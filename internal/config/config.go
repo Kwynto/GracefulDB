@@ -43,7 +43,9 @@ type WebServer struct {
 }
 
 type Config struct {
-	Env             string `yaml:"env" env-default:"prod"`
+	Env     string `yaml:"env" env-default:"prod"`
+	LogPath string `yaml:"log_path" env-default:"./logs/"`
+
 	CoreSettings    `yaml:"core_settings"`
 	SQLAnalyzer     `yaml:"sql_analyzer"`
 	SocketConnector `yaml:"socket_connector"`

@@ -1,4 +1,5 @@
 env: "prod" #dev, prod
+log_path: "./logs/"
 
 core_settings:
   bucket_size: 800
