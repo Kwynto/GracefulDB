@@ -1,0 +1,25 @@
+env: "prod" #dev, prod
+
+core_settings:
+  bucket_size: 800
+
+sql_analyzer:
+  enable: true
+
+socket_connector:
+  enable: true
+
+rest_connector:
+  enable: true
+  address: "0.0.0.0"
+  port: "31337"
+
+grpc_connector:
+  enable: true
+  address: "0.0.0.0"
+  port: "8080"
+
+web_server:
+  enable: true
+  address: "0.0.0.0"
+  port: "80"
