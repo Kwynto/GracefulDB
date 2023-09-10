@@ -1,4 +1,4 @@
-env: "prod" #dev, prod
+env: "dev" #dev, prod
 
 core_settings:
   bucket_size: 800

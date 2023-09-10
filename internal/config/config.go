@@ -3,23 +3,53 @@ package config
 import (
 	"log"
 	"os"
-	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type Config struct {
-	Env         string `yaml:"env" env-default:"local"`
-	StoragePath string `yaml:"storage_path" env-required:"true"`
-	HTTPServer  `yaml:"http_server"`
+const (
+	EnvDev  = "dev"
+	EnvProd = "prod"
+)
+
+type CoreSettings struct {
+	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
 }
 
-type HTTPServer struct {
-	Address     string        `yaml:"address" env-default:":80"`
-	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
-	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
-	User        string        `yaml:"user" env-required:"true"`
-	Password    string        `yaml:"password" env-required:"true" env:"HTTP_SERVER_PASSWORD"`
+type SQLAnalyzer struct {
+	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
+}
+
+type SocketConnector struct {
+	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
+}
+
+type RestConnector struct {
+	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Address string `yaml:"address" env-default:"0.0.0.0"`
+	Port    string `yaml:"port" env-default:"31337"`
+}
+
+type GrpcConnector struct {
+	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Address string `yaml:"address" env-default:"0.0.0.0"`
+	Port    string `yaml:"port" env-default:"8080"`
+}
+
+type WebServer struct {
+	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Address string `yaml:"address" env-default:"0.0.0.0"`
+	Port    string `yaml:"port" env-default:"80"`
+}
+
+type Config struct {
+	Env             string `yaml:"env" env-default:"prod"`
+	CoreSettings    `yaml:"core_settings"`
+	SQLAnalyzer     `yaml:"sql_analyzer"`
+	SocketConnector `yaml:"socket_connector"`
+	RestConnector   `yaml:"rest_connector"`
+	GrpcConnector   `yaml:"grpc_connector"`
+	WebServer       `yaml:"web_server"`
 }
 
 func MustLoad(configPath string) *Config {

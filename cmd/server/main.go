@@ -40,10 +40,13 @@ func main() {
 	// TODO: Start Socket connector
 	wg.Add(1)
 
-	// TODO: Start REST API
+	// TODO: Start REST API connector
 	wg.Add(1)
 
-	// TODO: Start gRPC
+	// TODO: Start gRPC connector
+	wg.Add(1)
+
+	// TODO: Start web-server for manage system
 	wg.Add(1)
 
 	// TODO:: Signal tracking
