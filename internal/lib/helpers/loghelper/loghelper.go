@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
-	"github.com/Kwynto/GracefulDB/internal/lib/helpers/fileshelper"
+	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/fileshelper"
 )
 
 func OpenLogFile(name string) (io.Writer, error) {
