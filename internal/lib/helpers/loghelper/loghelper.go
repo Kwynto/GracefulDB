@@ -1,6 +1,7 @@
 package loghelper
 
 import (
+	"io"
 	"os"
 
 	"log/slog"
@@ -8,20 +9,24 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 )
 
+var iomw io.Writer = io.MultiWriter(os.Stdout, os.Stderr)
+
 func SetupLogger(env string) *slog.Logger {
 	var log *slog.Logger
 
 	switch env {
 	case config.EnvDev:
 		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-				Level: slog.LevelDebug,
+			slog.NewTextHandler(iomw, &slog.HandlerOptions{
+				AddSource: true,
+				Level:     slog.LevelDebug,
 			}),
 		)
 	case config.EnvProd:
 		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-				Level: slog.LevelInfo,
+			slog.NewJSONHandler(iomw, &slog.HandlerOptions{
+				AddSource: false,
+				Level:     slog.LevelInfo,
 			}),
 		)
 	}
