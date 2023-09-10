@@ -24,7 +24,7 @@ func main() {
 	cfg := config.MustLoad(configPath)
 
 	// Init logger: slog
-	log := loghelper.SetupLogger(cfg.Env)
+	log := loghelper.SetupLogger(cfg)
 	log.Info("starting GracefulDB", slog.String("env", cfg.Env))
 	log.Debug("debug messages are enabled")
 

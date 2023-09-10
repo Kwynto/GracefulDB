@@ -1,36 +1,71 @@
 package loghelper
 
 import (
+	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/lib/helpers/fileshelper"
 )
 
-var iomw io.Writer = io.MultiWriter(os.Stdout, os.Stderr)
+func OpenLogFile(name string) (io.Writer, error) {
+	if !fileshelper.FileExists(name) {
+		if err := fileshelper.CreateFile(name); err != nil {
+			return nil, err
+		}
+	}
 
-func SetupLogger(env string) *slog.Logger {
-	var log *slog.Logger
+	fo, err := os.Open(name)
+	if err != nil {
+		return nil, err
+	}
 
-	switch env {
+	return fo, nil
+}
+
+func SetupLogger(cfg *config.Config) *slog.Logger {
+	var (
+		iof  io.Writer
+		iomw io.Writer
+		nlog *slog.Logger
+	)
+
+	iof, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	iomw = io.MultiWriter(os.Stdout, iof)
+
+	switch cfg.Env {
 	case config.EnvDev:
-		log = slog.New(
+		nlog = slog.New(
 			slog.NewTextHandler(iomw, &slog.HandlerOptions{
 				AddSource: true,
 				Level:     slog.LevelDebug,
 			}),
 		)
 	case config.EnvProd:
-		log = slog.New(
+		nlog = slog.New(
+			slog.NewJSONHandler(iomw, &slog.HandlerOptions{
+				AddSource: false,
+				Level:     slog.LevelInfo,
+			}),
+		)
+	default:
+		nlog = slog.New(
 			slog.NewJSONHandler(iomw, &slog.HandlerOptions{
 				AddSource: false,
 				Level:     slog.LevelInfo,
 			}),
 		)
 	}
-	return log
+
+	return nlog
 }
 
 func Err(err error) slog.Attr {
