@@ -1,12 +1,11 @@
 package webmanage
 
 import (
-	"log/slog"
 	"sync"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
 )
 
-func Start(cfg *config.Config, log *slog.Logger, wg *sync.WaitGroup) {
+func Start(cfg *config.Config, wg *sync.WaitGroup) {
 	wg.Done()
 }

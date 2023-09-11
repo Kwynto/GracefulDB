@@ -26,12 +26,12 @@ func SetupLogger(cfg *config.Config) *slog.Logger {
 
 	var nlog *slog.Logger
 
-	IoFile, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
+	ioFile, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	IoMultiWriter = io.MultiWriter(os.Stdout, IoFile)
+	IoMultiWriter = io.MultiWriter(os.Stdout, ioFile)
 
 	switch cfg.Env {
 	case config.EnvDev:
@@ -65,4 +65,9 @@ func Err(err error) slog.Attr {
 		Key:   "error",
 		Value: slog.StringValue(err.Error()),
 	}
+}
+
+func Init(cfg *config.Config) {
+	inlog := SetupLogger(cfg)
+	slog.SetDefault(inlog)
 }
