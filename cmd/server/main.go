@@ -23,17 +23,12 @@ func main() {
 	// Init variables
 	wg = sync.WaitGroup{}
 
-	// Init config: cleanenv
+	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
-	// if configPath == "" {
-	// 	configPath = "./config/default.yaml"
-	// }
 	cfg := config.MustLoad(configPath)
 
 	// Init logger: slog
 	// TODO: Сделать красивый логгер
-	// innerLogger := loghelper.SetupLogger(cfg)
-	// slog.SetDefault(innerLogger)
 	loghelper.Init(cfg)
 	slog.Info("starting GracefulDB", slog.String("env", cfg.Env))
 	slog.Debug("debug messages are enabled")
