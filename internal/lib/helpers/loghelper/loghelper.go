@@ -9,17 +9,15 @@ import (
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
-	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/fileshelper"
 )
 
-func OpenLogFile(name string) (io.Writer, error) {
-	if !fileshelper.FileExists(name) {
-		if err := fileshelper.CreateFile(name); err != nil {
-			return nil, err
-		}
-	}
+var IoFile io.Writer
+var IoMultiWriter io.Writer
+var LogHandler slog.Handler
+var LogServerError *log.Logger
 
-	fo, err := os.Open(name)
+func OpenLogFile(name string) (io.Writer, error) {
+	fo, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -28,41 +26,41 @@ func OpenLogFile(name string) (io.Writer, error) {
 }
 
 func SetupLogger(cfg *config.Config) *slog.Logger {
-	var (
-		iof  io.Writer
-		iomw io.Writer
-		nlog *slog.Logger
-	)
 
-	iof, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
+	var nlog *slog.Logger
+
+	IoFile, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	iomw = io.MultiWriter(os.Stdout, iof)
+	IoMultiWriter = io.MultiWriter(os.Stdout, IoFile)
 
 	switch cfg.Env {
 	case config.EnvDev:
-		nlog = slog.New(
-			slog.NewTextHandler(iomw, &slog.HandlerOptions{
+		LogHandler = slog.NewTextHandler(
+			IoMultiWriter,
+			&slog.HandlerOptions{
 				AddSource: true,
 				Level:     slog.LevelDebug,
-			}),
-		)
+			})
+		nlog = slog.New(LogHandler)
 	case config.EnvProd:
-		nlog = slog.New(
-			slog.NewJSONHandler(iomw, &slog.HandlerOptions{
+		LogHandler = slog.NewJSONHandler(
+			IoMultiWriter,
+			&slog.HandlerOptions{
 				AddSource: false,
 				Level:     slog.LevelInfo,
-			}),
-		)
+			})
+		nlog = slog.New(LogHandler)
 	default:
-		nlog = slog.New(
-			slog.NewJSONHandler(iomw, &slog.HandlerOptions{
+		LogHandler = slog.NewJSONHandler(
+			IoMultiWriter,
+			&slog.HandlerOptions{
 				AddSource: false,
 				Level:     slog.LevelInfo,
-			}),
-		)
+			})
+		nlog = slog.New(LogHandler)
 	}
 
 	return nlog
@@ -73,4 +71,10 @@ func Err(err error) slog.Attr {
 		Key:   "error",
 		Value: slog.StringValue(err.Error()),
 	}
+}
+
+func Init(cfg *config.Config) {
+	inlog := SetupLogger(cfg)
+	slog.SetDefault(inlog)
+	LogServerError = slog.NewLogLogger(LogHandler, slog.LevelError)
 }

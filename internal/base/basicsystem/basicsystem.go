@@ -7,6 +7,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 )
 
-func CommandSystem(cfg *config.Config, log *slog.Logger, wg *sync.WaitGroup) {
+func CommandSystem(cfg *config.Config, wg *sync.WaitGroup) {
+	slog.Info("GracefulDB: The basic command system was started.")
 	wg.Done()
 }

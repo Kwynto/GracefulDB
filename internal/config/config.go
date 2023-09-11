@@ -56,7 +56,7 @@ type Config struct {
 
 func MustLoad(configPath string) *Config {
 	if configPath == "" {
-		log.Fatal("CONFIG_PATH is not set")
+		configPath = "./config/default.yaml"
 	}
 
 	// check if file exists

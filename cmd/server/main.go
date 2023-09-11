@@ -23,49 +23,47 @@ func main() {
 	// Init variables
 	wg = sync.WaitGroup{}
 
-	// Init config: cleanenv
+	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "./config/default.yaml"
-	}
 	cfg := config.MustLoad(configPath)
 
 	// Init logger: slog
-	log := loghelper.SetupLogger(cfg)
-	log.Info("starting GracefulDB", slog.String("env", cfg.Env))
-	log.Debug("debug messages are enabled")
+	// TODO: Сделать красивый логгер
+	loghelper.Init(cfg)
+	slog.Info("starting GracefulDB", slog.String("env", cfg.Env))
+	slog.Debug("debug messages are enabled")
 
 	// TODO: Load the core of the system
 	wg.Add(1)
-	go core.Engine(cfg, log, &wg)
+	go core.Engine(cfg, &wg)
 
 	// TODO: Run the basic command system
 	wg.Add(1)
-	go basicsystem.CommandSystem(cfg, log, &wg)
+	go basicsystem.CommandSystem(cfg, &wg)
 
 	// TODO: Start the language analyzer (SQL)
 	wg.Add(1)
-	go sqlanalyzer.Analyzer(cfg, log, &wg)
+	go sqlanalyzer.Analyzer(cfg, &wg)
 
 	// TODO: Start Socket connector
 	wg.Add(1)
-	go socketconnector.Start(cfg, log, &wg)
+	go socketconnector.Start(cfg, &wg)
 
 	// TODO: Start REST API connector
 	wg.Add(1)
-	go rest.Start(cfg, log, &wg)
+	go rest.Start(cfg, &wg)
 
 	// TODO: Start gRPC connector
 	wg.Add(1)
-	go grpc.Start(cfg, log, &wg)
+	go grpc.Start(cfg, &wg)
 
 	// TODO: Start web-server for manage system
 	wg.Add(1)
-	go webmanage.Start(cfg, log, &wg)
+	go webmanage.Start(cfg, &wg)
 
 	// TODO:: Signal tracking
 
 	// Wait for all processes to complete
 	wg.Wait()
-	log.Info("GracefulDB has finished its work and will miss you.")
+	slog.Info("GracefulDB has finished its work and will miss you.")
 }
