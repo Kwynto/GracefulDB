@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"log/slog"
 
@@ -19,53 +18,52 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/connectors/socketconnector"
 	"github.com/Kwynto/GracefulDB/internal/lib/helpers/loghelper"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
+	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
 func runServer(ctx context.Context, cfg *config.Config) error {
+	var closeProcs = &closer.Closer{}
+
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
+	closeProcs.Add(core.Shutdown) // Register a shutdown handler.
 
 	// TODO: Run the basic command system
 	go basicsystem.CommandSystem(cfg)
+	closeProcs.Add(basicsystem.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start the language analyzer (SQL)
 	go sqlanalyzer.Analyzer(cfg)
+	closeProcs.Add(sqlanalyzer.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start Socket connector
 	go socketconnector.Start(cfg)
+	closeProcs.Add(socketconnector.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start REST API connector
 	go rest.Start(cfg)
+	closeProcs.Add(rest.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start gRPC connector
 	go grpc.Start(cfg)
+	closeProcs.Add(grpc.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start web-server for manage system
 	go webmanage.Start(cfg)
+	closeProcs.Add(webmanage.Shutdown) // Register a shutdown handler.
 
-	// We are waiting for a stop signal from the OS
+	// Waiting for a stop signal from the OS
 	<-ctx.Done()
 	slog.Warn("The shutdown process has started.")
-
-	processShutdown := make(chan struct{}, 1)
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
 	defer cancel()
 
-	// Stopping all processes.
-	go func() {
-		// TODO: Alternate stopping of all processes
-		time.Sleep(13 * time.Second)
-
-		processShutdown <- struct{}{}
-	}()
-
-	select {
-	case <-shutdownCtx.Done():
-		return fmt.Errorf("server shutdown: %w", ctx.Err())
-	case <-processShutdown:
-		slog.Info("All processes are stopped.")
+	if err := closeProcs.Close(shutdownCtx); err != nil {
+		return fmt.Errorf("server shutdown: %v", err)
 	}
+
+	slog.Info("All processes are stopped.")
 
 	return nil
 }
