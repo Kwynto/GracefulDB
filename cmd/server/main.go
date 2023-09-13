@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"log/slog"
 
@@ -17,53 +21,72 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 )
 
-var wg sync.WaitGroup
+func runServer(ctx context.Context, cfg *config.Config) error {
+	// TODO: Load the core of the system
+	go core.Engine(cfg)
+
+	// TODO: Run the basic command system
+	go basicsystem.CommandSystem(cfg)
+
+	// TODO: Start the language analyzer (SQL)
+	go sqlanalyzer.Analyzer(cfg)
+
+	// TODO: Start Socket connector
+	go socketconnector.Start(cfg)
+
+	// TODO: Start REST API connector
+	go rest.Start(cfg)
+
+	// TODO: Start gRPC connector
+	go grpc.Start(cfg)
+
+	// TODO: Start web-server for manage system
+	go webmanage.Start(cfg)
+
+	// We are waiting for a stop signal from the OS
+	<-ctx.Done()
+	slog.Warn("The shutdown process has started.")
+
+	processShutdown := make(chan struct{}, 1)
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
+	defer cancel()
+
+	// Stopping all processes.
+	go func() {
+		// TODO: Alternate stopping of all processes
+		time.Sleep(13 * time.Second)
+
+		processShutdown <- struct{}{}
+	}()
+
+	select {
+	case <-shutdownCtx.Done():
+		return fmt.Errorf("server shutdown: %w", ctx.Err())
+	case <-processShutdown:
+		slog.Info("All processes are stopped.")
+	}
+
+	return nil
+}
 
 func main() {
-	// Init variables
-	wg = sync.WaitGroup{}
-
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
 	cfg := config.MustLoad(configPath)
 
 	// Init logger: slog
-	// TODO: Сделать красивый логгер
 	loghelper.Init(cfg)
 	slog.Info("starting GracefulDB", slog.String("env", cfg.Env))
 	slog.Debug("debug messages are enabled")
 
-	// TODO: Load the core of the system
-	wg.Add(1)
-	go core.Engine(cfg, &wg)
+	// Signal tracking
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	// TODO: Run the basic command system
-	wg.Add(1)
-	go basicsystem.CommandSystem(cfg, &wg)
+	if err := runServer(ctx, cfg); err != nil {
+		slog.Error("An unexpected error occurred while the server was running.", slog.String("err", err.Error()))
+	}
 
-	// TODO: Start the language analyzer (SQL)
-	wg.Add(1)
-	go sqlanalyzer.Analyzer(cfg, &wg)
-
-	// TODO: Start Socket connector
-	wg.Add(1)
-	go socketconnector.Start(cfg, &wg)
-
-	// TODO: Start REST API connector
-	wg.Add(1)
-	go rest.Start(cfg, &wg)
-
-	// TODO: Start gRPC connector
-	wg.Add(1)
-	go grpc.Start(cfg, &wg)
-
-	// TODO: Start web-server for manage system
-	wg.Add(1)
-	go webmanage.Start(cfg, &wg)
-
-	// TODO:: Signal tracking
-
-	// Wait for all processes to complete
-	wg.Wait()
 	slog.Info("GracefulDB has finished its work and will miss you.")
 }

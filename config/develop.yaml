@@ -1,4 +1,6 @@
 env: "dev" #dev, prod
+log_path: "./logs/"
+shutdown_timeout: 5s
 
 core_settings:
   bucket_size: 800

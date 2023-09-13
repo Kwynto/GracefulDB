@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -43,8 +44,9 @@ type WebServer struct {
 }
 
 type Config struct {
-	Env     string `yaml:"env" env-default:"prod"`
-	LogPath string `yaml:"log_path" env-default:"./logs/"`
+	Env             string        `yaml:"env" env-default:"prod"`
+	LogPath         string        `yaml:"log_path" env-default:"./logs/"`
+	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
 	CoreSettings    `yaml:"core_settings"`
 	SQLAnalyzer     `yaml:"sql_analyzer"`
