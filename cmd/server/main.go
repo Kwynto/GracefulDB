@@ -26,31 +26,41 @@ func runServer(ctx context.Context, cfg *config.Config) error {
 
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
-	closeProcs.Add(core.Shutdown) // Register a shutdown handler.
+	closeProcs.AddHandler(core.Shutdown) // Register a shutdown handler.
 
 	// TODO: Run the basic command system
 	go basicsystem.CommandSystem(cfg)
-	closeProcs.Add(basicsystem.Shutdown) // Register a shutdown handler.
+	closeProcs.AddHandler(basicsystem.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start the language analyzer (SQL)
-	go sqlanalyzer.Analyzer(cfg)
-	closeProcs.Add(sqlanalyzer.Shutdown) // Register a shutdown handler.
+	if cfg.SQLAnalyzer.Enable {
+		go sqlanalyzer.Analyzer(cfg)
+		closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
+	}
 
 	// TODO: Start Socket connector
-	go socketconnector.Start(cfg)
-	closeProcs.Add(socketconnector.Shutdown) // Register a shutdown handler.
+	if cfg.SocketConnector.Enable {
+		go socketconnector.Start(cfg)
+		closeProcs.AddHandler(socketconnector.Shutdown) // Register a shutdown handler.
+	}
 
 	// TODO: Start REST API connector
-	go rest.Start(cfg)
-	closeProcs.Add(rest.Shutdown) // Register a shutdown handler.
+	if cfg.RestConnector.Enable {
+		go rest.Start(cfg)
+		closeProcs.AddHandler(rest.Shutdown) // Register a shutdown handler.
+	}
 
 	// TODO: Start gRPC connector
-	go grpc.Start(cfg)
-	closeProcs.Add(grpc.Shutdown) // Register a shutdown handler.
+	if cfg.GrpcConnector.Enable {
+		go grpc.Start(cfg)
+		closeProcs.AddHandler(grpc.Shutdown) // Register a shutdown handler.
+	}
 
 	// TODO: Start web-server for manage system
-	go webmanage.Start(cfg)
-	closeProcs.Add(webmanage.Shutdown) // Register a shutdown handler.
+	if cfg.WebServer.Enable {
+		go webmanage.Start(cfg)
+		closeProcs.AddHandler(webmanage.Shutdown) // Register a shutdown handler.
+	}
 
 	// Waiting for a stop signal from the OS
 	<-ctx.Done()
