@@ -1,4 +1,4 @@
-package loghelper
+package gdbprettyhandler
 
 import (
 	"context"
@@ -10,8 +10,11 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+)
 
-	"github.com/Kwynto/GracefulDB/internal/config"
+const (
+	EnvDev  = "dev"
+	EnvProd = "prod"
 )
 
 type GDBPrettyHandler struct {
@@ -56,10 +59,10 @@ func (h *GDBPrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	timeStrScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
 
 	switch h.env {
-	case config.EnvDev:
+	case EnvDev:
 		timeStrFile := r.Time.Format("2006-01-02 15:04:05.000 -0700")
 		strFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\" %s", timeStrFile, r.Level, r.Message, string(b))
-	case config.EnvProd:
+	case EnvProd:
 		timeStrFile := r.Time.Format("2006-01-02T15:04:05.000000000-0700")
 		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\", \"attributes\":%v}", timeStrFile, r.Level, r.Message, string(b))
 	}
@@ -72,12 +75,12 @@ func (h *GDBPrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	return nil
 }
 
-func NewGDBPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *GDBPrettyHandler {
+func newGDBPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *GDBPrettyHandler {
 	var gbdlevel slog.Level
 	switch env {
-	case config.EnvDev:
+	case EnvDev:
 		gbdlevel = slog.LevelDebug
-	case config.EnvProd:
+	case EnvProd:
 		gbdlevel = slog.LevelInfo
 	}
 
@@ -93,7 +96,7 @@ func NewGDBPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *GD
 	return h
 }
 
-func OpenLogFile(name string) (io.Writer, error) {
+func openLogFile(name string) (io.Writer, error) {
 	fo, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return nil, err
@@ -102,15 +105,15 @@ func OpenLogFile(name string) (io.Writer, error) {
 	return fo, nil
 }
 
-func SetupLogger(cfg *config.Config) *slog.Logger {
+func setupLogger(logPath, logEnv string) *slog.Logger {
 	var nlog *slog.Logger
 
-	IoFile, err := OpenLogFile(fmt.Sprintf("%s%s%s", cfg.LogPath, cfg.Env, ".log"))
+	IoFile, err := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	LogHandler = NewGDBPrettyHandler(os.Stdout, IoFile, cfg.Env)
+	LogHandler = newGDBPrettyHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
 
 	return nlog
@@ -123,8 +126,8 @@ func Err(err error) slog.Attr {
 	}
 }
 
-func Init(cfg *config.Config) {
-	inlog := SetupLogger(cfg)
+func Init(logPath, logEnv string) {
+	inlog := setupLogger(logPath, logEnv)
 	slog.SetDefault(inlog)
 	LogServerError = slog.NewLogLogger(LogHandler, slog.LevelError)
 }
