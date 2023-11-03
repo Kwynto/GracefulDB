@@ -18,6 +18,6 @@ func Shutdown(ctx context.Context, c *closer.Closer) {
 	// 	fmt.Print(".")
 	// 	time.Sleep(1 * time.Second)
 	// }
-	// c.AddMsg("типа имитация ошибки")
+	// c.AddMsg("Imitation of an error")
 	c.Done()
 }
