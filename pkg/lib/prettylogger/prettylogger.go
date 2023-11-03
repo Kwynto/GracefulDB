@@ -1,4 +1,4 @@
-package gdbprettyhandler
+package prettylogger
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const (
 	EnvProd = "prod"
 )
 
-type GDBPrettyHandler struct {
+type PrettyHandler struct {
 	slog.Handler
 	lScreen *log.Logger
 	lFile   *log.Logger
@@ -28,7 +28,7 @@ var IoFile io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
 
-func (h *GDBPrettyHandler) Handle(ctx context.Context, r slog.Record) error {
+func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	var strFileOut string
 
 	level := r.Level.String() + ":"
@@ -75,7 +75,7 @@ func (h *GDBPrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	return nil
 }
 
-func newGDBPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *GDBPrettyHandler {
+func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *PrettyHandler {
 	var gbdlevel slog.Level
 	switch env {
 	case EnvDev:
@@ -84,7 +84,7 @@ func newGDBPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *GD
 		gbdlevel = slog.LevelInfo
 	}
 
-	h := &GDBPrettyHandler{
+	h := &PrettyHandler{
 		Handler: slog.NewJSONHandler(outScreen, &slog.HandlerOptions{
 			Level: gbdlevel,
 		}),
@@ -113,7 +113,7 @@ func setupLogger(logPath, logEnv string) *slog.Logger {
 		log.Fatalf("error: %v", err)
 	}
 
-	LogHandler = newGDBPrettyHandler(os.Stdout, IoFile, logEnv)
+	LogHandler = newPrettyHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
 
 	return nlog
