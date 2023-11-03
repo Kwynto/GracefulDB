@@ -51,9 +51,21 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 		return true
 	})
 
-	b, err := json.MarshalIndent(fields, "", "  ")
+	byteAttrs, err := json.MarshalIndent(fields, "", "  ")
 	if err != nil {
 		return err
+	}
+
+	strAttrs := ""
+	switch h.env {
+	case EnvDev:
+		for k, v := range fields {
+			strAttrs = fmt.Sprintf("%s %s=\"%s\"", strAttrs, k, v.(string))
+		}
+	case EnvProd:
+		for k, v := range fields {
+			strAttrs = fmt.Sprintf("%s, \"%s\":\"%s\"", strAttrs, k, v.(string))
+		}
 	}
 
 	timeStrScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
@@ -61,15 +73,15 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	switch h.env {
 	case EnvDev:
 		timeStrFile := r.Time.Format("2006-01-02 15:04:05.000 -0700")
-		strFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\" %s", timeStrFile, r.Level, r.Message, string(b))
+		strFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\"%s", timeStrFile, r.Level, r.Message, strAttrs)
 	case EnvProd:
 		timeStrFile := r.Time.Format("2006-01-02T15:04:05.000000000-0700")
-		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\", \"attributes\":%v}", timeStrFile, r.Level, r.Message, string(b))
+		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", timeStrFile, r.Level, r.Message, strAttrs)
 	}
 
 	msg := color.CyanString(r.Message)
 
-	h.lScreen.Println(timeStrScreen, level, msg, color.WhiteString(string(b)))
+	h.lScreen.Println(timeStrScreen, level, msg, color.WhiteString(string(byteAttrs)))
 	h.lFile.Println(strFileOut)
 
 	return nil
