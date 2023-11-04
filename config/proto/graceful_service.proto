@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package graceful_service;
+
+message Request {
+    string message = 1;
+}
+
+message Response {
+    string message = 1;
+}
+
+service GracefulService {
+    rpc Query (Request) returns (Response);
+}
+
+option go_package = "./internal/connectors/grpc/proto/graceful_service";
