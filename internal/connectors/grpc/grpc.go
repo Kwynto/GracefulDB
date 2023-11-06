@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net"
 
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	gs "github.com/Kwynto/GracefulDB/internal/connectors/grpc/proto/graceful_service"
 	"google.golang.org/grpc"
 
@@ -20,14 +22,24 @@ type tMessageServer struct {
 var address string
 
 var messageServer tMessageServer
-var server *grpc.Server
+var grpcServer *grpc.Server
 
-func (tMessageServer) Query(ctx context.Context, r *gs.Request) (*gs.Response, error) {
-	slog.Debug("Request received", slog.String("request", r.Message))
+func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (*gs.SResponse, error) {
+	slog.Debug("Request received", slog.String("instruction", r.Instruction), slog.String("placeholder", fmt.Sprint(r.Placeholder)))
 
-	// TODO: There should be request processing here
-	response := &gs.Response{
-		Message: "There should be a response from the processed request.",
+	response := &gs.SResponse{
+		Message: sqlanalyzer.Request(r.Instruction, r.Placeholder),
+	}
+	slog.Debug("Response sent", slog.String("response", response.Message))
+
+	return response, nil
+}
+
+func (tMessageServer) VQuery(ctx context.Context, r *gs.VRequest) (*gs.VResponse, error) {
+	slog.Debug("Request received", slog.String("request", r.Instruction))
+
+	response := &gs.VResponse{
+		Message: vqlanalyzer.Request(r.Instruction),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))
 
@@ -42,13 +54,13 @@ func Start(cfg *config.Config) {
 		return
 	}
 
-	server = grpc.NewServer()
-	gs.RegisterGracefulServiceServer(server, messageServer)
+	grpcServer = grpc.NewServer()
+	gs.RegisterGracefulServiceServer(grpcServer, messageServer)
 
-	server.Serve(listen)
+	grpcServer.Serve(listen)
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
-	server.Stop()
+	grpcServer.Stop()
 	c.Done()
 }
