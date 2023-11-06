@@ -28,10 +28,8 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	closeProcs.AddHandler(basicsystem.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start the language analyzer (SQL)
-	if cfg.SQLAnalyzer.Enable {
-		go sqlanalyzer.Analyzer(cfg)
-		closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
-	}
+	go sqlanalyzer.Analyzer(cfg)
+	closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {
