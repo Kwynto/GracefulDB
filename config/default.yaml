@@ -5,9 +5,6 @@ shutdown_timeout: 5s
 core_settings:
   bucket_size: 800
 
-sql_analyzer:
-  enable: true
-
 socket_connector:
   enable: true
 

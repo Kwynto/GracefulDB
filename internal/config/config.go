@@ -17,10 +17,6 @@ type CoreSettings struct {
 	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
 }
 
-type SQLAnalyzer struct {
-	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
-}
-
 type SocketConnector struct {
 	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
 }
@@ -49,7 +45,6 @@ type Config struct {
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
 	CoreSettings    `yaml:"core_settings"`
-	SQLAnalyzer     `yaml:"sql_analyzer"`
 	SocketConnector `yaml:"socket_connector"`
 	RestConnector   `yaml:"rest_connector"`
 	GrpcConnector   `yaml:"grpc_connector"`

@@ -1,4 +1,4 @@
-package sqlanalyzer
+package vqlanalyzer
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 )
 
 // TODO: Request
-func Request(instruction string, placeholder []string) string {
+func Request(instruction string) string {
 	return "There should be a response from the processed request."
 }
 
