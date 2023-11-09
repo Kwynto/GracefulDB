@@ -16,20 +16,20 @@ func Request(instruction string) string {
 	if !json.Valid([]byte(instruction)) {
 		slog.Debug("No valid query", slog.String("instruction", instruction))
 		// ERROR 10 - No valid query
-		return `{"action":"response", "error":10}`
+		return `{"action":"response","error":10}`
 	}
 
 	// FIXME: Unmarshsl только для тестов, для оптимизации нужно переделать на NewDecoder.Decode
 	if err := json.Unmarshal([]byte(instruction), &qry); err != nil {
 		slog.Debug("Erroneous request", slog.String("err", err.Error()))
 		// ERROR 11 - Incorrect request structure
-		return `{"action":"response", "error":11}`
+		return `{"action":"response","error":11}`
 	}
 
 	bAnswer, err := json.Marshal(basicsystem.Processing(qry))
 	if err != nil {
 		// ERROR 20 - Server error
-		return `{"action":"response", "error":20}`
+		return `{"action":"response","error":20}`
 	}
 
 	return string(bAnswer)
