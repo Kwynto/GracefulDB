@@ -2,6 +2,7 @@ package vqlanalyzer
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem"
@@ -15,30 +16,22 @@ func Request(instruction string) string {
 
 	if !json.Valid([]byte(instruction)) {
 		slog.Debug("No valid query", slog.String("instruction", instruction))
-		// ERROR 10 - No valid query
-		return `{"action":"response","error":10}`
+		// ERROR 10 - Invalid request
+		return `{"action":"response","error":10,"description":"Invalid request"}`
 	}
 
 	// FIXME: Unmarshsl только для тестов, для оптимизации нужно переделать на NewDecoder.Decode
 	if err := json.Unmarshal([]byte(instruction), &qry); err != nil {
 		slog.Debug("Erroneous request", slog.String("err", err.Error()))
 		// ERROR 11 - Incorrect request structure
-		return `{"action":"response","error":11}`
+		return fmt.Sprintf("{\"action\":\"response\",\"error\":11,\"description\":\"%s\"}", err.Error())
 	}
 
 	bAnswer, err := json.Marshal(basicsystem.Processing(qry))
 	if err != nil {
 		// ERROR 20 - Server error
-		return `{"action":"response","error":20}`
+		return fmt.Sprintf("{\"action\":\"response\",\"error\":20,\"description\":\"%s\"}", err.Error())
 	}
 
 	return string(bAnswer)
 }
-
-// func Analyzer(cfg *config.Config) {
-// 	// -
-// }
-
-// func Shutdown(ctx context.Context, c *closer.Closer) {
-// 	c.Done()
-// }

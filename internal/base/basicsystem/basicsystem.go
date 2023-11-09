@@ -12,8 +12,8 @@ import (
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	return &gtypes.VAnswer{
 		Action: "response",
-		Secret: "",
-		Data:   "",
+		Secret: gtypes.VSecret{},
+		Data:   gtypes.VData{},
 		Error:  0,
 	}
 }

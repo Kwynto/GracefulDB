@@ -1,17 +1,32 @@
 package gtypes
 
+type RowDB map[string]any
+
+type VSecret struct {
+	Ticket   string `json:"ticket,omitempty"`
+	Login    string `json:"login,omitempty"`
+	Password string `json:"password,omitempty"`
+	Hash     string `json:"hash,omitempty"`
+	QueryID  string `json:"queryid,omitempty"`
+}
+
+type VData []RowDB
+
+type VFields RowDB
+
 type VQuery struct {
-	Action string `json:"action"`
-	Secret string `json:"secret"`
-	DB     string `json:"db"`
-	Table  string `json:"table"`
-	Fields string `json:"fields"`
-	Data   string `json:"data"`
+	Action string  `json:"action"`
+	Secret VSecret `json:"secret"`
+	DB     string  `json:"db"`
+	Table  string  `json:"table"`
+	Fields VFields `json:"fields"`
+	Data   VData   `json:"data"`
 }
 
 type VAnswer struct {
-	Action string `json:"action"`
-	Secret string `json:"secret,omitempty"`
-	Data   string `json:"data,omitempty"`
-	Error  int    `json:"error"`
+	Action      string  `json:"action"`
+	Secret      VSecret `json:"secret,omitempty"`
+	Data        VData   `json:"data,omitempty"`
+	Error       int     `json:"error"`
+	Description string  `json:"description,omitempty"`
 }

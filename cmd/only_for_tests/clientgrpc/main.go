@@ -42,11 +42,18 @@ func main() {
 		`Errorable Query!`,
 		`{}`,
 		`{"action":""}`,
-		`{"action":"", "secret":""}`,
-		`{"action":"", "secret":"", "db":""}`,
-		`{"action":"", "secret":"", "db":"", "table":""}`,
-		`{"action":"", "secret":"", "db":"", "table":"", "fields":""}`,
-		`{"action":"", "secret":"", "db":"", "table":"", "fields":"", "data":""}`,
+		`{"action":"", "secret":{}}`,
+		`{"action":"", "secret":{}, "db":""}`,
+		`{"action":"", "secret":{}, "db":"", "table":""}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":["Errorable Query!"]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{},{}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow"}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":""}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
 	}
 
 	for i1, v1 := range qrys {
