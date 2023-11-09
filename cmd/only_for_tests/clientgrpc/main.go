@@ -38,12 +38,24 @@ func main() {
 		return
 	}
 
-	client := gs.NewGracefulServiceClient(conn)
-	r, err := CallVQuery(context.Background(), client, "Database Query!")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Response Text:", r.Message)
+	var qrys = []string{
+		`Errorable Query!`,
+		`{}`,
+		`{"action":""}`,
+		`{"action":"", "secret":""}`,
+		`{"action":"", "secret":"", "db":""}`,
+		`{"action":"", "secret":"", "db":"", "table":""}`,
+		`{"action":"", "secret":"", "db":"", "table":"", "fields":""}`,
+		`{"action":"", "secret":"", "db":"", "table":"", "fields":"", "data":""}`,
 	}
 
+	for i1, v1 := range qrys {
+		client := gs.NewGracefulServiceClient(conn)
+		r, err := CallVQuery(context.Background(), client, v1)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Printf("Response Text %d: %s\n", i1, r.Message)
+		}
+	}
 }
