@@ -5,13 +5,20 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem"
 	"github.com/Kwynto/GracefulDB/internal/gtypes"
 )
 
-// TODO: Request
-func Request(instruction string) string {
+// TODO: Processing
+func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
+	return &gtypes.VAnswer{
+		Action: "response",
+		Secret: gtypes.VSecret{},
+		Data:   gtypes.VData{},
+		Error:  0,
+	}
+}
 
+func Request(instruction string) string {
 	var qry *gtypes.VQuery
 
 	if !json.Valid([]byte(instruction)) {
@@ -27,7 +34,7 @@ func Request(instruction string) string {
 		return fmt.Sprintf("{\"action\":\"response\",\"error\":11,\"description\":\"%s\"}", err.Error())
 	}
 
-	bAnswer, err := json.Marshal(basicsystem.Processing(qry))
+	bAnswer, err := json.Marshal(Processing(qry))
 	if err != nil {
 		// ERROR 20 - Server error
 		return fmt.Sprintf("{\"action\":\"response\",\"error\":20,\"description\":\"%s\"}", err.Error())
