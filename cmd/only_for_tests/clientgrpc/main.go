@@ -38,12 +38,31 @@ func main() {
 		return
 	}
 
-	client := gs.NewGracefulServiceClient(conn)
-	r, err := CallVQuery(context.Background(), client, "Database Query!")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Response Text:", r.Message)
+	var qrys = []string{
+		`Errorable Query!`,
+		`{}`,
+		`{"action":""}`,
+		`{"action":"", "secret":{}}`,
+		`{"action":"", "secret":{}, "db":""}`,
+		`{"action":"", "secret":{}, "db":"", "table":""}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":["Errorable Query!"]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{},{}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow"}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":""}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
+		`{"action":"", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
 	}
 
+	for i1, v1 := range qrys {
+		client := gs.NewGracefulServiceClient(conn)
+		r, err := CallVQuery(context.Background(), client, v1)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Printf("Response Text %d: %s\n", i1, r.Message)
+		}
+	}
 }

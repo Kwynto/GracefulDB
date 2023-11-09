@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
-	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem"
 	"github.com/Kwynto/GracefulDB/internal/base/core"
 	"github.com/Kwynto/GracefulDB/internal/config"
@@ -29,12 +27,12 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	closeProcs.AddHandler(basicsystem.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start the language analyzer (SQL)
-	go sqlanalyzer.Analyzer(cfg)
-	closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
+	// go sqlanalyzer.Analyzer(cfg)
+	// closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start the language analyzer (VQL)
-	go vqlanalyzer.Analyzer(cfg)
-	closeProcs.AddHandler(vqlanalyzer.Shutdown) // Register a shutdown handler.
+	// go vqlanalyzer.Analyzer(cfg)
+	// closeProcs.AddHandler(vqlanalyzer.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {
@@ -48,7 +46,7 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		closeProcs.AddHandler(rest.Shutdown) // Register a shutdown handler.
 	}
 
-	// TODO: Start gRPC connector
+	// Start gRPC connector
 	if cfg.GrpcConnector.Enable {
 		go grpc.Start(cfg)
 		closeProcs.AddHandler(grpc.Shutdown) // Register a shutdown handler.

@@ -47,7 +47,7 @@ func (c *Closer) Close(ctx context.Context) error {
 	}
 
 	go func() {
-		time.Sleep(250 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 		for {
 			time.Sleep(50 * time.Millisecond)
 			if c.counter <= 0 {

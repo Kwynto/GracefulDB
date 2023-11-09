@@ -11,6 +11,8 @@ import (
 const (
 	EnvDev  = "dev"
 	EnvProd = "prod"
+
+	configDefault = "./config/default.yaml"
 )
 
 type CoreSettings struct {
@@ -53,7 +55,7 @@ type Config struct {
 
 func MustLoad(configPath string) *Config {
 	if configPath == "" {
-		configPath = "./config/default.yaml"
+		configPath = configDefault
 	}
 
 	// check if file exists
