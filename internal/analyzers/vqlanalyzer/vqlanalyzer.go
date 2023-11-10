@@ -1,12 +1,32 @@
 package vqlanalyzer
 
 import (
+	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/gtypes"
 )
+
+func generateTicket() string {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x", b)
+}
+
+func Auth(secret *gtypes.VSecret) (string, error) {
+	// FIXME: Сделать настоящую авторизацию
+	if secret.Login == "root" && secret.Password == "toor" {
+		return generateTicket(), nil
+	}
+	slog.Debug("Authorization error", slog.String("login", secret.Login), slog.String("pass", secret.Password))
+	return "", errors.New("authorization error")
+}
 
 // TODO: Processing
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
@@ -17,9 +37,23 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 
 	// TODO: auth
 	case "auth":
+		ticket, err := Auth(&in.Secret)
+		if err != nil || ticket == "" {
+			return &gtypes.VAnswer{
+				Action: "response",
+				// Authorization error (code 432)
+				Error:       432,
+				Description: "Authorization error",
+			}
+		}
+
 		response = gtypes.VAnswer{
 			Action: "response",
-			Error:  0,
+			Secret: gtypes.VSecret{
+				Ticket:  ticket,
+				QueryID: in.Secret.QueryID,
+			},
+			Error: 0,
 		}
 
 	// TODO: read

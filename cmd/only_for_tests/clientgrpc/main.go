@@ -43,6 +43,8 @@ func main() {
 		`{}`,
 		`{"action":""}`,
 		`{"action":"auth", "secret":{}}`,
+		`{"action":"auth", "secret":{"login":"root", "password":"toor"}}`,
+		`{"action":"auth", "secret":{"login":"root", "password":"toor", "queryid":"any-id"}}`,
 		`{"action":"read", "secret":{}, "db":""}`,
 		`{"action":"store", "secret":{}, "db":"", "table":""}`,
 		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{}}`,
