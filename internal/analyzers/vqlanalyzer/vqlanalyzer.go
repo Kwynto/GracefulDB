@@ -10,12 +10,57 @@ import (
 
 // TODO: Processing
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
-	return &gtypes.VAnswer{
-		Action: "response",
-		Secret: gtypes.VSecret{},
-		Data:   gtypes.VData{},
-		Error:  0,
+	var response gtypes.VAnswer
+	var msgDesc string
+
+	switch in.Action {
+	// TODO: auth
+	case "auth":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: read
+	case "read":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: store
+	case "store":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: delete
+	case "delete":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	default:
+		if in.Action == "" {
+			msgDesc = "Empty command."
+			slog.Debug(msgDesc)
+			response = gtypes.VAnswer{
+				Action: "response",
+				// Empty command (code 30)
+				Error:       30,
+				Description: msgDesc,
+			}
+		} else {
+			msgDesc = fmt.Sprintf("Unknown command: \"%s\".", in.Action)
+			slog.Debug(msgDesc)
+			response = gtypes.VAnswer{
+				Action: "response",
+				// Unknown command (code 31)
+				Error:       31,
+				Description: msgDesc,
+			}
+		}
 	}
+
+	return &response
 }
 
 func Request(instruction string) string {
