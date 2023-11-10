@@ -5,13 +5,65 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem"
 	"github.com/Kwynto/GracefulDB/internal/gtypes"
 )
 
-// TODO: Request
-func Request(instruction string) string {
+// TODO: Processing
+func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
+	var response gtypes.VAnswer
+	var msgDesc string
 
+	switch in.Action {
+	// TODO: auth
+	case "auth":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: read
+	case "read":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: store
+	case "store":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	// TODO: delete
+	case "delete":
+		response = gtypes.VAnswer{
+			Action: "response",
+			Error:  0,
+		}
+	default:
+		if in.Action == "" {
+			msgDesc = "Empty command."
+			slog.Debug(msgDesc)
+			response = gtypes.VAnswer{
+				Action: "response",
+				// Empty command (code 30)
+				Error:       30,
+				Description: msgDesc,
+			}
+		} else {
+			msgDesc = fmt.Sprintf("Unknown command: \"%s\".", in.Action)
+			slog.Debug(msgDesc)
+			response = gtypes.VAnswer{
+				Action: "response",
+				// Unknown command (code 31)
+				Error:       31,
+				Description: msgDesc,
+			}
+		}
+	}
+
+	return &response
+}
+
+func Request(instruction string) string {
 	var qry *gtypes.VQuery
 
 	if !json.Valid([]byte(instruction)) {
@@ -27,7 +79,7 @@ func Request(instruction string) string {
 		return fmt.Sprintf("{\"action\":\"response\",\"error\":11,\"description\":\"%s\"}", err.Error())
 	}
 
-	bAnswer, err := json.Marshal(basicsystem.Processing(qry))
+	bAnswer, err := json.Marshal(Processing(qry))
 	if err != nil {
 		// ERROR 20 - Server error
 		return fmt.Sprintf("{\"action\":\"response\",\"error\":20,\"description\":\"%s\"}", err.Error())
