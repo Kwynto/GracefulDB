@@ -26,14 +26,6 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	go basicsystem.CommandSystem(cfg)
 	closeProcs.AddHandler(basicsystem.Shutdown) // Register a shutdown handler.
 
-	// TODO: Start the language analyzer (SQL)
-	// go sqlanalyzer.Analyzer(cfg)
-	// closeProcs.AddHandler(sqlanalyzer.Shutdown) // Register a shutdown handler.
-
-	// TODO: Start the language analyzer (VQL)
-	// go vqlanalyzer.Analyzer(cfg)
-	// closeProcs.AddHandler(vqlanalyzer.Shutdown) // Register a shutdown handler.
-
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {
 		go socketconnector.Start(cfg)
