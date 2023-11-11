@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem"
 	"github.com/Kwynto/GracefulDB/internal/base/core"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
@@ -21,10 +20,6 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
 	closeProcs.AddHandler(core.Shutdown) // Register a shutdown handler.
-
-	// TODO: Run the basic command system
-	go basicsystem.CommandSystem(cfg)
-	closeProcs.AddHandler(basicsystem.Shutdown) // Register a shutdown handler.
 
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {

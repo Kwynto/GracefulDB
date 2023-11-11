@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
 )
 
 func generateTicket() string {
