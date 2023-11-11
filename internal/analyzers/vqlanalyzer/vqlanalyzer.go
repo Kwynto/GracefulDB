@@ -2,6 +2,7 @@ package vqlanalyzer
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,8 +20,26 @@ func generateTicket() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func Auth(secret *gtypes.VSecret) (string, error) {
+func NewAuth(secret *gtypes.VSecret) (string, error) {
 	// FIXME: Сделать настоящую авторизацию
+	var pass string
+
+	if len(secret.Hash) != 32 {
+		pass = secret.Hash
+	} else {
+		h := sha256.Sum256([]byte(secret.Password))
+		pass = fmt.Sprintf("%x", h)
+	}
+
+	// FIXME: delete it
+	slog.Debug(pass)
+
+	// dbPass := secret.Login
+
+	// if pass == dbPass {
+	// 	return generateTicket(), nil
+	// }
+
 	if secret.Login == "root" && secret.Password == "toor" {
 		return generateTicket(), nil
 	}
@@ -37,7 +56,7 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 
 	// TODO: auth
 	case "auth":
-		ticket, err := Auth(&in.Secret)
+		ticket, err := NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
 			return &gtypes.VAnswer{
 				Action: "response",
