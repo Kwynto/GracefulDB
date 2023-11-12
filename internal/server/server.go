@@ -22,9 +22,11 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	go core.Engine(cfg)
 	closeProcs.AddHandler(core.Shutdown) // Register a shutdown handler.
 
+	// Basic system - begin
 	// Loading the authorization module
 	go gauth.Start()
 	closeProcs.AddHandler(gauth.Shutdown) // Register a shutdown handler.
+	// Basic system - end
 
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {
