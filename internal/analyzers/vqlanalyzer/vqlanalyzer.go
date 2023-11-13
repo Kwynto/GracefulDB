@@ -11,7 +11,14 @@ import (
 
 // TODO: Processing
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
-	var response gtypes.VAnswer
+	var response gtypes.VAnswer = gtypes.VAnswer{
+		Action: "response",
+		Secret: gtypes.VSecret{
+			QueryID: in.Secret.QueryID,
+		},
+		Error: 0,
+	}
+
 	var msgDesc string
 
 	switch in.Action {
@@ -19,70 +26,98 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	case "auth":
 		ticket, err := gauth.NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
-			return &gtypes.VAnswer{
-				Action: "response",
-				// Authorization error (code 432)
-				Error:       432,
-				Description: "Authorization error",
-			}
+			// return &gtypes.VAnswer{
+			// 	Action: "response",
+			// 	// Authorization error (code 432)
+			// 	Error:       432,
+			// 	Description: "Authorization error",
+			// }
+			response.Error = 432
+			response.Description = "Authorization error"
+			return &response
 		}
 
-		response = gtypes.VAnswer{
-			Action: "response",
-			Secret: gtypes.VSecret{
-				Ticket:  ticket,
-				QueryID: in.Secret.QueryID,
-			},
-			Error: 0,
-		}
+		// response = gtypes.VAnswer{
+		// 	Action: "response",
+		// 	Secret: gtypes.VSecret{
+		// 		Ticket: ticket,
+		// 	},
+		// }
+		response.Secret.Ticket = ticket
 
 	// TODO: read
 	case "read":
-		response = gtypes.VAnswer{
-			Action: "response",
-			Error:  0,
+		// TODO: Make preserving function
+		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
+		if err != nil {
+			slog.Debug("Authorization error", slog.String("operation", "read"))
+			// response = gtypes.VAnswer{
+			// 	Action:      "response",
+			// 	Error:       440,
+			// 	Description: "Authorization error",
+			// }
+			response.Error = 440
+			response.Description = "Authorization error"
 		}
+
+		if newticket != in.Secret.Ticket {
+			// response = gtypes.VAnswer{
+			// 	// Action: "response",
+			// 	Secret: gtypes.VSecret{
+			// 		Ticket: newticket,
+			// 	},
+			// }
+			response.Secret.Ticket = newticket
+		}
+
+		slog.Debug("Serving a read request", slog.String("login", login), slog.String("access", fmt.Sprint(access)))
+
+		// TODO: Make chacking access right
 
 	// TODO: store
 	case "store":
-		response = gtypes.VAnswer{
-			Action: "response",
-			Error:  0,
-		}
+		// response = gtypes.VAnswer{
+		// 	Action: "response",
+		// 	Error:  0,
+		// }
 
 	// TODO: delete
 	case "delete":
-		response = gtypes.VAnswer{
-			Action: "response",
-			Error:  0,
-		}
+		// response = gtypes.VAnswer{
+		// 	Action: "response",
+		// 	Error: 0,
+		// }
 
 	// TODO: manage
 	case "manage":
-		response = gtypes.VAnswer{
-			Action: "response",
-			Error:  0,
-		}
+		// response = gtypes.VAnswer{
+		// 	Action: "response",
+		// 	Error:  0,
+		// }
 
 	default:
 		if in.Action == "" {
 			msgDesc = "Empty command."
 			slog.Debug(msgDesc)
-			response = gtypes.VAnswer{
-				Action: "response",
-				// Empty command (code 430)
-				Error:       430,
-				Description: msgDesc,
-			}
+			// response = gtypes.VAnswer{
+			// 	Action: "response",
+			// 	// Empty command (code 430)
+			// 	Error:       430,
+			// 	Description: msgDesc,
+			// }
+			response.Error = 430
+			response.Description = msgDesc
 		} else {
 			msgDesc = fmt.Sprintf("Unknown command: \"%s\".", in.Action)
 			slog.Debug(msgDesc)
-			response = gtypes.VAnswer{
-				Action: "response",
-				// Unknown command (code 431)
-				Error:       431,
-				Description: msgDesc,
-			}
+			// response = gtypes.VAnswer{
+			// 	Action: "response",
+			// 	// Unknown command (code 431)
+			// 	Error:       431,
+			// 	Description: msgDesc,
+			// }
+			response.Error = 431
+			response.Description = msgDesc
 		}
 	}
 
