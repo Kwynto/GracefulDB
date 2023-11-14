@@ -19,30 +19,17 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		Error: 0,
 	}
 
-	var msgDesc string
-
 	switch in.Action {
 
 	case "auth":
 		ticket, err := gauth.NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
-			// return &gtypes.VAnswer{
-			// 	Action: "response",
 			// 	// Authorization error (code 432)
-			// 	Error:       432,
-			// 	Description: "Authorization error",
-			// }
 			response.Error = 432
 			response.Description = "Authorization error"
 			return &response
 		}
 
-		// response = gtypes.VAnswer{
-		// 	Action: "response",
-		// 	Secret: gtypes.VSecret{
-		// 		Ticket: ticket,
-		// 	},
-		// }
 		response.Secret.Ticket = ticket
 
 	// TODO: read
@@ -51,22 +38,12 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
 		if err != nil {
 			slog.Debug("Authorization error", slog.String("operation", "read"))
-			// response = gtypes.VAnswer{
-			// 	Action:      "response",
-			// 	Error:       440,
-			// 	Description: "Authorization error",
-			// }
+			// 	// Authorization error (code 440)
 			response.Error = 440
 			response.Description = "Authorization error"
 		}
 
-		if newticket != in.Secret.Ticket {
-			// response = gtypes.VAnswer{
-			// 	// Action: "response",
-			// 	Secret: gtypes.VSecret{
-			// 		Ticket: newticket,
-			// 	},
-			// }
+		if newticket != "" && newticket != in.Secret.Ticket {
 			response.Secret.Ticket = newticket
 		}
 
@@ -76,46 +53,26 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 
 	// TODO: store
 	case "store":
-		// response = gtypes.VAnswer{
-		// 	Action: "response",
-		// 	Error:  0,
-		// }
+		// -
 
 	// TODO: delete
 	case "delete":
-		// response = gtypes.VAnswer{
-		// 	Action: "response",
-		// 	Error: 0,
-		// }
+		// -
 
 	// TODO: manage
 	case "manage":
-		// response = gtypes.VAnswer{
-		// 	Action: "response",
-		// 	Error:  0,
-		// }
+		// -
 
 	default:
 		if in.Action == "" {
-			msgDesc = "Empty command."
-			slog.Debug(msgDesc)
-			// response = gtypes.VAnswer{
-			// 	Action: "response",
-			// 	// Empty command (code 430)
-			// 	Error:       430,
-			// 	Description: msgDesc,
-			// }
+			slog.Debug("Empty command.")
+			// Empty command (code 430)
 			response.Error = 430
-			response.Description = msgDesc
+			response.Description = "Empty command."
 		} else {
-			msgDesc = fmt.Sprintf("Unknown command: \"%s\".", in.Action)
+			msgDesc := fmt.Sprintf("Unknown command: \"%s\".", in.Action)
 			slog.Debug(msgDesc)
-			// response = gtypes.VAnswer{
-			// 	Action: "response",
-			// 	// Unknown command (code 431)
-			// 	Error:       431,
-			// 	Description: msgDesc,
-			// }
+			// Unknown command (code 431)
 			response.Error = 431
 			response.Description = msgDesc
 		}

@@ -272,6 +272,7 @@ func hashLoad() {
 }
 
 func hashSave() {
+	// FIXME: Сделать удаление файла перед записью, а то данные множатся
 	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
@@ -315,6 +316,7 @@ func accessLoad() {
 }
 
 func accessSave() {
+	// FIXME: Сделать удаление файла перед записью, а то данные множатся
 	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
