@@ -20,17 +20,45 @@ const (
 	ACCESS_FILE = "./config/access.gob"
 )
 
-type tAuth map[string]string
-type tReversAuth map[string]string
+// type tLogin string
+// type tHach string
+// type tRule string
+
+type tRole int
+
+const (
+	SYSTEM tRole = iota
+	ADMIN
+	ENGINEER
+	MANAGER
+	USER
+	WEBUSER
+)
+
+func (t tRole) String() string {
+	return [...]string{"SYSTEM", "ADMIN", "ENGINEER", "MANAGER", "USER", "WEBUSER"}[t]
+}
+
+type tRights struct {
+	role  tRole
+	rules []string // []tRule
+}
+
+type tAuth map[string]string // map[tLogin]tHach
+// type tReversAuth map[string]string   // map[tHach]tLogin
+type tTicket map[string]string       // login - ticket
+type tReversTicket map[string]string // ticket - login
+
+type tAccess map[string]tRights // map[tLogin]tRights
 
 var (
 	hashMap   tAuth = make(tAuth, 0)
-	accessMap       = make(tAuth, 0)
+	accessMap       = make(tAccess, 0)
 
-	ticketMap          tAuth       = make(tAuth, 0)
-	oldTicketMap       tAuth       = make(tAuth, 0)
-	reversTicketMap    tReversAuth = make(tReversAuth, 0)
-	reversOldTicketMap tReversAuth = make(tReversAuth, 0)
+	ticketMap          tTicket       = make(tTicket, 0)
+	oldTicketMap       tTicket       = make(tTicket, 0)
+	reversTicketMap    tReversTicket = make(tReversTicket, 0)
+	reversOldTicketMap tReversTicket = make(tReversTicket, 0)
 )
 
 var block sync.RWMutex
@@ -44,7 +72,7 @@ func generateTicket() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func addUser(login string, password string, access string) error {
+func addUser(login string, password string, access tRights) error {
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
@@ -66,14 +94,14 @@ func addUser(login string, password string, access string) error {
 	return nil
 }
 
-func AddUser(login string, password string, access string) error {
+func AddUser(login string, password string, access tRights) error {
 	if login != "root" {
 		return addUser(login, password, access)
 	}
 	return errors.New("unable to create a user")
 }
 
-func updateUser(login string, password string, access string) error {
+func updateUser(login string, password string, access tRights) error {
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
@@ -97,7 +125,7 @@ func updateUser(login string, password string, access string) error {
 	return nil
 }
 
-func UpdateUser(login string, password string, access string) error {
+func UpdateUser(login string, password string, access tRights) error {
 	return updateUser(login, password, access)
 }
 
@@ -131,7 +159,7 @@ func DeleteUser(login string) error {
 	return errors.New("it is not possible to delete a user")
 }
 
-func CheckTicket(ticket string) (login string, access string, newticket string, err error) {
+func CheckTicket(ticket string) (login string, access tRights, newticket string, err error) {
 	block.RLock()
 	defer block.RUnlock()
 
@@ -146,7 +174,7 @@ func CheckTicket(ticket string) (login string, access string, newticket string, 
 			// }
 			return login, access, newticket, nil
 		}
-		return "", "", "", errors.New("authorization failed")
+		return "", tRights{}, "", errors.New("authorization failed")
 	}
 
 	login, ok4 := reversOldTicketMap[ticket]
@@ -157,12 +185,12 @@ func CheckTicket(ticket string) (login string, access string, newticket string, 
 			if ok6 {
 				return login, access, newticket, nil
 			}
-			return "", "", "", errors.New("authorization failed")
+			return "", tRights{}, "", errors.New("authorization failed")
 		}
-		return "", "", "", errors.New("authorization failed")
+		return "", tRights{}, "", errors.New("authorization failed")
 	}
 
-	return "", "", "", errors.New("authorization failed")
+	return "", tRights{}, "", errors.New("authorization failed")
 }
 
 func NewAuth(secret *gtypes.VSecret) (string, error) {
@@ -244,6 +272,7 @@ func hashLoad() {
 }
 
 func hashSave() {
+	// FIXME: Сделать удаление файла перед записью, а то данные множатся
 	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
@@ -271,7 +300,10 @@ func accessLoad() {
 	defer tempFile.Close()
 
 	if isFNotEx {
-		accessMap["root"] = "admin"
+		accessMap["root"] = tRights{
+			role:  ADMIN,
+			rules: []string{},
+		}
 
 		encoder := gob.NewEncoder(tempFile)
 		if err := encoder.Encode(accessMap); err != nil {
@@ -284,6 +316,7 @@ func accessLoad() {
 }
 
 func accessSave() {
+	// FIXME: Сделать удаление файла перед записью, а то данные множатся
 	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
