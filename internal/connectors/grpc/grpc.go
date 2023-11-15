@@ -50,17 +50,19 @@ func Start(cfg *config.Config) {
 	address = fmt.Sprintf("%s:%s", cfg.GrpcConnector.Address, cfg.GrpcConnector.Port)
 	listen, err := net.Listen("tcp", address)
 	if err != nil {
-		slog.Error("Failed to start listener", slog.String("err", err.Error()))
+		slog.Error("Failed to start gRPC-listener", slog.String("err", err.Error()))
 		return
 	}
 
 	grpcServer = grpc.NewServer()
 	gs.RegisterGracefulServiceServer(grpcServer, messageServer)
 
+	slog.Info("gRPC server is running", slog.String("address", address))
 	grpcServer.Serve(listen)
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
 	grpcServer.Stop()
+	slog.Info("gRPC server stopped")
 	c.Done()
 }
