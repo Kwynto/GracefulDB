@@ -2,16 +2,22 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
+	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
 )
 
 var address string
 var muxRest *http.ServeMux
+
+var srvRest *http.Server
 
 func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
@@ -19,41 +25,90 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func squery(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("The method is prohibited!"))
+		slog.Debug("The method is prohibited!", slog.String("method", http.MethodPost))
+		w.Header().Set("Allow", http.MethodPost)
+		http.Error(w, "The method is prohibited!", http.StatusMethodNotAllowed)
 		return
 	}
 
-	w.Write([]byte("This should be a respons for the client."))
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	var placeholder *[]string
+
+	instruction := r.PostForm.Get("instruction")
+	placeholderJSONArray := r.PostForm.Get("placeholder")
+	if err := json.Unmarshal([]byte(placeholderJSONArray), &placeholder); err != nil {
+		slog.Debug("Placeholder error", slog.String("err", err.Error()))
+		http.Error(w, "Bad request - placeholder error", http.StatusBadRequest)
+		return
+	}
+
+	response := sqlanalyzer.Request(instruction, *placeholder)
+
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response))
 }
 
 func vquery(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("The method is prohibited!"))
+		slog.Debug("The method is prohibited!", slog.String("method", r.Method))
+		w.Header().Set("Allow", http.MethodPost)
+		http.Error(w, "The method is prohibited!", http.StatusMethodNotAllowed)
 		return
 	}
 
-	w.Write([]byte("This should be a respons for the client."))
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	instruction := r.PostForm.Get("instruction")
+
+	response := vqlanalyzer.Request(instruction)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response))
+}
+
+func routes() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", home)
+	mux.HandleFunc("/squery", squery)
+	mux.HandleFunc("/vquery", vquery)
+
+	return mux
 }
 
 func Start(cfg *config.Config) {
 	address = fmt.Sprintf("%s:%s", cfg.RestConnector.Address, cfg.RestConnector.Port)
+	muxRest = routes()
 
-	muxRest = http.NewServeMux()
-	muxRest.HandleFunc("/", home)
-	muxRest.HandleFunc("/squery", squery)
-	muxRest.HandleFunc("/vquery", vquery)
+	srvRest = &http.Server{
+		Addr:     address,
+		ErrorLog: prettylogger.LogServerError,
+		Handler:  muxRest,
+	}
 
 	slog.Info("REST server is running", slog.String("address", address))
-	if err := http.ListenAndServe(address, muxRest); err != nil {
+	if err := srvRest.ListenAndServe(); err != nil {
 		slog.Error("Failed to start REST-listener", slog.String("err", err.Error()))
 		return
 	}
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
+	if err := srvRest.Shutdown(ctx); err != nil {
+		slog.Error("There was a problem with stopping the REST-server", slog.String("err", err.Error()))
+	}
 	slog.Info("REST server stopped")
-
 	c.Done()
 }
