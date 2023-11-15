@@ -24,7 +24,7 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	case "auth":
 		ticket, err := gauth.NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
-			// 	// Authorization error (code 432)
+			// Authorization error (code 432)
 			response.Error = 432
 			response.Description = "Authorization error"
 			return &response
@@ -38,7 +38,7 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
 		if err != nil {
 			slog.Debug("Authorization error", slog.String("operation", "read"))
-			// 	// Authorization error (code 440)
+			// Authorization error (code 440)
 			response.Error = 440
 			response.Description = "Authorization error"
 		}
