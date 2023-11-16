@@ -18,6 +18,9 @@ import (
 const (
 	AUTH_FILE   = "./config/auth.gob"
 	ACCESS_FILE = "./config/access.gob"
+
+	DEFAULT_USER     = "root"
+	DEFAULT_PASSWORD = "toor"
 )
 
 // type tLogin string
@@ -242,28 +245,24 @@ func NewAuth(secret *gtypes.VSecret) (string, error) {
 }
 
 func hashLoad() {
-	var isFNotEx bool = false
-
-	// check if file exists
-	if _, err := os.Stat(AUTH_FILE); os.IsNotExist(err) {
-		isFNotEx = true
-	}
+	_, err := os.Stat(AUTH_FILE)
+	isFNotEx := os.IsNotExist(err)
 
 	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
 	if isFNotEx {
-		h := sha256.Sum256([]byte("toor"))
+		h := sha256.Sum256([]byte(DEFAULT_PASSWORD))
 		pass := fmt.Sprintf("%x", h)
 
-		hashMap["root"] = pass
+		hashMap[DEFAULT_USER] = pass
 
 		encoder := gob.NewEncoder(tempFile)
 		if err := encoder.Encode(hashMap); err != nil {
-			slog.Debug("Error writing authentication data")
+			slog.Debug("Error writing authentication data", slog.String("file", AUTH_FILE))
 		}
 	}
 
@@ -272,10 +271,15 @@ func hashLoad() {
 }
 
 func hashSave() {
-	// FIXME: Сделать удаление файла перед записью, а то данные множатся
+	if _, err := os.Stat(AUTH_FILE); os.IsExist(err) {
+		if err2 := os.Remove(AUTH_FILE); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", AUTH_FILE), slog.String("err", err2.Error()))
+		}
+	}
+
 	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
@@ -286,28 +290,24 @@ func hashSave() {
 }
 
 func accessLoad() {
-	var isFNotEx bool = false
-
-	// check if file exists
-	if _, err := os.Stat(ACCESS_FILE); os.IsNotExist(err) {
-		isFNotEx = true
-	}
+	_, err := os.Stat(ACCESS_FILE)
+	isFNotEx := os.IsNotExist(err)
 
 	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
 	if isFNotEx {
-		accessMap["root"] = tRights{
+		accessMap[DEFAULT_USER] = tRights{
 			Role:  ADMIN,
 			Rules: []string{},
 		}
 
 		encoder := gob.NewEncoder(tempFile)
 		if err := encoder.Encode(accessMap); err != nil {
-			slog.Debug("Error writing authentication data")
+			slog.Debug("Error writing authentication data", slog.String("file", ACCESS_FILE))
 		}
 	}
 
@@ -316,10 +316,15 @@ func accessLoad() {
 }
 
 func accessSave() {
-	// FIXME: Сделать удаление файла перед записью, а то данные множатся
+	if _, err := os.Stat(ACCESS_FILE); os.IsExist(err) {
+		if err2 := os.Remove(ACCESS_FILE); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", ACCESS_FILE), slog.String("err", err2.Error()))
+		}
+	}
+
 	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
