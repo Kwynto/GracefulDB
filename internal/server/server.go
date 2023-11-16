@@ -10,10 +10,13 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
-	"github.com/Kwynto/GracefulDB/internal/connectors/socketconnector"
+	"github.com/Kwynto/GracefulDB/internal/connectors/socket"
+	"github.com/Kwynto/GracefulDB/internal/connectors/websocket"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
+
+var stopSignal = make(chan struct{}, 1)
 
 func Run(ctx context.Context, cfg *config.Config) error {
 	var closeProcs = &closer.Closer{}
@@ -30,11 +33,17 @@ func Run(ctx context.Context, cfg *config.Config) error {
 
 	// TODO: Start Socket connector
 	if cfg.SocketConnector.Enable {
-		go socketconnector.Start(cfg)
-		closeProcs.AddHandler(socketconnector.Shutdown) // Register a shutdown handler.
+		go socket.Start(cfg)
+		closeProcs.AddHandler(socket.Shutdown) // Register a shutdown handler.
 	}
 
-	// TODO: Start REST API connector
+	// TODO: Start Socket connector
+	if cfg.WebSocketConnector.Enable {
+		go websocket.Start(cfg)
+		closeProcs.AddHandler(socket.Shutdown) // Register a shutdown handler.
+	}
+
+	// Start REST API connector
 	if cfg.RestConnector.Enable {
 		go rest.Start(cfg)
 		closeProcs.AddHandler(rest.Shutdown) // Register a shutdown handler.
@@ -52,8 +61,12 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		closeProcs.AddHandler(webmanage.Shutdown) // Register a shutdown handler.
 	}
 
-	// Waiting for a stop signal from the OS
-	<-ctx.Done()
+	select {
+	case <-ctx.Done(): // Waiting for a stop signal from the OS
+		break
+	case <-stopSignal: // Program signal from the control interface
+		break
+	}
 	slog.Warn("The shutdown process has started.")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
@@ -66,4 +79,10 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	slog.Info("All processes are stopped.")
 
 	return nil
+}
+
+func Stop(login string) {
+	msg := fmt.Sprintf("A stop signal was received from the control interface from the %s user", login)
+	slog.Warn(msg, slog.String("user", login))
+	stopSignal <- struct{}{}
 }

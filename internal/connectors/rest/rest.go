@@ -44,7 +44,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	placeholderJSONArray := r.PostForm.Get("placeholder")
 	if err := json.Unmarshal([]byte(placeholderJSONArray), &placeholder); err != nil {
 		slog.Debug("Placeholder error", slog.String("err", err.Error()))
-		http.Error(w, "Bad request - placeholder error", http.StatusBadRequest)
+		http.Error(w, "Bad request - placeholder error (The placeholder must be in JSON format, in the form of an array of strings).", http.StatusBadRequest)
 		return
 	}
 
@@ -100,7 +100,7 @@ func Start(cfg *config.Config) {
 
 	slog.Info("REST server is running", slog.String("address", address))
 	if err := srvRest.ListenAndServe(); err != nil {
-		slog.Error("Failed to start REST-listener", slog.String("err", err.Error()))
+		slog.Debug(err.Error())
 		return
 	}
 }

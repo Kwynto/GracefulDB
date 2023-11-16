@@ -335,6 +335,7 @@ func Start() {
 	hashLoad()
 	accessLoad()
 	block.Unlock()
+	slog.Info("The authentication system is running.")
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
@@ -342,6 +343,6 @@ func Shutdown(ctx context.Context, c *closer.Closer) {
 	hashSave()
 	accessSave()
 	block.Unlock()
-
+	slog.Info("The authentication system is stopped.")
 	c.Done()
 }

@@ -23,6 +23,10 @@ type SocketConnector struct {
 	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
 }
 
+type WebSocketConnector struct {
+	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
+}
+
 type RestConnector struct {
 	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
@@ -46,11 +50,12 @@ type Config struct {
 	LogPath         string        `yaml:"log_path" env-default:"./logs/"`
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
-	CoreSettings    `yaml:"core_settings"`
-	SocketConnector `yaml:"socket_connector"`
-	RestConnector   `yaml:"rest_connector"`
-	GrpcConnector   `yaml:"grpc_connector"`
-	WebServer       `yaml:"web_server"`
+	CoreSettings       `yaml:"core_settings"`
+	SocketConnector    `yaml:"socket_connector"`
+	WebSocketConnector `yaml:"websocket_connector"`
+	RestConnector      `yaml:"rest_connector"`
+	GrpcConnector      `yaml:"grpc_connector"`
+	WebServer          `yaml:"web_server"`
 }
 
 func MustLoad(configPath string) *Config {
