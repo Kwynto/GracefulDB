@@ -40,8 +40,8 @@ func (t tRole) String() string {
 }
 
 type tRights struct {
-	role  tRole
-	rules []string // []tRule
+	Role  tRole
+	Rules []string // []tRule
 }
 
 type tAuth map[string]string // map[tLogin]tHach
@@ -281,7 +281,7 @@ func hashSave() {
 
 	encoder := gob.NewEncoder(tempFile)
 	if err := encoder.Encode(hashMap); err != nil {
-		slog.Debug("Error writing authentication data")
+		slog.Warn("Error writing authentication data", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
 	}
 }
 
@@ -301,8 +301,8 @@ func accessLoad() {
 
 	if isFNotEx {
 		accessMap["root"] = tRights{
-			role:  ADMIN,
-			rules: []string{},
+			Role:  ADMIN,
+			Rules: []string{},
 		}
 
 		encoder := gob.NewEncoder(tempFile)
@@ -325,7 +325,7 @@ func accessSave() {
 
 	encoder := gob.NewEncoder(tempFile)
 	if err := encoder.Encode(accessMap); err != nil {
-		slog.Debug("Error writing authentication data")
+		slog.Warn("Error writing authentication data", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
 	}
 }
 
@@ -335,6 +335,7 @@ func Start() {
 	hashLoad()
 	accessLoad()
 	block.Unlock()
+	slog.Info("The authentication system is running.")
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
@@ -342,6 +343,6 @@ func Shutdown(ctx context.Context, c *closer.Closer) {
 	hashSave()
 	accessSave()
 	block.Unlock()
-
+	slog.Info("The authentication system is stopped.")
 	c.Done()
 }

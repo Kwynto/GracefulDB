@@ -9,7 +9,7 @@ import (
 )
 
 func Engine(cfg *config.Config) {
-	slog.Info("GracefulDB: The core of the system was started.")
+	slog.Info("The core of the DBMS was started.")
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {

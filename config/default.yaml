@@ -8,6 +8,9 @@ core_settings:
 socket_connector:
   enable: true
 
+websocket_connector:
+  enable: true
+
 rest_connector:
   enable: true
   address: "0.0.0.0"
