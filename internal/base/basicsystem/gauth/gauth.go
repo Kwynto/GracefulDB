@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	AUTH_FILE   = "./config/auth.gob"
-	ACCESS_FILE = "./config/access.gob"
+	AUTH_FILE   = "./config/auth.json"
+	ACCESS_FILE = "./config/access.json"
 
 	DEFAULT_USER     = "root"
 	DEFAULT_PASSWORD = "toor"
@@ -260,18 +260,20 @@ func hashLoad() {
 
 		hashMap[DEFAULT_USER] = pass
 
-		encoder := gob.NewEncoder(tempFile)
+		encoder := json.NewEncoder(tempFile)
 		if err := encoder.Encode(hashMap); err != nil {
 			slog.Debug("Error writing authentication data", slog.String("file", AUTH_FILE))
 		}
+	} else {
+		decoder := json.NewDecoder(tempFile)
+		if err := decoder.Decode(&hashMap); err != nil {
+			slog.Debug("Error loading the configuration file", slog.String("file", AUTH_FILE))
+		}
 	}
-
-	decoder := gob.NewDecoder(tempFile)
-	decoder.Decode(&hashMap)
 }
 
 func hashSave() {
-	if _, err := os.Stat(AUTH_FILE); os.IsExist(err) {
+	if _, err := os.Stat(AUTH_FILE); !os.IsNotExist(err) {
 		if err2 := os.Remove(AUTH_FILE); err2 != nil {
 			slog.Warn("Unable to delete file", slog.String("file", AUTH_FILE), slog.String("err", err2.Error()))
 		}
@@ -283,7 +285,7 @@ func hashSave() {
 	}
 	defer tempFile.Close()
 
-	encoder := gob.NewEncoder(tempFile)
+	encoder := json.NewEncoder(tempFile)
 	if err := encoder.Encode(hashMap); err != nil {
 		slog.Warn("Error writing authentication data", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
 	}
@@ -305,18 +307,20 @@ func accessLoad() {
 			Rules: []string{},
 		}
 
-		encoder := gob.NewEncoder(tempFile)
+		encoder := json.NewEncoder(tempFile)
 		if err := encoder.Encode(accessMap); err != nil {
 			slog.Debug("Error writing authentication data", slog.String("file", ACCESS_FILE))
 		}
+	} else {
+		decoder := json.NewDecoder(tempFile)
+		if err := decoder.Decode(&accessMap); err != nil {
+			slog.Debug("Error loading the configuration file", slog.String("file", ACCESS_FILE))
+		}
 	}
-
-	decoder := gob.NewDecoder(tempFile)
-	decoder.Decode(&accessMap)
 }
 
 func accessSave() {
-	if _, err := os.Stat(ACCESS_FILE); os.IsExist(err) {
+	if _, err := os.Stat(ACCESS_FILE); !os.IsNotExist(err) {
 		if err2 := os.Remove(ACCESS_FILE); err2 != nil {
 			slog.Warn("Unable to delete file", slog.String("file", ACCESS_FILE), slog.String("err", err2.Error()))
 		}
@@ -328,7 +332,7 @@ func accessSave() {
 	}
 	defer tempFile.Close()
 
-	encoder := gob.NewEncoder(tempFile)
+	encoder := json.NewEncoder(tempFile)
 	if err := encoder.Encode(accessMap); err != nil {
 		slog.Warn("Error writing authentication data", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
 	}
