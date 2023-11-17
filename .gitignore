@@ -9,6 +9,9 @@
 *.dylib
 *.gob
 
+config/access.json
+config/auth.json
+
 # Logging files
 logs/*.log
 
