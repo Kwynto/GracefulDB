@@ -24,7 +24,9 @@ type SocketConnector struct {
 }
 
 type WebSocketConnector struct {
-	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
+	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Address string `yaml:"address" env-default:"0.0.0.0"`
+	Port    string `yaml:"port" env-default:"8080"`
 }
 
 type RestConnector struct {
@@ -36,7 +38,7 @@ type RestConnector struct {
 type GrpcConnector struct {
 	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
-	Port    string `yaml:"port" env-default:"8080"`
+	Port    string `yaml:"port" env-default:"3137"`
 }
 
 type WebServer struct {
