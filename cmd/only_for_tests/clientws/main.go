@@ -27,6 +27,9 @@ func getInput(input chan string) {
 	input <- result
 }
 
+// go run .\cmd\only_for_tests\clientws\main.go localhost:8080 squery
+// go run .\cmd\only_for_tests\clientws\main.go localhost:8080 vquery
+
 func main() {
 	arguments := os.Args
 	if len(arguments) != 3 {

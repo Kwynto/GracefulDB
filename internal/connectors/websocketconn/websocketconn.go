@@ -2,17 +2,24 @@ package websocketconn
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
-	"time"
 
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
 
 	"github.com/gorilla/websocket"
 )
+
+type tSQuery struct {
+	Instruction string   `json:"instruction"`
+	Placeholder []string `json:"placeholder"`
+}
 
 var address string
 var muxWS *http.ServeMux
@@ -24,6 +31,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func squery(w http.ResponseWriter, r *http.Request) {
+	var msgSQuery *tSQuery
+
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -34,7 +43,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to create connection", slog.String("err", err.Error()))
 		return
 	}
-	slog.Debug("Websocket Connected!")
+	slog.Debug("Websocket Connected! - SQuery")
 
 	for {
 		// read a message
@@ -44,13 +53,18 @@ func squery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		timeReceive := time.Now()
-
 		// Data processing
-		// fmt.Println(string(messageContent))
+		slog.Debug(string(messageContent))
+
+		if err := json.Unmarshal(messageContent, &msgSQuery); err != nil {
+			slog.Debug("Query error", slog.String("err", err.Error()))
+			websocket.WriteMessage(messageType, []byte("Bad request - query error."))
+			websocket.Close()
+			return
+		}
 
 		// reponse message
-		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
+		messageResponse := sqlanalyzer.Request(msgSQuery.Instruction, msgSQuery.Placeholder)
 
 		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
@@ -70,7 +84,7 @@ func vquery(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Failed to create connection", slog.String("err", err.Error()))
 		return
 	}
-	slog.Debug("Websocket Connected!")
+	slog.Debug("Websocket Connected! - VQuery")
 
 	for {
 		// read a message
@@ -80,13 +94,11 @@ func vquery(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		timeReceive := time.Now()
-
 		// Data processing
-		// fmt.Println(string(messageContent))
+		slog.Debug(string(messageContent))
 
 		// reponse message
-		messageResponse := fmt.Sprintf("Your message is: %s. Time received : %v", messageContent, timeReceive)
+		messageResponse := vqlanalyzer.Request(string(messageContent))
 
 		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
