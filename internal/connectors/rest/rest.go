@@ -48,11 +48,11 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := sqlanalyzer.Request(instruction, *placeholder)
+	response := sqlanalyzer.Request(&instruction, placeholder)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
+	w.Write([]byte(*response))
 }
 
 func vquery(w http.ResponseWriter, r *http.Request) {
@@ -70,13 +70,13 @@ func vquery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instruction := r.PostForm.Get("instruction")
+	instruction := []byte(r.PostForm.Get("instruction"))
 
-	response := vqlanalyzer.Request(instruction)
+	response := vqlanalyzer.Request(&instruction)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
+	w.Write(*response)
 }
 
 func routes() *http.ServeMux {

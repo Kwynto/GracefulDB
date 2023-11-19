@@ -54,7 +54,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Data processing
-		slog.Debug(string(messageContent))
+		// slog.Debug(string(messageContent))
 
 		if err := json.Unmarshal(messageContent, &msgSQuery); err != nil {
 			slog.Debug("Query error", slog.String("err", err.Error()))
@@ -64,10 +64,11 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reponse message
-		messageResponse := sqlanalyzer.Request(msgSQuery.Instruction, msgSQuery.Placeholder)
+		messageResponse := sqlanalyzer.Request(&msgSQuery.Instruction, &msgSQuery.Placeholder)
 
-		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := websocket.WriteMessage(messageType, []byte(*messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
+			websocket.Close()
 			return
 		}
 	}
@@ -95,12 +96,12 @@ func vquery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Data processing
-		slog.Debug(string(messageContent))
+		// slog.Debug(string(messageContent))
 
 		// reponse message
-		messageResponse := vqlanalyzer.Request(string(messageContent))
+		messageResponse := vqlanalyzer.Request(&messageContent)
 
-		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := websocket.WriteMessage(messageType, *messageResponse); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
 			return
 		}
