@@ -26,6 +26,8 @@ var muxWS *http.ServeMux
 
 var srvWS *http.Server
 
+var conf config.WebSocketConnector
+
 func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
@@ -34,8 +36,8 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	var msgSQuery *tSQuery
 
 	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  conf.BufferSize.Read,
+		WriteBufferSize: conf.BufferSize.Write,
 	}
 
 	websocket, err := upgrader.Upgrade(w, r, nil)
@@ -76,8 +78,8 @@ func squery(w http.ResponseWriter, r *http.Request) {
 
 func vquery(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  conf.BufferSize.Read,
+		WriteBufferSize: conf.BufferSize.Write,
 	}
 
 	websocket, err := upgrader.Upgrade(w, r, nil)
@@ -118,7 +120,9 @@ func routes() *http.ServeMux {
 }
 
 func Start(cfg *config.Config) {
-	address = fmt.Sprintf("%s:%s", cfg.WebSocketConnector.Address, cfg.WebSocketConnector.Port)
+	conf = cfg.WebSocketConnector
+
+	address = fmt.Sprintf("%s:%s", conf.Address, conf.Port)
 	muxWS = routes()
 
 	srvWS = &http.Server{
