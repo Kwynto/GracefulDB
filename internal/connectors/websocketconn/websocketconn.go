@@ -26,6 +26,8 @@ var muxWS *http.ServeMux
 
 var srvWS *http.Server
 
+var conf config.WebSocketConnector
+
 func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
@@ -34,8 +36,8 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	var msgSQuery *tSQuery
 
 	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  conf.BufferSize.Read,
+		WriteBufferSize: conf.BufferSize.Write,
 	}
 
 	websocket, err := upgrader.Upgrade(w, r, nil)
@@ -54,7 +56,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Data processing
-		slog.Debug(string(messageContent))
+		// slog.Debug(string(messageContent))
 
 		if err := json.Unmarshal(messageContent, &msgSQuery); err != nil {
 			slog.Debug("Query error", slog.String("err", err.Error()))
@@ -64,10 +66,11 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reponse message
-		messageResponse := sqlanalyzer.Request(msgSQuery.Instruction, msgSQuery.Placeholder)
+		messageResponse := sqlanalyzer.Request(&msgSQuery.Instruction, &msgSQuery.Placeholder)
 
-		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := websocket.WriteMessage(messageType, []byte(*messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
+			websocket.Close()
 			return
 		}
 	}
@@ -75,8 +78,8 @@ func squery(w http.ResponseWriter, r *http.Request) {
 
 func vquery(w http.ResponseWriter, r *http.Request) {
 	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
+		ReadBufferSize:  conf.BufferSize.Read,
+		WriteBufferSize: conf.BufferSize.Write,
 	}
 
 	websocket, err := upgrader.Upgrade(w, r, nil)
@@ -95,12 +98,12 @@ func vquery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Data processing
-		slog.Debug(string(messageContent))
+		// slog.Debug(string(messageContent))
 
 		// reponse message
-		messageResponse := vqlanalyzer.Request(string(messageContent))
+		messageResponse := vqlanalyzer.Request(&messageContent)
 
-		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := websocket.WriteMessage(messageType, *messageResponse); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
 			return
 		}
@@ -117,7 +120,9 @@ func routes() *http.ServeMux {
 }
 
 func Start(cfg *config.Config) {
-	address = fmt.Sprintf("%s:%s", cfg.WebSocketConnector.Address, cfg.WebSocketConnector.Port)
+	conf = cfg.WebSocketConnector
+
+	address = fmt.Sprintf("%s:%s", conf.Address, conf.Port)
 	muxWS = routes()
 
 	srvWS = &http.Server{

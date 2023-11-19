@@ -81,27 +81,30 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	return &response
 }
 
-func Request(instruction string) string {
+func Request(instruction *[]byte) *[]byte {
 	var qry *gtypes.VQuery
 
-	if !json.Valid([]byte(instruction)) {
-		slog.Debug("No valid query", slog.String("instruction", instruction))
+	if !json.Valid(*instruction) {
+		slog.Debug("No valid query", slog.String("instruction", string(*instruction)))
 		// ERROR 420 - Invalid request
-		return `{"action":"response","error":420,"description":"Invalid request"}`
+		resB := []byte(`{"action":"response","error":420,"description":"Invalid request"}`)
+		return &resB
 	}
 
 	// FIXME: Unmarshsl только для тестов, для оптимизации нужно переделать на NewDecoder.Decode
-	if err := json.Unmarshal([]byte(instruction), &qry); err != nil {
+	if err := json.Unmarshal(*instruction, &qry); err != nil {
 		slog.Debug("Erroneous request", slog.String("err", err.Error()))
 		// ERROR 421 - Incorrect request structure
-		return fmt.Sprintf("{\"action\":\"response\",\"error\":421,\"description\":\"%s\"}", err.Error())
+		resB := []byte(fmt.Sprintf("{\"action\":\"response\",\"error\":421,\"description\":\"%s\"}", err.Error()))
+		return &resB
 	}
 
 	bAnswer, err := json.Marshal(Processing(qry))
 	if err != nil {
 		// ERROR 410 - Server error
-		return fmt.Sprintf("{\"action\":\"response\",\"error\":410,\"description\":\"%s\"}", err.Error())
+		resB := []byte(fmt.Sprintf("{\"action\":\"response\",\"error\":410,\"description\":\"%s\"}", err.Error()))
+		return &resB
 	}
 
-	return string(bAnswer)
+	return &bAnswer
 }

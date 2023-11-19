@@ -27,8 +27,11 @@ var grpcServer *grpc.Server
 func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (*gs.SResponse, error) {
 	slog.Debug("Request received", slog.String("instruction", r.Instruction), slog.String("placeholder", fmt.Sprint(r.Placeholder)))
 
+	// instructionB := []byte(r.Instruction)
+	// placeholderB := []byte(r.Placeholder)
+
 	response := &gs.SResponse{
-		Message: sqlanalyzer.Request(r.Instruction, r.Placeholder),
+		Message: *sqlanalyzer.Request(&r.Instruction, &r.Placeholder),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))
 
@@ -38,8 +41,10 @@ func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (*gs.SResponse
 func (tMessageServer) VQuery(ctx context.Context, r *gs.VRequest) (*gs.VResponse, error) {
 	slog.Debug("Request received", slog.String("request", r.Instruction))
 
+	instructionB := []byte(r.Instruction)
+
 	response := &gs.VResponse{
-		Message: vqlanalyzer.Request(r.Instruction),
+		Message: string(*vqlanalyzer.Request(&instructionB)),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))
 

@@ -23,10 +23,16 @@ type SocketConnector struct {
 	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
 }
 
+type BufferSize struct {
+	Read  int `yaml:"read" env-default:"1024"`
+	Write int `yaml:"write" env-default:"1024"`
+}
+
 type WebSocketConnector struct {
-	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
-	Address string `yaml:"address" env-default:"0.0.0.0"`
-	Port    string `yaml:"port" env-default:"8080"`
+	Enable     bool       `yaml:"enable" env-default:"true" env-required:"true"`
+	Address    string     `yaml:"address" env-default:"0.0.0.0"`
+	Port       string     `yaml:"port" env-default:"8080"`
+	BufferSize BufferSize `yaml:"buffer_size"`
 }
 
 type RestConnector struct {
