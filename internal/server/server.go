@@ -37,7 +37,7 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		closeProcs.AddHandler(socket.Shutdown) // Register a shutdown handler.
 	}
 
-	// TODO: Start WebSocket connector
+	// Start WebSocket connector
 	if cfg.WebSocketConnector.Enable {
 		go websocketconn.Start(cfg)
 		closeProcs.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
