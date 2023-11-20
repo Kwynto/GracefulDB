@@ -127,6 +127,7 @@ func updateUser(login string, password string, access tRights) error {
 
 // Deleting a user - internal
 func deleteUser(login string) error {
+	// This function is complete
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
@@ -138,12 +139,18 @@ func deleteUser(login string) error {
 	block.Lock()
 	defer block.Unlock()
 
-	delete(hashMap, login)
-	delete(accessMap, login)
+	if ticket, ok := oldTicketMap[login]; ok {
+		delete(reversOldTicketMap, ticket)
+		delete(oldTicketMap, login)
+	}
 
-	// TODO: Need to write deleting reverses
-	delete(ticketMap, login)
-	delete(oldTicketMap, login)
+	if ticket, ok := ticketMap[login]; ok {
+		delete(reversTicketMap, ticket)
+		delete(ticketMap, login)
+	}
+
+	delete(accessMap, login)
+	delete(hashMap, login)
 
 	hashSave()
 	accessSave()
