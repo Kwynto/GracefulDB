@@ -23,10 +23,6 @@ const (
 	DEFAULT_PASSWORD = "toor"
 )
 
-// type tLogin string
-// type tHach string
-// type tRule string
-
 type tRole int
 
 const (
@@ -48,7 +44,7 @@ type tRights struct {
 }
 
 type tAuth map[string]string // map[tLogin]tHach
-// type tReversAuth map[string]string   // map[tHach]tLogin
+
 type tTicket map[string]string       // login - ticket
 type tReversTicket map[string]string // ticket - login
 
@@ -66,7 +62,9 @@ var (
 
 var block sync.RWMutex
 
+// Ticket generation
 func generateTicket() string {
+	// This function is complete
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -75,7 +73,9 @@ func generateTicket() string {
 	return fmt.Sprintf("%x", b)
 }
 
+// Adding a user - internal
 func addUser(login string, password string, access tRights) error {
+	// This function is complete
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
@@ -97,14 +97,9 @@ func addUser(login string, password string, access tRights) error {
 	return nil
 }
 
-func AddUser(login string, password string, access tRights) error {
-	if login != "root" {
-		return addUser(login, password, access)
-	}
-	return errors.New("unable to create a user")
-}
-
+// Updating a user - internal
 func updateUser(login string, password string, access tRights) error {
+	// This function is complete
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
@@ -128,34 +123,50 @@ func updateUser(login string, password string, access tRights) error {
 	return nil
 }
 
-func UpdateUser(login string, password string, access tRights) error {
-	return updateUser(login, password, access)
-}
-
+// Deleting a user - internal
 func deleteUser(login string) error {
 	block.RLock()
 	_, ok := hashMap[login]
 	block.RUnlock()
 
-	if ok {
-		block.Lock()
-		defer block.Unlock()
-
-		delete(oldTicketMap, login)
-		delete(ticketMap, login)
-		delete(accessMap, login)
-		delete(hashMap, login)
-
-		hashSave()
-		accessSave()
-
-		return nil
+	if !ok {
+		return errors.New("it is not possible to delete a user")
 	}
 
-	return errors.New("it is not possible to delete a user")
+	block.Lock()
+	defer block.Unlock()
+
+	delete(hashMap, login)
+	delete(accessMap, login)
+
+	// TODO: Need to write deleting reverses
+	delete(ticketMap, login)
+	delete(oldTicketMap, login)
+
+	hashSave()
+	accessSave()
+
+	return nil
 }
 
+// Adding a user
+func AddUser(login string, password string, access tRights) error {
+	// This function is complete
+	if login != "root" {
+		return addUser(login, password, access)
+	}
+	return errors.New("unable to create a user")
+}
+
+// Updating a user
+func UpdateUser(login string, password string, access tRights) error {
+	// This function is complete
+	return updateUser(login, password, access)
+}
+
+// Deleting a user
 func DeleteUser(login string) error {
+	// This function is complete
 	if login != "root" {
 		return deleteUser(login)
 	}
@@ -196,7 +207,9 @@ func CheckTicket(ticket string) (login string, access tRights, newticket string,
 	return "", tRights{}, "", errors.New("authorization failed")
 }
 
+// Authorization verification and ticket issuance
 func NewAuth(secret *gtypes.VSecret) (string, error) {
+	// This function is complete
 	var pass string
 
 	if secret.Login == "" {
@@ -245,7 +258,9 @@ func NewAuth(secret *gtypes.VSecret) (string, error) {
 	return "", errors.New("authentication error")
 }
 
+// Loading hashs of users from a file
 func hashLoad() {
+	// This function is complete
 	_, err := os.Stat(AUTH_FILE)
 	isFNotEx := os.IsNotExist(err)
 
@@ -273,7 +288,9 @@ func hashLoad() {
 	}
 }
 
+// Saving hashs of users in a file
 func hashSave() {
+	// This function is complete
 	if _, err := os.Stat(AUTH_FILE); !os.IsNotExist(err) {
 		if err2 := os.Remove(AUTH_FILE); err2 != nil {
 			slog.Warn("Unable to delete file", slog.String("file", AUTH_FILE), slog.String("err", err2.Error()))
@@ -292,7 +309,9 @@ func hashSave() {
 	}
 }
 
+// Loading access of users from a file
 func accessLoad() {
+	// This function is complete
 	_, err := os.Stat(ACCESS_FILE)
 	isFNotEx := os.IsNotExist(err)
 
@@ -320,7 +339,9 @@ func accessLoad() {
 	}
 }
 
+// Saving access of users in a file
 func accessSave() {
+	// This function is complete
 	if _, err := os.Stat(ACCESS_FILE); !os.IsNotExist(err) {
 		if err2 := os.Remove(ACCESS_FILE); err2 != nil {
 			slog.Warn("Unable to delete file", slog.String("file", ACCESS_FILE), slog.String("err", err2.Error()))
@@ -341,6 +362,7 @@ func accessSave() {
 
 // Package initialization
 func Start() {
+	// This function is complete
 	block.Lock()
 	hashLoad()
 	accessLoad()
@@ -348,7 +370,9 @@ func Start() {
 	slog.Info("The authentication system is running.")
 }
 
+// Shutting down the service
 func Shutdown(ctx context.Context, c *closer.Closer) {
+	// This function is complete
 	block.Lock()
 	hashSave()
 	accessSave()
