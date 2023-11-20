@@ -26,16 +26,15 @@ const (
 type tRole int
 
 const (
-	SYSTEM tRole = iota
-	ADMIN
-	ENGINEER
-	MANAGER
-	USER
-	WEBUSER
+	SYSTEM   tRole = iota
+	ADMIN          // All administrator rights
+	MANAGER        // User management rights only
+	ENGINEER       // Only the rights to control the engine and to force the launch of diagnostic processes.
+	USER           // Limited rights of a regular user.
 )
 
 func (t tRole) String() string {
-	return [...]string{"SYSTEM", "ADMIN", "ENGINEER", "MANAGER", "USER", "WEBUSER"}[t]
+	return [...]string{"SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"}[t]
 }
 
 type tRights struct {
