@@ -232,6 +232,7 @@ func NewAuth(secret *gtypes.VSecret) (string, error) {
 			}
 			reversOldTicketMap[oldTicket] = secret.Login
 			oldTicketMap[secret.Login] = oldTicket
+			delete(reversTicketMap, oldTicket)
 		}
 		ticketMap[secret.Login] = newTicket
 		reversTicketMap[newTicket] = secret.Login
