@@ -62,6 +62,8 @@ var (
 
 var block sync.RWMutex
 
+// Internal functions
+
 // Ticket generation
 func generateTicket() string {
 	// This function is complete
@@ -149,6 +151,8 @@ func deleteUser(login string) error {
 	return nil
 }
 
+// Public functions
+
 // Adding a user
 func AddUser(login string, password string, access tRights) error {
 	// This function is complete
@@ -173,7 +177,9 @@ func DeleteUser(login string) error {
 	return errors.New("it is not possible to delete a user")
 }
 
+// Verifying the authenticity of the ticket and obtaining access rights.
 func CheckTicket(ticket string) (login string, access tRights, newticket string, err error) {
+	// This function is complete
 	block.RLock()
 	defer block.RUnlock()
 
