@@ -23,22 +23,22 @@ const (
 	DEFAULT_PASSWORD = "toor"
 )
 
-type tRole int
+type TRole int
 
 const (
-	SYSTEM   tRole = iota
+	SYSTEM   TRole = iota
 	ADMIN          // All administrator rights
 	MANAGER        // User management rights only
 	ENGINEER       // Only the rights to control the engine and to force the launch of diagnostic processes.
 	USER           // Limited rights of a regular user.
 )
 
-func (t tRole) String() string {
+func (t TRole) String() string {
 	return [...]string{"SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"}[t]
 }
 
-type tRights struct {
-	Role  tRole
+type TRights struct {
+	Role  TRole
 	Rules []string // []tRule
 }
 
@@ -47,7 +47,7 @@ type tAuth map[string]string // map[tLogin]tHach
 type tTicket map[string]string       // login - ticket
 type tReversTicket map[string]string // ticket - login
 
-type tAccess map[string]tRights // map[tLogin]tRights
+type tAccess map[string]TRights // map[tLogin]tRights
 
 var (
 	hashMap   tAuth = make(tAuth, 0)
@@ -75,7 +75,7 @@ func generateTicket() string {
 }
 
 // Adding a user - internal
-func addUser(login string, password string, access tRights) error {
+func addUser(login string, password string, access TRights) error {
 	// This function is complete
 	block.RLock()
 	_, ok := hashMap[login]
@@ -99,7 +99,7 @@ func addUser(login string, password string, access tRights) error {
 }
 
 // Updating a user - internal
-func updateUser(login string, password string, access tRights) error {
+func updateUser(login string, password string, access TRights) error {
 	// This function is complete
 	block.RLock()
 	_, ok := hashMap[login]
@@ -160,7 +160,7 @@ func deleteUser(login string) error {
 // Public functions
 
 // Adding a user
-func AddUser(login string, password string, access tRights) error {
+func AddUser(login string, password string, access TRights) error {
 	// This function is complete
 	if login != "root" {
 		return addUser(login, password, access)
@@ -169,7 +169,7 @@ func AddUser(login string, password string, access tRights) error {
 }
 
 // Updating a user
-func UpdateUser(login string, password string, access tRights) error {
+func UpdateUser(login string, password string, access TRights) error {
 	// This function is complete
 	return updateUser(login, password, access)
 }
@@ -184,7 +184,7 @@ func DeleteUser(login string) error {
 }
 
 // Verifying the authenticity of the ticket and obtaining access rights.
-func CheckTicket(ticket string) (login string, access tRights, newticket string, err error) {
+func CheckTicket(ticket string) (login string, access TRights, newticket string, err error) {
 	// This function is complete
 	block.RLock()
 	defer block.RUnlock()
@@ -200,7 +200,7 @@ func CheckTicket(ticket string) (login string, access tRights, newticket string,
 			// }
 			return login, access, newticket, nil
 		}
-		return "", tRights{}, "", errors.New("authorization failed")
+		return "", TRights{}, "", errors.New("authorization failed")
 	}
 
 	login, ok4 := reversOldTicketMap[ticket]
@@ -211,12 +211,12 @@ func CheckTicket(ticket string) (login string, access tRights, newticket string,
 			if ok6 {
 				return login, access, newticket, nil
 			}
-			return "", tRights{}, "", errors.New("authorization failed")
+			return "", TRights{}, "", errors.New("authorization failed")
 		}
-		return "", tRights{}, "", errors.New("authorization failed")
+		return "", TRights{}, "", errors.New("authorization failed")
 	}
 
-	return "", tRights{}, "", errors.New("authorization failed")
+	return "", TRights{}, "", errors.New("authorization failed")
 }
 
 // Authorization verification and ticket issuance
@@ -334,7 +334,7 @@ func accessLoad() {
 	defer tempFile.Close()
 
 	if isFNotEx {
-		accessMap[DEFAULT_USER] = tRights{
+		accessMap[DEFAULT_USER] = TRights{
 			Role:  ADMIN,
 			Rules: []string{},
 		}

@@ -9,6 +9,12 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
 )
 
+// TODO: Reading
+func Reading(login *string, access *gauth.TRights, fields *gtypes.VFields) *gtypes.VData {
+	// TODO: Сделать чтение из базы (возможно перенести эту функцию в ядро)
+	return &gtypes.VData{}
+}
+
 // TODO: Processing
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	var response gtypes.VAnswer = gtypes.VAnswer{
@@ -22,6 +28,7 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	switch in.Action {
 
 	case "auth":
+		// The branch is completed
 		ticket, err := gauth.NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
 			// Authorization error (code 432)
@@ -29,12 +36,10 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 			response.Description = "Authorization error"
 			return &response
 		}
-
 		response.Secret.Ticket = ticket
 
-	// TODO: read
 	case "read":
-		// TODO: Make preserving function
+		// The branch is completed
 		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
 		if err != nil {
 			slog.Debug("Authorization error", slog.String("operation", "read"))
@@ -42,14 +47,11 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 			response.Error = 440
 			response.Description = "Authorization error"
 		}
-
 		if newticket != "" && newticket != in.Secret.Ticket {
 			response.Secret.Ticket = newticket
 		}
-
-		slog.Debug("Serving a read request", slog.String("login", login), slog.String("access", fmt.Sprint(access)))
-
-		// TODO: Make chacking access right
+		// slog.Debug("Serving a read request", slog.String("login", login), slog.String("access", fmt.Sprint(access)))
+		response.Data = *Reading(&login, &access, &in.Fields)
 
 	// TODO: store
 	case "store":
