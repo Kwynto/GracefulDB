@@ -9,7 +9,31 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
 )
 
-// TODO: Processing
+// TODO: Reading
+func Reading(login *string, access *gauth.TRights, fields *gtypes.VFields) *gtypes.VData {
+	// TODO: Сделать чтение из базы (возможно перенести эту функцию в ядро)
+	return &gtypes.VData{}
+}
+
+// TODO: Storing
+func Storing(login *string, access *gauth.TRights, in *gtypes.VQuery) *gtypes.VData {
+	// TODO: Сделать запись в базу (возможно перенести эту функцию в ядро)
+	return &gtypes.VData{}
+}
+
+// TODO: Deleting
+func Deleting(login *string, access *gauth.TRights, fields *gtypes.VFields) *gtypes.VData {
+	// TODO: Сделать удаление из базы (возможно перенести эту функцию в ядро)
+	return &gtypes.VData{}
+}
+
+// TODO: Managing
+func Managing(login *string, access *gauth.TRights, in *gtypes.VQuery) *gtypes.VData {
+	// TODO: Сделать управление базой (возможно перенести эту функцию в ядро)
+	return &gtypes.VData{}
+}
+
+// Request processing
 func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	var response gtypes.VAnswer = gtypes.VAnswer{
 		Action: "response",
@@ -19,8 +43,27 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		Error: 0,
 	}
 
-	switch in.Action {
+	var gLogin string
+	var gAccess gauth.TRights
 
+	if in.Action != "auth" {
+		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
+		// gLogin = login
+		// gAccess = access
+		gLogin, gAccess = login, access
+		if newticket != "" && newticket != in.Secret.Ticket {
+			response.Secret.Ticket = newticket
+		}
+		if err != nil {
+			slog.Debug("Authorization error", slog.String("operation", "read"))
+			// Authorization error (code 440)
+			response.Error = 440
+			response.Description = "Authorization error"
+			return &response
+		}
+	}
+
+	switch in.Action {
 	case "auth":
 		ticket, err := gauth.NewAuth(&in.Secret)
 		if err != nil || ticket == "" {
@@ -29,39 +72,19 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 			response.Description = "Authorization error"
 			return &response
 		}
-
 		response.Secret.Ticket = ticket
 
-	// TODO: read
 	case "read":
-		// TODO: Make preserving function
-		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
-		if err != nil {
-			slog.Debug("Authorization error", slog.String("operation", "read"))
-			// Authorization error (code 440)
-			response.Error = 440
-			response.Description = "Authorization error"
-		}
+		response.Data = *Reading(&gLogin, &gAccess, &in.Fields)
 
-		if newticket != "" && newticket != in.Secret.Ticket {
-			response.Secret.Ticket = newticket
-		}
-
-		slog.Debug("Serving a read request", slog.String("login", login), slog.String("access", fmt.Sprint(access)))
-
-		// TODO: Make chacking access right
-
-	// TODO: store
 	case "store":
-		// -
+		response.Data = *Storing(&gLogin, &gAccess, in)
 
-	// TODO: delete
 	case "delete":
-		// -
+		response.Data = *Deleting(&gLogin, &gAccess, &in.Fields)
 
-	// TODO: manage
 	case "manage":
-		// -
+		response.Data = *Managing(&gLogin, &gAccess, in)
 
 	default:
 		if in.Action == "" {
@@ -81,6 +104,7 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 	return &response
 }
 
+// Getting a clean request from the connector and returning a response
 func Request(instruction *[]byte) *[]byte {
 	var qry *gtypes.VQuery
 
@@ -91,7 +115,7 @@ func Request(instruction *[]byte) *[]byte {
 		return &resB
 	}
 
-	// FIXME: Unmarshsl только для тестов, для оптимизации нужно переделать на NewDecoder.Decode
+	// FIXME: Unmarshal только для тестов, для оптимизации нужно переделать на NewDecoder.Decode
 	if err := json.Unmarshal(*instruction, &qry); err != nil {
 		slog.Debug("Erroneous request", slog.String("err", err.Error()))
 		// ERROR 421 - Incorrect request structure
