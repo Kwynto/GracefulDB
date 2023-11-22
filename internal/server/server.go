@@ -10,7 +10,6 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
-	"github.com/Kwynto/GracefulDB/internal/connectors/socket"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
@@ -30,12 +29,6 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	go gauth.Start()
 	closeProcs.AddHandler(gauth.Shutdown) // Register a shutdown handler.
 	// Basic system - end
-
-	// TODO: Start Socket connector
-	if cfg.SocketConnector.Enable {
-		go socket.Start(cfg)
-		closeProcs.AddHandler(socket.Shutdown) // Register a shutdown handler.
-	}
 
 	// Start WebSocket connector
 	if cfg.WebSocketConnector.Enable {

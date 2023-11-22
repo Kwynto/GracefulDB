@@ -21,7 +21,8 @@ func main() {
 
 	// Init logger: slog
 	prettylogger.Init(cfg.LogPath, cfg.Env)
-	slog.Info("starting GracefulDB", slog.String("env", cfg.Env))
+	slog.Info("Starting GracefulDB", slog.String("env", cfg.Env))
+	slog.Info("Configuration loaded", slog.String("file", config.DisplayConfigPath))
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking

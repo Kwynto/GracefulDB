@@ -15,12 +15,10 @@ const (
 	configDefault = "./config/default.yaml"
 )
 
+var DisplayConfigPath string
+
 type CoreSettings struct {
 	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
-}
-
-type SocketConnector struct {
-	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
 }
 
 type BufferSize struct {
@@ -59,7 +57,6 @@ type Config struct {
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
 	CoreSettings       `yaml:"core_settings"`
-	SocketConnector    `yaml:"socket_connector"`
 	WebSocketConnector `yaml:"websocket_connector"`
 	RestConnector      `yaml:"rest_connector"`
 	GrpcConnector      `yaml:"grpc_connector"`
@@ -82,5 +79,6 @@ func MustLoad(configPath string) *Config {
 		log.Fatalf("cannot read config: %s", configPath)
 	}
 
+	DisplayConfigPath = configPath
 	return &cfg
 }
