@@ -15,6 +15,8 @@ const (
 	configDefault = "./config/default.yaml"
 )
 
+var DisplayConfigPath string
+
 type CoreSettings struct {
 	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
 }
@@ -77,5 +79,6 @@ func MustLoad(configPath string) *Config {
 		log.Fatalf("cannot read config: %s", configPath)
 	}
 
+	DisplayConfigPath = configPath
 	return &cfg
 }

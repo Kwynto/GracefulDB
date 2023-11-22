@@ -8,6 +8,7 @@ type VSecret struct {
 	Password string `json:"password,omitempty"`
 	Hash     string `json:"hash,omitempty"`
 	QueryID  string `json:"queryid,omitempty"`
+	Version  string `json:"version,omitempty"`
 }
 
 type VData []RowDB
