@@ -19,10 +19,6 @@ type CoreSettings struct {
 	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
 }
 
-type SocketConnector struct {
-	Enable bool `yaml:"enable" env-default:"true" env-required:"true"`
-}
-
 type BufferSize struct {
 	Read  int `yaml:"read" env-default:"1024"`
 	Write int `yaml:"write" env-default:"1024"`
@@ -59,7 +55,6 @@ type Config struct {
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
 	CoreSettings       `yaml:"core_settings"`
-	SocketConnector    `yaml:"socket_connector"`
 	WebSocketConnector `yaml:"websocket_connector"`
 	RestConnector      `yaml:"rest_connector"`
 	GrpcConnector      `yaml:"grpc_connector"`

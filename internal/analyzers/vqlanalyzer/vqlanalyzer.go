@@ -9,26 +9,31 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
 )
 
+type VAuth struct {
+	Login  string
+	Access gauth.TRights
+}
+
 // TODO: Reading
-func Reading(login *string, access *gauth.TRights, fields *gtypes.VFields) *gtypes.VData {
+func Reading(auth *VAuth, fields *gtypes.VFields) *gtypes.VData {
 	// TODO: Сделать чтение из базы (возможно перенести эту функцию в ядро)
 	return &gtypes.VData{}
 }
 
 // TODO: Storing
-func Storing(login *string, access *gauth.TRights, in *gtypes.VQuery) *gtypes.VData {
+func Storing(auth *VAuth, in *gtypes.VQuery) *gtypes.VData {
 	// TODO: Сделать запись в базу (возможно перенести эту функцию в ядро)
 	return &gtypes.VData{}
 }
 
 // TODO: Deleting
-func Deleting(login *string, access *gauth.TRights, fields *gtypes.VFields) *gtypes.VData {
+func Deleting(auth *VAuth, fields *gtypes.VFields) *gtypes.VData {
 	// TODO: Сделать удаление из базы (возможно перенести эту функцию в ядро)
 	return &gtypes.VData{}
 }
 
 // TODO: Managing
-func Managing(login *string, access *gauth.TRights, in *gtypes.VQuery) *gtypes.VData {
+func Managing(auth *VAuth, in *gtypes.VQuery) *gtypes.VData {
 	// TODO: Сделать управление базой (возможно перенести эту функцию в ядро)
 	return &gtypes.VData{}
 }
@@ -43,14 +48,14 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		Error: 0,
 	}
 
-	var gLogin string
-	var gAccess gauth.TRights
+	var auth VAuth
 
 	if in.Action != "auth" {
 		login, access, newticket, err := gauth.CheckTicket(in.Secret.Ticket)
-		// gLogin = login
-		// gAccess = access
-		gLogin, gAccess = login, access
+		auth = VAuth{
+			Login:  login,
+			Access: access,
+		}
 		if newticket != "" && newticket != in.Secret.Ticket {
 			response.Secret.Ticket = newticket
 		}
@@ -75,16 +80,16 @@ func Processing(in *gtypes.VQuery) *gtypes.VAnswer {
 		response.Secret.Ticket = ticket
 
 	case "read":
-		response.Data = *Reading(&gLogin, &gAccess, &in.Fields)
+		response.Data = *Reading(&auth, &in.Fields)
 
 	case "store":
-		response.Data = *Storing(&gLogin, &gAccess, in)
+		response.Data = *Storing(&auth, in)
 
 	case "delete":
-		response.Data = *Deleting(&gLogin, &gAccess, &in.Fields)
+		response.Data = *Deleting(&auth, &in.Fields)
 
 	case "manage":
-		response.Data = *Managing(&gLogin, &gAccess, in)
+		response.Data = *Managing(&auth, in)
 
 	default:
 		if in.Action == "" {

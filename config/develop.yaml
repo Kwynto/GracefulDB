@@ -5,9 +5,6 @@ shutdown_timeout: 5s
 core_settings:
   bucket_size: 800
 
-socket_connector:
-  enable: true
-
 websocket_connector:
   enable: true
   address: "0.0.0.0"
