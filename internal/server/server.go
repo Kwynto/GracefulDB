@@ -18,40 +18,38 @@ import (
 var stopSignal = make(chan struct{}, 1)
 
 func Run(ctx context.Context, cfg *config.Config) error {
-	var closeProcs = &closer.Closer{}
-
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
-	closeProcs.AddHandler(core.Shutdown) // Register a shutdown handler.
+	closer.AddHandler(core.Shutdown) // Register a shutdown handler.
 
 	// Basic system - begin
 	// Loading the authorization module
 	go gauth.Start()
-	closeProcs.AddHandler(gauth.Shutdown) // Register a shutdown handler.
+	closer.AddHandler(gauth.Shutdown) // Register a shutdown handler.
 	// Basic system - end
 
 	// Start WebSocket connector
 	if cfg.WebSocketConnector.Enable {
 		go websocketconn.Start(cfg)
-		closeProcs.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
+		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
 	}
 
 	// Start REST API connector
 	if cfg.RestConnector.Enable {
 		go rest.Start(cfg)
-		closeProcs.AddHandler(rest.Shutdown) // Register a shutdown handler.
+		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
 	}
 
 	// Start gRPC connector
 	if cfg.GrpcConnector.Enable {
 		go grpc.Start(cfg)
-		closeProcs.AddHandler(grpc.Shutdown) // Register a shutdown handler.
+		closer.AddHandler(grpc.Shutdown) // Register a shutdown handler.
 	}
 
 	// TODO: Start web-server for manage system
 	if cfg.WebServer.Enable {
 		go webmanage.Start(cfg)
-		closeProcs.AddHandler(webmanage.Shutdown) // Register a shutdown handler.
+		closer.AddHandler(webmanage.Shutdown) // Register a shutdown handler.
 	}
 
 	select {
@@ -65,7 +63,7 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
 	defer cancel()
 
-	if err := closeProcs.Close(shutdownCtx); err != nil {
+	if err := closer.Close(shutdownCtx); err != nil {
 		return fmt.Errorf("server shutdown: %v", err)
 	}
 

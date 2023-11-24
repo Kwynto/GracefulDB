@@ -12,9 +12,19 @@ type Handler func(ctx context.Context, c *Closer)
 
 type Closer struct {
 	mu      sync.RWMutex
-	funcs   []Handler
+	funcs   map[string]Handler
 	msgs    []string
 	counter int
+}
+
+var CloseProcs = &Closer{
+	funcs: make(map[string]Handler, 1),
+}
+
+func New() *Closer {
+	return &Closer{
+		funcs: make(map[string]Handler, 1),
+	}
 }
 
 func (c *Closer) AddMsg(msg string) {
@@ -35,8 +45,36 @@ func (c *Closer) AddHandler(f Handler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.funcs = append(c.funcs, f)
+	// c.funcs = append(c.funcs, f)
+	c.funcs[fmt.Sprint(f)] = f
 	c.counter++
+}
+
+func (c *Closer) DelHandler(f Handler) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	key := fmt.Sprint(f)
+	if _, ok := c.funcs[key]; ok {
+		delete(c.funcs, key)
+		c.counter--
+	}
+}
+
+func (c *Closer) RunAndDelHandler(f Handler) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	sdCtx, cnl := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cnl()
+
+	go f(sdCtx, c)
+
+	key := fmt.Sprint(f)
+	if _, ok := c.funcs[key]; ok {
+		delete(c.funcs, key)
+		c.counter--
+	}
 }
 
 func (c *Closer) Close(ctx context.Context) error {
@@ -72,4 +110,20 @@ func (c *Closer) Close(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func AddHandler(f Handler) {
+	CloseProcs.AddHandler(f)
+}
+
+func DelHandler(f Handler) {
+	CloseProcs.DelHandler(f)
+}
+
+func RunAndDelHandler(f Handler) {
+	CloseProcs.RunAndDelHandler(f)
+}
+
+func Close(ctx context.Context) error {
+	return CloseProcs.Close(ctx)
 }
