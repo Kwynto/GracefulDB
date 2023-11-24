@@ -50,7 +50,9 @@ func Start(cfg *config.Config) {
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
 	if err := srvWeb.Shutdown(ctx); err != nil {
-		slog.Error("There was a problem with stopping the Web manager", slog.String("err", err.Error()))
+		// slog.Error("There was a problem with stopping the Web manager", slog.String("err", err.Error()))
+		msg := fmt.Sprintf("There was a problem with stopping the Web manager: %s", err.Error())
+		c.AddMsg(msg)
 	}
 	slog.Info("Web manager stopped")
 	c.Done()

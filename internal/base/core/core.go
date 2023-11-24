@@ -14,10 +14,5 @@ func Engine(cfg *config.Config) {
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
 	// -
-	// for i := 0; i < 10; i++ {
-	// 	fmt.Print(".")
-	// 	time.Sleep(1 * time.Second)
-	// }
-	// c.AddMsg("Imitation of an error")
 	c.Done()
 }
