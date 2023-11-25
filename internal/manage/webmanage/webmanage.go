@@ -25,9 +25,6 @@ func routes() *http.ServeMux {
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	// fileServer := http.FileServer(http.Dir("./ui/static/"))
-	// mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
 	return mux
 }
 

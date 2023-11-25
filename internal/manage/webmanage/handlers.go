@@ -10,7 +10,9 @@ import (
 	"github.com/Kwynto/gosession"
 )
 
+// Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
+	// -
 	ts, err := template.ParseFiles("./ui/html/home.html")
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
@@ -25,7 +27,9 @@ func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
 	}
 }
 
+// Authorization Handler
 func homeAuth(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
 	if r.Method == http.MethodPost {
 		err := r.ParseForm()
 		if err != nil {
@@ -58,7 +62,9 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Handler for the main route
 func home(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return

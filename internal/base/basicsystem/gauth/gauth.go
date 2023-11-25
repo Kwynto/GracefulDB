@@ -185,6 +185,7 @@ func DeleteUser(login string) error {
 
 // User verification
 func CheckUser(user string, password string) bool {
+	// This function is complete
 	dbPass, ok := hashMap[user]
 	if !ok {
 		return false
@@ -198,6 +199,7 @@ func CheckUser(user string, password string) bool {
 
 // Get access rights
 func GetAccess(user string) (TRights, error) {
+	// This function is complete
 	access, ok := accessMap[user]
 	if ok {
 		return access, nil
