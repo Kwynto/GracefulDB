@@ -183,6 +183,28 @@ func DeleteUser(login string) error {
 	return errors.New("it is not possible to delete a user")
 }
 
+// User verification
+func CheckUser(user string, password string) bool {
+	dbPass, ok := hashMap[user]
+	if !ok {
+		return false
+	}
+
+	h := sha256.Sum256([]byte(password))
+	pass := fmt.Sprintf("%x", h)
+
+	return dbPass == pass
+}
+
+// Get access rights
+func GetAccess(user string) (TRights, error) {
+	access, ok := accessMap[user]
+	if ok {
+		return access, nil
+	}
+	return TRights{}, errors.New("access denied")
+}
+
 // Verifying the authenticity of the ticket and obtaining access rights.
 func CheckTicket(ticket string) (login string, access TRights, newticket string, err error) {
 	// This function is complete

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/gosession"
 )
 
@@ -25,17 +26,35 @@ func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
 }
 
 func homeAuth(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./ui/html/auth.html")
-	if err != nil {
-		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
+		if err != nil {
+			slog.Debug("Bad request", slog.String("err", err.Error()))
+			http.Error(w, "Bad request", http.StatusBadRequest)
+			return
+		}
 
-	err = ts.Execute(w, nil)
-	if err != nil {
-		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		username := r.PostForm.Get("username")
+		password := r.PostForm.Get("password")
+		isAuth := gauth.CheckUser(username, password)
+		if isAuth {
+			sesID := gosession.Start(&w, r)
+			sesID.Set("auth", username)
+		}
+		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+	} else {
+		ts, err := template.ParseFiles("./ui/html/auth.html")
+		if err != nil {
+			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		err = ts.Execute(w, nil)
+		if err != nil {
+			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
 	}
 }
 
