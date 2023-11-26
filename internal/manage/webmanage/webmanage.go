@@ -20,6 +20,7 @@ var srvWeb *http.Server
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
+	mux.HandleFunc("/log.out", logout)
 
 	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})
 	mux.Handle("/static", http.NotFoundHandler())

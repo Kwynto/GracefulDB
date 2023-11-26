@@ -45,7 +45,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			sesID := gosession.Start(&w, r)
 			sesID.Set("auth", username)
 		}
-		http.Redirect(w, r, "/", http.StatusMovedPermanently)
+		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
 		ts, err := template.ParseFiles("./ui/html/auth.html")
 		if err != nil {
@@ -66,7 +66,8 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 func home(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		// http.NotFound(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -78,4 +79,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 		login := fmt.Sprint(auth)
 		homeDefault(w, r, login)
 	}
+}
+
+// Exit handler
+func logout(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
+	sesID := gosession.Start(&w, r)
+	sesID.Remove("auth")
+	http.Redirect(w, r, "/", http.StatusFound)
 }
