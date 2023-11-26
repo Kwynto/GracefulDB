@@ -3,6 +3,7 @@ module github.com/Kwynto/GracefulDB
 go 1.21.1
 
 require (
+	github.com/Kwynto/gosession v0.3.0
 	github.com/fatih/color v1.15.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
@@ -12,7 +13,6 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/Kwynto/gosession v0.3.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
