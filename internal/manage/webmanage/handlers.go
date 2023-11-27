@@ -6,14 +6,18 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/gosession"
+
+	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/auth_masq"
+	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/home_masq"
 )
 
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
-	// -
-	ts, err := template.ParseFiles("./ui/html/home.html")
+	// This function is complete
+	// ts, err := template.ParseFiles("./ui/html/home.html")
+	ts, err := template.New("home.html").Parse(home_masq.HtmlHome)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -47,7 +51,8 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		ts, err := template.ParseFiles("./ui/html/auth.html")
+		// ts, err := template.ParseFiles("./ui/html/auth.html")
+		ts, err := template.New("auth.html").Parse(auth_masq.HtmlAuth)
 		if err != nil {
 			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
