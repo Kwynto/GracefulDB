@@ -1,3 +1,6 @@
+package home_masq
+
+var main_js string = `
 (function ($) {
     "use strict";
 
@@ -195,3 +198,4 @@
     });
 
 })(jQuery);
+`

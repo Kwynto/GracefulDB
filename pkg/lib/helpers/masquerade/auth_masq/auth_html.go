@@ -1,3 +1,117 @@
+package auth_masq
+
+import "fmt"
+
+var html1 string = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GracefulDB Manager - Auth</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="./static/img/favicon.ico" rel="icon">
+	<style>
+`
+var html2 string = `
+	</style>
+</head>
+<body>
+    <div id="logo"> 
+        <h1><i>GracefulDB Manager</i></h1>
+    </div> 
+    <section class="graceful-login">
+        <form action="" method="POST">  
+            <div id="fade-box">
+                <input type="text" name="username" id="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button>Let me in</button> 
+            </div>
+        </form>
+        <div class="hexagons">
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <br>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <br>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span> 
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>      
+            <br>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <br>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+            <span>&#x2B22;</span>
+        </div>      
+    </section> 
+                  
+    <div id="circle1">
+        <div id="inner-cirlce1">
+            <h2> </h2>
+        </div>
+    </div>
+                                
+    <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+                  
+</body>
+</html>
+`
+
+var css1 string = `
 @import "https://fonts.googleapis.com/css?family=Ubuntu:400,700italic";
 @import "https://fonts.googleapis.com/css?family=Cabin:400";
 * {
@@ -334,3 +448,6 @@ Animation Keyframes
     transform: rotate(360deg);
   }
 }
+`
+
+var HtmlAuth string = fmt.Sprint(html1, css1, html2)

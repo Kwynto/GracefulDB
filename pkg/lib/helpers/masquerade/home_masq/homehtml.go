@@ -1,3 +1,6 @@
+package home_masq
+
+var html1 string = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,10 +21,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="./static/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+	`
+
+var html2 string = `
+	</style>
 
     <!-- Template Stylesheet -->
-    <link href="./static/css/style.css" rel="stylesheet">
+	<style>
+	`
+
+var html3 string = `
+	</style>
 </head>
 
 <body>
@@ -119,7 +130,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Template Javascript -->
-    <script src="./static/js/main.js"></script>
+    <script>
+    `
+
+var html4 string = `
+    </script>
 </body>
 
 </html>
+`

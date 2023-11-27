@@ -2,25 +2,18 @@ package webmanage
 
 import (
 	"fmt"
-	"html/template"
 	"log/slog"
 	"net/http"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/gosession"
+
+	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 )
 
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
-	// -
-	ts, err := template.ParseFiles("./ui/html/home.html")
-	if err != nil {
-		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	err = ts.Execute(w, nil)
+	// This function is complete
+	err := templatesMap[HOME_TEMP_NAME].Execute(w, nil)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -47,14 +40,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		ts, err := template.ParseFiles("./ui/html/auth.html")
-		if err != nil {
-			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		err = ts.Execute(w, nil)
+		err := templatesMap[AUTH_TEMP_NAME].Execute(w, nil)
 		if err != nil {
 			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
