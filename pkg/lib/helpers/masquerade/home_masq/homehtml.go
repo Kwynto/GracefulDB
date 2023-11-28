@@ -135,6 +135,11 @@ var html3 string = `
 
 var html4 string = `
     </script>
+    <script>
+    `
+
+var html5 string = `
+    </script>
 </body>
 
 </html>
