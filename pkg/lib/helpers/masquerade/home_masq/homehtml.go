@@ -98,9 +98,12 @@ var html3 string = `
             </nav>
             <!-- Navbar End -->
 
-            <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
-                    
+            <div id="idMainUnit">
+                <div class="container-fluid pt-4 px-4">
+                    <div id="idFirstMsg" class="bg-secondary text-center rounded p-4">
+                        <a href="#" hx-get="/hx/firstmsg" hx-target="#idFirstMsg">Click Me</a><br>
+                        <a href="#" hx-get="/hx/mainunit" hx-target="#idMainUnit">Click Me</a>
+                    </div>
                 </div>
             </div>
 
@@ -134,6 +137,11 @@ var html3 string = `
     `
 
 var html4 string = `
+    </script>
+    <script>
+    `
+
+var html5 string = `
     </script>
 </body>
 
