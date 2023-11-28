@@ -74,3 +74,17 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	sesID.Remove("auth")
 	http.Redirect(w, r, "/", http.StatusFound)
 }
+
+func firstmsg(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("This is FirstMsg!"))
+	if err != nil {
+		slog.Debug("The response has not been sent", slog.String("err", err.Error()))
+	}
+}
+
+func mainunit(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit."))
+	if err != nil {
+		slog.Debug("The response has not been sent", slog.String("err", err.Error()))
+	}
+}

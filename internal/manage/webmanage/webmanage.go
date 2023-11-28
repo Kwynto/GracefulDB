@@ -49,10 +49,16 @@ func parseTemplates() {
 }
 
 func routes() *http.ServeMux {
+	// Main routes
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/log.out", logout)
 
+	// HTMX routes
+	mux.HandleFunc("/hx/firstmsg", firstmsg)
+	mux.HandleFunc("/hx/mainunit", mainunit)
+
+	// Isolation of static files
 	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
