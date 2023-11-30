@@ -50,7 +50,8 @@ var html3 string = `
             <nav class="navbar bg-secondary navbar-dark">
                 <a href="/" class="navbar-brand mx-4 mb-3">
                     <h3 class="text-primary">
-                        <img src="./static/img/logo.png" style="width: 40px; height: 40px;"> GracefulDB
+                        <img src="./static/img/logo.svg" style="width: 50px; height: 50px;"> GracefulDB
+                        <div class="tagline">Fast, Simple and Secure</div>
                     </h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
@@ -112,7 +113,7 @@ var html3 string = `
                 <div class="bg-secondary rounded-top p-4">
                     <div class="row">
                         <div class="col-12 col-sm-6 text-center text-sm-start">
-                            &copy; <a href="/">GracefulDB Manager</a> 
+                            &copy; <a target="_blank" href="http://gracefuldb.dev/">GracefulDB</a> 
                         </div>
                         <div class="col-12 col-sm-6 text-center text-sm-end">
                             <br>
