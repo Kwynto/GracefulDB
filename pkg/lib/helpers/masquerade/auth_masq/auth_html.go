@@ -19,6 +19,7 @@ var html2 string = `
     <div id="logo"> 
         <h1><i>GracefulDB Manager</i></h1>
     </div> 
+    <img src="./static/img/logo.svg" class="logoimg">
     <section class="graceful-login">
         <form action="" method="POST">  
             <div id="fade-box">
@@ -140,10 +141,17 @@ GracefulDB Logo
   z-index: 40;
 }
 
+.logoimg {
+  animation: logo-entry 7s ease-in;
+  width: 50px;
+  height: 50px;
+  margin: 25px auto 0;
+}
+
 h1 {
   animation: text-glow 2s ease-out infinite alternate;
   font-family: 'Ubuntu', sans-serif;
-  color: #00a4a2;
+  color: #483D8B;
   font-size: 48px;
   font-size: 4.8rem;
   font-weight: bold;
@@ -154,7 +162,7 @@ h1 {
 h1:before {
   animation: before-glow 2s ease-out infinite alternate;
   border-left: 535px solid transparent;
-  border-bottom: 10px solid #00a4a2;
+  border-bottom: 10px solid #483D8B;
   content: ' ';
   height: 0;
   position: absolute;
@@ -165,7 +173,7 @@ h1:before {
 h1:after {
   animation: after-glow 2s ease-out infinite alternate;
   border-left: 100px solid transparent;
-  border-top: 16px solid #00a4a2;
+  border-top: 16px solid #483D8B;
   content: ' ';
   height: 0;
   position: absolute;
@@ -186,21 +194,21 @@ Log in form
 .graceful-login form {
   animation: form-entry 3s ease-in-out;
   background: #111;
-  background: linear-gradient(#004746, #111111);
-  border: 6px solid #00a4a2;
-  box-shadow: 0 0 15px #00fffd;
+  background: linear-gradient(#483F8D, #111111);
+  border: 6px solid #483D8B;
+  box-shadow: 0 0 15px #8A2BE4;
   border-radius: 5px;
   display: inline-block;
   height: 220px;
-  margin: 200px auto 0;
+  margin: 110px auto 0;
   position: relative;
   z-index: 4;
   width: 500px;
   transition: 1s all;
 }
 .graceful-login form:hover {
-  border: 6px solid #00fffd;
-  box-shadow: 0 0 25px #00fffd;
+  border: 6px solid #8A2BE4;
+  box-shadow: 0 0 25px #8A2BE4;
   transition: 1s all;
 }
 .graceful-login input {
@@ -224,7 +232,7 @@ Log in form
   animation: box-glow 1s ease-out infinite alternate;
   background: #0B4252;
   background: linear-gradient(#333933, #222922);
-  border-color: #00fffc;
+  border-color: #8A2BE2;
   box-shadow: 0 0 5px rgba(0, 255, 253, 0.2), inset 0 0 5px rgba(0, 255, 253, 0.1), 0 2px 0 #000;
   color: #efe;
   outline: none;
@@ -260,7 +268,7 @@ Log in form
 .graceful-login button:focus {
   background: #0C6125;
   background: linear-gradient(#393939, #292929);
-  color: #00fffc;
+  color: deepskyblue;
   outline: none;
   transition: 1s all;
 }
@@ -278,8 +286,8 @@ Spinner
   animation: circle1 4s linear infinite, circle-entry 6s ease-in-out;
   background: #000;
   border-radius: 50%;
-  border: 10px solid #00a4a2;
-  box-shadow: 0 0 0 2px black, 0 0 0 6px #00fffc;
+  border: 10px solid #483D8B;
+  box-shadow: 0 0 0 2px black, 0 0 0 6px #8A2BE2;
   height: 500px;
   width: 500px;
   position: absolute;
@@ -294,7 +302,7 @@ Spinner
 #inner-cirlce1 {
   background: #000;
   border-radius: 50%;
-  border: 36px solid #00fffc;
+  border: 36px solid #8A2BE2;
   height: 460px;
   width: 460px;
   margin: 10px;
@@ -329,7 +337,7 @@ Hexagon Mesh
   letter-spacing: -0.2em;
   line-height: 0.7;
   position: absolute;
-  text-shadow: 0 0 6px #00fffc;
+  text-shadow: 0 0 6px #8A2BE2;
   top: 310px;
   width: 100%;
   transform: perspective(600px) rotateX(60deg) scale(1.4);
@@ -381,7 +389,7 @@ Animation Keyframes
   }
   20% {
     height: 0;
-    border: 1px solid #00a4a2;
+    border: 1px solid #483D8B;
     width: 0;
     opacity: 0;
     padding: 0;
@@ -389,7 +397,7 @@ Animation Keyframes
   40% {
     width: 0;
     height: 220px;
-    border: 6px solid #00a4a2;
+    border: 6px solid #483D8B;
     opacity: 1;
     padding: 0;
   }
@@ -404,34 +412,34 @@ Animation Keyframes
     box-shadow: 0 0 5px rgba(0, 255, 253, 0.2), inset 0 0 5px rgba(0, 255, 253, 0.1), 0 2px 0 #000;
   }
   100% {
-    border-color: #00fffc;
+    border-color: #8A2BE2;
     box-shadow: 0 0 20px rgba(0, 255, 253, 0.6), inset 0 0 10px rgba(0, 255, 253, 0.4), 0 2px 0 #000;
   }
 }
 @keyframes text-glow {
   0% {
-    color: #00a4a2;
+    color: #483D8B;
     text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000, 0 0 40px #000, 0 0 50px #000, 0 0 60px #000, 0 0 70px #000;
   }
   100% {
-    color: #00fffc;
-    text-shadow: 0 0 20px rgba(0, 255, 253, 0.6), 0 0 10px rgba(0, 255, 253, 0.4), 0 2px 0 #000;
+    color: #8A2BE2;
+    text-shadow: 0 0 20px rgba(100, 0, 253, 0.6), 0 0 10px rgba(100, 0, 253, 0.4), 0 2px 0 #000;
   }
 }
 @keyframes before-glow {
   0% {
-    border-bottom: 10px solid #00a4a2;
+    border-bottom: 10px solid #483D8B;
   }
   100% {
-    border-bottom: 10px solid #00fffc;
+    border-bottom: 10px solid #8A2BE2;
   }
 }
 @keyframes after-glow {
   0% {
-    border-top: 16px solid #00a4a2;
+    border-top: 16px solid #483D8B;
   }
   100% {
-    border-top: 16px solid #00fffc;
+    border-top: 16px solid #8A2BE2;
   }
 }
 @keyframes circle1 {
