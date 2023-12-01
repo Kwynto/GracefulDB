@@ -92,7 +92,7 @@ var html3 string = `
                             <span class="d-none d-lg-inline-flex">User Name</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-                            <a href="/log.out" class="dropdown-item"><i class="fa fa-sign-out-alt me-2"></i>Log Out</a>
+                            <a hx-get="/hx/nav/logout" class="dropdown-item" hx-confirm="Are you sure you wish to log out?"><i class="fa fa-sign-out-alt me-2"></i>Log Out</a>
                         </div>
                     </div>
                 </div>

@@ -115,3 +115,11 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
+
+func nav_logout(w http.ResponseWriter, r *http.Request) {
+	// -
+	sesID := gosession.Start(&w, r)
+	sesID.Remove("auth")
+	w.Header().Set("HX-Redirect", "/log.out")
+	// http.Redirect(w, r, "/", http.StatusFound)
+}
