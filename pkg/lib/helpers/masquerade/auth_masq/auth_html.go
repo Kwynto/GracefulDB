@@ -142,10 +142,10 @@ GracefulDB Logo
 }
 
 .logoimg {
-  animation: logo-entry 7s ease-in;
+  animation: logo-entry 7.2s ease-in;
   width: 50px;
   height: 50px;
-  margin: 25px auto 0;
+  margin: 28px auto 0;
 }
 
 h1 {
@@ -157,7 +157,7 @@ h1 {
   font-weight: bold;
   position: absolute;
   text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000, 0 0 40px #000, 0 0 50px #000, 0 0 60px #000, 0 0 70px #000;
-  top: 50px;
+  top: 57px;
 }
 h1:before {
   animation: before-glow 2s ease-out infinite alternate;
@@ -200,7 +200,7 @@ Log in form
   border-radius: 5px;
   display: inline-block;
   height: 220px;
-  margin: 110px auto 0;
+  margin: 107px auto 0;
   position: relative;
   z-index: 4;
   width: 500px;

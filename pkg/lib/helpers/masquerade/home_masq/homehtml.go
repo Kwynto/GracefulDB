@@ -65,10 +65,10 @@ var html3 string = `
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-database me-2"></i>Databases</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Accounts</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-cogs me-2"></i>Settings</a>
+                    <a hx-get="/hx/nav/dashboard" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+                    <a hx-get="/hx/nav/databases" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-database me-2"></i>Databases</a>
+                    <a hx-get="/hx/nav/accounts" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Accounts</a>
+                    <a hx-get="/hx/nav/settings" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-cogs me-2"></i>Settings</a>
                 </div>
             </nav>
         </div>
@@ -100,12 +100,6 @@ var html3 string = `
             <!-- Navbar End -->
 
             <div id="idMainUnit">
-                <div class="container-fluid pt-4 px-4">
-                    <div id="idFirstMsg" class="bg-secondary text-center rounded p-4">
-                        <a href="#" hx-get="/hx/firstmsg" hx-target="#idFirstMsg">Click Me</a><br>
-                        <a href="#" hx-get="/hx/mainunit" hx-target="#idMainUnit">Click Me</a>
-                    </div>
-                </div>
             </div>
 
             <!-- Footer Start -->
