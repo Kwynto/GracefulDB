@@ -75,16 +75,52 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func firstmsg(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("This is FirstMsg!"))
+// Nav Menu Handlers
+func nav_default(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
+	err := templatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
 	if err != nil {
-		slog.Debug("The response has not been sent", slog.String("err", err.Error()))
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
-func mainunit(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit. This is main unit."))
+func nav_logout(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
+	sesID := gosession.Start(&w, r)
+	sesID.Remove("auth")
+	w.Header().Set("HX-Redirect", "/log.out")
+	// http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func nav_dashboard(w http.ResponseWriter, r *http.Request) {
+	err := templatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
 	if err != nil {
-		slog.Debug("The response has not been sent", slog.String("err", err.Error()))
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func nav_databases(w http.ResponseWriter, r *http.Request) {
+	err := templatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func nav_accounts(w http.ResponseWriter, r *http.Request) {
+	err := templatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+func nav_settings(w http.ResponseWriter, r *http.Request) {
+	err := templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, nil)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }

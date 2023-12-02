@@ -14,11 +14,19 @@ import (
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/auth_masq"
 	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/home_masq"
+	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/htmx_masq"
 )
 
 const (
+	// The names of the templates in the cache
 	HOME_TEMP_NAME = "home.html"
 	AUTH_TEMP_NAME = "auth.html"
+
+	BLOCK_TEMP_DEFAULT   = "Default"
+	BLOCK_TEMP_DASHBOARD = "Dashboard"
+	BLOCK_TEMP_DATABASES = "Databases"
+	BLOCK_TEMP_ACCOUNTS  = "Accounts"
+	BLOCK_TEMP_SETTINGS  = "Settings"
 )
 
 var address string
@@ -29,23 +37,55 @@ var srvWeb *http.Server
 var templatesMap = make(map[string]*template.Template)
 
 func parseTemplates() {
-	// ts, err := template.ParseFiles("./ui/html/home.html")
 	ts, err := template.New(HOME_TEMP_NAME).Parse(home_masq.HtmlHome)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	templatesMap[HOME_TEMP_NAME] = ts
 
-	// ts, err := template.ParseFiles("./ui/html/auth.html")
 	ts, err = template.New(AUTH_TEMP_NAME).Parse(auth_masq.HtmlAuth)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	templatesMap[AUTH_TEMP_NAME] = ts
+
+	ts, err = template.New(BLOCK_TEMP_DEFAULT).Parse(htmx_masq.Default)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		return
+	}
+	templatesMap[BLOCK_TEMP_DEFAULT] = ts
+
+	templatesMap[BLOCK_TEMP_DASHBOARD] = ts
+	ts, err = template.New(BLOCK_TEMP_DASHBOARD).Parse(htmx_masq.Dashboard)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		return
+	}
+	templatesMap[BLOCK_TEMP_DASHBOARD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_DATABASES).Parse(htmx_masq.Databases)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		return
+	}
+	templatesMap[BLOCK_TEMP_DATABASES] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNTS).Parse(htmx_masq.Accounts)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		return
+	}
+	templatesMap[BLOCK_TEMP_ACCOUNTS] = ts
+
+	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
+	if err != nil {
+		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		return
+	}
+	templatesMap[BLOCK_TEMP_SETTINGS] = ts
 }
 
 func routes() *http.ServeMux {
@@ -55,8 +95,12 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/log.out", logout)
 
 	// HTMX routes
-	mux.HandleFunc("/hx/firstmsg", firstmsg)
-	mux.HandleFunc("/hx/mainunit", mainunit)
+	mux.HandleFunc("/hx/", nav_default)
+	mux.HandleFunc("/hx/nav/logout", nav_logout)
+	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
+	mux.HandleFunc("/hx/nav/databases", nav_databases)
+	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
+	mux.HandleFunc("/hx/nav/settings", nav_settings)
 
 	// Isolation of static files
 	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})

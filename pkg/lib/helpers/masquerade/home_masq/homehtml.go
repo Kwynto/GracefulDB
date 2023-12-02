@@ -65,10 +65,10 @@ var html3 string = `
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-database me-2"></i>Databases</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Accounts</a>
-                    <a href="/" class="nav-item nav-link"><i class="fa fa-cogs me-2"></i>Settings</a>
+                    <a hx-get="/hx/nav/dashboard" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+                    <a hx-get="/hx/nav/databases" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-database me-2"></i>Databases</a>
+                    <a hx-get="/hx/nav/accounts" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Accounts</a>
+                    <a hx-get="/hx/nav/settings" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-cogs me-2"></i>Settings</a>
                 </div>
             </nav>
         </div>
@@ -92,7 +92,7 @@ var html3 string = `
                             <span class="d-none d-lg-inline-flex">User Name</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-                            <a href="/log.out" class="dropdown-item"><i class="fa fa-sign-out-alt me-2"></i>Log Out</a>
+                            <a hx-get="/hx/nav/logout" class="dropdown-item" hx-confirm="Are you sure you wish to log out?"><i class="fa fa-sign-out-alt me-2"></i>Log Out</a>
                         </div>
                     </div>
                 </div>
@@ -100,12 +100,6 @@ var html3 string = `
             <!-- Navbar End -->
 
             <div id="idMainUnit">
-                <div class="container-fluid pt-4 px-4">
-                    <div id="idFirstMsg" class="bg-secondary text-center rounded p-4">
-                        <a href="#" hx-get="/hx/firstmsg" hx-target="#idFirstMsg">Click Me</a><br>
-                        <a href="#" hx-get="/hx/mainunit" hx-target="#idMainUnit">Click Me</a>
-                    </div>
-                </div>
             </div>
 
             <!-- Footer Start -->
@@ -132,12 +126,13 @@ var html3 string = `
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Template Javascript -->
     <script>
     `
 
-var html4 string = `
+var html4_jsblank string = `
     </script>
     <script>
     `
