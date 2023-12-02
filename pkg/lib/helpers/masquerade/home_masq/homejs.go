@@ -203,3 +203,17 @@ var main_js string = `
 
 })(jQuery);
 `
+
+// var confirm_js string = `
+// document.addEventListener("htmx:confirm", function(e) {
+//     e.preventDefault()
+//     Swal.fire({
+//       title: e.detail.question,
+//       text: " ",
+//       icon: "question",
+//       showCancelButton: true
+//     }).then(function(result) {
+//       if(result.isConfirmed) e.detail.issueRequest(true) // use true to skip window.confirm
+//     })
+//   })
+// `

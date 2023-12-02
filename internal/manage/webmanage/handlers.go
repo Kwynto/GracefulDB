@@ -77,11 +77,20 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 // Nav Menu Handlers
 func nav_default(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
 	err := templatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
+}
+
+func nav_logout(w http.ResponseWriter, r *http.Request) {
+	// This function is complete
+	sesID := gosession.Start(&w, r)
+	sesID.Remove("auth")
+	w.Header().Set("HX-Redirect", "/log.out")
+	// http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
@@ -114,12 +123,4 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-func nav_logout(w http.ResponseWriter, r *http.Request) {
-	// -
-	sesID := gosession.Start(&w, r)
-	sesID.Remove("auth")
-	w.Header().Set("HX-Redirect", "/log.out")
-	// http.Redirect(w, r, "/", http.StatusFound)
 }

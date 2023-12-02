@@ -96,11 +96,11 @@ func routes() *http.ServeMux {
 
 	// HTMX routes
 	mux.HandleFunc("/hx/", nav_default)
+	mux.HandleFunc("/hx/nav/logout", nav_logout)
 	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
-	mux.HandleFunc("/hx/nav/logout", nav_logout)
 
 	// Isolation of static files
 	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})
