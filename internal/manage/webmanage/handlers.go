@@ -110,17 +110,19 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 }
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
-	err := templatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
-	if err != nil {
-		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	templatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
+	// err := templatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
+	// if err != nil {
+	// 	slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// }
 }
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
-	err := templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, nil)
-	if err != nil {
-		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	}
+	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, nil)
+	// err := templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, nil)
+	// if err != nil {
+	// 	slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// }
 }

@@ -158,29 +158,17 @@ h1 {
   position: absolute;
   text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000, 0 0 40px #000, 0 0 50px #000, 0 0 60px #000, 0 0 70px #000;
   top: 57px;
-}
-h1:before {
-  animation: before-glow 2s ease-out infinite alternate;
-  border-left: 535px solid transparent;
-  border-bottom: 10px solid #483D8B;
-  content: ' ';
-  height: 0;
-  position: absolute;
-  right: -74px;
-  top: -10px;
-  width: 0;
+  width: 100%;
 }
 h1:after {
   animation: after-glow 2s ease-out infinite alternate;
-  border-left: 100px solid transparent;
-  border-top: 16px solid #483D8B;
-  content: ' ';
+  content: 'Fast, Simple and Secure';
   height: 0;
   position: absolute;
-  right: -85px;
-  top: 24px;
-  transform: rotate(-47deg);
-  width: 0;
+  right: -95px;
+  top: 42px;
+  width: 100%;
+  font-size: small;
 }
 
 /* =========================================
@@ -436,10 +424,10 @@ Animation Keyframes
 }
 @keyframes after-glow {
   0% {
-    border-top: 16px solid #483D8B;
+    border-top: 0px solid #483D8B;
   }
   100% {
-    border-top: 16px solid #8A2BE2;
+    border-top: 0px solid #8A2BE2;
   }
 }
 @keyframes circle1 {
