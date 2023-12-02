@@ -143,9 +143,9 @@ GracefulDB Logo
 
 .logoimg {
   animation: logo-entry 7.2s ease-in;
-  width: 50px;
-  height: 50px;
-  margin: 28px auto 0;
+  width: 60px;
+  height: 60px;
+  margin: 33px auto 0;
 }
 
 h1 {
@@ -188,7 +188,7 @@ Log in form
   border-radius: 5px;
   display: inline-block;
   height: 220px;
-  margin: 107px auto 0;
+  margin: 90px auto 0;
   position: relative;
   z-index: 4;
   width: 500px;
