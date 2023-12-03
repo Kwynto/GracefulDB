@@ -17,11 +17,11 @@ import (
 func main() {
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
-	cfg := config.MustLoad(configPath)
+	config.MustLoad(configPath)
 
 	// Init logger: slog
-	prettylogger.Init(cfg.LogPath, cfg.Env)
-	slog.Info("Starting GracefulDB", slog.String("env", cfg.Env))
+	prettylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
+	slog.Info("Starting GracefulDB", slog.String("env", config.DefaultConfig.Env))
 	slog.Info("Configuration loaded", slog.String("file", config.DisplayConfigPath))
 	slog.Debug("debug messages are enabled")
 
@@ -29,7 +29,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := server.Run(ctx, cfg); err != nil {
+	if err := server.Run(ctx, &config.DefaultConfig); err != nil {
 		slog.Error("An unexpected error occurred while the server was running.", slog.String("err", err.Error()))
 	}
 

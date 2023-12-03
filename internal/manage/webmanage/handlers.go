@@ -8,6 +8,7 @@ import (
 	"github.com/Kwynto/gosession"
 
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/config"
 )
 
 // Handler after authorization
@@ -99,5 +100,6 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
-	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, nil)
+	data := config.DefaultConfig
+	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }

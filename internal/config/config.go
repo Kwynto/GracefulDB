@@ -16,6 +16,7 @@ const (
 )
 
 var DisplayConfigPath string
+var DefaultConfig Config
 
 type CoreSettings struct {
 	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
@@ -80,5 +81,7 @@ func MustLoad(configPath string) *Config {
 	}
 
 	DisplayConfigPath = configPath
+	DefaultConfig = cfg
+
 	return &cfg
 }
