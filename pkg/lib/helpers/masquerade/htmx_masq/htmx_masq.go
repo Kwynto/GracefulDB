@@ -45,11 +45,27 @@ var Settings string = `
     <div class="row g-4">
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-    .Env: {{.Env}}<br>
-    .LogPath: {{.LogPath}}<br>
-    .ShutdownTimeOut: {{.ShutdownTimeOut}}<br> <br>
+                    <i class="fa fa-info fa-3x text-primary"></i><h5>Basic settings</h5>
+                    <div class="ms-3">
+                    
+                    <p class="mb-2">Environment: <h6 class="mb-0">{{.Env}}</h6></p>
+                    <hr>
+                    <p class="mb-2">LogPath: <h6 class="mb-0">{{.LogPath}}</h6></p>
+                    <hr>
+                    <p class="mb-2">ShutdownTimeOut: <h6 class="mb-0">{{.ShutdownTimeOut}}</h6></p>
+                    
+                    </div>
+            </div>
+        </div>
 
-    .CoreSettings.BucketSize: {{.CoreSettings.BucketSize}}<br>
+        <div class="col-sm-6 col-xl-3">
+            <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
+                <i class="fa fa-tree fa-3x text-primary"></i><h5>Core settings</h5>
+                <div class="ms-3">
+
+                    <p class="mb-2">Bucket size: <h6 class="mb-0">{{.CoreSettings.BucketSize}}</h6></p>
+
+                </div>
             </div>
         </div>
     </div>
