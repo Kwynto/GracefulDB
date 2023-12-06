@@ -75,7 +75,7 @@ var Settings string = `
     <div class="row g-4">
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-info fa-3x text-primary"></i><h5>Web Socket</h5>
+                <i class="fa fa-exchange-alt fa-3x text-primary"></i><h5>Web Socket</h5>
                 <div class="ms-3">
                 
                 <p class="mb-2">Enable: <h6 class="mb-0">{{.WebSocketConnector.Enable}}</h6></p>
@@ -94,7 +94,7 @@ var Settings string = `
     
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-info fa-3x text-primary"></i><h5>REST</h5>
+                <i class="fa fa-server fa-3x text-primary"></i><h5>REST</h5>
                 <div class="ms-3">
                 
                 <p class="mb-2">Enable: <h6 class="mb-0">{{.RestConnector.Enable}}</h6></p>
@@ -109,7 +109,7 @@ var Settings string = `
 
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-info fa-3x text-primary"></i><h5>gRPC</h5>
+                <i class="fa fa-shapes fa-3x text-primary"></i><h5>gRPC</h5>
                 <div class="ms-3">
                 
                 <p class="mb-2">Enable: <h6 class="mb-0">{{.GrpcConnector.Enable}}</h6></p>
@@ -124,7 +124,7 @@ var Settings string = `
     
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-info fa-3x text-primary"></i><h5>Web Manager</h5>
+                <i class="fa fa-window-restore fa-3x text-primary"></i><h5>Web Manager</h5>
                 <div class="ms-3">
                 
                 <p class="mb-2">Enable: <h6 class="mb-0">{{.WebServer.Enable}}</h6></p>
