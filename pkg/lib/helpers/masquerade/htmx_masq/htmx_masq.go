@@ -75,35 +75,65 @@ var Settings string = `
     <div class="row g-4">
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-    .WebSocketConnector.Enable: {{.WebSocketConnector.Enable}}<br>
-    .WebSocketConnector.Address: {{.WebSocketConnector.Address}}<br>
-    .WebSocketConnector.Port: {{.WebSocketConnector.Port}}<br>
-    .WebSocketConnector.BufferSize.Read: {{.WebSocketConnector.BufferSize.Read}}<br>
-    .WebSocketConnector.BufferSize.Write: {{.WebSocketConnector.BufferSize.Write}}<br> <br>
+                <i class="fa fa-info fa-3x text-primary"></i><h5>Web Socket</h5>
+                <div class="ms-3">
+                
+                <p class="mb-2">Enable: <h6 class="mb-0">{{.WebSocketConnector.Enable}}</h6></p>
+                <hr>
+                <p class="mb-2">Address: <h6 class="mb-0">{{.WebSocketConnector.Address}}</h6></p>
+                <hr>
+                <p class="mb-2">Port: <h6 class="mb-0">{{.WebSocketConnector.Port}}</h6></p>
+                <hr>
+                <p class="mb-2">BufferSize - Read: <h6 class="mb-0">{{.WebSocketConnector.BufferSize.Read}}</h6></p>
+                <hr>
+                <p class="mb-2">BufferSize - Write: <h6 class="mb-0">{{.WebSocketConnector.BufferSize.Write}}</h6></p>
+            
+                </div>
             </div>
         </div>
     
         <div class="col-sm-6 col-xl-3">
-        <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-    .RestConnector.Enable: {{.RestConnector.Enable}}<br>
-    .RestConnector.Address: {{.RestConnector.Address}}<br>
-    .RestConnector.Port: {{.RestConnector.Port}}<br> <br>
+            <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
+                <i class="fa fa-info fa-3x text-primary"></i><h5>REST</h5>
+                <div class="ms-3">
+                
+                <p class="mb-2">Enable: <h6 class="mb-0">{{.RestConnector.Enable}}</h6></p>
+                <hr>
+                <p class="mb-2">Address: <h6 class="mb-0">{{.RestConnector.Address}}</h6></p>
+                <hr>
+                <p class="mb-2">Port: <h6 class="mb-0">{{.RestConnector.Port}}</h6></p>
+                
+                </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-    .GrpcConnector.Enable: {{.GrpcConnector.Enable}}<br>
-    .GrpcConnector.Address: {{.GrpcConnector.Address}}<br>
-    .GrpcConnector.Port: {{.GrpcConnector.Port}}<br> <br>
+                <i class="fa fa-info fa-3x text-primary"></i><h5>gRPC</h5>
+                <div class="ms-3">
+                
+                <p class="mb-2">Enable: <h6 class="mb-0">{{.GrpcConnector.Enable}}</h6></p>
+                <hr>
+                <p class="mb-2">Address: <h6 class="mb-0">{{.GrpcConnector.Address}}</h6></p>
+                <hr>
+                <p class="mb-2">Port: <h6 class="mb-0">{{.GrpcConnector.Port}}</h6></p>
+                
+                </div>
             </div>
         </div>
     
         <div class="col-sm-6 col-xl-3">
             <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
-    .WebServer.Enable: {{.WebServer.Enable}}<br>
-    .WebServer.Address: {{.WebServer.Address}}<br>
-    .WebServer.Port: {{.WebServer.Port}}<br> <br>
+                <i class="fa fa-info fa-3x text-primary"></i><h5>Web Manager</h5>
+                <div class="ms-3">
+                
+                <p class="mb-2">Enable: <h6 class="mb-0">{{.WebServer.Enable}}</h6></p>
+                <hr>
+                <p class="mb-2">Address: <h6 class="mb-0">{{.WebServer.Address}}</h6></p>
+                <hr>
+                <p class="mb-2">Port: <h6 class="mb-0">{{.WebServer.Port}}</h6></p>
+                
+                </div>
             </div>
         </div>
     
