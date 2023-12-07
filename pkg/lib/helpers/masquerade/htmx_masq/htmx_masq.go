@@ -128,7 +128,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.RestConnector.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .RestConnector.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
@@ -150,7 +158,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.GrpcConnector.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .GrpcConnector.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
@@ -172,7 +188,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.WebServer.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .WebServer.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" disabled checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" disabled>
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
