@@ -19,7 +19,7 @@ var DisplayConfigPath string
 var DefaultConfig Config
 
 type CoreSettings struct {
-	BucketSize int `yaml:"bucket_size" env-default:"800" env-required:"true"`
+	BucketSize int `yaml:"bucket_size" env-default:"800"`
 }
 
 type BufferSize struct {
@@ -28,26 +28,26 @@ type BufferSize struct {
 }
 
 type WebSocketConnector struct {
-	Enable     bool       `yaml:"enable" env-default:"true" env-required:"true"`
+	Enable     bool       `yaml:"enable"`
 	Address    string     `yaml:"address" env-default:"0.0.0.0"`
 	Port       string     `yaml:"port" env-default:"8080"`
 	BufferSize BufferSize `yaml:"buffer_size"`
 }
 
 type RestConnector struct {
-	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"31337"`
 }
 
 type GrpcConnector struct {
-	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"3137"`
 }
 
 type WebServer struct {
-	Enable  bool   `yaml:"enable" env-default:"true" env-required:"true"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"80"`
 }
