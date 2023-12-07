@@ -35,19 +35,19 @@ type WebSocketConnector struct {
 }
 
 type RestConnector struct {
-	Enable  bool   `yaml:"enable" env-default:"True"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"31337"`
 }
 
 type GrpcConnector struct {
-	Enable  bool   `yaml:"enable" env-default:"True"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"3137"`
 }
 
 type WebServer struct {
-	Enable  bool   `yaml:"enable" env-default:"True"`
+	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"80"`
 }
