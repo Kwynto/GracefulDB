@@ -90,7 +90,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.WebSocketConnector.Enable}}</td>
+                            <td>{{.WebSocketConnector.Enable}} 
+                                <div class="form-check form-switch">
+                                {{if .WebSocketConnector.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
