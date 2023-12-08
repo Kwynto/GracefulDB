@@ -19,7 +19,7 @@ import (
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
 	// This function is complete
-	err := templatesMap[HOME_TEMP_NAME].Execute(w, nil)
+	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -46,7 +46,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		err := templatesMap[AUTH_TEMP_NAME].Execute(w, nil)
+		err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
 		if err != nil {
 			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -84,7 +84,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 // Nav Menu Handlers
 func nav_default(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	templatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
 }
 
 func nav_logout(w http.ResponseWriter, r *http.Request) {
@@ -93,20 +93,20 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
-	templatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
 }
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
-	templatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
-	templatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
 }
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
 	data := config.DefaultConfig
-	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
+	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }
 
 func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
@@ -152,15 +152,7 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
-	if config.DefaultConfig.WebServer.Enable {
-		config.DefaultConfig.WebServer.Enable = false
-		closer.RunAndDelHandler(Shutdown)
-	} else {
-		config.DefaultConfig.WebServer.Enable = true
-		go Start(&config.DefaultConfig)
-		closer.AddHandler(Shutdown) // Register a shutdown handler.
-	}
-	slog.Warn("The service has been switched.", slog.String("service", "WebServer"))
+	slog.Warn("This service cannot be disabled.", slog.String("service", "WebServer"))
 
 	nav_settings(w, r)
 }

@@ -34,7 +34,7 @@ var muxWeb *http.ServeMux
 
 var srvWeb *http.Server
 
-var templatesMap = make(map[string]*template.Template)
+var TemplatesMap = make(map[string]*template.Template)
 
 func parseTemplates() {
 	ts, err := template.New(HOME_TEMP_NAME).Parse(home_masq.HtmlHome)
@@ -42,50 +42,50 @@ func parseTemplates() {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[HOME_TEMP_NAME] = ts
+	TemplatesMap[HOME_TEMP_NAME] = ts
 
 	ts, err = template.New(AUTH_TEMP_NAME).Parse(auth_masq.HtmlAuth)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[AUTH_TEMP_NAME] = ts
+	TemplatesMap[AUTH_TEMP_NAME] = ts
 
 	ts, err = template.New(BLOCK_TEMP_DEFAULT).Parse(htmx_masq.Default)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[BLOCK_TEMP_DEFAULT] = ts
+	TemplatesMap[BLOCK_TEMP_DEFAULT] = ts
 
-	templatesMap[BLOCK_TEMP_DASHBOARD] = ts
+	TemplatesMap[BLOCK_TEMP_DASHBOARD] = ts
 	ts, err = template.New(BLOCK_TEMP_DASHBOARD).Parse(htmx_masq.Dashboard)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[BLOCK_TEMP_DASHBOARD] = ts
+	TemplatesMap[BLOCK_TEMP_DASHBOARD] = ts
 
 	ts, err = template.New(BLOCK_TEMP_DATABASES).Parse(htmx_masq.Databases)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[BLOCK_TEMP_DATABASES] = ts
+	TemplatesMap[BLOCK_TEMP_DATABASES] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNTS).Parse(htmx_masq.Accounts)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[BLOCK_TEMP_ACCOUNTS] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNTS] = ts
 
 	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	templatesMap[BLOCK_TEMP_SETTINGS] = ts
+	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
 }
 
 func routes() *http.ServeMux {
