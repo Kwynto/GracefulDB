@@ -9,7 +9,10 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
+	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
+
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
@@ -117,6 +120,47 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "WebSocketConnector"))
 
-	data := config.DefaultConfig
-	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
+	nav_settings(w, r)
+}
+
+func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
+	if config.DefaultConfig.RestConnector.Enable {
+		config.DefaultConfig.RestConnector.Enable = false
+		closer.RunAndDelHandler(rest.Shutdown)
+	} else {
+		config.DefaultConfig.RestConnector.Enable = true
+		go rest.Start(&config.DefaultConfig)
+		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
+	}
+	slog.Warn("The service has been switched.", slog.String("service", "RestConnector"))
+
+	nav_settings(w, r)
+}
+
+func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
+	if config.DefaultConfig.GrpcConnector.Enable {
+		config.DefaultConfig.GrpcConnector.Enable = false
+		closer.RunAndDelHandler(grpc.Shutdown)
+	} else {
+		config.DefaultConfig.GrpcConnector.Enable = true
+		go grpc.Start(&config.DefaultConfig)
+		closer.AddHandler(grpc.Shutdown) // Register a shutdown handler.
+	}
+	slog.Warn("The service has been switched.", slog.String("service", "GrpcConnector"))
+
+	nav_settings(w, r)
+}
+
+func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
+	if config.DefaultConfig.WebServer.Enable {
+		config.DefaultConfig.WebServer.Enable = false
+		closer.RunAndDelHandler(Shutdown)
+	} else {
+		config.DefaultConfig.WebServer.Enable = true
+		go Start(&config.DefaultConfig)
+		closer.AddHandler(Shutdown) // Register a shutdown handler.
+	}
+	slog.Warn("The service has been switched.", slog.String("service", "WebServer"))
+
+	nav_settings(w, r)
 }

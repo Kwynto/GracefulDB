@@ -131,9 +131,9 @@ var Settings string = `
                             <td>
                                 <div class="form-check form-switch">
                                 {{if .RestConnector.Enable}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s" checked>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
                                 {{end}}
                                 </div>
                             </td>
@@ -161,9 +161,9 @@ var Settings string = `
                             <td>
                                 <div class="form-check form-switch">
                                 {{if .GrpcConnector.Enable}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s" checked>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
                                 {{end}}
                                 </div>
                             </td>
@@ -191,9 +191,9 @@ var Settings string = `
                             <td>
                                 <div class="form-check form-switch">
                                 {{if .WebServer.Enable}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s" disabled checked>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s" disabled>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled>
                                 {{end}}
                                 </div>
                             </td>
