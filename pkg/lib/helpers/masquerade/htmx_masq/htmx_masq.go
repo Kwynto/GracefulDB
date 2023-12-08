@@ -93,9 +93,9 @@ var Settings string = `
                             <td>
                                 <div class="form-check form-switch">
                                 {{if .WebSocketConnector.Enable}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" checked>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
                                 {{end}}
                                 </div>
                             </td>
@@ -128,7 +128,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.RestConnector.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .RestConnector.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
@@ -150,7 +158,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.GrpcConnector.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .GrpcConnector.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>
@@ -172,7 +188,15 @@ var Settings string = `
                     <tbody>
                         <tr>
                             <td><h6>Enable: </h6></td>
-                            <td>{{.WebServer.Enable}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .WebServer.Enable}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled>
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                         <tr>
                             <td><h6>Address: </h6></td>

@@ -71,10 +71,11 @@ func (c *Closer) RunAndDelHandler(f Handler) {
 	go f(sdCtx, c)
 
 	key := fmt.Sprint(f)
-	if _, ok := c.funcs[key]; ok {
-		delete(c.funcs, key)
-		c.counter--
-	}
+	delete(c.funcs, key)
+	// if _, ok := c.funcs[key]; ok {
+	// 	delete(c.funcs, key)
+	// 	c.counter--
+	// }
 }
 
 func (c *Closer) Close(ctx context.Context) error {
