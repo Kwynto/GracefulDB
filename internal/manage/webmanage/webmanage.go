@@ -101,6 +101,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
+	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)
 
 	// Isolation of static files
 	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})

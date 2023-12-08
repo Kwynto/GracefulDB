@@ -9,6 +9,8 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
+	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
 // Handler after authorization
@@ -100,6 +102,21 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
+	data := config.DefaultConfig
+	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
+}
+
+func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
+	if config.DefaultConfig.WebSocketConnector.Enable {
+		config.DefaultConfig.WebSocketConnector.Enable = false
+		closer.RunAndDelHandler(websocketconn.Shutdown)
+	} else {
+		config.DefaultConfig.WebSocketConnector.Enable = true
+		go websocketconn.Start(&config.DefaultConfig)
+		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
+	}
+	slog.Warn("The service has been switched.", slog.String("service", "WebSocketConnector"))
+
 	data := config.DefaultConfig
 	templatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }

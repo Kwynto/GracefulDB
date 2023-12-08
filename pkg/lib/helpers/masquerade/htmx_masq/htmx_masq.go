@@ -93,9 +93,9 @@ var Settings string = `
                             <td>
                                 <div class="form-check form-switch">
                                 {{if .WebSocketConnector.Enable}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s" checked>
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="changed delay:1s">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
                                 {{end}}
                                 </div>
                             </td>
