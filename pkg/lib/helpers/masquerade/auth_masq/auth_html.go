@@ -290,7 +290,7 @@ Spinner
 #inner-cirlce1 {
   background: #000;
   border-radius: 50%;
-  border: 36px solid #8A2BE2;
+  border: 61px solid #8A2BE2;
   height: 460px;
   width: 460px;
   margin: 10px;
