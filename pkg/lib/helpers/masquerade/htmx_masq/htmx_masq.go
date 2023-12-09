@@ -48,27 +48,15 @@ var Accounts string = `
                         </tr>
                     </thead>
                     <tbody>
+                    {{ range $ind, $data := . }}
                         <tr>
-                            <th scope="row">1</th>
-                            <td>John</td>
-                            <td>Doe</td>
-                            <td>Doe</td>
-                            <td>jhon@email.com</td>
+                            <th scope="row"> {{ $ind }} </th>
+                            <td> {{ $data.Login }} </td>
+                            <td> {{ $data.Role }} </td>
+                            <td> {{ $data.Description }} </td>
+                            <td> buttons </td>
                         </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>Otto</td>
-                            <td>mark@email.com</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">3</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>Thornton</td>
-                            <td>jacob@email.com</td>
-                        </tr>
+                    {{ end }}
                     </tbody>
                 </table>
             </div>
