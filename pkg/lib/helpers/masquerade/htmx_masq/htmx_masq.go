@@ -28,6 +28,39 @@ var Accounts string = `
 <div class="container-fluid pt-4 px-4">
     <div class="bg-secondary text-center rounded p-4">
 	    <h4>Accounts</h4>
+        <p>In this section, you can manage DBMS users.</p>
+    </div>
+</div>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <h6 class="mb-4">Hoverable Table</h6>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Login</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Control</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $ind, $data := . }}
+                        <tr>
+                            <th scope="row"> {{ $ind }} </th>
+                            <td> {{ $data.Login }} </td>
+                            <td> {{ $data.Role }} </td>
+                            <td> {{ $data.Description }} </td>
+                            <td> buttons </td>
+                        </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 `

@@ -38,8 +38,9 @@ func (t TRole) String() string {
 }
 
 type TRights struct {
-	Role  TRole
-	Rules []string // []tRule
+	Description string
+	Role        TRole
+	Rules       []string // []tRule
 }
 
 type tAuth map[string]string // map[tLogin]tHach
@@ -50,8 +51,8 @@ type tReversTicket map[string]string // ticket - login
 type tAccess map[string]TRights // map[tLogin]tRights
 
 var (
-	hashMap   tAuth = make(tAuth, 0)
-	accessMap       = make(tAccess, 0)
+	HashMap   tAuth = make(tAuth, 0)
+	AccessMap       = make(tAccess, 0)
 
 	ticketMap          tTicket       = make(tTicket, 0)
 	oldTicketMap       tTicket       = make(tTicket, 0)
@@ -78,7 +79,7 @@ func generateTicket() string {
 func addUser(login string, password string, access TRights) error {
 	// This function is complete
 	block.RLock()
-	_, ok := hashMap[login]
+	_, ok := HashMap[login]
 	block.RUnlock()
 
 	if ok {
@@ -87,9 +88,9 @@ func addUser(login string, password string, access TRights) error {
 
 	block.Lock()
 	h := sha256.Sum256([]byte(password))
-	hashMap[login] = fmt.Sprintf("%x", h)
+	HashMap[login] = fmt.Sprintf("%x", h)
 
-	accessMap[login] = access
+	AccessMap[login] = access
 
 	hashSave()
 	accessSave()
@@ -102,7 +103,7 @@ func addUser(login string, password string, access TRights) error {
 func updateUser(login string, password string, access TRights) error {
 	// This function is complete
 	block.RLock()
-	_, ok := hashMap[login]
+	_, ok := HashMap[login]
 	block.RUnlock()
 
 	if !ok {
@@ -111,10 +112,10 @@ func updateUser(login string, password string, access TRights) error {
 
 	block.Lock()
 	h := sha256.Sum256([]byte(password))
-	hashMap[login] = fmt.Sprintf("%x", h)
+	HashMap[login] = fmt.Sprintf("%x", h)
 
 	if login != "root" {
-		accessMap[login] = access
+		AccessMap[login] = access
 	}
 
 	hashSave()
@@ -128,7 +129,7 @@ func updateUser(login string, password string, access TRights) error {
 func deleteUser(login string) error {
 	// This function is complete
 	block.RLock()
-	_, ok := hashMap[login]
+	_, ok := HashMap[login]
 	block.RUnlock()
 
 	if !ok {
@@ -148,8 +149,8 @@ func deleteUser(login string) error {
 		delete(ticketMap, login)
 	}
 
-	delete(accessMap, login)
-	delete(hashMap, login)
+	delete(AccessMap, login)
+	delete(HashMap, login)
 
 	hashSave()
 	accessSave()
@@ -186,7 +187,7 @@ func DeleteUser(login string) error {
 // User verification
 func CheckUser(user string, password string) bool {
 	// This function is complete
-	dbPass, ok := hashMap[user]
+	dbPass, ok := HashMap[user]
 	if !ok {
 		return false
 	}
@@ -200,7 +201,7 @@ func CheckUser(user string, password string) bool {
 // Get access rights
 func GetAccess(user string) (TRights, error) {
 	// This function is complete
-	access, ok := accessMap[user]
+	access, ok := AccessMap[user]
 	if ok {
 		return access, nil
 	}
@@ -215,7 +216,7 @@ func CheckTicket(ticket string) (login string, access TRights, newticket string,
 
 	login, ok1 := reversTicketMap[ticket]
 	if ok1 {
-		access, ok2 := accessMap[login]
+		access, ok2 := AccessMap[login]
 		if ok2 {
 			// oldTicket, ok3 := oldTicketMap[login]
 			// if ok3 {
@@ -229,7 +230,7 @@ func CheckTicket(ticket string) (login string, access TRights, newticket string,
 
 	login, ok4 := reversOldTicketMap[ticket]
 	if ok4 {
-		access, ok5 := accessMap[login]
+		access, ok5 := AccessMap[login]
 		if ok5 {
 			newticket, ok6 := ticketMap[login]
 			if ok6 {
@@ -263,7 +264,7 @@ func NewAuth(secret *gtypes.VSecret) (string, error) {
 	block.Lock()
 	defer block.Unlock()
 
-	dbPass, ok := hashMap[secret.Login]
+	dbPass, ok := HashMap[secret.Login]
 	if !ok {
 		slog.Debug("Authentication error", slog.String("login", secret.Login))
 		return "", errors.New("authentication error")
@@ -310,15 +311,15 @@ func hashLoad() {
 		h := sha256.Sum256([]byte(DEFAULT_PASSWORD))
 		pass := fmt.Sprintf("%x", h)
 
-		hashMap[DEFAULT_USER] = pass
+		HashMap[DEFAULT_USER] = pass
 
 		encoder := json.NewEncoder(tempFile)
-		if err := encoder.Encode(hashMap); err != nil {
+		if err := encoder.Encode(HashMap); err != nil {
 			slog.Debug("Error writing authentication data", slog.String("file", AUTH_FILE))
 		}
 	} else {
 		decoder := json.NewDecoder(tempFile)
-		if err := decoder.Decode(&hashMap); err != nil {
+		if err := decoder.Decode(&HashMap); err != nil {
 			slog.Debug("Error loading the configuration file", slog.String("file", AUTH_FILE))
 		}
 	}
@@ -340,7 +341,7 @@ func hashSave() {
 	defer tempFile.Close()
 
 	encoder := json.NewEncoder(tempFile)
-	if err := encoder.Encode(hashMap); err != nil {
+	if err := encoder.Encode(HashMap); err != nil {
 		slog.Warn("Error writing authentication data", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
 	}
 }
@@ -358,18 +359,19 @@ func accessLoad() {
 	defer tempFile.Close()
 
 	if isFNotEx {
-		accessMap[DEFAULT_USER] = TRights{
-			Role:  ADMIN,
-			Rules: []string{},
+		AccessMap[DEFAULT_USER] = TRights{
+			Description: "This is the main user.",
+			Role:        ADMIN,
+			Rules:       []string{},
 		}
 
 		encoder := json.NewEncoder(tempFile)
-		if err := encoder.Encode(accessMap); err != nil {
+		if err := encoder.Encode(AccessMap); err != nil {
 			slog.Debug("Error writing authentication data", slog.String("file", ACCESS_FILE))
 		}
 	} else {
 		decoder := json.NewDecoder(tempFile)
-		if err := decoder.Decode(&accessMap); err != nil {
+		if err := decoder.Decode(&AccessMap); err != nil {
 			slog.Debug("Error loading the configuration file", slog.String("file", ACCESS_FILE))
 		}
 	}
@@ -391,7 +393,7 @@ func accessSave() {
 	defer tempFile.Close()
 
 	encoder := json.NewEncoder(tempFile)
-	if err := encoder.Encode(accessMap); err != nil {
+	if err := encoder.Encode(AccessMap); err != nil {
 		slog.Warn("Error writing authentication data", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
 	}
 }

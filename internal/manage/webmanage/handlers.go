@@ -16,6 +16,12 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
+type TViewAccountsTable struct {
+	Login       string
+	Role        string
+	Description string
+}
+
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
 	// This function is complete
@@ -101,7 +107,19 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 }
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, nil)
+	var table = make([]TViewAccountsTable, 0, 10)
+	for key := range gauth.HashMap {
+		element := TViewAccountsTable{
+			Login:       key,
+			Role:        gauth.AccessMap[key].Role.String(),
+			Description: gauth.AccessMap[key].Description,
+		}
+		table = append(table, element)
+	}
+
+	// view := table
+	// TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, view)
+	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
