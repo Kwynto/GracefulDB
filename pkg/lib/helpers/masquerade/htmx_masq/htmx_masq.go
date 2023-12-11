@@ -76,6 +76,66 @@ var Accounts string = `
 </div>
 `
 
+var AccountCreateForm string = `
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+	    <h4>Accounts</h4>
+        <p>In this section, you can manage DBMS users.</p>
+    </div>
+</div>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+        Тут будет форма добавления пользователя.
+    </div>
+</div>
+`
+
+var AccountEditForm string = `
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+	    <h4>Accounts</h4>
+        <p>In this section, you can manage DBMS users.</p>
+    </div>
+</div>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+        Тут будет форма редактирования пользователя.
+    </div>
+</div>
+`
+
+var AccountBanForm string = `
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+	    <h4>Accounts</h4>
+        <p>In this section, you can manage DBMS users.</p>
+    </div>
+</div>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+        Тут будет форма блокировки пользователя.
+    </div>
+</div>
+`
+
+var AccountDelForm string = `
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+	    <h4>Accounts</h4>
+        <p>In this section, you can manage DBMS users.</p>
+    </div>
+</div>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary text-center rounded p-4">
+        Тут будет форма удаления пользователя.
+    </div>
+</div>
+`
+
 var Settings string = `
 <div class="container-fluid pt-4 px-4">
     <div class="bg-secondary text-center rounded p-4">

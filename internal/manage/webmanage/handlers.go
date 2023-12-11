@@ -146,6 +146,22 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
 
+func account_create_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM].Execute(w, nil)
+}
+
+func account_edit_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM].Execute(w, nil)
+}
+
+func account_ban_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM].Execute(w, nil)
+}
+
+func account_del_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM].Execute(w, nil)
+}
+
 /*
 Settings block
 */
