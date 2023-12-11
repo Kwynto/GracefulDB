@@ -17,10 +17,15 @@ import (
 )
 
 type TViewAccountsTable struct {
+	Superuser   bool
 	Login       string
 	Role        string
 	Description string
 }
+
+/*
+The main block
+*/
 
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
@@ -87,7 +92,10 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-// Nav Menu Handlers
+/*
+Nav Menu Handlers
+*/
+
 func nav_default(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	TemplatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
@@ -98,21 +106,37 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("HX-Redirect", "/log.out")
 }
 
+/*
+Dashboard block
+*/
+
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
 }
+
+/*
+Databases block
+*/
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
+/*
+Accounts block
+*/
+
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	var table = make([]TViewAccountsTable, 0, 10)
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
+			Superuser:   false,
 			Login:       key,
 			Role:        gauth.AccessMap[key].Role.String(),
 			Description: gauth.AccessMap[key].Description,
+		}
+		if key == "root" {
+			element.Superuser = true
 		}
 		table = append(table, element)
 	}
@@ -121,6 +145,10 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	// TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, view)
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
+
+/*
+Settings block
+*/
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
 	data := config.DefaultConfig

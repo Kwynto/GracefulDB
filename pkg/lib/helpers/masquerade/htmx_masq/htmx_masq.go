@@ -36,7 +36,7 @@ var Accounts string = `
     <div class="row g-4">
         <div class="col-12">
             <div class="bg-secondary rounded h-100 p-4">
-                <h6 class="mb-4">Hoverable Table</h6>
+                <button type="button" hx-get="/hx/accounts/create_form" hx-target="#idMainUnit" class="btn btn-success"><i class="fa fa-plus-square"></i> Create a user</button><br>
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -54,7 +54,18 @@ var Accounts string = `
                             <td> {{ $data.Login }} </td>
                             <td> {{ $data.Role }} </td>
                             <td> {{ $data.Description }} </td>
-                            <td> buttons </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-info"><i class="fa fa-edit"></i> Edit</button>
+                                    {{ if $data.Superuser }}
+                                    <button type="button" class="btn btn-sm btn-warning" disabled><i class="fa fa-ban"></i> Block</button>
+                                    <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
+                                    {{ else }}
+                                    <button type="button" hx-get="/hx/accounts/ban_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-warning"><i class="fa fa-ban"></i> Block</button>
+                                    <button type="button" hx-get="/hx/accounts/del_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i> Remove</button>
+                                    {{ end }}
+                                </div> 
+                            </td>
                         </tr>
                     {{ end }}
                     </tbody>
