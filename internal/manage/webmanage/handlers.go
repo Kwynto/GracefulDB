@@ -17,6 +17,7 @@ import (
 )
 
 type TViewAccountsTable struct {
+	Superuser   bool
 	Login       string
 	Role        string
 	Description string
@@ -129,9 +130,13 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	var table = make([]TViewAccountsTable, 0, 10)
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
+			Superuser:   false,
 			Login:       key,
 			Role:        gauth.AccessMap[key].Role.String(),
 			Description: gauth.AccessMap[key].Description,
+		}
+		if key == "root" {
+			element.Superuser = true
 		}
 		table = append(table, element)
 	}
