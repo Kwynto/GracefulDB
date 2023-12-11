@@ -89,28 +89,28 @@ func parseTemplates() {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM).Parse(htmx_masq.AccountEditForm)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM).Parse(htmx_masq.AccountBanForm)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM).Parse(htmx_masq.AccountDelForm)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM] = ts
 
 	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
 	if err != nil {
