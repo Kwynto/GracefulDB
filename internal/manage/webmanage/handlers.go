@@ -146,8 +146,34 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
 
-func account_create_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM].Execute(w, nil)
+func account_create_ok(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	Login := r.PostForm.Get("login")
+	Password := r.PostForm.Get("password")
+	Value := "default value" // r.PostForm.Get("login")
+
+	var data = struct {
+		Login    string
+		Password string
+		Value    string
+	}{
+		Login,
+		Password,
+		Value,
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM].Execute(w, data)
 }
 
 func account_edit_form(w http.ResponseWriter, r *http.Request) {

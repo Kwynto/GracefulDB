@@ -134,7 +134,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
-	mux.HandleFunc("/hx/accounts/create_form", account_create_form)
+	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
 	mux.HandleFunc("/hx/accounts/edit_form", account_edit_form)
 	mux.HandleFunc("/hx/accounts/ban_form", account_ban_form)
 	mux.HandleFunc("/hx/accounts/del_form", account_del_form)

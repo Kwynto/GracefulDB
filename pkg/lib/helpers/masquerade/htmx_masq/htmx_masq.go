@@ -36,7 +36,7 @@ var Accounts string = `
     <div class="row g-4">
         <div class="col-12">
             <div class="bg-secondary rounded h-100 p-4">
-                <button type="button" hx-get="/hx/accounts/create_form" hx-target="#idMainUnit" class="btn btn-success"><i class="fa fa-plus-square"></i> Create a user</button><br>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createModal"><i class="fa fa-plus-square"></i> Create a user</button><br>
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -74,6 +74,33 @@ var Accounts string = `
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content bg-light" hx-include="find input">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createModalLabel">Create user</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+                <form id="create-user-form" hx-post="/hx/accounts/create_ok" hx-target="#idMainUnit" hx-trigger="submit">
+                    <div class="mb-3">
+                        <label for="login-input" class="col-form-label">Login:</label>
+                        <input type="text" class="form-control" name="login" id="login-input">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password-input" class="col-form-label">Password:</label>
+                        <input type="password" class="form-control" name="password" id="password-input">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="create-user-form" class="btn btn-primary" onclick="$('#createModal').hide()">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
 `
 
 var AccountCreateForm string = `
@@ -86,7 +113,10 @@ var AccountCreateForm string = `
 
 <div class="container-fluid pt-4 px-4">
     <div class="bg-secondary text-center rounded p-4">
-        Тут будет форма добавления пользователя.
+        Пришли данные пользователя.<br>
+        {{ .Login}}<br>
+        {{ .Password}}<br>
+        {{ .Value}}<br>
     </div>
 </div>
 `
