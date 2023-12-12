@@ -92,7 +92,7 @@ var html3 string = `
                             <span class="d-none d-lg-inline-flex">User Name</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
-                            <a hx-get="/hx/nav/logout" class="dropdown-item" hx-confirm="Are you sure you wish to log out?"><i class="fa fa-sign-out-alt me-2"></i>Log Out</a>
+                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="fa fa-sign-out-alt me-2"></i>Log Out </a>
                         </div>
                     </div>
                 </div>
@@ -121,6 +121,25 @@ var html3 string = `
 
         <!-- Back to Top -->
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    <!-- Modal Logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-light">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="logoutModalLabel">Log Out</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-dark">
+                    Are you sure you wish to log out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" hx-get="/hx/nav/logout">Go to exit</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript Libraries -->
