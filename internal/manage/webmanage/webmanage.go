@@ -22,11 +22,15 @@ const (
 	HOME_TEMP_NAME = "home.html"
 	AUTH_TEMP_NAME = "auth.html"
 
-	BLOCK_TEMP_DEFAULT   = "Default"
-	BLOCK_TEMP_DASHBOARD = "Dashboard"
-	BLOCK_TEMP_DATABASES = "Databases"
-	BLOCK_TEMP_ACCOUNTS  = "Accounts"
-	BLOCK_TEMP_SETTINGS  = "Settings"
+	BLOCK_TEMP_DEFAULT             = "Default"
+	BLOCK_TEMP_DASHBOARD           = "Dashboard"
+	BLOCK_TEMP_DATABASES           = "Databases"
+	BLOCK_TEMP_ACCOUNTS            = "Accounts"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM = "AccountCreateForm"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM   = "AccountEditForm"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM    = "AccountBanForm"
+	BLOCK_TEMP_ACCOUNT_DEL_FORM    = "AccountDelForm"
+	BLOCK_TEMP_SETTINGS            = "Settings"
 )
 
 var address string
@@ -80,12 +84,41 @@ func parseTemplates() {
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS] = ts
 
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM).Parse(htmx_masq.AccountCreateForm)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM).Parse(htmx_masq.AccountEditForm)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM).Parse(htmx_masq.AccountBanForm)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM).Parse(htmx_masq.AccountDelForm)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM] = ts
+
 	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
 	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+
 }
 
 func routes() *http.ServeMux {
@@ -99,7 +132,13 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/logout", nav_logout)
 	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
+
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
+	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
+	mux.HandleFunc("/hx/accounts/edit_form", account_edit_form)
+	mux.HandleFunc("/hx/accounts/ban_form", account_ban_form)
+	mux.HandleFunc("/hx/accounts/del_form", account_del_form)
+
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
 	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)
 	mux.HandleFunc("/hx/settings/rest_change_sw", settings_rest_change_sw)
