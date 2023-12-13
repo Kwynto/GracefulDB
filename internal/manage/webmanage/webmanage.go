@@ -22,15 +22,17 @@ const (
 	HOME_TEMP_NAME = "home.html"
 	AUTH_TEMP_NAME = "auth.html"
 
-	BLOCK_TEMP_DEFAULT             = "Default"
-	BLOCK_TEMP_DASHBOARD           = "Dashboard"
-	BLOCK_TEMP_DATABASES           = "Databases"
-	BLOCK_TEMP_ACCOUNTS            = "Accounts"
-	BLOCK_TEMP_ACCOUNT_CREATE_FORM = "AccountCreateForm"
-	BLOCK_TEMP_ACCOUNT_EDIT_FORM   = "AccountEditForm"
-	BLOCK_TEMP_ACCOUNT_BAN_FORM    = "AccountBanForm"
-	BLOCK_TEMP_ACCOUNT_DEL_FORM    = "AccountDelForm"
-	BLOCK_TEMP_SETTINGS            = "Settings"
+	BLOCK_TEMP_DEFAULT                   = "Default"
+	BLOCK_TEMP_DASHBOARD                 = "Dashboard"
+	BLOCK_TEMP_DATABASES                 = "Databases"
+	BLOCK_TEMP_ACCOUNTS                  = "Accounts"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "AccountCreateFormOk"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "AccountCreateFormError"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM         = "AccountEditForm"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM          = "AccountBanForm"
+	BLOCK_TEMP_ACCOUNT_DEL_FORM          = "AccountDelForm"
+	BLOCK_TEMP_SETTINGS                  = "Settings"
 )
 
 var address string
@@ -84,12 +86,26 @@ func parseTemplates() {
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS] = ts
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM).Parse(htmx_masq.AccountCreateForm)
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD).Parse(htmx_masq.AccountCreateFormLoad)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK).Parse(htmx_masq.AccountCreateFormOk)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR).Parse(htmx_masq.AccountCreateFormError)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM).Parse(htmx_masq.AccountEditForm)
 	if err != nil {
@@ -134,6 +150,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
+	mux.HandleFunc("/hx/accounts/create_load_form", account_create_load_form)
 	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
 	mux.HandleFunc("/hx/accounts/edit_form", account_edit_form)
 	mux.HandleFunc("/hx/accounts/ban_form", account_ban_form)
