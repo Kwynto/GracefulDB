@@ -146,6 +146,10 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
 
+func account_create_load_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD].Execute(w, nil)
+}
+
 func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
@@ -161,19 +165,31 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Login := r.PostForm.Get("login")
-	Password := r.PostForm.Get("password")
-	Value := "default value" // r.PostForm.Get("login")
+	password := r.PostForm.Get("password")
+	desc := r.PostForm.Get("desc")
+	access := gauth.TRights{
+		Description: desc,
+		Role:        gauth.USER,
+		Rules:       []string{},
+	}
+
+	err2 := gauth.AddUser(Login, password, access)
+	if err2 != nil {
+		var data = struct {
+			Login string
+		}{
+			Login,
+		}
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
+		return
+	}
 
 	var data = struct {
-		Login    string
-		Password string
-		Value    string
+		Login string
 	}{
 		Login,
-		Password,
-		Value,
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM].Execute(w, data)
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, data)
 }
 
 func account_edit_form(w http.ResponseWriter, r *http.Request) {

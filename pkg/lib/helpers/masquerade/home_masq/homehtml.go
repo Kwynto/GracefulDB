@@ -135,8 +135,8 @@ var html3 string = `
                     Are you sure you wish to log out?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" hx-get="/hx/nav/logout">Go to exit</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, I'll be back.</button>
+                    <button type="button" class="btn btn-primary" hx-get="/hx/nav/logout">Yes, but I'm going to miss you.</button>
                 </div>
             </div>
         </div>
