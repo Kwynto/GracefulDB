@@ -30,8 +30,12 @@ const (
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "AccountCreateFormError"
 	BLOCK_TEMP_ACCOUNT_EDIT_FORM         = "AccountEditForm"
-	BLOCK_TEMP_ACCOUNT_BAN_FORM          = "AccountBanForm"
-	BLOCK_TEMP_ACCOUNT_DEL_FORM          = "AccountDelForm"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_OK       = "AccountBanFormOk"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD     = "AccountBanFormLoad"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR    = "AccountBanFormError"
+	BLOCK_TEMP_ACCOUNT_DEL_FORM_OK       = "AccountDelFormOk"
+	BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD     = "AccountDelFormLoad"
+	BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR    = "AccountDelFormError"
 	BLOCK_TEMP_SETTINGS                  = "Settings"
 )
 
@@ -86,19 +90,19 @@ func parseTemplates() {
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS] = ts
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD).Parse(htmx_masq.AccountCreateFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD] = ts
-
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK).Parse(htmx_masq.AccountCreateFormOk)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD).Parse(htmx_masq.AccountCreateFormLoad)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR).Parse(htmx_masq.AccountCreateFormError)
 	if err != nil {
@@ -114,19 +118,47 @@ func parseTemplates() {
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM] = ts
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM).Parse(htmx_masq.AccountBanForm)
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK).Parse(htmx_masq.AccountBanFormOk)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK] = ts
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM).Parse(htmx_masq.AccountDelForm)
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD).Parse(htmx_masq.AccountBanFormLoad)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR).Parse(htmx_masq.AccountBanFormLoad)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_OK).Parse(htmx_masq.AccountDelFormOk)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD).Parse(htmx_masq.AccountDelFormLoad)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR).Parse(htmx_masq.AccountDelFormError)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR] = ts
 
 	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
 	if err != nil {
@@ -153,8 +185,10 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/accounts/create_load_form", account_create_load_form)
 	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
 	mux.HandleFunc("/hx/accounts/edit_form", account_edit_form)
-	mux.HandleFunc("/hx/accounts/ban_form", account_ban_form)
-	mux.HandleFunc("/hx/accounts/del_form", account_del_form)
+	mux.HandleFunc("/hx/accounts/ban_load_form", account_ban_load_form)
+	mux.HandleFunc("/hx/accounts/ban_ok", account_ban_ok)
+	mux.HandleFunc("/hx/accounts/del_load_form", account_del_load_form)
+	mux.HandleFunc("/hx/accounts/del_ok", account_del_ok)
 
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
 	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)
