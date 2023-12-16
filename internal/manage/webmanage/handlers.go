@@ -197,7 +197,7 @@ func account_edit_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, nil)
 }
 
 func account_ban_ok(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +205,7 @@ func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_del_load_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK].Execute(w, nil)
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, nil)
 }
 
 func account_del_ok(w http.ResponseWriter, r *http.Request) {

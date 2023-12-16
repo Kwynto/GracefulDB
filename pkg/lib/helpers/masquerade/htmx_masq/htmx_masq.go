@@ -236,28 +236,22 @@ var AccountBanFormOk string = `
 `
 
 var AccountBanFormLoad string = `
-<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content bg-light" id="banModalSpace">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-dark">
-                <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
-                    <div class="mb-3">
-                        <label for="login-input" class="col-form-label">Login:</label>
-                        <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
-                    </div>
-                </form>
-                Block the {{.Login}} user?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="ban-user-form" class="btn btn-primary">Block</button>
-            </div>
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <label for="login-input" class="col-form-label">Login:</label>
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
-    </div>
+    </form>
+    Block the {{.Login}} user?
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="ban-user-form" class="btn btn-primary">Block</button>
 </div>
 `
 
@@ -287,28 +281,22 @@ var AccountDelFormOk string = `
 `
 
 var AccountDelFormLoad string = `
-<div class="modal fade" id="delModal" tabindex="-1" aria-labelledby="delModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content bg-light" id="delModalSpace">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-dark">
-                <form id="del-user-form" hx-post="/hx/accounts/del_ok" hx-target="#delModalSpace" hx-trigger="submit">
-                    <div class="mb-3">
-                        <label for="login-input" class="col-form-label">Login:</label>
-                        <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
-                    </div>
-                </form>
-                Delete the {{.Login}} user?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="del-user-form" class="btn btn-primary">Delete</button>
-            </div>
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    <form id="del-user-form" hx-post="/hx/accounts/del_ok" hx-target="#delModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <label for="login-input" class="col-form-label">Login:</label>
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
-    </div>
+    </form>
+    Delete the {{.Login}} user?
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="del-user-form" class="btn btn-primary">Delete</button>
 </div>
 `
 
