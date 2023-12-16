@@ -57,13 +57,13 @@ var Accounts string = `
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button type="button" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-success"><i class="fa fa-edit"></i> Edit</button>
+                                    <button type="button" class="btn btn-sm btn-success" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit"><i class="fa fa-edit"></i> Edit</button>
                                     {{ if $data.Superuser }}
                                     <button type="button" class="btn btn-sm btn-warning" disabled><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ else }}
-                                    <button type="button" hx-get="/hx/accounts/ban_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-warning"><i class="fa fa-ban"></i> Block</button>
-                                    <button type="button" hx-get="/hx/accounts/del_form?user={{$data.Login}}" hx-target="#idMainUnit" class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i> Remove</button>
+                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#banModal" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delModal" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ end }}
                                 </div> 
                             </td>
@@ -225,7 +225,7 @@ var AccountEditForm string = `
 
 var AccountBanFormOk string = `
 <div class="modal-header">
-    <h1 class="modal-title fs-5" id="banModalLabel">Ban user</h1>
+    <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
@@ -240,7 +240,7 @@ var AccountBanFormLoad string = `
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content bg-light" id="banModalSpace">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="banModalLabel">Ban user</h1>
+                <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-dark">
@@ -250,11 +250,11 @@ var AccountBanFormLoad string = `
                         <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
                     </div>
                 </form>
-                Block the root user?
+                Block the {{.Login}} user?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="ban-user-form" class="btn btn-primary">Create</button>
+                <button type="submit" form="ban-user-form" class="btn btn-primary">Block</button>
             </div>
         </div>
     </div>
@@ -263,7 +263,7 @@ var AccountBanFormLoad string = `
 
 var AccountBanFormError string = `
 <div class="modal-header">
-    <h1 class="modal-title fs-5" id="banModalLabel">Ban user</h1>
+    <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
@@ -276,7 +276,7 @@ var AccountBanFormError string = `
 
 var AccountDelFormOk string = `
 <div class="modal-header">
-    <h1 class="modal-title fs-5" id="delModalLabel">Delete user</h1>
+    <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
@@ -291,7 +291,7 @@ var AccountDelFormLoad string = `
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content bg-light" id="delModalSpace">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="delModalLabel">Delete user</h1>
+                <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-dark">
@@ -301,7 +301,7 @@ var AccountDelFormLoad string = `
                         <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
                     </div>
                 </form>
-                Delete the root user?
+                Delete the {{.Login}} user?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -314,7 +314,7 @@ var AccountDelFormLoad string = `
 
 var AccountDelFormError string = `
 <div class="modal-header">
-    <h1 class="modal-title fs-5" id="delModalLabel">Delete user</h1>
+    <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
