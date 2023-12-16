@@ -200,6 +200,34 @@ func blockUser(login string) error {
 	return nil
 }
 
+// UnBlocking the user - internal
+func unblockUser(login string) error {
+	// This function is complete
+	block.RLock()
+	_, ok := HashMap[login]
+	block.RUnlock()
+
+	if !ok {
+		return errors.New("it is not possible to unblock a user")
+	}
+
+	block.Lock()
+	defer block.Unlock()
+
+	access, ok := AccessMap[login]
+	if !ok {
+		return errors.New("it is not possible to unblock a user")
+	}
+
+	access.Status = ACTIVE
+	AccessMap[login] = access
+
+	hashSave()
+	accessSave()
+
+	return nil
+}
+
 // Public functions
 
 // Adding a user
@@ -231,6 +259,15 @@ func BlockUser(login string) error {
 	// This function is complete
 	if login != "root" {
 		return blockUser(login)
+	}
+	return errors.New("it is not possible to delete a user")
+}
+
+// Unblocking the user
+func UnblockUser(login string) error {
+	// This function is complete
+	if login != "root" {
+		return unblockUser(login)
 	}
 	return errors.New("it is not possible to delete a user")
 }
