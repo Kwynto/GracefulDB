@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/Kwynto/gosession"
 
@@ -18,7 +19,9 @@ import (
 
 type TViewAccountsTable struct {
 	Superuser   bool
+	Baned       bool
 	Login       string
+	Status      string
 	Role        string
 	Description string
 }
@@ -131,12 +134,17 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
 			Superuser:   false,
+			Baned:       false,
 			Login:       key,
+			Status:      gauth.AccessMap[key].Status.String(),
 			Role:        gauth.AccessMap[key].Role.String(),
 			Description: gauth.AccessMap[key].Description,
 		}
 		if key == "root" {
 			element.Superuser = true
+		}
+		if gauth.AccessMap[key].Status == gauth.BANED {
+			element.Baned = true
 		}
 		table = append(table, element)
 	}
@@ -164,31 +172,35 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	Login := r.PostForm.Get("login")
-	password := r.PostForm.Get("password")
-	desc := r.PostForm.Get("desc")
-	access := gauth.TRights{
-		Description: desc,
-		Role:        gauth.USER,
-		Rules:       []string{},
-	}
-
-	err = gauth.AddUser(Login, password, access)
-	if err != nil {
-		var data = struct {
-			Login string
-		}{
-			Login,
-		}
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
-		return
-	}
+	Login := strings.TrimSpace(r.PostForm.Get("login"))
+	password := strings.TrimSpace(r.PostForm.Get("password"))
+	desc := strings.TrimSpace(r.PostForm.Get("desc"))
 
 	var data = struct {
 		Login string
 	}{
 		Login,
 	}
+
+	if len(Login) == 0 || len(password) == 0 {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	access := gauth.TRights{
+		Description: desc,
+		Status:      gauth.NEW,
+		Role:        gauth.USER,
+		Rules:       []string{},
+	}
+
+	err = gauth.AddUser(Login, password, access)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	slog.Info("The user has been created", slog.String("user", Login))
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, data)
 }
 
@@ -197,19 +209,162 @@ func account_edit_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, nil)
+	user := strings.TrimSpace(r.URL.Query().Get("user"))
+	data := struct {
+		Login string
+	}{
+		Login: user,
+	}
+
+	if user == "" || user == "root" {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, data)
 }
 
 func account_ban_ok(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, nil)
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	Login := strings.TrimSpace(r.PostForm.Get("login"))
+
+	var data = struct {
+		Login string
+	}{
+		Login,
+	}
+
+	if len(Login) == 0 {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	err = gauth.BlockUser(Login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	slog.Info("The user has been blocked", slog.String("user", Login))
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, data)
+}
+
+func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
+	user := strings.TrimSpace(r.URL.Query().Get("user"))
+	data := struct {
+		Login string
+	}{
+		Login: user,
+	}
+
+	if user == "" || user == "root" {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD].Execute(w, data)
+}
+
+func account_unban_ok(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	Login := strings.TrimSpace(r.PostForm.Get("login"))
+
+	var data = struct {
+		Login string
+	}{
+		Login,
+	}
+
+	if len(Login) == 0 {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	err = gauth.UnblockUser(Login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	slog.Info("The user has been unblocked", slog.String("user", Login))
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK].Execute(w, data)
 }
 
 func account_del_load_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, nil)
+	user := strings.TrimSpace(r.URL.Query().Get("user"))
+	data := struct {
+		Login string
+	}{
+		Login: user,
+	}
+
+	if user == "" || user == "root" {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, data)
 }
 
 func account_del_ok(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK].Execute(w, nil)
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	Login := strings.TrimSpace(r.PostForm.Get("login"))
+
+	var data = struct {
+		Login string
+	}{
+		Login,
+	}
+
+	if len(Login) == 0 {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	err = gauth.DeleteUser(Login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	slog.Info("The user has been removed", slog.String("user", Login))
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK].Execute(w, data)
 }
 
 /*

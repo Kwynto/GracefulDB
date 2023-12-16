@@ -43,6 +43,7 @@ var Accounts string = `
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Login</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Role</th>
                             <th scope="col">Description</th>
                             <th scope="col">Control</th>
@@ -53,16 +54,20 @@ var Accounts string = `
                         <tr>
                             <th scope="row"> {{ $ind }} </th>
                             <td> {{ $data.Login }} </td>
+                            <td> {{ $data.Status }} </td>
                             <td> {{ $data.Role }} </td>
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-sm btn-success" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit"><i class="fa fa-edit"></i> Edit</button>
                                     {{ if $data.Superuser }}
-                                    <button type="button" class="btn btn-sm btn-warning" disabled><i class="fa fa-ban"></i> Block</button>
+                                    <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
+                                    {{ else if $data.Baned }}
+                                    <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#unbanModal" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace"><i class="fa fa-undo"></i> UnBlock</button>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delModal" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ else }}
-                                    <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#banModal" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
+                                    <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#banModal" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#delModal" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ end }}
                                 </div> 
@@ -131,6 +136,29 @@ var Accounts string = `
     </div>
 </div>
 
+<div class="modal fade" id="unbanModal" tabindex="-1" aria-labelledby="unbanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content bg-light" id="unbanModalSpace">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="unbanModalLabel">UnBlock user</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-dark">
+                <form id="unban-user-form" hx-post="/hx/accounts/unban_ok" hx-target="#unbanModalSpace" hx-trigger="submit">
+                    <div class="mb-3">
+                        <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+                    </div>
+                </form>
+                UnBlock the <b>{{.Login}}</b> user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="unban-user-form" class="btn btn-primary">UnBlock</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="delModal" tabindex="-1" aria-labelledby="delModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content bg-light" id="delModalSpace">
@@ -162,7 +190,7 @@ var AccountCreateFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been created.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been created.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -202,7 +230,7 @@ var AccountCreateFormError string = `
 </div>
 <div class="modal-body text-dark">
     User creation error.<br>
-    The {{ .Login }} user cannot be created.<br>
+    The <b>{{.Login}}</b> user cannot be created.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -229,7 +257,7 @@ var AccountBanFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been blocked.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been blocked.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -243,11 +271,10 @@ var AccountBanFormLoad string = `
 <div class="modal-body text-dark">
     <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
         <div class="mb-3">
-            <label for="login-input" class="col-form-label">Login:</label>
             <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
     </form>
-    Block the {{.Login}} user?
+    Block the <b>{{.Login}}</b> user?
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -262,7 +289,51 @@ var AccountBanFormError string = `
 </div>
 <div class="modal-body text-dark">
     Error blocking the user.<br>
-    The {{ .Login }} user cannot be blocked.<br>
+    The <b>{{.Login}}</b> user cannot be blocked.<br>
+</div>
+<div class="modal-footer">
+</div>
+`
+
+var AccountUnBanFormOk string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="unbanModalLabel">UnBlock user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    Congratulations! The <b>{{.Login}}</b> user has been unblocked.<br>
+</div>
+<div class="modal-footer">
+</div>
+`
+
+var AccountUnBanFormLoad string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="unbanModalLabel">UnBlock user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    <form id="unban-user-form" hx-post="/hx/accounts/unban_ok" hx-target="#unbanModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+        </div>
+    </form>
+    UnBlock the <b>{{.Login}}</b> user?
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="unban-user-form" class="btn btn-primary">UnBlock</button>
+</div>
+`
+
+var AccountUnBanFormError string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="unbanModalLabel">UnBlock user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    Error unblocking the user.<br>
+    The <b>{{.Login}}</b> user cannot be unblocked.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -274,7 +345,7 @@ var AccountDelFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been deleted.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been deleted.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -288,11 +359,10 @@ var AccountDelFormLoad string = `
 <div class="modal-body text-dark">
     <form id="del-user-form" hx-post="/hx/accounts/del_ok" hx-target="#delModalSpace" hx-trigger="submit">
         <div class="mb-3">
-            <label for="login-input" class="col-form-label">Login:</label>
             <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
     </form>
-    Delete the {{.Login}} user?
+    Delete the <b>{{.Login}}</b> user?
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -307,7 +377,7 @@ var AccountDelFormError string = `
 </div>
 <div class="modal-body text-dark">
     Error deleting the user.<br>
-    The {{ .Login }} user cannot be deleted.<br>
+    The <b>{{.Login}}</b> user cannot be deleted.<br>
 </div>
 <div class="modal-footer">
 </div>
