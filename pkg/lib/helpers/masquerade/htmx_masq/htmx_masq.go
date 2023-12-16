@@ -43,6 +43,7 @@ var Accounts string = `
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Login</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Role</th>
                             <th scope="col">Description</th>
                             <th scope="col">Control</th>
@@ -53,6 +54,7 @@ var Accounts string = `
                         <tr>
                             <th scope="row"> {{ $ind }} </th>
                             <td> {{ $data.Login }} </td>
+                            <td> {{ $data.Status }} </td>
                             <td> {{ $data.Role }} </td>
                             <td> {{ $data.Description }} </td>
                             <td>
@@ -162,7 +164,7 @@ var AccountCreateFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been created.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been created.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -202,7 +204,7 @@ var AccountCreateFormError string = `
 </div>
 <div class="modal-body text-dark">
     User creation error.<br>
-    The {{ .Login }} user cannot be created.<br>
+    The <b>{{.Login}}</b> user cannot be created.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -229,7 +231,7 @@ var AccountBanFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been blocked.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been blocked.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -243,11 +245,10 @@ var AccountBanFormLoad string = `
 <div class="modal-body text-dark">
     <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
         <div class="mb-3">
-            <label for="login-input" class="col-form-label">Login:</label>
             <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
     </form>
-    Block the {{.Login}} user?
+    Block the <b>{{.Login}}</b> user?
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -262,7 +263,7 @@ var AccountBanFormError string = `
 </div>
 <div class="modal-body text-dark">
     Error blocking the user.<br>
-    The {{ .Login }} user cannot be blocked.<br>
+    The <b>{{.Login}}</b> user cannot be blocked.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -274,7 +275,7 @@ var AccountDelFormOk string = `
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="modal-body text-dark">
-    Congratulations! The {{ .Login }} user has been deleted.<br>
+    Congratulations! The <b>{{.Login}}</b> user has been deleted.<br>
 </div>
 <div class="modal-footer">
 </div>
@@ -288,11 +289,10 @@ var AccountDelFormLoad string = `
 <div class="modal-body text-dark">
     <form id="del-user-form" hx-post="/hx/accounts/del_ok" hx-target="#delModalSpace" hx-trigger="submit">
         <div class="mb-3">
-            <label for="login-input" class="col-form-label">Login:</label>
             <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
         </div>
     </form>
-    Delete the {{.Login}} user?
+    Delete the <b>{{.Login}}</b> user?
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -307,7 +307,7 @@ var AccountDelFormError string = `
 </div>
 <div class="modal-body text-dark">
     Error deleting the user.<br>
-    The {{ .Login }} user cannot be deleted.<br>
+    The <b>{{.Login}}</b> user cannot be deleted.<br>
 </div>
 <div class="modal-footer">
 </div>

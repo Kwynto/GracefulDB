@@ -37,8 +37,22 @@ func (t TRole) String() string {
 	return [...]string{"SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"}[t]
 }
 
+type TStatus int
+
+const (
+	UNDEFINED TStatus = iota
+	NEW
+	ACTIVE
+	BANED
+)
+
+func (t TStatus) String() string {
+	return [...]string{"UNDEFINED", "NEW", "ACTIVE", "BANED"}[t]
+}
+
 type TRights struct {
 	Description string
+	Status      TStatus
 	Role        TRole
 	Rules       []string // []tRule
 }
@@ -158,6 +172,34 @@ func deleteUser(login string) error {
 	return nil
 }
 
+// Blocking the user - internal
+func blockUser(login string) error {
+	// This function is complete
+	block.RLock()
+	_, ok := HashMap[login]
+	block.RUnlock()
+
+	if !ok {
+		return errors.New("it is not possible to block a user")
+	}
+
+	block.Lock()
+	defer block.Unlock()
+
+	access, ok := AccessMap[login]
+	if !ok {
+		return errors.New("it is not possible to block a user")
+	}
+
+	access.Status = BANED
+	AccessMap[login] = access
+
+	hashSave()
+	accessSave()
+
+	return nil
+}
+
 // Public functions
 
 // Adding a user
@@ -180,6 +222,15 @@ func DeleteUser(login string) error {
 	// This function is complete
 	if login != "root" {
 		return deleteUser(login)
+	}
+	return errors.New("it is not possible to delete a user")
+}
+
+// Blocking the user
+func BlockUser(login string) error {
+	// This function is complete
+	if login != "root" {
+		return blockUser(login)
 	}
 	return errors.New("it is not possible to delete a user")
 }
@@ -361,6 +412,7 @@ func accessLoad() {
 	if isFNotEx {
 		AccessMap[DEFAULT_USER] = TRights{
 			Description: "This is the main user.",
+			Status:      ACTIVE,
 			Role:        ADMIN,
 			Rules:       []string{},
 		}
