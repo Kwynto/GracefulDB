@@ -118,7 +118,7 @@ var Accounts string = `
                 <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
                     <div class="mb-3">
                         <label for="login-input" class="col-form-label">Login:</label>
-                        <input type="text" class="form-control" name="login" id="login-input" value="root">
+                        <input type="hidden" class="form-control" name="login" id="login-input" value="root">
                     </div>
                 </form>
                 Block the root user?
@@ -247,7 +247,7 @@ var AccountBanFormLoad string = `
                 <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
                     <div class="mb-3">
                         <label for="login-input" class="col-form-label">Login:</label>
-                        <input type="text" class="form-control" name="login" id="login-input" value="{{.Login}}">
+                        <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
                     </div>
                 </form>
                 Block the root user?
