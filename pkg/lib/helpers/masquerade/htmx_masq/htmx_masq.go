@@ -83,7 +83,7 @@ var Accounts string = `
 `
 
 var AccountCreateFormOk string = `
-<div class="modal-header">
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
     <h1 class="modal-title fs-5" id="createModalLabel">Create user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -150,7 +150,7 @@ var AccountEditForm string = `
 `
 
 var AccountBanFormOk string = `
-<div class="modal-header">
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
     <h1 class="modal-title fs-5" id="banModalLabel">Block user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -194,7 +194,7 @@ var AccountBanFormError string = `
 `
 
 var AccountUnBanFormOk string = `
-<div class="modal-header">
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
     <h1 class="modal-title fs-5" id="unbanModalLabel">UnBlock user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
@@ -238,7 +238,7 @@ var AccountUnBanFormError string = `
 `
 
 var AccountDelFormOk string = `
-<div class="modal-header">
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
     <h1 class="modal-title fs-5" id="delModalLabel">Remove user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
