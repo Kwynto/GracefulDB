@@ -91,7 +91,11 @@ var html3 string = `
                             <img class="rounded-circle me-lg-2" src="./static/img/user.png" alt="" style="width: 40px; height: 40px;">
                             <span class="d-none d-lg-inline-flex">User Name</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end bg-secondary border-0 rounded-0 rounded-bottom m-0">
+                        <div class="dropdown-menu dropdown-menu-end bg-secondary border-1 rounded-0 rounded-bottom m-0">
+                            <a class="dropdown-item" hx-get="/hx/nav/dashboard" hx-target="#idMainUnit"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
+                            <a class="dropdown-item" hx-get="/hx/nav/databases" hx-target="#idMainUnit"><i class="fa fa-database me-2"></i>Databases</a>
+                            <a class="dropdown-item" hx-get="/hx/nav/accounts" hx-target="#idMainUnit"><i class="fa fa-users me-2"></i>Accounts</a>
+                            <a class="dropdown-item" hx-get="/hx/nav/settings" hx-target="#idMainUnit"><i class="fa fa-cogs me-2"></i>Settings</a>
                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="fa fa-sign-out-alt me-2"></i>Log Out </a>
                         </div>
                     </div>
