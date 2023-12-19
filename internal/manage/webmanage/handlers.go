@@ -204,8 +204,12 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, data)
 }
 
-func account_edit_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM].Execute(w, nil)
+func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, nil)
+}
+
+func account_edit_ok(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, nil)
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {

@@ -59,7 +59,7 @@ var Accounts string = `
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-success" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit"><i class="fa fa-edit"></i> Edit</button>
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#editModal" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
                                     {{ if $data.Superuser }}
                                     <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
@@ -134,18 +134,55 @@ var AccountCreateFormError string = `
 </div>
 `
 
-var AccountEditForm string = `
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-secondary text-center rounded p-4">
-	    <h4>Accounts</h4>
-        <p>In this section, you can manage DBMS users.</p>
-    </div>
+var AccountEditFormOk string = `
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
+<div class="modal-body text-dark">
+    Congratulations! The <b>{{.Login}}</b> user has been updated.<br>
+</div>
+<div class="modal-footer">
+</div>
+`
 
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-secondary text-center rounded p-4">
-        Тут будет форма редактирования пользователя.
-    </div>
+var AccountEditFormLoad string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    <form id="edit-user-form" hx-post="/hx/accounts/edit_ok" hx-target="#editModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <label for="login-input" class="col-form-label">Login:</label>
+            <input type="text" class="form-control" name="login" id="login-input" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="password-input" class="col-form-label">New password:</label>
+            <input type="password" class="form-control" name="password" id="password-input">
+        </div>
+        <div class="mb-3">
+            <label for="desc-input" class="col-form-label">Description:</label>
+            <input type="text" class="form-control" name="desc" id="desc-input">
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="edit-user-form" class="btn btn-primary">Save</button>
+</div>
+`
+
+var AccountEditFormError string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    User update error.<br>
+    The <b>{{.Login}}</b> user cannot be updated.<br>
+</div>
+<div class="modal-footer">
 </div>
 `
 

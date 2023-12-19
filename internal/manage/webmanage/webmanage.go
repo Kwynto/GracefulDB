@@ -29,7 +29,9 @@ const (
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "AccountCreateFormOk"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "AccountCreateFormError"
-	BLOCK_TEMP_ACCOUNT_EDIT_FORM         = "AccountEditForm"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK      = "AccountEditFormOk"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD    = "AccountEditFormLoad"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR   = "AccountEditFormError"
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_OK       = "AccountBanFormOk"
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD     = "AccountBanFormLoad"
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR    = "AccountBanFormError"
@@ -114,12 +116,26 @@ func parseTemplates() {
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR] = ts
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM).Parse(htmx_masq.AccountEditForm)
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK).Parse(htmx_masq.AccountEditFormOk)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM] = ts
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD).Parse(htmx_masq.AccountEditFormLoad)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR).Parse(htmx_masq.AccountEditFormError)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR] = ts
 
 	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK).Parse(htmx_masq.AccountBanFormOk)
 	if err != nil {
@@ -208,7 +224,8 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
 	mux.HandleFunc("/hx/accounts/create_load_form", account_create_load_form)
 	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
-	mux.HandleFunc("/hx/accounts/edit_form", account_edit_form)
+	mux.HandleFunc("/hx/accounts/edit_load_form", account_edit_load_form)
+	mux.HandleFunc("/hx/accounts/edit_ok", account_edit_ok)
 	mux.HandleFunc("/hx/accounts/ban_load_form", account_ban_load_form)
 	mux.HandleFunc("/hx/accounts/ban_ok", account_ban_ok)
 	mux.HandleFunc("/hx/accounts/unban_load_form", account_unban_load_form)
