@@ -11,7 +11,7 @@ import (
 
 type VAuth struct {
 	Login  string
-	Access gauth.TRights
+	Access gauth.TProfile
 }
 
 // TODO: Reading

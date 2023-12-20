@@ -189,7 +189,7 @@ var html3 string = `
                     <form id="edit-user-form" hx-post="/hx/accounts/edit_ok" hx-target="#editModalSpace" hx-trigger="submit">
                         <div class="mb-3">
                             <label for="login-input" class="col-form-label">Login:</label>
-                            <input type="text" class="form-control" name="login" id="login-input" disabled>
+                            <input type="hidden" class="form-control" name="login" id="login-input" value="" disabled>
                         </div>
                         <div class="mb-3">
                             <label for="password-input" class="col-form-label">New password:</label>

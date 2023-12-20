@@ -50,7 +50,7 @@ func (t TStatus) String() string {
 	return [...]string{"UNDEFINED", "NEW", "ACTIVE", "BANED"}[t]
 }
 
-type TRights struct {
+type TProfile struct {
 	Description string
 	Status      TStatus
 	Role        TRole
@@ -62,7 +62,7 @@ type tAuth map[string]string // map[tLogin]tHach
 type tTicket map[string]string       // login - ticket
 type tReversTicket map[string]string // ticket - login
 
-type tAccess map[string]TRights // map[tLogin]tRights
+type tAccess map[string]TProfile // map[tLogin]TProfile
 
 var (
 	HashMap   tAuth = make(tAuth, 0)
@@ -90,7 +90,7 @@ func generateTicket() string {
 }
 
 // Adding a user - internal
-func addUser(login string, password string, access TRights) error {
+func addUser(login string, password string, access TProfile) error {
 	// This function is complete
 	block.RLock()
 	_, ok := HashMap[login]
@@ -114,7 +114,7 @@ func addUser(login string, password string, access TRights) error {
 }
 
 // Updating a user - internal
-func updateUser(login string, password string, access TRights) error {
+func updateUser(login string, password string, access TProfile) error {
 	// This function is complete
 	block.RLock()
 	_, ok := HashMap[login]
@@ -231,7 +231,7 @@ func unblockUser(login string) error {
 // Public functions
 
 // Adding a user
-func AddUser(login string, password string, access TRights) error {
+func AddUser(login string, password string, access TProfile) error {
 	// This function is complete
 	if login != "root" {
 		return addUser(login, password, access)
@@ -240,7 +240,7 @@ func AddUser(login string, password string, access TRights) error {
 }
 
 // Updating a user
-func UpdateUser(login string, password string, access TRights) error {
+func UpdateUser(login string, password string, access TProfile) error {
 	// This function is complete
 	return updateUser(login, password, access)
 }
@@ -286,18 +286,18 @@ func CheckUser(user string, password string) bool {
 	return dbPass == pass
 }
 
-// Get access rights
-func GetAccess(user string) (TRights, error) {
+// Get user's profile and access rights
+func GetProfile(user string) (TProfile, error) {
 	// This function is complete
 	access, ok := AccessMap[user]
 	if ok {
 		return access, nil
 	}
-	return TRights{}, errors.New("access denied")
+	return TProfile{}, errors.New("profile error")
 }
 
 // Verifying the authenticity of the ticket and obtaining access rights.
-func CheckTicket(ticket string) (login string, access TRights, newticket string, err error) {
+func CheckTicket(ticket string) (login string, access TProfile, newticket string, err error) {
 	// This function is complete
 	block.RLock()
 	defer block.RUnlock()
@@ -313,7 +313,7 @@ func CheckTicket(ticket string) (login string, access TRights, newticket string,
 			// }
 			return login, access, newticket, nil
 		}
-		return "", TRights{}, "", errors.New("authorization failed")
+		return "", TProfile{}, "", errors.New("authorization failed")
 	}
 
 	login, ok4 := reversOldTicketMap[ticket]
@@ -324,12 +324,12 @@ func CheckTicket(ticket string) (login string, access TRights, newticket string,
 			if ok6 {
 				return login, access, newticket, nil
 			}
-			return "", TRights{}, "", errors.New("authorization failed")
+			return "", TProfile{}, "", errors.New("authorization failed")
 		}
-		return "", TRights{}, "", errors.New("authorization failed")
+		return "", TProfile{}, "", errors.New("authorization failed")
 	}
 
-	return "", TRights{}, "", errors.New("authorization failed")
+	return "", TProfile{}, "", errors.New("authorization failed")
 }
 
 // Authorization verification and ticket issuance
@@ -447,7 +447,7 @@ func accessLoad() {
 	defer tempFile.Close()
 
 	if isFNotEx {
-		AccessMap[DEFAULT_USER] = TRights{
+		AccessMap[DEFAULT_USER] = TProfile{
 			Description: "This is the main user.",
 			Status:      ACTIVE,
 			Role:        ADMIN,
