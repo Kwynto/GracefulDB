@@ -18,6 +18,7 @@ import (
 )
 
 type TViewAccountsTable struct {
+	System      bool
 	Superuser   bool
 	Baned       bool
 	Login       string
@@ -133,6 +134,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	var table = make([]TViewAccountsTable, 0, 10)
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
+			System:      false,
 			Superuser:   false,
 			Baned:       false,
 			Login:       key,
@@ -140,12 +142,17 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			Role:        gauth.AccessMap[key].Role.String(),
 			Description: gauth.AccessMap[key].Description,
 		}
+
+		if gauth.AccessMap[key].Role == gauth.SYSTEM {
+			element.System = true
+		}
 		if key == "root" {
 			element.Superuser = true
 		}
 		if gauth.AccessMap[key].Status == gauth.BANED {
 			element.Baned = true
 		}
+
 		table = append(table, element)
 	}
 

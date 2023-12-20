@@ -59,8 +59,12 @@ var Accounts string = `
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
+                                    {{ if $data.System }}
+                                    <button type="button" class="btn btn-sm btn-success" disabled><i class="fa fa-edit"></i> Edit</button>
+                                    {{ else }}
                                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#editModal" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
-                                    {{ if $data.Superuser }}
+                                    {{ end }}
+                                    {{ if or $data.Superuser $data.System }}
                                     <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ else if $data.Baned }}
