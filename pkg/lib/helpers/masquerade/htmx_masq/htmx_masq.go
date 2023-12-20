@@ -59,8 +59,12 @@ var Accounts string = `
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-success" hx-get="/hx/accounts/edit_form?user={{$data.Login}}" hx-target="#idMainUnit"><i class="fa fa-edit"></i> Edit</button>
-                                    {{ if $data.Superuser }}
+                                    {{ if $data.System }}
+                                    <button type="button" class="btn btn-sm btn-success" disabled><i class="fa fa-edit"></i> Edit</button>
+                                    {{ else }}
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#editModal" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
+                                    {{ end }}
+                                    {{ if or $data.Superuser $data.System }}
                                     <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
                                     <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
                                     {{ else if $data.Baned }}
@@ -134,18 +138,86 @@ var AccountCreateFormError string = `
 </div>
 `
 
-var AccountEditForm string = `
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-secondary text-center rounded p-4">
-	    <h4>Accounts</h4>
-        <p>In this section, you can manage DBMS users.</p>
-    </div>
+var AccountEditFormOk string = `
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
+<div class="modal-body text-dark">
+    Congratulations! The <b>{{.Login}}</b> user has been updated.<br>
+</div>
+<div class="modal-footer">
+</div>
+`
 
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-secondary text-center rounded p-4">
-        Тут будет форма редактирования пользователя.
-    </div>
+var AccountEditFormLoad string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+{{ if eq .Role 0 }} 
+<div class="modal-body text-dark">
+    SYSTEM USER (This user cannot be changed.) 
+</div>
+{{ else }}
+<div class="modal-body text-dark">
+    <form id="edit-user-form" hx-post="/hx/accounts/edit_ok" hx-target="#editModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <label for="login-input" class="col-form-label">Login:</label> <b>{{.Login}}</b>
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+        </div>
+        <div class="mb-3">
+            <label for="password-input" class="col-form-label">New password:</label>
+            <input type="password" class="form-control" name="password" id="password-input" value="">
+        </div>
+        <div class="mb-3">
+            <label for="desc-input" class="col-form-label">Description:</label>
+            <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Description}}">
+        </div>
+        {{ if ne .Login "root" }} 
+        <div class="mb-3">
+            <label for="status-select" class="col-form-label">Status:</label>{{ if eq .Status 0 }} UNDEFINED (You must select the status) {{ end }}
+            <select class="form-select form-select-sm mb-3" aria-label=".form-select-sm" id="status-select" name="status">
+                {{ if eq .Status 1 }} <option value="1" selected>NEW</option> {{ else }} <option value="1">NEW</option> {{ end }}
+                {{ if eq .Status 2 }} <option value="2" selected>ACTIVE</option> {{ else }} <option value="2">ACTIVE</option> {{ end }}
+                {{ if eq .Status 3 }} <option value="3" selected>BANED</option> {{ else }} <option value="3">BANED</option> {{ end }}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="role-select" class="col-form-label">Role:</label>
+            <select class="form-select form-select-sm mb-3" aria-label=".form-select-sm" id="role-select" name="role">
+                {{ if eq .Role 1 }} <option value="1" selected>ADMIN</option> {{ else }} <option value="1">ADMIN</option> {{ end }}
+                {{ if eq .Role 2 }} <option value="2" selected>MANAGER</option> {{ else }} <option value="2">MANAGER</option> {{ end }}
+                {{ if eq .Role 3 }} <option value="3" selected>ENGINEER</option> {{ else }} <option value="3">ENGINEER</option> {{ end }}
+                {{ if eq .Role 4 }} <option value="4" selected>USER</option> {{ else }} <option value="4">USER</option> {{ end }}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="rules-area" class="col-form-label">Rules:</label>
+            <textarea class="form-control" id="rules-area" name="rules" style="height: 100px;">{{.Rules}}</textarea>
+        </div>
+        {{ else }}
+            You cannot change the permissions of this user.
+        {{ end }}
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="edit-user-form" class="btn btn-primary">Save</button>
+</div>
+{{ end }}
+`
+
+var AccountEditFormError string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    User update error.<br>
+    The <b>{{.Login}}</b> user cannot be updated.<br>
+</div>
+<div class="modal-footer">
 </div>
 `
 

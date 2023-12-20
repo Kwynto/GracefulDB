@@ -18,6 +18,7 @@ import (
 )
 
 type TViewAccountsTable struct {
+	System      bool
 	Superuser   bool
 	Baned       bool
 	Login       string
@@ -133,6 +134,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	var table = make([]TViewAccountsTable, 0, 10)
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
+			System:      false,
 			Superuser:   false,
 			Baned:       false,
 			Login:       key,
@@ -140,12 +142,17 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			Role:        gauth.AccessMap[key].Role.String(),
 			Description: gauth.AccessMap[key].Description,
 		}
+
+		if gauth.AccessMap[key].Role == gauth.SYSTEM {
+			element.System = true
+		}
 		if key == "root" {
 			element.Superuser = true
 		}
 		if gauth.AccessMap[key].Status == gauth.BANED {
 			element.Baned = true
 		}
+
 		table = append(table, element)
 	}
 
@@ -187,7 +194,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	access := gauth.TRights{
+	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.NEW,
 		Role:        gauth.USER,
@@ -204,8 +211,36 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, data)
 }
 
-func account_edit_form(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM].Execute(w, nil)
+func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
+	user := strings.TrimSpace(r.URL.Query().Get("user"))
+	data := struct {
+		Login       string
+		Description string
+		Status      gauth.TStatus
+		Role        gauth.TRole
+		Rules       string
+	}{
+		Login: user,
+		Rules: "",
+	}
+
+	profile, err := gauth.GetProfile(user)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+	data.Description = profile.Description
+	data.Status = profile.Status
+	data.Role = profile.Role
+	for _, v := range profile.Rules {
+		data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, data)
+}
+
+func account_edit_ok(w http.ResponseWriter, r *http.Request) {
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, nil)
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
