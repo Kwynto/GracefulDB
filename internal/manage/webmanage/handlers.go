@@ -297,16 +297,14 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rules := strings.TrimSpace(r.PostForm.Get("rules"))
-
-	// TODO: Заменить на разбор
-	fmt.Println("Проверка:", rules)
+	rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
+	rules := strings.Split(rulesIn, "\n")
 
 	err = gauth.UpdateUser(Login, password, gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
 		Role:        gauth.TRole(role),
-		Rules:       []string{},
+		Rules:       rules,
 	})
 	if err != nil {
 		slog.Debug("Update user", slog.String("err", err.Error()))
