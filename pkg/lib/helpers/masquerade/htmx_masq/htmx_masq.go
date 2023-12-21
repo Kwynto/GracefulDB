@@ -194,7 +194,8 @@ var AccountEditFormLoad string = `
         </div>
         <div class="mb-3">
             <label for="rules-area" class="col-form-label">Rules:</label>
-            <textarea class="form-control" id="rules-area" name="rules" style="height: 100px;">{{.Rules}}</textarea>
+            <textarea class="form-control" id="rules-area" name="rules" style="height: 150px;">{{.Rules}}</textarea>
+            <p style="color: yellow;">there should be only one rule per line</p>
         </div>
         {{ else }}
             You cannot change the permissions of this user.
@@ -216,6 +217,7 @@ var AccountEditFormError string = `
 <div class="modal-body text-dark">
     User update error.<br>
     The <b>{{.Login}}</b> user cannot be updated.<br>
+    <p style="color: red;">{{.MsgErr}}</p>
 </div>
 <div class="modal-footer">
 </div>
