@@ -451,7 +451,7 @@ func accessLoad() {
 			Description: "This is the main user.",
 			Status:      ACTIVE,
 			Role:        ADMIN,
-			Rules:       []string{},
+			Rules:       []string{""},
 		}
 
 		encoder := json.NewEncoder(tempFile)

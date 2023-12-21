@@ -199,7 +199,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		Description: desc,
 		Status:      gauth.NEW,
 		Role:        gauth.USER,
-		Rules:       []string{},
+		Rules:       []string{""},
 	}
 
 	err = gauth.AddUser(Login, password, access)
