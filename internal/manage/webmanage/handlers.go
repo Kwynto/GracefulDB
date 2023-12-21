@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Kwynto/gosession"
@@ -198,7 +199,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		Description: desc,
 		Status:      gauth.NEW,
 		Role:        gauth.USER,
-		Rules:       []string{},
+		Rules:       []string{""},
 	}
 
 	err = gauth.AddUser(Login, password, access)
@@ -240,7 +241,79 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_edit_ok(w http.ResponseWriter, r *http.Request) {
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, nil)
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	data := struct {
+		Login  string
+		MsgErr string
+	}{
+		Login:  "",
+		MsgErr: "",
+	}
+
+	Login := strings.TrimSpace(r.PostForm.Get("login"))
+	if Login == "" {
+		slog.Debug("Update user", slog.String("err", "invalid username"))
+		data.MsgErr = "Invalid username."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+	data.Login = Login
+
+	password := strings.TrimSpace(r.PostForm.Get("password"))
+	if password == "" {
+		slog.Debug("Update user", slog.String("err", "an empty password"))
+		data.MsgErr = "The password cannot be empty."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	desc := strings.TrimSpace(r.PostForm.Get("desc"))
+
+	status, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("status")))
+	if err != nil || status < 1 {
+		slog.Debug("Update user", slog.String("err", "incorrect status"))
+		data.MsgErr = "Incorrect status."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
+	if err != nil || role == 0 {
+		slog.Debug("Update user", slog.String("err", "incorrect role"))
+		data.MsgErr = "Incorrect role."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
+	rules := strings.Split(rulesIn, "\n")
+
+	err = gauth.UpdateUser(Login, password, gauth.TProfile{
+		Description: desc,
+		Status:      gauth.TStatus(status),
+		Role:        gauth.TRole(role),
+		Rules:       rules,
+	})
+	if err != nil {
+		slog.Debug("Update user", slog.String("err", err.Error()))
+		data.MsgErr = "The user could not be updated."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, data)
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
