@@ -170,11 +170,11 @@ var AccountEditFormLoad string = `
             <label for="password-input" class="col-form-label">New password:</label>
             <input type="password" class="form-control" name="password" id="password-input" value="">
         </div>
+        {{ if ne .Login "root" }} 
         <div class="mb-3">
             <label for="desc-input" class="col-form-label">Description:</label>
             <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Description}}">
         </div>
-        {{ if ne .Login "root" }} 
         <div class="mb-3">
             <label for="status-select" class="col-form-label">Status:</label>{{ if eq .Status 0 }} UNDEFINED (You must select the status) {{ end }}
             <select class="form-select form-select-sm mb-3" aria-label=".form-select-sm" id="status-select" name="status">
@@ -198,6 +198,10 @@ var AccountEditFormLoad string = `
             <p style="color: yellow;">there should be only one rule per line</p>
         </div>
         {{ else }}
+            <div class="mb-3">
+                <label for="desc-input" class="col-form-label">Description:</label> <b>{{.Description}}</b>
+                <input type="hidden" class="form-control" name="desc" id="desc-input" value="{{.Description}}">
+            </div>
             You cannot change the permissions of this user.
         {{ end }}
     </form>

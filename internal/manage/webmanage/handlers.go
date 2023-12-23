@@ -282,7 +282,7 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	desc := strings.TrimSpace(r.PostForm.Get("desc"))
 
 	status, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("status")))
-	if err != nil || status < 1 {
+	if (err != nil || status < 1) && Login != "root" {
 		slog.Debug("Update user", slog.String("err", "incorrect status"))
 		data.MsgErr = "Incorrect status."
 		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
@@ -290,7 +290,7 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	}
 
 	role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
-	if err != nil || role == 0 {
+	if (err != nil || role == 0) && Login != "root" {
 		slog.Debug("Update user", slog.String("err", "incorrect role"))
 		data.MsgErr = "Incorrect role."
 		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
@@ -299,6 +299,13 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 
 	rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
 	rules := strings.Split(rulesIn, "\n")
+
+	if Login == "root" {
+		desc = ""
+		status = 2
+		role = 1
+		rules = []string{""}
+	}
 
 	err = gauth.UpdateUser(Login, password, gauth.TProfile{
 		Description: desc,
