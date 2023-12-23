@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 )
 
+// Isolation of statistical data for web access.
+
 type isolatedFS struct {
 	fs http.FileSystem
 }
@@ -32,4 +34,10 @@ func (ifs isolatedFS) Open(path string) (http.File, error) {
 	}
 
 	return f, nil
+}
+
+// Isolation of authorization in handlers.
+
+func IsolatedAuth() error {
+	return nil
 }
