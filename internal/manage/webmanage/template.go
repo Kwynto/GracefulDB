@@ -11,8 +11,8 @@ import (
 
 const (
 	// The names of the templates in the cache
-	HOME_TEMP_NAME = "home.html"
-	AUTH_TEMP_NAME = "auth.html"
+	HOME_TEMP_NAME = "Home"
+	AUTH_TEMP_NAME = "Auth"
 
 	BLOCK_TEMP_DEFAULT                   = "Default"
 	BLOCK_TEMP_DASHBOARD                 = "Dashboard"
@@ -193,5 +193,4 @@ func parseTemplates() {
 		return
 	}
 	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
-
 }
