@@ -26,6 +26,7 @@ func routes() *http.ServeMux {
 	// HTMX routes
 	mux.HandleFunc("/hx/", nav_default)
 	mux.HandleFunc("/hx/nav/logout", nav_logout)
+
 	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 

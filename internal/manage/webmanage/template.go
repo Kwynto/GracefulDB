@@ -15,6 +15,7 @@ const (
 	AUTH_TEMP_NAME = "Auth"
 
 	BLOCK_TEMP_DEFAULT                   = "Default"
+	BLOCK_TEMP_ACCESS_DENIED             = "AccessDenied"
 	BLOCK_TEMP_DASHBOARD                 = "Dashboard"
 	BLOCK_TEMP_DATABASES                 = "Databases"
 	BLOCK_TEMP_ACCOUNTS                  = "Accounts"
@@ -59,6 +60,13 @@ func parseTemplates() {
 		return
 	}
 	TemplatesMap[BLOCK_TEMP_DEFAULT] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCESS_DENIED).Parse(htmx_masq.AccessDenied)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCESS_DENIED] = ts
 
 	TemplatesMap[BLOCK_TEMP_DASHBOARD] = ts
 	ts, err = template.New(BLOCK_TEMP_DASHBOARD).Parse(htmx_masq.Dashboard)

@@ -123,7 +123,7 @@ Dashboard block
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, gauth.ENGINEER) {
-		logout(w, r)
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
@@ -135,6 +135,11 @@ Databases block
 */
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ENGINEER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
@@ -143,6 +148,11 @@ Accounts block
 */
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	var table = make([]TViewAccountsTable, 0, 10)
 	for key := range gauth.HashMap {
 		element := TViewAccountsTable{
@@ -174,10 +184,19 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_create_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD].Execute(w, nil)
 }
 
 func account_create_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
 		return
@@ -224,6 +243,11 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
 		Login       string
@@ -252,6 +276,11 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_edit_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
 		return
@@ -335,6 +364,11 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
 		Login string
@@ -351,6 +385,11 @@ func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
 		return
@@ -388,6 +427,11 @@ func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
 		Login string
@@ -404,6 +448,11 @@ func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_unban_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
 		return
@@ -441,6 +490,11 @@ func account_unban_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_del_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
 		Login string
@@ -457,6 +511,11 @@ func account_del_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_del_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.MANAGER) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		nav_default(w, r)
 		return
@@ -498,11 +557,21 @@ Settings block
 */
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ADMIN) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	data := config.DefaultConfig
 	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }
 
 func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ADMIN) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if config.DefaultConfig.WebSocketConnector.Enable {
 		config.DefaultConfig.WebSocketConnector.Enable = false
 		closer.RunAndDelHandler(websocketconn.Shutdown)
@@ -517,6 +586,11 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ADMIN) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if config.DefaultConfig.RestConnector.Enable {
 		config.DefaultConfig.RestConnector.Enable = false
 		closer.RunAndDelHandler(rest.Shutdown)
@@ -531,6 +605,11 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ADMIN) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	if config.DefaultConfig.GrpcConnector.Enable {
 		config.DefaultConfig.GrpcConnector.Enable = false
 		closer.RunAndDelHandler(grpc.Shutdown)
@@ -545,6 +624,11 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ADMIN) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
 	slog.Warn("This service cannot be disabled.", slog.String("service", "WebServer"))
 
 	nav_settings(w, r)
