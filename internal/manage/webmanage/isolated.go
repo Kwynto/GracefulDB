@@ -1,8 +1,12 @@
 package webmanage
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
+
+	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
+	"github.com/Kwynto/gosession"
 )
 
 // Isolation of statistical data for web access.
@@ -34,4 +38,26 @@ func (ifs isolatedFS) Open(path string) (http.File, error) {
 	}
 
 	return f, nil
+}
+
+// Isolation of authorization.
+func IsolatedAuth(w http.ResponseWriter, r *http.Request, minAccess gauth.TRole) bool {
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		return true
+	}
+
+	if !profile.IsAuth(gauth.ENGINEER) {
+		return true
+	}
+
+	if profile.Status == gauth.NEW {
+		profile.Status = gauth.ACTIVE
+		gauth.UpdateProfile(login, profile)
+	}
+
+	return false
 }

@@ -35,26 +35,12 @@ The main block
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
-	profile, err := gauth.GetProfile(login)
-	if err != nil {
+	if IsolatedAuth(w, r, gauth.ENGINEER) {
 		logout(w, r)
 		return
 	}
 
-	if !profile.IsolatedAuth(gauth.ENGINEER) {
-		logout(w, r)
-		return
-	}
-
-	if profile.Status == gauth.NEW {
-		profile.Status = gauth.ACTIVE
-		gauth.UpdateProfile(login, profile)
-	}
-
-	err = TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
+	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -136,6 +122,11 @@ Dashboard block
 */
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, gauth.ENGINEER) {
+		logout(w, r)
+		return
+	}
+
 	TemplatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
 }
 

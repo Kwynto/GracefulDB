@@ -97,8 +97,8 @@ func (t TProfile) AccessIsDenied() bool {
 	return t.Status.IsBad() || t.Role.IsUser()
 }
 
-// Isolation of authorization.
-func (t TProfile) IsolatedAuth(minAccess TRole) bool {
+// Chacking of authorization.
+func (t TProfile) IsAuth(minAccess TRole) bool {
 	if t.AccessIsDenied() {
 		return false
 	}
