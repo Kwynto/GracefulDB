@@ -33,9 +33,28 @@ The main block
 */
 
 // Handler after authorization
-func homeDefault(w http.ResponseWriter, r *http.Request, login string) {
+func homeDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		logout(w, r)
+		return
+	}
+
+	if !profile.IsolatedAuth(gauth.ENGINEER) {
+		logout(w, r)
+		return
+	}
+
+	if profile.Status == gauth.NEW {
+		profile.Status = gauth.ACTIVE
+		gauth.UpdateProfile(login, profile)
+	}
+
+	err = TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -84,8 +103,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if auth == nil {
 		homeAuth(w, r)
 	} else {
-		login := fmt.Sprint(auth)
-		homeDefault(w, r, login)
+		// login := fmt.Sprint(auth)
+		// homeDefault(w, r, login)
+		homeDefault(w, r)
 	}
 }
 

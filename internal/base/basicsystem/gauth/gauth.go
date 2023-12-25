@@ -37,6 +37,30 @@ func (t TRole) String() string {
 	return [...]string{"SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"}[t]
 }
 
+func (t TRole) IsSystem() bool {
+	return t == 0
+}
+
+func (t TRole) IsAdmin() bool {
+	return t == 1
+}
+
+func (t TRole) IsManager() bool {
+	return t == 2
+}
+
+func (t TRole) IsEngineer() bool {
+	return t == 3
+}
+
+func (t TRole) IsUser() bool {
+	return t == 4
+}
+
+func (t TRole) IsNotUser() bool {
+	return t != 4
+}
+
 type TStatus int
 
 const (
@@ -50,11 +74,44 @@ func (t TStatus) String() string {
 	return [...]string{"UNDEFINED", "NEW", "ACTIVE", "BANED"}[t]
 }
 
+func (t TStatus) IsBad() bool {
+	return t < 1 || t > 2
+}
+
+func (t TStatus) IsGood() bool {
+	return t > 0 && t < 3
+}
+
 type TProfile struct {
 	Description string
 	Status      TStatus
 	Role        TRole
 	Rules       []string // []tRule
+}
+
+func (t TProfile) AccessIsAllowed() bool {
+	return t.Status.IsGood() && t.Role.IsNotUser()
+}
+
+func (t TProfile) AccessIsDenied() bool {
+	return t.Status.IsBad() || t.Role.IsUser()
+}
+
+// Isolation of authorization.
+func (t TProfile) IsolatedAuth(minAccess TRole) bool {
+	if t.AccessIsDenied() {
+		return false
+	}
+
+	if t.Role > minAccess {
+		return false
+	}
+
+	if t.Role == 0 {
+		return false
+	}
+
+	return true
 }
 
 type tAuth map[string]string // map[tLogin]tHach
@@ -228,6 +285,29 @@ func unblockUser(login string) error {
 	return nil
 }
 
+// Updating a profile of a user - internal
+func updateProfile(login string, access TProfile) error {
+	// This function is complete
+	block.RLock()
+	_, ok := HashMap[login]
+	block.RUnlock()
+
+	if !ok {
+		return errors.New("unable to update user")
+	}
+
+	block.Lock()
+
+	if login != "root" {
+		AccessMap[login] = access
+	}
+
+	accessSave()
+	block.Unlock()
+
+	return nil
+}
+
 // Public functions
 
 // Adding a user
@@ -270,6 +350,12 @@ func UnblockUser(login string) error {
 		return unblockUser(login)
 	}
 	return errors.New("it is not possible to delete a user")
+}
+
+// Updating a profile of a user
+func UpdateProfile(login string, access TProfile) error {
+	// This function is complete
+	return updateProfile(login, access)
 }
 
 // User verification

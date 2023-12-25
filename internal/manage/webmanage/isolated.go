@@ -35,9 +35,3 @@ func (ifs isolatedFS) Open(path string) (http.File, error) {
 
 	return f, nil
 }
-
-// Isolation of authorization in handlers.
-
-func IsolatedAuth() error {
-	return nil
-}
