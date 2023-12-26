@@ -40,7 +40,28 @@ func homeDefault(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, nil)
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		logout(w, r)
+		return
+	}
+
+	var data = struct {
+		Login string
+		Roles string
+	}{
+		Login: login,
+		Roles: "",
+	}
+
+	for _, role := range profile.Roles {
+		data.Roles = fmt.Sprintf("%s %s", data.Roles, role.String())
+	}
+
+	err = TemplatesMap[HOME_TEMP_NAME].Execute(w, data)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -165,7 +186,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			Description: gauth.AccessMap[key].Description,
 		}
 
-		for _, role := range gauth.AccessMap[key].Role {
+		for _, role := range gauth.AccessMap[key].Roles {
 			if role == gauth.SYSTEM {
 				element.System = true
 			}
@@ -236,7 +257,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.NEW,
-		Role:        []gauth.TRole{gauth.USER},
+		Roles:       []gauth.TRole{gauth.USER},
 		Rules:       []string{""},
 	}
 
@@ -261,7 +282,7 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 		Login       string
 		Description string
 		Status      gauth.TStatus
-		Role        []gauth.TRole
+		Roles       []gauth.TRole
 		Rules       string
 	}{
 		Login: user,
@@ -275,7 +296,7 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Description = profile.Description
 	data.Status = profile.Status
-	data.Role = profile.Role
+	data.Roles = profile.Roles
 	for _, v := range profile.Rules {
 		data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
 	}
@@ -358,7 +379,7 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
-		Role:        []gauth.TRole{gauth.TRole(role)},
+		Roles:       []gauth.TRole{gauth.TRole(role)},
 		Rules:       rules,
 	}
 

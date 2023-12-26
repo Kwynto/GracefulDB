@@ -85,21 +85,19 @@ func (t TStatus) IsGood() bool {
 type TProfile struct {
 	Description string
 	Status      TStatus
-	Role        []TRole
+	Roles       []TRole
 	Rules       []string // []tRule
 }
 
 func (t TProfile) AccessIsAllowed() bool {
 	if t.Status.IsGood() {
-		for _, role := range t.Role {
+		for _, role := range t.Roles {
 			if role.IsNotUser() {
 				return true
 			}
 		}
 	}
-
 	return false
-	// return t.Status.IsGood() && t.Role.IsNotUser()
 }
 
 func (t TProfile) AccessIsDenied() bool {
@@ -107,14 +105,13 @@ func (t TProfile) AccessIsDenied() bool {
 		return true
 	}
 
-	for _, role := range t.Role {
+	for _, role := range t.Roles {
 		if role.IsNotUser() {
 			return false
 		}
 	}
 
 	return true
-	// return t.Status.IsBad() || t.Role.IsUser()
 }
 
 // Chacking of authorization.
@@ -123,27 +120,13 @@ func (t TProfile) IsAuth(minAccess TRole) bool {
 		return false
 	}
 
-	for _, role := range t.Role {
+	for _, role := range t.Roles {
 		if role <= minAccess && role != 0 {
 			return true
 		}
 	}
 
 	return false
-
-	// if t.AccessIsDenied() {
-	// 	return false
-	// }
-
-	// if t.Role > minAccess {
-	// 	return false
-	// }
-
-	// if t.Role == 0 {
-	// 	return false
-	// }
-
-	// return true
 }
 
 type tAuth map[string]string // map[tLogin]tHach
@@ -568,7 +551,7 @@ func accessLoad() {
 		AccessMap[DEFAULT_USER] = TProfile{
 			Description: "This is the main user.",
 			Status:      ACTIVE,
-			Role:        []TRole{ADMIN},
+			Roles:       []TRole{ADMIN},
 			Rules:       []string{""},
 		}
 
