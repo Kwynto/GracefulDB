@@ -60,8 +60,8 @@ var html3 string = `
                         <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
                     </div>
                     <div class="ms-3">
-                        <h6 class="mb-0">User Name</h6>
-                        <span>Role</span>
+                        <h6 class="mb-0">{{ .Login }}</h6>
+                        <span>{{ .Roles }}</span>
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
@@ -89,7 +89,7 @@ var html3 string = `
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img class="rounded-circle me-lg-2" src="./static/img/user.png" alt="" style="width: 40px; height: 40px;">
-                            <span class="d-none d-lg-inline-flex">User Name</span>
+                            <span class="d-none d-lg-inline-flex">{{ .Login }}</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-secondary border-1 rounded-0 rounded-bottom m-0">
                             <a class="dropdown-item" hx-get="/hx/nav/dashboard" hx-target="#idMainUnit"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
