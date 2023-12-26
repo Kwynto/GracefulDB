@@ -50,7 +50,7 @@ func IsolatedAuth(w http.ResponseWriter, r *http.Request, minAccess gauth.TRole)
 		return true
 	}
 
-	if !profile.IsAuth(gauth.ENGINEER) {
+	if !profile.IsAuth(minAccess) {
 		return true
 	}
 

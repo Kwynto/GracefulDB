@@ -11,7 +11,7 @@ var Default string = `
 var AccessDenied string = `
 <div class="container-fluid pt-4 px-4">
     <div class="bg-secondary text-center rounded p-4">
-		<i class="fa fa-circle-exclamation"></i> Warning: You are not allowed access to this section.
+		<i class="fa fa-exclamation-circle"></i> Warning: You are not allowed access to this section.
     </div>
 </div>
 `
