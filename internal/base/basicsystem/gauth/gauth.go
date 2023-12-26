@@ -38,27 +38,27 @@ func (t TRole) String() string {
 }
 
 func (t TRole) IsSystem() bool {
-	return t == 0
+	return t == SYSTEM
 }
 
 func (t TRole) IsAdmin() bool {
-	return t == 1
+	return t == ADMIN
 }
 
 func (t TRole) IsManager() bool {
-	return t == 2
+	return t == MANAGER
 }
 
 func (t TRole) IsEngineer() bool {
-	return t == 3
+	return t == ENGINEER
 }
 
 func (t TRole) IsUser() bool {
-	return t == 4
+	return t == USER
 }
 
 func (t TRole) IsNotUser() bool {
-	return t != 4
+	return t != USER
 }
 
 type TStatus int
@@ -85,16 +85,36 @@ func (t TStatus) IsGood() bool {
 type TProfile struct {
 	Description string
 	Status      TStatus
-	Role        TRole
+	Role        []TRole
 	Rules       []string // []tRule
 }
 
 func (t TProfile) AccessIsAllowed() bool {
-	return t.Status.IsGood() && t.Role.IsNotUser()
+	if t.Status.IsGood() {
+		for _, role := range t.Role {
+			if role.IsNotUser() {
+				return true
+			}
+		}
+	}
+
+	return false
+	// return t.Status.IsGood() && t.Role.IsNotUser()
 }
 
 func (t TProfile) AccessIsDenied() bool {
-	return t.Status.IsBad() || t.Role.IsUser()
+	if t.Status.IsBad() {
+		return true
+	}
+
+	for _, role := range t.Role {
+		if role.IsNotUser() {
+			return false
+		}
+	}
+
+	return true
+	// return t.Status.IsBad() || t.Role.IsUser()
 }
 
 // Chacking of authorization.
@@ -103,15 +123,27 @@ func (t TProfile) IsAuth(minAccess TRole) bool {
 		return false
 	}
 
-	if t.Role > minAccess {
-		return false
+	for _, role := range t.Role {
+		if role <= minAccess && role != 0 {
+			return true
+		}
 	}
 
-	if t.Role == 0 {
-		return false
-	}
+	return false
 
-	return true
+	// if t.AccessIsDenied() {
+	// 	return false
+	// }
+
+	// if t.Role > minAccess {
+	// 	return false
+	// }
+
+	// if t.Role == 0 {
+	// 	return false
+	// }
+
+	// return true
 }
 
 type tAuth map[string]string // map[tLogin]tHach
@@ -536,7 +568,7 @@ func accessLoad() {
 		AccessMap[DEFAULT_USER] = TProfile{
 			Description: "This is the main user.",
 			Status:      ACTIVE,
-			Role:        ADMIN,
+			Role:        []TRole{ADMIN},
 			Rules:       []string{""},
 		}
 

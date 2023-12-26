@@ -161,13 +161,21 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			Baned:       false,
 			Login:       key,
 			Status:      gauth.AccessMap[key].Status.String(),
-			Role:        gauth.AccessMap[key].Role.String(),
+			Role:        "",
 			Description: gauth.AccessMap[key].Description,
 		}
 
-		if gauth.AccessMap[key].Role == gauth.SYSTEM {
-			element.System = true
+		for _, role := range gauth.AccessMap[key].Role {
+			if role == gauth.SYSTEM {
+				element.System = true
+			}
+			element.Role = fmt.Sprintf("%s %s", element.Role, role.String())
 		}
+
+		// if gauth.AccessMap[key].Role == gauth.SYSTEM {
+		// 	element.System = true
+		// }
+
 		if key == "root" {
 			element.Superuser = true
 		}
@@ -228,7 +236,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.NEW,
-		Role:        gauth.USER,
+		Role:        []gauth.TRole{gauth.USER},
 		Rules:       []string{""},
 	}
 
@@ -253,7 +261,7 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 		Login       string
 		Description string
 		Status      gauth.TStatus
-		Role        gauth.TRole
+		Role        []gauth.TRole
 		Rules       string
 	}{
 		Login: user,
@@ -347,12 +355,14 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		rules = []string{""}
 	}
 
-	err = gauth.UpdateUser(Login, password, gauth.TProfile{
+	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
-		Role:        gauth.TRole(role),
+		Role:        []gauth.TRole{gauth.TRole(role)},
 		Rules:       rules,
-	})
+	}
+
+	err = gauth.UpdateUser(Login, password, access)
 	if err != nil {
 		slog.Debug("Update user", slog.String("err", err.Error()))
 		data.MsgErr = "The user could not be updated."

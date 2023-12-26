@@ -28,6 +28,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/logout", nav_logout)
 
 	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
+
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
 
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
