@@ -52,7 +52,7 @@ var Accounts string = `
                             <th scope="col">#</th>
                             <th scope="col">Login</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Role</th>
+                            <th scope="col">Roles</th>
                             <th scope="col">Description</th>
                             <th scope="col">Control</th>
                         </tr>
@@ -63,7 +63,7 @@ var Accounts string = `
                             <th scope="row"> {{ $ind }} </th>
                             <td> {{ $data.Login }} </td>
                             <td> {{ $data.Status }} </td>
-                            <td> {{ $data.Role }} </td>
+                            <td> {{ $data.Roles }} </td>
                             <td> {{ $data.Description }} </td>
                             <td>
                                 <div class="btn-group" role="group">
@@ -253,11 +253,6 @@ var AccountEditFormLoad string = `
                     USER
                 </label>
             </div>
-        </div>
-        <div class="mb-3">
-            <label for="rules-area" class="col-form-label">Rules:</label>
-            <textarea class="form-control" id="rules-area" name="rules" style="height: 150px;">{{.Rules}}</textarea>
-            <p style="color: yellow;">there should be only one rule per line</p>
         </div>
         {{ else }}
             <div class="mb-3">
