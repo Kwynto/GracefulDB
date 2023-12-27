@@ -369,12 +369,33 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
-	if (err != nil || role == 0) && Login != "root" {
-		slog.Debug("Update user", slog.String("err", "incorrect role"))
-		data.MsgErr = "Incorrect role."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
-		return
+	// role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
+	// if (err != nil || role == 0) && Login != "root" {
+	// 	slog.Debug("Update user", slog.String("err", "incorrect role"))
+	// 	data.MsgErr = "Incorrect role."
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+	// 	return
+	// }
+
+	var roles []gauth.TRole
+	if Login != "root" {
+		rolesIn := r.Form["role_names"]
+		for _, role := range rolesIn {
+			switch role {
+			case "SYSTEM":
+				roles = append(roles, gauth.SYSTEM)
+			case "ADMIN":
+				roles = append(roles, gauth.ADMIN)
+			case "MANAGER":
+				roles = append(roles, gauth.MANAGER)
+			case "ENGINEER":
+				roles = append(roles, gauth.ENGINEER)
+			case "USER":
+				roles = append(roles, gauth.USER)
+			default:
+				roles = append(roles, gauth.USER)
+			}
+		}
 	}
 
 	rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
@@ -383,14 +404,14 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	if Login == "root" {
 		desc = ""
 		status = 2
-		role = 1
+		roles = append(roles, gauth.ADMIN)
 		rules = []string{""}
 	}
 
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
-		Roles:       []gauth.TRole{gauth.TRole(role)},
+		Roles:       roles,
 		Rules:       rules,
 	}
 
