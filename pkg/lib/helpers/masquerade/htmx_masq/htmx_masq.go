@@ -163,7 +163,7 @@ var AccountEditFormLoad string = `
     <h1 class="modal-title fs-5" id="editModalLabel">Edit user</h1>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
-{{ if eq .Role 0 }} 
+{{ if .System }} 
 <div class="modal-body text-dark">
     SYSTEM USER (This user cannot be changed.) 
 </div>
@@ -192,13 +192,67 @@ var AccountEditFormLoad string = `
             </select>
         </div>
         <div class="mb-3">
-            <label for="role-select" class="col-form-label">Role:</label>
-            <select class="form-select form-select-sm mb-3" aria-label=".form-select-sm" id="role-select" name="role">
-                {{ if eq .Role 1 }} <option value="1" selected>ADMIN</option> {{ else }} <option value="1">ADMIN</option> {{ end }}
-                {{ if eq .Role 2 }} <option value="2" selected>MANAGER</option> {{ else }} <option value="2">MANAGER</option> {{ end }}
-                {{ if eq .Role 3 }} <option value="3" selected>ENGINEER</option> {{ else }} <option value="3">ENGINEER</option> {{ end }}
-                {{ if eq .Role 4 }} <option value="4" selected>USER</option> {{ else }} <option value="4">USER</option> {{ end }}
-            </select>
+            Roles:<br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="role_names" value="SYSTEM" id="checkEdit0" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "SYSTEM" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                disabled>
+                <label class="form-check-label" for="checkEdit0">
+                    SYSTEM
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="role_names" value="ADMIN" id="checkEdit1" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "ADMIN" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="form-check-label" for="checkEdit1">
+                    ADMIN
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="role_names" value="MANAGER" id="checkEdit2" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "MANAGER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="form-check-label" for="checkEdit2">
+                    MANAGER
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="role_names" value="ENGINEER" id="checkEdit3" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "ENGINEER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="form-check-label" for="checkEdit3">
+                    ENGINEER
+                </label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="role_names" value="USER" id="checkEdit4" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "USER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="form-check-label" for="checkEdit4">
+                    USER
+                </label>
+            </div>
         </div>
         <div class="mb-3">
             <label for="rules-area" class="col-form-label">Rules:</label>

@@ -279,14 +279,16 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
+		System      bool
 		Login       string
 		Description string
 		Status      gauth.TStatus
-		Roles       []gauth.TRole
+		Roles       []string
 		Rules       string
 	}{
-		Login: user,
-		Rules: "",
+		System: false,
+		Login:  user,
+		Rules:  "",
 	}
 
 	profile, err := gauth.GetProfile(user)
@@ -296,7 +298,16 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Description = profile.Description
 	data.Status = profile.Status
-	data.Roles = profile.Roles
+
+	for _, role := range profile.Roles {
+		if role == gauth.SYSTEM {
+			data.System = true
+		}
+		data.Roles = append(data.Roles, role.String())
+	}
+
+	// data.Roles = profile.Roles
+
 	for _, v := range profile.Rules {
 		data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
 	}
