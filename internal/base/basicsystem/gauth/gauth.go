@@ -86,7 +86,7 @@ type TProfile struct {
 	Description string
 	Status      TStatus
 	Roles       []TRole
-	Rules       []string // []tRule
+	// Rules       []string // []tRule
 }
 
 func (t TProfile) AccessIsAllowed() bool {
@@ -552,7 +552,7 @@ func accessLoad() {
 			Description: "This is the main user.",
 			Status:      ACTIVE,
 			Roles:       []TRole{ADMIN},
-			Rules:       []string{""},
+			// Rules:       []string{""},
 		}
 
 		encoder := json.NewEncoder(tempFile)

@@ -24,7 +24,7 @@ type TViewAccountsTable struct {
 	Baned       bool
 	Login       string
 	Status      string
-	Role        string
+	Roles       string
 	Description string
 }
 
@@ -182,7 +182,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			Baned:       false,
 			Login:       key,
 			Status:      gauth.AccessMap[key].Status.String(),
-			Role:        "",
+			Roles:       "",
 			Description: gauth.AccessMap[key].Description,
 		}
 
@@ -190,7 +190,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			if role == gauth.SYSTEM {
 				element.System = true
 			}
-			element.Role = fmt.Sprintf("%s %s", element.Role, role.String())
+			element.Roles = fmt.Sprintf("%s %s", element.Roles, role.String())
 		}
 
 		// if gauth.AccessMap[key].Role == gauth.SYSTEM {
@@ -258,7 +258,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		Description: desc,
 		Status:      gauth.NEW,
 		Roles:       []gauth.TRole{gauth.USER},
-		Rules:       []string{""},
+		// Rules:       []string{""},
 	}
 
 	err = gauth.AddUser(Login, password, access)
@@ -279,14 +279,16 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 
 	user := strings.TrimSpace(r.URL.Query().Get("user"))
 	data := struct {
+		System      bool
 		Login       string
 		Description string
 		Status      gauth.TStatus
-		Roles       []gauth.TRole
-		Rules       string
+		Roles       []string
+		// Rules       string
 	}{
-		Login: user,
-		Rules: "",
+		System: false,
+		Login:  user,
+		// Rules:  "",
 	}
 
 	profile, err := gauth.GetProfile(user)
@@ -296,10 +298,19 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Description = profile.Description
 	data.Status = profile.Status
-	data.Roles = profile.Roles
-	for _, v := range profile.Rules {
-		data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
+
+	for _, role := range profile.Roles {
+		if role == gauth.SYSTEM {
+			data.System = true
+		}
+		data.Roles = append(data.Roles, role.String())
 	}
+
+	// data.Roles = profile.Roles
+
+	// for _, v := range profile.Rules {
+	// 	data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
+	// }
 
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, data)
 }
@@ -358,29 +369,50 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
-	if (err != nil || role == 0) && Login != "root" {
-		slog.Debug("Update user", slog.String("err", "incorrect role"))
-		data.MsgErr = "Incorrect role."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
-		return
+	// role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
+	// if (err != nil || role == 0) && Login != "root" {
+	// 	slog.Debug("Update user", slog.String("err", "incorrect role"))
+	// 	data.MsgErr = "Incorrect role."
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+	// 	return
+	// }
+
+	var roles []gauth.TRole
+	if Login != "root" {
+		rolesIn := r.Form["role_names"]
+		for _, role := range rolesIn {
+			switch role {
+			case "SYSTEM":
+				roles = append(roles, gauth.SYSTEM)
+			case "ADMIN":
+				roles = append(roles, gauth.ADMIN)
+			case "MANAGER":
+				roles = append(roles, gauth.MANAGER)
+			case "ENGINEER":
+				roles = append(roles, gauth.ENGINEER)
+			case "USER":
+				roles = append(roles, gauth.USER)
+			default:
+				roles = append(roles, gauth.USER)
+			}
+		}
 	}
 
-	rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
-	rules := strings.Split(rulesIn, "\n")
+	// rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
+	// rules := strings.Split(rulesIn, "\n")
 
 	if Login == "root" {
 		desc = ""
 		status = 2
-		role = 1
-		rules = []string{""}
+		roles = append(roles, gauth.ADMIN)
+		// rules = []string{""}
 	}
 
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
-		Roles:       []gauth.TRole{gauth.TRole(role)},
-		Rules:       rules,
+		Roles:       roles,
+		// Rules:       rules,
 	}
 
 	err = gauth.UpdateUser(Login, password, access)
