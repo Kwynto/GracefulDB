@@ -139,6 +139,10 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
+Profile block
+*/
+
+/*
 Dashboard block
 */
 
