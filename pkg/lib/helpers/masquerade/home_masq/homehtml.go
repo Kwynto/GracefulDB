@@ -96,6 +96,8 @@ var html3 string = `
                             <a class="dropdown-item" hx-get="/hx/nav/databases" hx-target="#idMainUnit"><i class="fa fa-database me-2"></i>Databases</a>
                             <a class="dropdown-item" hx-get="/hx/nav/accounts" hx-target="#idMainUnit"><i class="fa fa-users me-2"></i>Accounts</a>
                             <a class="dropdown-item" hx-get="/hx/nav/settings" hx-target="#idMainUnit"><i class="fa fa-cogs me-2"></i>Settings</a>
+                            <hr>
+                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="fa fa-user me-2"></i>Your profile</a>
                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="fa fa-sign-out-alt me-2"></i>Log Out </a>
                         </div>
                     </div>
@@ -125,6 +127,38 @@ var html3 string = `
 
         <!-- Back to Top -->
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    </div>
+
+    <!-- Modal Profile -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content bg-light" id="profileModalSpace">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="profileModalLabel">Your profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-dark">
+                    <form id="profile-user-form" hx-post="/hx/accounts/profile_ok" hx-target="#profileModalSpace" hx-trigger="submit">
+                        <div class="mb-3">
+                            <label for="login-input" class="col-form-label">Login:</label>
+                            <input type="hidden" class="form-control" name="login" id="login-input" value="" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password-input" class="col-form-label">Password:</label>
+                            <input type="password" class="form-control" name="password" id="password-input">
+                        </div>
+                        <div class="mb-3">
+                            <label for="desc-input" class="col-form-label">Description:</label>
+                            <input type="text" class="form-control" name="desc" id="desc-input">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="profile-user-form" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal Logout -->

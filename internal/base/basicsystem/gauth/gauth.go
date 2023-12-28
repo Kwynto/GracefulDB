@@ -89,40 +89,46 @@ type TProfile struct {
 	// Rules       []string // []tRule
 }
 
-func (t TProfile) AccessIsAllowed() bool {
-	if t.Status.IsGood() {
-		for _, role := range t.Roles {
-			if role.IsNotUser() {
-				return true
-			}
-		}
-	}
-	return false
-}
+// func (t TProfile) AccessIsAllowed() bool {
+// 	if t.Status.IsGood() {
+// 		for _, role := range t.Roles {
+// 			if role.IsNotUser() {
+// 				return true
+// 			}
+// 		}
+// 	}
+// 	return false
+// }
 
-func (t TProfile) AccessIsDenied() bool {
-	if t.Status.IsBad() {
-		return true
-	}
+// func (t TProfile) AccessIsDenied() bool {
+// 	return t.Status.IsBad()
+// 	// if t.Status.IsBad() {
+// 	// 	return true
+// 	// }
 
-	for _, role := range t.Roles {
-		if role.IsNotUser() {
-			return false
-		}
-	}
+// 	// for _, role := range t.Roles {
+// 	// 	if role.IsNotUser() {
+// 	// 		return false
+// 	// 	}
+// 	// }
 
-	return true
-}
+// 	// return true
+// }
 
 // Chacking of authorization.
-func (t TProfile) IsAuth(minAccess TRole) bool {
-	if t.AccessIsDenied() {
+func (t TProfile) IsAllowed(rules []TRole) bool {
+	if t.Status.IsBad() {
 		return false
 	}
 
 	for _, role := range t.Roles {
-		if role <= minAccess && role != 0 {
+		if role == ADMIN {
 			return true
+		}
+		for _, rule := range rules {
+			if role == rule && role != 0 {
+				return true
+			}
 		}
 	}
 
