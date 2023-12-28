@@ -41,7 +41,7 @@ func (ifs isolatedFS) Open(path string) (http.File, error) {
 }
 
 // Isolation of authorization.
-func IsolatedAuth(w http.ResponseWriter, r *http.Request, minAccess gauth.TRole) bool {
+func IsolatedAuth(w http.ResponseWriter, r *http.Request, rules []gauth.TRole) bool {
 	sesID := gosession.Start(&w, r)
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
@@ -50,7 +50,7 @@ func IsolatedAuth(w http.ResponseWriter, r *http.Request, minAccess gauth.TRole)
 		return true
 	}
 
-	if !profile.IsAuth(minAccess) {
+	if !profile.IsAllowe(rules) {
 		return true
 	}
 

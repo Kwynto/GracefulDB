@@ -35,7 +35,7 @@ The main block
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	if IsolatedAuth(w, r, gauth.ENGINEER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		logout(w, r)
 		return
 	}
@@ -143,7 +143,7 @@ Dashboard block
 */
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ENGINEER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -156,7 +156,7 @@ Databases block
 */
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ENGINEER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -169,7 +169,7 @@ Accounts block
 */
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -213,7 +213,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_create_load_form(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -221,7 +221,7 @@ func account_create_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_create_ok(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -272,7 +272,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -316,7 +316,7 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_edit_ok(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -427,7 +427,7 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -448,7 +448,7 @@ func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_ban_ok(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -490,7 +490,7 @@ func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -511,7 +511,7 @@ func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_unban_ok(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -553,7 +553,7 @@ func account_unban_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_del_load_form(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -574,7 +574,7 @@ func account_del_load_form(w http.ResponseWriter, r *http.Request) {
 }
 
 func account_del_ok(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.MANAGER) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -620,7 +620,7 @@ Settings block
 */
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ADMIN) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -630,7 +630,7 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ADMIN) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -649,7 +649,7 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ADMIN) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -668,7 +668,7 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ADMIN) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
@@ -687,7 +687,7 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, gauth.ADMIN) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}

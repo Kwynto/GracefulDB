@@ -115,14 +115,19 @@ func (t TProfile) AccessIsDenied() bool {
 }
 
 // Chacking of authorization.
-func (t TProfile) IsAuth(minAccess TRole) bool {
+func (t TProfile) IsAllowe(rules []TRole) bool {
 	if t.AccessIsDenied() {
 		return false
 	}
 
 	for _, role := range t.Roles {
-		if role <= minAccess && role != 0 {
+		if role == ADMIN {
 			return true
+		}
+		for _, rule := range rules {
+			if role == rule && role != 0 {
+				return true
+			}
 		}
 	}
 
