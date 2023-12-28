@@ -35,7 +35,7 @@ The main block
 // Handler after authorization
 func homeDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
 		logout(w, r)
 		return
 	}
@@ -143,7 +143,7 @@ Dashboard block
 */
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
-	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}

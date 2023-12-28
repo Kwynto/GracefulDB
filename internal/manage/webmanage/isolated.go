@@ -50,7 +50,7 @@ func IsolatedAuth(w http.ResponseWriter, r *http.Request, rules []gauth.TRole) b
 		return true
 	}
 
-	if !profile.IsAllowe(rules) {
+	if !profile.IsAllowed(rules) {
 		return true
 	}
 
