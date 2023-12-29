@@ -444,8 +444,13 @@ var SelfEditFormLoad string = `
             <input type="password" class="form-control" name="password" id="password-input" value="">
         </div>
         <div class="mb-3">
+        {{ if eq .Login "root"}}
+            <label for="desc-input" class="col-form-label">Description:</label> <b>{{.Desc}}</b>
+            <input type="hidden" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+        {{ else }}
             <label for="desc-input" class="col-form-label">Description:</label>
             <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+        {{ end }}
         </div>
     </form>
 </div>
