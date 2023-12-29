@@ -42,6 +42,8 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/accounts/unban_ok", account_unban_ok)
 	mux.HandleFunc("/hx/accounts/del_load_form", account_del_load_form)
 	mux.HandleFunc("/hx/accounts/del_ok", account_del_ok)
+	mux.HandleFunc("/hx/accounts/selfedit_load_form", selfedit_load_form)
+	mux.HandleFunc("/hx/accounts/selfedit_ok", selfedit_ok)
 
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
 	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)

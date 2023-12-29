@@ -97,7 +97,7 @@ var html3 string = `
                             <a class="dropdown-item" hx-get="/hx/nav/accounts" hx-target="#idMainUnit"><i class="fa fa-users me-2"></i>Accounts</a>
                             <a class="dropdown-item" hx-get="/hx/nav/settings" hx-target="#idMainUnit"><i class="fa fa-cogs me-2"></i>Settings</a>
                             <hr>
-                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="fa fa-user me-2"></i>Your profile</a>
+                            <a class="dropdown-item" hx-get="/hx/accounts/selfedit_load_form" hx-target="#profileModalSpace" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="fa fa-user me-2"></i>Your profile</a>
                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="fa fa-sign-out-alt me-2"></i>Log Out </a>
                         </div>
                     </div>
@@ -138,7 +138,7 @@ var html3 string = `
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-dark">
-                    <form id="profile-user-form" hx-post="/hx/accounts/profile_ok" hx-target="#profileModalSpace" hx-trigger="submit">
+                    <form id="profile-user-form" hx-post="/hx/accounts/selfedit_ok" hx-target="#profileModalSpace" hx-trigger="submit">
                         <div class="mb-3">
                             <label for="login-input" class="col-form-label">Login:</label>
                             <input type="hidden" class="form-control" name="login" id="login-input" value="" disabled>
