@@ -34,6 +34,9 @@ const (
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_OK       = "AccountDelFormOk"
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD     = "AccountDelFormLoad"
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR    = "AccountDelFormError"
+	BLOCK_TEMP_ACCOUNT_SELFEDIT_OK       = "AccountSelfeditFormOk"
+	BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD     = "AccountSelfeditFormLoad"
+	BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR    = "AccountSelfeditFormError"
 	BLOCK_TEMP_SETTINGS                  = "Settings"
 )
 
@@ -194,6 +197,27 @@ func parseTemplates() {
 		return
 	}
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_OK).Parse(htmx_masq.SelfEditFormOk)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD).Parse(htmx_masq.SelfEditFormLoad)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD] = ts
+
+	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR).Parse(htmx_masq.SelfEditFormError)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR] = ts
 
 	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
 	if err != nil {

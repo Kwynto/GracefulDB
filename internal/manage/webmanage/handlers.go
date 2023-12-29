@@ -142,6 +142,89 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 Profile block
 */
 
+func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, nil)
+		return
+	}
+
+	data := struct {
+		Login string
+		Desc  string
+	}{
+		Login: login,
+		Desc:  profile.Description,
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD].Execute(w, data)
+}
+
+func selfedit_ok(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		// http.Error(w, "Bad request", http.StatusBadRequest)
+		nav_default(w, r)
+		return
+	}
+
+	var data = struct {
+		MsgErr string
+	}{
+		MsgErr: "",
+	}
+
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		data.MsgErr = "Unknown user."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+		return
+	}
+
+	password := strings.TrimSpace(r.PostForm.Get("password"))
+	if password == "" {
+		slog.Debug("Update user", slog.String("err", "an empty password"))
+		data.MsgErr = "The password cannot be empty."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+		return
+	}
+
+	desc := strings.TrimSpace(r.PostForm.Get("desc"))
+	profile.Description = desc
+
+	err = gauth.UpdateUser(login, password, profile)
+	if err != nil {
+		slog.Debug("Update user", slog.String("err", err.Error()))
+		data.MsgErr = "The user could not be updated."
+		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK].Execute(w, nil)
+}
+
 /*
 Dashboard block
 */

@@ -415,3 +415,60 @@ var AccountDelFormError string = `
 <div class="modal-footer">
 </div>
 `
+
+var SelfEditFormOk string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="profileModalLabel">Your profile</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    Congratulations! You have changed your profile.<br>
+</div>
+<div class="modal-footer">
+</div>
+`
+
+var SelfEditFormLoad string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="profileModalLabel">Your profile</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    <form id="profile-user-form" hx-post="/hx/accounts/selfedit_ok" hx-target="#profileModalSpace" hx-trigger="submit">
+        <div class="mb-3">
+            <label for="login-input" class="col-form-label">Login:</label> <b>{{ .Login }}</b>
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}" disabled>
+        </div>
+        <div class="mb-3">
+            <label for="password-input" class="col-form-label">Password:</label>
+            <input type="password" class="form-control" name="password" id="password-input" value="">
+        </div>
+        <div class="mb-3">
+        {{ if eq .Login "root"}}
+            <label for="desc-input" class="col-form-label">Description:</label> <b>{{.Desc}}</b>
+            <input type="hidden" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+        {{ else }}
+            <label for="desc-input" class="col-form-label">Description:</label>
+            <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+        {{ end }}
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="submit" form="profile-user-form" class="btn btn-primary">Save</button>
+</div>
+`
+
+var SelfEditFormError string = `
+<div class="modal-header">
+    <h1 class="modal-title fs-5" id="profileModalLabel">Your profile</h1>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<div class="modal-body text-dark">
+    Error update the profile.<br>
+    <p style="color: red;">{{.MsgErr}}</p>
+</div>
+<div class="modal-footer">
+</div>
+`
