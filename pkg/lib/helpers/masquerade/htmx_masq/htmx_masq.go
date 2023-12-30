@@ -115,21 +115,21 @@ var AccountCreateFormLoad string = `
     <form id="create-user-form" hx-post="/hx/accounts/create_ok" hx-target="#createModalSpace" hx-trigger="submit">
         <div class="mb-3">
             <label for="login-input" class="col-form-label">Login:</label>
-            <input type="text" class="form-control" name="login" id="login-input">
+            <input type="text" class="form-control" name="login" id="login-input" placeholder="login">
         </div>
         <div class="mb-3">
             <label for="password-input" class="col-form-label">Password:</label>
-            <input type="password" class="form-control" name="password" id="password-input">
+            <input type="password" class="form-control" name="password" id="password-input" placeholder="password">
         </div>
         <div class="mb-3">
             <label for="desc-input" class="col-form-label">Description:</label>
-            <input type="text" class="form-control" name="desc" id="desc-input">
+            <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description">
         </div>
     </form>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" form="create-user-form" class="btn btn-primary">Create</button>
+    <button type="submit" form="create-user-form" class="btn btn-success">Create</button>
 </div>
 `
 
@@ -176,12 +176,12 @@ var AccountEditFormLoad string = `
         </div>
         <div class="mb-3">
             <label for="password-input" class="col-form-label">New password:</label>
-            <input type="password" class="form-control" name="password" id="password-input" value="">
+            <input type="password" class="form-control" name="password" id="password-input" placeholder="password" value="">
         </div>
         {{ if ne .Login "root" }} 
         <div class="mb-3">
             <label for="desc-input" class="col-form-label">Description:</label>
-            <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Description}}">
+            <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Description}}">
         </div>
         <div class="mb-3">
             <label for="status-select" class="col-form-label">Status:</label>{{ if eq .Status 0 }} UNDEFINED (You must select the status) {{ end }}
@@ -265,7 +265,7 @@ var AccountEditFormLoad string = `
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" form="edit-user-form" class="btn btn-primary">Save</button>
+    <button type="submit" form="edit-user-form" class="btn btn-success">Save</button>
 </div>
 {{ end }}
 `
@@ -311,7 +311,7 @@ var AccountBanFormLoad string = `
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" form="ban-user-form" class="btn btn-primary">Block</button>
+    <button type="submit" form="ban-user-form" class="btn btn-warning">Block</button>
 </div>
 `
 
@@ -355,7 +355,7 @@ var AccountUnBanFormLoad string = `
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" form="unban-user-form" class="btn btn-primary">UnBlock</button>
+    <button type="submit" form="unban-user-form" class="btn btn-warning">UnBlock</button>
 </div>
 `
 
@@ -440,8 +440,8 @@ var SelfEditFormLoad string = `
             <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}" disabled>
         </div>
         <div class="mb-3">
-            <label for="password-input" class="col-form-label">Password:</label>
-            <input type="password" class="form-control" name="password" id="password-input" value="">
+            <label for="password-input" class="col-form-label">New password:</label>
+            <input type="password" class="form-control" name="password" id="password-input" placeholder="password" value="">
         </div>
         <div class="mb-3">
         {{ if eq .Login "root"}}
@@ -449,14 +449,14 @@ var SelfEditFormLoad string = `
             <input type="hidden" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
         {{ else }}
             <label for="desc-input" class="col-form-label">Description:</label>
-            <input type="text" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+            <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Desc}}">
         {{ end }}
         </div>
     </form>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    <button type="submit" form="profile-user-form" class="btn btn-primary">Save</button>
+    <button type="submit" form="profile-user-form" class="btn btn-success">Save</button>
 </div>
 `
 
