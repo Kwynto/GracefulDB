@@ -45,7 +45,6 @@ func (c *Closer) AddHandler(f Handler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// c.funcs = append(c.funcs, f)
 	c.funcs[fmt.Sprint(f)] = f
 	c.counter++
 }
@@ -72,10 +71,6 @@ func (c *Closer) RunAndDelHandler(f Handler) {
 
 	key := fmt.Sprint(f)
 	delete(c.funcs, key)
-	// if _, ok := c.funcs[key]; ok {
-	// 	delete(c.funcs, key)
-	// 	c.counter--
-	// }
 }
 
 func (c *Closer) Close(ctx context.Context) error {

@@ -86,34 +86,7 @@ type TProfile struct {
 	Description string
 	Status      TStatus
 	Roles       []TRole
-	// Rules       []string // []tRule
 }
-
-// func (t TProfile) AccessIsAllowed() bool {
-// 	if t.Status.IsGood() {
-// 		for _, role := range t.Roles {
-// 			if role.IsNotUser() {
-// 				return true
-// 			}
-// 		}
-// 	}
-// 	return false
-// }
-
-// func (t TProfile) AccessIsDenied() bool {
-// 	return t.Status.IsBad()
-// 	// if t.Status.IsBad() {
-// 	// 	return true
-// 	// }
-
-// 	// for _, role := range t.Roles {
-// 	// 	if role.IsNotUser() {
-// 	// 		return false
-// 	// 	}
-// 	// }
-
-// 	// return true
-// }
 
 // Chacking of authorization.
 func (t TProfile) IsAllowed(rules []TRole) bool {
@@ -413,11 +386,6 @@ func CheckTicket(ticket string) (login string, access TProfile, newticket string
 	if ok1 {
 		access, ok2 := AccessMap[login]
 		if ok2 {
-			// oldTicket, ok3 := oldTicketMap[login]
-			// if ok3 {
-			// 	delete(oldTicketMap, login)
-			// 	delete(reversOldTicketMap, oldTicket)
-			// }
 			return login, access, newticket, nil
 		}
 		return "", TProfile{}, "", errors.New("authorization failed")
@@ -558,7 +526,6 @@ func accessLoad() {
 			Description: "This is the main user.",
 			Status:      ACTIVE,
 			Roles:       []TRole{ADMIN},
-			// Rules:       []string{""},
 		}
 
 		encoder := json.NewEncoder(tempFile)

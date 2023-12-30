@@ -107,7 +107,6 @@ func Start(cfg *config.Config) {
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
 	if err := srvRest.Shutdown(ctx); err != nil {
-		// slog.Error("There was a problem with stopping the REST-server", slog.String("err", err.Error()))
 		msg := fmt.Sprintf("There was a problem with stopping the REST-server: %s", err.Error())
 		c.AddMsg(msg)
 	}

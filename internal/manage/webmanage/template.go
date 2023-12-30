@@ -42,187 +42,51 @@ const (
 
 var TemplatesMap = make(map[string]*template.Template)
 
+func loadTemplateFromVar(name string, temp string) {
+	ts, err := template.New(name).Parse(temp)
+	if err != nil {
+		slog.Debug("Error reading the template", slog.String("err", err.Error()))
+		return
+	}
+	TemplatesMap[name] = ts
+}
+
 func parseTemplates() {
-	ts, err := template.New(HOME_TEMP_NAME).Parse(home_masq.HtmlHome)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[HOME_TEMP_NAME] = ts
+	loadTemplateFromVar(HOME_TEMP_NAME, home_masq.HtmlHome)
+	loadTemplateFromVar(AUTH_TEMP_NAME, auth_masq.HtmlAuth)
 
-	ts, err = template.New(AUTH_TEMP_NAME).Parse(auth_masq.HtmlAuth)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[AUTH_TEMP_NAME] = ts
+	loadTemplateFromVar(BLOCK_TEMP_DEFAULT, htmx_masq.Default)
+	loadTemplateFromVar(BLOCK_TEMP_ACCESS_DENIED, htmx_masq.AccessDenied)
 
-	ts, err = template.New(BLOCK_TEMP_DEFAULT).Parse(htmx_masq.Default)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_DEFAULT] = ts
+	loadTemplateFromVar(BLOCK_TEMP_DASHBOARD, htmx_masq.Dashboard)
 
-	ts, err = template.New(BLOCK_TEMP_ACCESS_DENIED).Parse(htmx_masq.AccessDenied)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCESS_DENIED] = ts
+	loadTemplateFromVar(BLOCK_TEMP_DATABASES, htmx_masq.Databases)
 
-	TemplatesMap[BLOCK_TEMP_DASHBOARD] = ts
-	ts, err = template.New(BLOCK_TEMP_DASHBOARD).Parse(htmx_masq.Dashboard)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_DASHBOARD] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNTS, htmx_masq.Accounts)
 
-	ts, err = template.New(BLOCK_TEMP_DATABASES).Parse(htmx_masq.Databases)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_DATABASES] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK, htmx_masq.AccountCreateFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD, htmx_masq.AccountCreateFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR, htmx_masq.AccountCreateFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNTS).Parse(htmx_masq.Accounts)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNTS] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK, htmx_masq.AccountEditFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD, htmx_masq.AccountEditFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR, htmx_masq.AccountEditFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK).Parse(htmx_masq.AccountCreateFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK, htmx_masq.AccountBanFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD, htmx_masq.AccountBanFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR, htmx_masq.AccountBanFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD).Parse(htmx_masq.AccountCreateFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK, htmx_masq.AccountUnBanFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD, htmx_masq.AccountUnBanFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR, htmx_masq.AccountUnBanFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR).Parse(htmx_masq.AccountCreateFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_DEL_FORM_OK, htmx_masq.AccountDelFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD, htmx_masq.AccountDelFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR, htmx_masq.AccountDelFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK).Parse(htmx_masq.AccountEditFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK] = ts
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_SELFEDIT_OK, htmx_masq.SelfEditFormOk)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD, htmx_masq.SelfEditFormLoad)
+	loadTemplateFromVar(BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR, htmx_masq.SelfEditFormError)
 
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD).Parse(htmx_masq.AccountEditFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR).Parse(htmx_masq.AccountEditFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK).Parse(htmx_masq.AccountBanFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD).Parse(htmx_masq.AccountBanFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR).Parse(htmx_masq.AccountBanFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK).Parse(htmx_masq.AccountUnBanFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD).Parse(htmx_masq.AccountUnBanFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR).Parse(htmx_masq.AccountUnBanFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_OK).Parse(htmx_masq.AccountDelFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD).Parse(htmx_masq.AccountDelFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR).Parse(htmx_masq.AccountDelFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_OK).Parse(htmx_masq.SelfEditFormOk)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD).Parse(htmx_masq.SelfEditFormLoad)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD] = ts
-
-	ts, err = template.New(BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR).Parse(htmx_masq.SelfEditFormError)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR] = ts
-
-	ts, err = template.New(BLOCK_TEMP_SETTINGS).Parse(htmx_masq.Settings)
-	if err != nil {
-		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
-	}
-	TemplatesMap[BLOCK_TEMP_SETTINGS] = ts
+	loadTemplateFromVar(BLOCK_TEMP_SETTINGS, htmx_masq.Settings)
 }

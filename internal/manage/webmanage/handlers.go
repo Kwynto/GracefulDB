@@ -100,7 +100,6 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 func home(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	if r.URL.Path != "/" {
-		// http.NotFound(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -110,8 +109,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if auth == nil {
 		homeAuth(w, r)
 	} else {
-		// login := fmt.Sprint(auth)
-		// homeDefault(w, r, login)
 		homeDefault(w, r)
 	}
 }
@@ -182,7 +179,6 @@ func selfedit_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
@@ -280,10 +276,6 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 			element.Roles = fmt.Sprintf("%s %s", element.Roles, role.String())
 		}
 
-		// if gauth.AccessMap[key].Role == gauth.SYSTEM {
-		// 	element.System = true
-		// }
-
 		if key == "root" {
 			element.Superuser = true
 		}
@@ -294,8 +286,6 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 		table = append(table, element)
 	}
 
-	// view := table
-	// TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, view)
 	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
 }
 
@@ -321,7 +311,6 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
@@ -345,7 +334,6 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 		Description: desc,
 		Status:      gauth.NEW,
 		Roles:       []gauth.TRole{gauth.USER},
-		// Rules:       []string{""},
 	}
 
 	err = gauth.AddUser(Login, password, access)
@@ -371,11 +359,9 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 		Description string
 		Status      gauth.TStatus
 		Roles       []string
-		// Rules       string
 	}{
 		System: false,
 		Login:  user,
-		// Rules:  "",
 	}
 
 	profile, err := gauth.GetProfile(user)
@@ -392,12 +378,6 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 		}
 		data.Roles = append(data.Roles, role.String())
 	}
-
-	// data.Roles = profile.Roles
-
-	// for _, v := range profile.Rules {
-	// 	data.Rules = fmt.Sprintf("%s\n%s", data.Rules, v)
-	// }
 
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, data)
 }
@@ -416,7 +396,6 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
@@ -456,14 +435,6 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// role, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("role")))
-	// if (err != nil || role == 0) && Login != "root" {
-	// 	slog.Debug("Update user", slog.String("err", "incorrect role"))
-	// 	data.MsgErr = "Incorrect role."
-	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
-	// 	return
-	// }
-
 	var roles []gauth.TRole
 	if Login != "root" {
 		rolesIn := r.Form["role_names"]
@@ -485,21 +456,16 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// rulesIn := strings.TrimSpace(r.PostForm.Get("rules"))
-	// rules := strings.Split(rulesIn, "\n")
-
 	if Login == "root" {
 		desc = ""
 		status = 2
 		roles = append(roles, gauth.ADMIN)
-		// rules = []string{""}
 	}
 
 	access := gauth.TProfile{
 		Description: desc,
 		Status:      gauth.TStatus(status),
 		Roles:       roles,
-		// Rules:       rules,
 	}
 
 	err = gauth.UpdateUser(Login, password, access)
@@ -548,7 +514,6 @@ func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
@@ -611,7 +576,6 @@ func account_unban_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
@@ -674,7 +638,6 @@ func account_del_ok(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		// http.Error(w, "Bad request", http.StatusBadRequest)
 		nav_default(w, r)
 		return
 	}
