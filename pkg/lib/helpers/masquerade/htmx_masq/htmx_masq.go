@@ -30,6 +30,14 @@ var Databases string = `
 	    <h4>Databases</h4>
     </div>
 </div>
+
+<!-- Footer Start -->
+<div class="container-fluid pt-4 px-4 sticky-foot">
+    <div class="bg-secondary rounded-top p-4">
+        Footer
+    </div>
+</div>
+<!-- Footer End -->
 `
 
 var Accounts string = `

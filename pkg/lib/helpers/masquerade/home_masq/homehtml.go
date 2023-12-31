@@ -70,6 +70,9 @@ var html3 string = `
                     <a hx-get="/hx/nav/accounts" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-users me-2"></i>Accounts</a>
                     <a hx-get="/hx/nav/settings" hx-target="#idMainUnit" class="nav-item nav-link"><i class="fa fa-cogs me-2"></i>Settings</a>
                 </div>
+                <div class="sticky-foot">
+                    &nbsp; &copy; <a href="http://www.gracefuldb.dev/" target="_blank">GracefulDB Site</a>.
+                </div>
             </nav>
         </div>
         <!-- Sidebar End -->
@@ -108,25 +111,9 @@ var html3 string = `
             <div id="idMainUnit">
             </div>
 
-            <!-- Footer Start -->
-            <div class="container-fluid pt-4 px-4">
-                <div class="bg-secondary rounded-top p-4">
-                    <div class="row">
-                        <div class="col-12 col-sm-6 text-center text-sm-start">
-                            &copy; <a target="_blank" href="http://gracefuldb.dev/">GracefulDB</a> 
-                        </div>
-                        <div class="col-12 col-sm-6 text-center text-sm-end">
-                            <br>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Footer End -->
         </div>
         <!-- Content End -->
 
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
     </div>
 
     <!-- Modal Profile -->
