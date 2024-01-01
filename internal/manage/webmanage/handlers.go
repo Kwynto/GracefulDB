@@ -247,6 +247,45 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
+func database_request(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		nav_default(w, r)
+		return
+	}
+
+	request := strings.TrimSpace(r.PostForm.Get("request"))
+
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+
+	// TODO: Make request to DBMS
+	answer := "This is answer"
+
+	data := struct {
+		From    string
+		Request string
+		Answer  string
+	}{
+		From:    login,
+		Request: request,
+		Answer:  answer,
+	}
+	TemplatesMap[BLOCK_TEMP_DATABASE_REQUEST_ANSWER].Execute(w, data)
+}
+
 /*
 Accounts block
 */

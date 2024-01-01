@@ -14,10 +14,13 @@ const (
 	HOME_TEMP_NAME = "Home"
 	AUTH_TEMP_NAME = "Auth"
 
-	BLOCK_TEMP_DEFAULT                   = "Default"
-	BLOCK_TEMP_ACCESS_DENIED             = "AccessDenied"
-	BLOCK_TEMP_DASHBOARD                 = "Dashboard"
-	BLOCK_TEMP_DATABASES                 = "Databases"
+	BLOCK_TEMP_DEFAULT       = "Default"
+	BLOCK_TEMP_ACCESS_DENIED = "AccessDenied"
+	BLOCK_TEMP_DASHBOARD     = "Dashboard"
+
+	BLOCK_TEMP_DATABASES               = "Databases"
+	BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "DatabaseRequestAnswer"
+
 	BLOCK_TEMP_ACCOUNTS                  = "Accounts"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "AccountCreateFormOk"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
@@ -61,6 +64,7 @@ func parseTemplates() {
 	loadTemplateFromVar(BLOCK_TEMP_DASHBOARD, htmx_masq.Dashboard)
 
 	loadTemplateFromVar(BLOCK_TEMP_DATABASES, htmx_masq.Databases)
+	loadTemplateFromVar(BLOCK_TEMP_DATABASE_REQUEST_ANSWER, htmx_masq.DatabaseRequestAnswer)
 
 	loadTemplateFromVar(BLOCK_TEMP_ACCOUNTS, htmx_masq.Accounts)
 
