@@ -11,7 +11,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
