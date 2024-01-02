@@ -5,19 +5,23 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
-	"github.com/Kwynto/GracefulDB/internal/base/core"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 var stopSignal = make(chan struct{}, 1)
 
-func Run(ctx context.Context, cfg *config.Config) error {
+func Run(ctx context.Context, cfg *config.Config) (err error) {
+	op := "internal -> server-> Run"
+	defer func() { e.Wrapper(op, err) }()
+
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
 	closer.AddHandler(core.Shutdown) // Register a shutdown handler.

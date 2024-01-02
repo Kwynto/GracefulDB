@@ -11,8 +11,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 const (
@@ -305,8 +306,11 @@ func updateProfile(login string, access TProfile) error {
 // Public functions
 
 // Adding a user
-func AddUser(login string, password string, access TProfile) error {
+func AddUser(login string, password string, access TProfile) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> AddUser"
+	defer func() { e.Wrapper(op, err) }()
+
 	if login != "root" {
 		return addUser(login, password, access)
 	}
@@ -314,14 +318,20 @@ func AddUser(login string, password string, access TProfile) error {
 }
 
 // Updating a user
-func UpdateUser(login string, password string, access TProfile) error {
+func UpdateUser(login string, password string, access TProfile) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> UpdateUser"
+	defer func() { e.Wrapper(op, err) }()
+
 	return updateUser(login, password, access)
 }
 
 // Deleting a user
-func DeleteUser(login string) error {
+func DeleteUser(login string) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> DeleteUser"
+	defer func() { e.Wrapper(op, err) }()
+
 	if login != "root" {
 		return deleteUser(login)
 	}
@@ -329,8 +339,11 @@ func DeleteUser(login string) error {
 }
 
 // Blocking the user
-func BlockUser(login string) error {
+func BlockUser(login string) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> BlockUser"
+	defer func() { e.Wrapper(op, err) }()
+
 	if login != "root" {
 		return blockUser(login)
 	}
@@ -338,8 +351,11 @@ func BlockUser(login string) error {
 }
 
 // Unblocking the user
-func UnblockUser(login string) error {
+func UnblockUser(login string) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> UnblockUser"
+	defer func() { e.Wrapper(op, err) }()
+
 	if login != "root" {
 		return unblockUser(login)
 	}
@@ -347,8 +363,11 @@ func UnblockUser(login string) error {
 }
 
 // Updating a profile of a user
-func UpdateProfile(login string, access TProfile) error {
+func UpdateProfile(login string, access TProfile) (err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> UpdateProfile"
+	defer func() { e.Wrapper(op, err) }()
+
 	return updateProfile(login, access)
 }
 
@@ -367,8 +386,11 @@ func CheckUser(user string, password string) bool {
 }
 
 // Get user's profile and access rights
-func GetProfile(user string) (TProfile, error) {
+func GetProfile(user string) (prof TProfile, err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> GetProfile"
+	defer func() { e.Wrapper(op, err) }()
+
 	access, ok := AccessMap[user]
 	if ok {
 		return access, nil
@@ -379,6 +401,9 @@ func GetProfile(user string) (TProfile, error) {
 // Verifying the authenticity of the ticket and obtaining access rights.
 func CheckTicket(ticket string) (login string, access TProfile, newticket string, err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> CheckTicket"
+	defer func() { e.Wrapper(op, err) }()
+
 	block.RLock()
 	defer block.RUnlock()
 
@@ -408,8 +433,11 @@ func CheckTicket(ticket string) (login string, access TProfile, newticket string
 }
 
 // Authorization verification and ticket issuance
-func NewAuth(secret *gtypes.VSecret) (string, error) {
+func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
 	// This function is complete
+	op := "internal -> engine -> gAuth -> NewAuth"
+	defer func() { e.Wrapper(op, err) }()
+
 	var pass string
 
 	if secret.Login == "" {

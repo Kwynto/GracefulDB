@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
 type VAuth struct {

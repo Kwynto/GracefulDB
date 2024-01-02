@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/gosession"
 )
 
@@ -15,8 +16,11 @@ type isolatedFS struct {
 	fs http.FileSystem
 }
 
-func (ifs isolatedFS) Open(path string) (http.File, error) {
-	f, err := ifs.fs.Open(path)
+func (ifs isolatedFS) Open(path string) (f http.File, err error) {
+	op := "internal -> WebManage -> isolated -> Open"
+	defer func() { e.Wrapper(op, err) }()
+
+	f, err = ifs.fs.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +36,6 @@ func (ifs isolatedFS) Open(path string) (http.File, error) {
 			if closeErr != nil {
 				return nil, closeErr
 			}
-
 			return nil, err
 		}
 	}
