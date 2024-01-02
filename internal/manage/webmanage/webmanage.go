@@ -30,6 +30,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
 
 	mux.HandleFunc("/hx/nav/databases", nav_databases)
+	mux.HandleFunc("/hx/databases/request", database_request)
 
 	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
 	mux.HandleFunc("/hx/accounts/create_load_form", account_create_load_form)

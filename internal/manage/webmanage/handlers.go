@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Kwynto/gosession"
 
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
@@ -245,6 +247,52 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 	}
 
 	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
+}
+
+func database_request(w http.ResponseWriter, r *http.Request) {
+	timeR := time.Now().Format("2006-01-02 15:04:05")
+
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	if r.Method != http.MethodPost {
+		nav_default(w, r)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Debug("Bad request", slog.String("err", err.Error()))
+		nav_default(w, r)
+		return
+	}
+
+	request := strings.TrimSpace(r.PostForm.Get("request"))
+
+	sesID := gosession.Start(&w, r)
+	auth := sesID.Get("auth")
+	login := fmt.Sprint(auth)
+
+	answer := sqlanalyzer.Request(&request, &[]string{})
+
+	timeA := time.Now().Format("2006-01-02 15:04:05")
+
+	data := struct {
+		From    string
+		Request string
+		Answer  string
+		TimeR   string
+		TimeA   string
+	}{
+		From:    login,
+		Request: request,
+		Answer:  *answer,
+		TimeR:   timeR,
+		TimeA:   timeA,
+	}
+	TemplatesMap[BLOCK_TEMP_DATABASE_REQUEST_ANSWER].Execute(w, data)
 }
 
 /*
