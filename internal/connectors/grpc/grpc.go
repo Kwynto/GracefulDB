@@ -13,6 +13,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 type tMessageServer struct {
@@ -24,13 +25,16 @@ var address string
 var messageServer tMessageServer
 var grpcServer *grpc.Server
 
-func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (*gs.SResponse, error) {
+func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (response *gs.SResponse, err error) {
+	op := "internal -> connectors -> gRPC -> SQuery"
+	defer func() { e.Wrapper(op, err) }()
+
 	slog.Debug("Request received", slog.String("instruction", r.Instruction), slog.String("placeholder", fmt.Sprint(r.Placeholder)))
 
 	// instructionB := []byte(r.Instruction)
 	// placeholderB := []byte(r.Placeholder)
 
-	response := &gs.SResponse{
+	response = &gs.SResponse{
 		Message: *sqlanalyzer.Request(&r.Instruction, &r.Placeholder),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))
@@ -38,12 +42,15 @@ func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (*gs.SResponse
 	return response, nil
 }
 
-func (tMessageServer) VQuery(ctx context.Context, r *gs.VRequest) (*gs.VResponse, error) {
+func (tMessageServer) VQuery(ctx context.Context, r *gs.VRequest) (response *gs.VResponse, err error) {
+	op := "internal -> connectors -> gRPC -> VQuery"
+	defer func() { e.Wrapper(op, err) }()
+
 	slog.Debug("Request received", slog.String("request", r.Instruction))
 
 	instructionB := []byte(r.Instruction)
 
-	response := &gs.VResponse{
+	response = &gs.VResponse{
 		Message: string(*vqlanalyzer.Request(&instructionB)),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))

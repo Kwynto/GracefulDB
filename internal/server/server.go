@@ -13,11 +13,15 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 var stopSignal = make(chan struct{}, 1)
 
-func Run(ctx context.Context, cfg *config.Config) error {
+func Run(ctx context.Context, cfg *config.Config) (err error) {
+	op := "internal -> server-> Run"
+	defer func() { e.Wrapper(op, err) }()
+
 	// TODO: Load the core of the system
 	go core.Engine(cfg)
 	closer.AddHandler(core.Shutdown) // Register a shutdown handler.
