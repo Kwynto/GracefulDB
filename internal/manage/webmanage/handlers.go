@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Kwynto/gosession"
 
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/base/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
@@ -248,6 +250,8 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 }
 
 func database_request(w http.ResponseWriter, r *http.Request) {
+	timeR := time.Now().Format("2006-01-02 15:04:05")
+
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -271,17 +275,22 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
 
-	// TODO: Make request to DBMS
-	answer := "This is answer"
+	answer := sqlanalyzer.Request(&request, &[]string{})
+
+	timeA := time.Now().Format("2006-01-02 15:04:05")
 
 	data := struct {
 		From    string
 		Request string
 		Answer  string
+		TimeR   string
+		TimeA   string
 	}{
 		From:    login,
 		Request: request,
-		Answer:  answer,
+		Answer:  *answer,
+		TimeR:   timeR,
+		TimeA:   timeA,
 	}
 	TemplatesMap[BLOCK_TEMP_DATABASE_REQUEST_ANSWER].Execute(w, data)
 }

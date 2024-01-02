@@ -51,8 +51,8 @@ var Databases string = `
 `
 
 var DatabaseRequestAnswer string = `
-    <p class="text-white"><b class="text-success">{{.From}}&gt;</b> {{.Request}}</p>
-    <p class="text-info">{{.Answer}}</p>
+    <p class="text-white"><b class="text-primary">Request [{{.TimeR}}] from {{.From}} &gt;</b> {{.Request}}</p>
+    <p class="text-info"><b class="text-success">Answer [{{.TimeA}}] &gt;</b> {{.Answer}}</p>
 `
 
 var Accounts string = `
