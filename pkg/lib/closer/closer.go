@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+const (
+	MIN_SIZE_MAP        = 1
+	MAX_TIME_CLOSE      = 5
+	MICRO_DEFAULT_DELAY = 50
+)
+
 type Handler func(ctx context.Context, c *Closer)
 
 type Closer struct {
@@ -18,12 +24,12 @@ type Closer struct {
 }
 
 var CloseProcs = &Closer{
-	funcs: make(map[string]Handler, 1),
+	funcs: make(map[string]Handler, MIN_SIZE_MAP),
 }
 
 func New() *Closer {
 	return &Closer{
-		funcs: make(map[string]Handler, 1),
+		funcs: make(map[string]Handler, MIN_SIZE_MAP),
 	}
 }
 
@@ -64,7 +70,7 @@ func (c *Closer) RunAndDelHandler(f Handler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	sdCtx, cnl := context.WithTimeout(context.Background(), 5*time.Second)
+	sdCtx, cnl := context.WithTimeout(context.Background(), MAX_TIME_CLOSE*time.Second)
 	defer cnl()
 
 	go f(sdCtx, c)
@@ -74,16 +80,16 @@ func (c *Closer) RunAndDelHandler(f Handler) {
 }
 
 func (c *Closer) Close(ctx context.Context) error {
-	var complete = make(chan struct{}, 1)
+	var complete = make(chan struct{}, MIN_SIZE_MAP)
 
 	for _, f := range c.funcs {
 		go f(ctx, c)
 	}
 
 	go func() {
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(MICRO_DEFAULT_DELAY * time.Millisecond)
 		for {
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(MICRO_DEFAULT_DELAY * time.Millisecond)
 			if c.counter <= 0 {
 				complete <- struct{}{}
 				break
