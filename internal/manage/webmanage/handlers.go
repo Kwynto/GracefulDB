@@ -250,7 +250,7 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 }
 
 func database_request(w http.ResponseWriter, r *http.Request) {
-	timeR := time.Now().Format("2006-01-02 15:04:05")
+	timeR := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
@@ -277,7 +277,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 
 	answer := sqlanalyzer.Request(&request, &[]string{})
 
-	timeA := time.Now().Format("2006-01-02 15:04:05")
+	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	data := struct {
 		From    string
