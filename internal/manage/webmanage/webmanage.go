@@ -12,6 +12,10 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
 )
 
+const (
+	CONSOLE_TIME_FORMAT = "2006-01-02 15:04:05"
+)
+
 var address string
 var muxWeb *http.ServeMux
 
