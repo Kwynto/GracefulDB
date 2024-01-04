@@ -24,7 +24,7 @@ type PrettyHandler struct {
 	env     string
 }
 
-var IoFile io.Writer
+var IoFile *os.File // io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
 
@@ -113,22 +113,16 @@ func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *Prett
 	return h
 }
 
-func openLogFile(name string) (io.Writer, error) {
-	fo, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	if err != nil {
-		return nil, err
-	}
+func openLogFile(name string) *os.File {
+	fo, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 
-	return fo, nil
+	return fo
 }
 
 func setupLogger(logPath, logEnv string) *slog.Logger {
 	var nlog *slog.Logger
 
-	IoFile, err := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+	IoFile := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
 
 	LogHandler = newPrettyHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
