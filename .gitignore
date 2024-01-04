@@ -13,7 +13,7 @@ config/access.json
 config/auth.json
 
 # Logging files
-logs/*.log
+*.log
 
 # Test binary, built with `go test -c`
 *.test
