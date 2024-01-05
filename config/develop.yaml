@@ -4,6 +4,7 @@ shutdown_timeout: 5s
 
 core_settings:
   bucket_size: 800
+  freeze: false
 
 websocket_connector:
   enable: true

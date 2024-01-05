@@ -42,6 +42,10 @@ var Settings string = `
                             <td><h6>Bucket size: </h6></td>
                             <td>{{.CoreSettings.BucketSize}}</td>
                         </tr>
+                        <tr>
+                            <td><h6>Freeze mode: </h6></td>
+                            <td>{{.CoreSettings.FreezeMode}}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

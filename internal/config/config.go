@@ -9,17 +9,18 @@ import (
 )
 
 const (
-	EnvDev  = "dev"
-	EnvProd = "prod"
+	ENV_DEV  = "dev"
+	ENV_PROD = "prod"
 
-	configDefault = "./config/default.yaml"
+	CONFIG_DEFAULT = "./config/default.yaml"
 )
 
 var DisplayConfigPath string
 var DefaultConfig Config
 
 type CoreSettings struct {
-	BucketSize int `yaml:"bucket_size" env-default:"800"`
+	BucketSize int  `yaml:"bucket_size" env-default:"800"`
+	FreezeMode bool `yaml:"freeze"`
 }
 
 type BufferSize struct {
@@ -66,7 +67,7 @@ type Config struct {
 
 func MustLoad(configPath string) *Config {
 	if configPath == "" {
-		configPath = configDefault
+		configPath = CONFIG_DEFAULT
 	}
 
 	// check if file exists
