@@ -4,6 +4,19 @@ This is a DBMS for professionals and extreme loads.
 
 **_This repository is under development._**
 
+**Testing**
+
+Run tests:
+> go test ./... -v
+
+Run tests showing code coverage:
+> go test ./... -cover -v
+
+You can view code coverage in detail in your web browser.  
+To do this, you need to sequentially execute two commands in the console:
+> go test ./... -coverprofile="coverage.out" -v  
+> go tool cover -html="coverage.out"
+
 ## About the author
 
 The author of the project is Constantine Zavezeon (Kwynto).  
