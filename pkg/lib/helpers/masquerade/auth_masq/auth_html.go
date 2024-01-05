@@ -1,6 +1,10 @@
 package auth_masq
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 var html1 string = `
 <!DOCTYPE html>
@@ -447,3 +451,11 @@ Animation Keyframes
 `
 
 var HtmlAuth string = fmt.Sprint(html1, css1, html2)
+
+func Default() (string, error) {
+	str := strings.TrimSpace(HtmlAuth)
+	if str == "" {
+		return str, errors.New("an empty template")
+	}
+	return HtmlAuth, nil
+}
