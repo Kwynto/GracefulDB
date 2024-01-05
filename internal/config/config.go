@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 	"time"
 
@@ -9,17 +8,18 @@ import (
 )
 
 const (
-	EnvDev  = "dev"
-	EnvProd = "prod"
+	ENV_DEV  = "dev"
+	ENV_PROD = "prod"
 
-	configDefault = "./config/default.yaml"
+	CONFIG_DEFAULT = "./config/default.yaml"
 )
 
 var DisplayConfigPath string
 var DefaultConfig Config
 
 type CoreSettings struct {
-	BucketSize int `yaml:"bucket_size" env-default:"800"`
+	BucketSize int  `yaml:"bucket_size" env-default:"800"`
+	FreezeMode bool `yaml:"freeze"`
 }
 
 type BufferSize struct {
@@ -64,20 +64,58 @@ type Config struct {
 	WebServer          `yaml:"web_server"`
 }
 
+func defaultConfig() Config {
+	return Config{
+		Env:             "test",
+		LogPath:         "./logs/",
+		ShutdownTimeOut: 5 * time.Second,
+		CoreSettings: CoreSettings{
+			BucketSize: 800,
+			FreezeMode: false,
+		},
+		WebSocketConnector: WebSocketConnector{
+			Enable:  true,
+			Address: "0.0.0.0",
+			Port:    "8080",
+			BufferSize: BufferSize{
+				Read:  1024,
+				Write: 1024,
+			},
+		},
+		RestConnector: RestConnector{
+			Enable:  true,
+			Address: "0.0.0.0",
+			Port:    "31337",
+		},
+		GrpcConnector: GrpcConnector{
+			Enable:  true,
+			Address: "0.0.0.0",
+			Port:    "3137",
+		},
+		WebServer: WebServer{
+			Enable:  true,
+			Address: "0.0.0.0",
+			Port:    "80",
+		},
+	}
+}
+
 func MustLoad(configPath string) *Config {
 	if configPath == "" {
-		configPath = configDefault
-	}
-
-	// check if file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config file %s does not exist", configPath)
+		configPath = CONFIG_DEFAULT
 	}
 
 	var cfg Config
 
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("cannot read config: %s", configPath)
+	// check if file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// log.Fatalf("config file %s does not exist", configPath)
+		// Default
+		cfg = defaultConfig()
+	} else if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		// log.Fatalf("cannot read config: %s", configPath)
+		// Default
+		cfg = defaultConfig()
 	}
 
 	DisplayConfigPath = configPath
