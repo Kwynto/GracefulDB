@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,6 +19,11 @@ func main() {
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(configPath)
+
+	if config.DefaultConfig.Env == "test" {
+		fmt.Println("You should set up the configuration file correctly.")
+		os.Exit(0)
+	}
 
 	// Init logger: slog
 	prettylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
