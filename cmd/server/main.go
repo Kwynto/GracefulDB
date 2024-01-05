@@ -20,6 +20,8 @@ func main() {
 	configPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(configPath)
 
+	startCtx := context.Background()
+
 	if config.DefaultConfig.Env == "test" {
 		fmt.Println("You should set up the configuration file correctly.")
 		os.Exit(0)
@@ -32,7 +34,7 @@ func main() {
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(startCtx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	if err := server.Run(ctx, &config.DefaultConfig); err != nil {
