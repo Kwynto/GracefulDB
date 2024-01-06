@@ -109,12 +109,8 @@ func MustLoad(configPath string) *Config {
 
 	// check if file exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		// log.Fatalf("config file %s does not exist", configPath)
-		// Default
 		cfg = defaultConfig()
 	} else if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		// log.Fatalf("cannot read config: %s", configPath)
-		// Default
 		cfg = defaultConfig()
 	}
 

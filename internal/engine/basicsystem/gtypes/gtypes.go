@@ -31,3 +31,7 @@ type VAnswer struct {
 	Error       int     `json:"error"`
 	Description string  `json:"description,omitempty"`
 }
+
+func DefaultData() VData {
+	return VData{}
+}

@@ -128,12 +128,12 @@ func Request(instruction *[]byte) *[]byte {
 		return &resB
 	}
 
-	bAnswer, err := json.Marshal(Processing(qry))
-	if err != nil {
-		// ERROR 410 - Server error
-		resB := []byte(fmt.Sprintf("{\"action\":\"response\",\"error\":410,\"description\":\"%s\"}", err.Error()))
-		return &resB
-	}
+	bAnswer, _ := json.Marshal(Processing(qry))
+	// if err != nil {
+	// 	// ERROR 410 - Server error
+	// 	resB := []byte(fmt.Sprintf("{\"action\":\"response\",\"error\":410,\"description\":\"%s\"}", err.Error()))
+	// 	return &resB
+	// }
 
 	return &bAnswer
 }

@@ -24,6 +24,11 @@ const (
 	DEFAULT_PASSWORD = "toor"
 )
 
+var (
+	AuthFile   = AUTH_FILE
+	AccessFile = ACCESS_FILE
+)
+
 type TRole int
 
 const (
@@ -134,10 +139,10 @@ var block sync.RWMutex
 func generateTicket() string {
 	// This function is complete
 	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return ""
-	}
+	rand.Read(b)
+	// if err != nil {
+	// 	return ""
+	// }
 	return fmt.Sprintf("%x", b)
 }
 
@@ -489,12 +494,12 @@ func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
 // Loading hashs of users from a file
 func hashLoad() {
 	// This function is complete
-	_, err := os.Stat(AUTH_FILE)
+	_, err := os.Stat(AuthFile)
 	isFNotEx := os.IsNotExist(err)
 
-	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	tempFile, err := os.OpenFile(AuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AuthFile), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
@@ -506,12 +511,12 @@ func hashLoad() {
 
 		encoder := json.NewEncoder(tempFile)
 		if err := encoder.Encode(HashMap); err != nil {
-			slog.Debug("Error writing authentication data", slog.String("file", AUTH_FILE))
+			slog.Debug("Error writing authentication data", slog.String("file", AuthFile))
 		}
 	} else {
 		decoder := json.NewDecoder(tempFile)
 		if err := decoder.Decode(&HashMap); err != nil {
-			slog.Debug("Error loading the configuration file", slog.String("file", AUTH_FILE))
+			slog.Debug("Error loading the configuration file", slog.String("file", AuthFile))
 		}
 	}
 }
@@ -519,33 +524,33 @@ func hashLoad() {
 // Saving hashs of users in a file
 func hashSave() {
 	// This function is complete
-	if _, err := os.Stat(AUTH_FILE); !os.IsNotExist(err) {
-		if err2 := os.Remove(AUTH_FILE); err2 != nil {
-			slog.Warn("Unable to delete file", slog.String("file", AUTH_FILE), slog.String("err", err2.Error()))
+	if _, err := os.Stat(AuthFile); !os.IsNotExist(err) {
+		if err2 := os.Remove(AuthFile); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", AuthFile), slog.String("err", err2.Error()))
 		}
 	}
 
-	tempFile, err := os.OpenFile(AUTH_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	tempFile, err := os.OpenFile(AuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AuthFile), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
 	encoder := json.NewEncoder(tempFile)
 	if err := encoder.Encode(HashMap); err != nil {
-		slog.Warn("Error writing authentication data", slog.String("file", AUTH_FILE), slog.String("err", err.Error()))
+		slog.Warn("Error writing authentication data", slog.String("file", AuthFile), slog.String("err", err.Error()))
 	}
 }
 
 // Loading access of users from a file
 func accessLoad() {
 	// This function is complete
-	_, err := os.Stat(ACCESS_FILE)
+	_, err := os.Stat(AccessFile)
 	isFNotEx := os.IsNotExist(err)
 
-	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	tempFile, err := os.OpenFile(AccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AccessFile), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
@@ -558,12 +563,12 @@ func accessLoad() {
 
 		encoder := json.NewEncoder(tempFile)
 		if err := encoder.Encode(AccessMap); err != nil {
-			slog.Debug("Error writing authentication data", slog.String("file", ACCESS_FILE))
+			slog.Debug("Error writing authentication data", slog.String("file", AccessFile))
 		}
 	} else {
 		decoder := json.NewDecoder(tempFile)
 		if err := decoder.Decode(&AccessMap); err != nil {
-			slog.Debug("Error loading the configuration file", slog.String("file", ACCESS_FILE))
+			slog.Debug("Error loading the configuration file", slog.String("file", AccessFile))
 		}
 	}
 }
@@ -571,21 +576,21 @@ func accessLoad() {
 // Saving access of users in a file
 func accessSave() {
 	// This function is complete
-	if _, err := os.Stat(ACCESS_FILE); !os.IsNotExist(err) {
-		if err2 := os.Remove(ACCESS_FILE); err2 != nil {
-			slog.Warn("Unable to delete file", slog.String("file", ACCESS_FILE), slog.String("err", err2.Error()))
+	if _, err := os.Stat(AccessFile); !os.IsNotExist(err) {
+		if err2 := os.Remove(AccessFile); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", AccessFile), slog.String("err", err2.Error()))
 		}
 	}
 
-	tempFile, err := os.OpenFile(ACCESS_FILE, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	tempFile, err := os.OpenFile(AccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", AccessFile), slog.String("err", err.Error()))
 	}
 	defer tempFile.Close()
 
 	encoder := json.NewEncoder(tempFile)
 	if err := encoder.Encode(AccessMap); err != nil {
-		slog.Warn("Error writing authentication data", slog.String("file", ACCESS_FILE), slog.String("err", err.Error()))
+		slog.Warn("Error writing authentication data", slog.String("file", AccessFile), slog.String("err", err.Error()))
 	}
 }
 
