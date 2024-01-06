@@ -355,3 +355,404 @@ func Test_deleteUser(t *testing.T) {
 		}
 	})
 }
+
+func Test_blockUser(t *testing.T) {
+	Start()
+
+	t.Run("blockUser() function testing - negative", func(t *testing.T) {
+		if err := blockUser("fakeuser"); err == nil {
+			t.Error("blockUser() error.")
+		}
+	})
+
+	t.Run("blockUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := blockUser(randStr); err != nil {
+			t.Error("blockUser() error.")
+		}
+	})
+
+	t.Run("blockUser() function testing - negative", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+		delete(AccessMap, randStr)
+
+		if err := blockUser(randStr); err == nil {
+			t.Error("blockUser() error.")
+		}
+	})
+}
+
+func Test_unblockUser(t *testing.T) {
+	Start()
+
+	t.Run("unblockUser() function testing - negative", func(t *testing.T) {
+		if err := unblockUser("fakeuser"); err == nil {
+			t.Error("unblockUser() error.")
+		}
+	})
+
+	t.Run("unblockUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := unblockUser(randStr); err != nil {
+			t.Error("unblockUser() error.")
+		}
+	})
+
+	t.Run("unblockUser() function testing - negative", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+		delete(AccessMap, randStr)
+
+		if err := unblockUser(randStr); err == nil {
+			t.Error("unblockUser() error.")
+		}
+	})
+}
+
+func Test_updateProfile(t *testing.T) {
+	Start()
+
+	t.Run("updateProfile() function testing - negative", func(t *testing.T) {
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+
+		if err := updateProfile("fakeuser", prof); err == nil {
+			t.Error("updateProfile() error.")
+		}
+	})
+
+	t.Run("updateProfile() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := updateProfile(randStr, prof); err != nil {
+			t.Error("updateProfile() error.")
+		}
+	})
+}
+
+func Test_AddUser(t *testing.T) {
+	Start()
+
+	t.Run("AddUser() function testing - negative", func(t *testing.T) {
+		prof := TProfile{
+			Status: ACTIVE,
+			Roles:  []TRole{ADMIN},
+		}
+
+		if err := AddUser("root", "toor", prof); err == nil {
+			t.Error("AddUser() error.")
+		}
+	})
+
+	t.Run("AddUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      NEW,
+			Roles:       []TRole{ADMIN},
+		}
+
+		if err := AddUser(randStr, randStr, prof); err != nil {
+			t.Error("AddUser() error.")
+		}
+	})
+}
+
+func Test_UpdateUser(t *testing.T) {
+	Start()
+
+	t.Run("UpdateUser() function testing - negative", func(t *testing.T) {
+		prof := TProfile{
+			Status: ACTIVE,
+			Roles:  []TRole{ADMIN},
+		}
+
+		if err := UpdateUser("fakeuser", "toor", prof); err == nil {
+			t.Error("UpdateUser() error.")
+		}
+	})
+
+	t.Run("UpdateUser() function testing - positive", func(t *testing.T) {
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{ADMIN},
+		}
+
+		if err := UpdateUser("root", "toor", prof); err != nil {
+			t.Error("UpdateUser() error.")
+		}
+	})
+
+	t.Run("UpdateUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := UpdateUser(randStr, randStr, prof); err != nil {
+			t.Error("UpdateUser() error.")
+		}
+	})
+}
+
+func Test_DeleteUser(t *testing.T) {
+	Start()
+
+	t.Run("DeleteUser() function testing - negative", func(t *testing.T) {
+		if err := DeleteUser("fakeuser"); err == nil {
+			t.Error("DeleteUser() error.")
+		}
+	})
+
+	t.Run("DeleteUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := DeleteUser(randStr); err != nil {
+			t.Error("DeleteUser() error.")
+		}
+	})
+
+	t.Run("DeleteUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		secret := gtypes.VSecret{
+			Login:    randStr,
+			Password: randStr,
+		}
+		NewAuth(&secret)
+		NewAuth(&secret)
+
+		if err := DeleteUser(randStr); err != nil {
+			t.Error("DeleteUser() error.")
+		}
+	})
+
+	t.Run("DeleteUser() function testing - negative", func(t *testing.T) {
+		if err := DeleteUser("root"); err == nil {
+			t.Error("DeleteUser() error.")
+		}
+	})
+
+}
+
+func Test_BlockUser(t *testing.T) {
+	Start()
+
+	t.Run("BlockUser() function testing - negative", func(t *testing.T) {
+		if err := BlockUser("fakeuser"); err == nil {
+			t.Error("BlockUser() error.")
+		}
+	})
+
+	t.Run("BlockUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := BlockUser(randStr); err != nil {
+			t.Error("BlockUser() error.")
+		}
+	})
+
+	t.Run("BlockUser() function testing - negative", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+		delete(AccessMap, randStr)
+
+		if err := BlockUser(randStr); err == nil {
+			t.Error("BlockUser() error.")
+		}
+	})
+
+	t.Run("BlockUser() function testing - negative", func(t *testing.T) {
+		if err := BlockUser("root"); err == nil {
+			t.Error("BlockUser() error.")
+		}
+	})
+}
+
+func Test_UnblockUser(t *testing.T) {
+	Start()
+
+	t.Run("UnblockUser() function testing - negative", func(t *testing.T) {
+		if err := UnblockUser("fakeuser"); err == nil {
+			t.Error("UnblockUser() error.")
+		}
+	})
+
+	t.Run("UnblockUser() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := UnblockUser(randStr); err != nil {
+			t.Error("UnblockUser() error.")
+		}
+	})
+
+	t.Run("UnblockUser() function testing - negative", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+		delete(AccessMap, randStr)
+
+		if err := UnblockUser(randStr); err == nil {
+			t.Error("UnblockUser() error.")
+		}
+	})
+
+	t.Run("UnblockUser() function testing - negative", func(t *testing.T) {
+		if err := UnblockUser("root"); err == nil {
+			t.Error("UnblockUser() error.")
+		}
+	})
+}
+
+func Test_UpdateProfile(t *testing.T) {
+	Start()
+
+	t.Run("UpdateProfile() function testing - negative", func(t *testing.T) {
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+
+		if err := UpdateProfile("fakeuser", prof); err == nil {
+			t.Error("UpdateProfile() error.")
+		}
+	})
+
+	t.Run("UpdateProfile() function testing - positive", func(t *testing.T) {
+		randStr := generateTicket()
+		prof := TProfile{
+			Description: "Testing description",
+			Status:      ACTIVE,
+			Roles:       []TRole{USER},
+		}
+		addUser(randStr, randStr, prof)
+
+		if err := UpdateProfile(randStr, prof); err != nil {
+			t.Error("UpdateProfile() error.")
+		}
+	})
+}
+
+func Test_CheckUser(t *testing.T) {
+	Start()
+
+	t.Run("CheckUser() function testing - negative", func(t *testing.T) {
+		if b := CheckUser("fakeuser", "fakeuser"); b {
+			t.Error("CheckUser() error.")
+		}
+	})
+
+	t.Run("CheckUser() function testing - positive", func(t *testing.T) {
+		if b := CheckUser("root", "toor"); !b {
+			t.Error("CheckUser() error.")
+		}
+	})
+
+	t.Run("CheckUser() function testing - negative", func(t *testing.T) {
+		if b := CheckUser("root", "root"); b {
+			t.Error("CheckUser() error.")
+		}
+	})
+}
+
+func Test_GetProfile(t *testing.T) {
+	Start()
+
+	t.Run("GetProfile() function testing - negative", func(t *testing.T) {
+		if _, err := GetProfile("fakeuser"); err == nil {
+			t.Error("GetProfile() error.")
+		}
+	})
+
+	t.Run("GetProfile() function testing - positive", func(t *testing.T) {
+		if _, err := GetProfile("root"); err != nil {
+			t.Error("GetProfile() error.")
+		}
+	})
+
+	t.Run("GetProfile() function testing", func(t *testing.T) {
+		res, _ := GetProfile("fakeuser")
+		if reflect.TypeOf(res) != reflect.TypeOf(TProfile{}) {
+			t.Error("GetProfile() error = The function returns the wrong type")
+		}
+	})
+
+	t.Run("GetProfile() function testing", func(t *testing.T) {
+		res, _ := GetProfile("root")
+		if reflect.TypeOf(res) != reflect.TypeOf(TProfile{}) {
+			t.Error("GetProfile() error = The function returns the wrong type")
+		}
+	})
+}
