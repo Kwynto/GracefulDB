@@ -51,10 +51,10 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 		return true
 	})
 
-	byteAttrs, err := json.MarshalIndent(fields, "", "  ")
-	if err != nil {
-		return err
-	}
+	byteAttrs, _ := json.MarshalIndent(fields, "", "  ")
+	// if err != nil {
+	// 	return err
+	// }
 
 	strAttrsScreenOut := string(byteAttrs)
 	if strAttrsScreenOut == "{}" {

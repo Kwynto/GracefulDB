@@ -139,10 +139,10 @@ var block sync.RWMutex
 func generateTicket() string {
 	// This function is complete
 	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return ""
-	}
+	rand.Read(b)
+	// if err != nil {
+	// 	return ""
+	// }
 	return fmt.Sprintf("%x", b)
 }
 
