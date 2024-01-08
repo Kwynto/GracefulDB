@@ -70,12 +70,12 @@ func Test_Done(t *testing.T) {
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("Done() function testing", func(t *testing.T) {
 			randI := rand.Intn(75) + 5
-			res.counter = randI
+			res.Counter = randI
 			expectedResult := randI - 1
 			res.Done()
 
-			if res.counter != expectedResult {
-				t.Errorf("Done() error: %v != %v", res.counter, expectedResult)
+			if res.Counter != expectedResult {
+				t.Errorf("Done() error: %v != %v", res.Counter, expectedResult)
 			}
 		})
 	}
@@ -90,9 +90,9 @@ func Test_AddHandler(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("AddHandler() function testing", func(t *testing.T) {
-			c := res.counter
+			c := res.Counter
 			res.AddHandler(hand)
-			if res.counter == c {
+			if res.Counter == c {
 				t.Error("AddHandler() error: the counter is not working.")
 			}
 
@@ -113,11 +113,11 @@ func Test_DelHandler(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("DelHandler() function testing", func(t *testing.T) {
-			c := res.counter
+			c := res.Counter
 			res.AddHandler(hand)
 			res.DelHandler(hand)
 
-			if res.counter != c {
+			if res.Counter != c {
 				t.Error("DelHandler() error: the counter has not been reduced.")
 			}
 
@@ -138,14 +138,14 @@ func Test_RunAndDelHandler(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("RunAndDelHandler() function testing", func(t *testing.T) {
-			c := res.counter
+			c := res.Counter
 			res.AddHandler(hand)
 			res.RunAndDelHandler(hand)
 
 			time.Sleep(50 * time.Millisecond)
 
-			if res.counter != c {
-				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", res.counter, c)
+			if res.Counter != c {
+				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", res.Counter, c)
 			}
 
 			if _, ok := res.funcs[fmt.Sprint(Handler(hand))]; ok {
@@ -188,7 +188,7 @@ func Test_Close(t *testing.T) {
 			t.Error("Close() error: the error messages were not returned")
 		}
 
-		if res_with_msg.counter != 0 {
+		if res_with_msg.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})
@@ -203,7 +203,7 @@ func Test_Close(t *testing.T) {
 			t.Error("Close() error: the error messages were returned")
 		}
 
-		if res_without_msg.counter != 0 {
+		if res_without_msg.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})
@@ -229,9 +229,9 @@ func Test_AddHandler_Default(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("AddHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.counter
+			c := CloseProcs.Counter
 			AddHandler(hand)
-			if CloseProcs.counter == c {
+			if CloseProcs.Counter == c {
 				t.Error("AddHandler() error: the counter is not working.")
 			}
 
@@ -252,11 +252,11 @@ func Test_DelHandler_Default(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("DelHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.counter
+			c := CloseProcs.Counter
 			AddHandler(hand)
 			DelHandler(hand)
 
-			if CloseProcs.counter != c {
+			if CloseProcs.Counter != c {
 				t.Error("DelHandler() error: the counter has not been reduced.")
 			}
 
@@ -277,14 +277,14 @@ func Test_RunAndDelHandler_Default(t *testing.T) {
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("RunAndDelHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.counter
+			c := CloseProcs.Counter
 			AddHandler(hand)
 			RunAndDelHandler(hand)
 
 			time.Sleep(50 * time.Millisecond)
 
-			if CloseProcs.counter != c {
-				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", CloseProcs.counter, c)
+			if CloseProcs.Counter != c {
+				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", CloseProcs.Counter, c)
 			}
 
 			if _, ok := CloseProcs.funcs[fmt.Sprint(Handler(hand))]; ok {
@@ -322,7 +322,7 @@ func Test_Close_Default(t *testing.T) {
 			t.Error("Close() error: the error messages were not returned")
 		}
 
-		if CloseProcs.counter != 0 {
+		if CloseProcs.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})
@@ -341,7 +341,7 @@ func Test_Close_Default(t *testing.T) {
 			t.Error("Close() error: the error messages were returned")
 		}
 
-		if CloseProcs.counter != 0 {
+		if CloseProcs.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})

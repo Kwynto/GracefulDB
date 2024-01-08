@@ -450,7 +450,7 @@ func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
 		return "", errors.New("authentication error")
 	}
 
-	if len(secret.Hash) == 32 {
+	if len(secret.Hash) == 64 {
 		pass = secret.Hash
 	} else {
 		h := sha256.Sum256([]byte(secret.Password))

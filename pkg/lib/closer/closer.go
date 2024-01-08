@@ -20,7 +20,7 @@ type Closer struct {
 	mu      sync.RWMutex
 	funcs   map[string]Handler
 	msgs    []string
-	counter int
+	Counter int
 }
 
 var CloseProcs = &Closer{
@@ -44,7 +44,7 @@ func (c *Closer) Done() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.counter--
+	c.Counter--
 }
 
 func (c *Closer) AddHandler(f Handler) {
@@ -52,7 +52,7 @@ func (c *Closer) AddHandler(f Handler) {
 	defer c.mu.Unlock()
 
 	c.funcs[fmt.Sprint(f)] = f
-	c.counter++
+	c.Counter++
 }
 
 func (c *Closer) DelHandler(f Handler) {
@@ -62,7 +62,7 @@ func (c *Closer) DelHandler(f Handler) {
 	key := fmt.Sprint(f)
 	if _, ok := c.funcs[key]; ok {
 		delete(c.funcs, key)
-		c.counter--
+		c.Counter--
 	}
 }
 
@@ -90,7 +90,7 @@ func (c *Closer) Close(ctx context.Context) error {
 		time.Sleep(MICRO_DEFAULT_DELAY * time.Millisecond)
 		for {
 			time.Sleep(MICRO_DEFAULT_DELAY * time.Millisecond)
-			if c.counter <= 0 {
+			if c.Counter <= 0 {
 				complete <- struct{}{}
 				break
 			}
