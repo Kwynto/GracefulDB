@@ -31,15 +31,8 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseForm()
-	if err != nil {
-		slog.Debug("Bad request", slog.String("err", err.Error()))
-		http.Error(w, "Bad request", http.StatusBadRequest)
-		return
-	}
-
+	r.ParseForm()
 	var placeholder *[]string
-
 	instruction := r.PostForm.Get("instruction")
 	placeholderJSONArray := r.PostForm.Get("placeholder")
 	if err := json.Unmarshal([]byte(placeholderJSONArray), &placeholder); err != nil {
