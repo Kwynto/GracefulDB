@@ -19,7 +19,7 @@ type Handler func(ctx context.Context, c *Closer)
 type Closer struct {
 	mu      sync.RWMutex
 	funcs   map[string]Handler
-	msgs    []string
+	Msgs    []string
 	Counter int
 }
 
@@ -37,7 +37,7 @@ func (c *Closer) AddMsg(msg string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.msgs = append(c.msgs, fmt.Sprintf("[!] %v", msg))
+	c.Msgs = append(c.Msgs, fmt.Sprintf("[!] %v", msg))
 }
 
 func (c *Closer) Done() {
@@ -107,8 +107,8 @@ func (c *Closer) Close(ctx context.Context) error {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	if len(c.msgs) > 0 {
-		return fmt.Errorf("shutdown finished with error(s): %s", strings.Join(c.msgs, " | "))
+	if len(c.Msgs) > 0 {
+		return fmt.Errorf("shutdown finished with error(s): %s", strings.Join(c.Msgs, " | "))
 	}
 
 	return nil
