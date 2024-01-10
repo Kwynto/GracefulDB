@@ -55,8 +55,8 @@ func Test_AddMsg(t *testing.T) {
 	for itt, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			res.AddMsg(tt.args.msg)
-			if res.msgs[itt] != tt.result {
-				t.Errorf("AddMsg() error: %v != %v", res.msgs[itt], tt.result)
+			if res.Msgs[itt] != tt.result {
+				t.Errorf("AddMsg() error: %v != %v", res.Msgs[itt], tt.result)
 			}
 		})
 	}
@@ -97,7 +97,7 @@ func Test_AddHandler(t *testing.T) {
 			}
 
 			res.funcs[fmt.Sprint(Handler(hand))](context.Background(), res)
-			if res.msgs[i] != "[!] true" {
+			if res.Msgs[i] != "[!] true" {
 				t.Error("AddHandler() error: incorrect handler execution.")
 			}
 		})
@@ -236,7 +236,7 @@ func Test_AddHandler_Default(t *testing.T) {
 			}
 
 			CloseProcs.funcs[fmt.Sprint(Handler(hand))](context.Background(), CloseProcs)
-			if CloseProcs.msgs[i] != "[!] true" {
+			if CloseProcs.Msgs[i] != "[!] true" {
 				t.Error("AddHandler() error: incorrect handler execution.")
 			}
 		})
