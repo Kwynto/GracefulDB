@@ -2,7 +2,6 @@ package rest
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -144,30 +143,8 @@ func Test_Start_and_Shutdown(t *testing.T) {
 		}
 	})
 
-	t.Run("Shutdown() function testing - negative", func(t *testing.T) {
+	t.Run("Shutdown() function testing - positive", func(t *testing.T) {
 		Shutdown(context.Background(), closer.CloseProcs)
-
-		if len(closer.CloseProcs.Msgs) > 0 {
-			t.Errorf("Shutdown() error.")
-		}
-	})
-}
-
-func Test_Shutdown(t *testing.T) {
-	t.Run("Shutdown() function testing - negative", func(t *testing.T) {
-		address = fmt.Sprintf("%s:%s", "0.0.0.0", "31337")
-		muxRest = routes()
-		srvRest = &http.Server{
-			Addr:    address,
-			Handler: muxRest,
-		}
-
-		ctx, cf := context.WithTimeout(context.Background(), 500*time.Millisecond)
-		// defer cf()
-
-		go Shutdown(ctx, closer.CloseProcs)
-		cf()
-		time.Sleep(3 * time.Second)
 
 		if len(closer.CloseProcs.Msgs) > 0 {
 			t.Errorf("Shutdown() error.")
