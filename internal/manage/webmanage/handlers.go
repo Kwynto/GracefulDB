@@ -66,7 +66,7 @@ func homeDefault(w http.ResponseWriter, r *http.Request) {
 	err = TemplatesMap[HOME_TEMP_NAME].Execute(w, data)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
@@ -90,11 +90,12 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
-		if err != nil {
-			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
+		TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
+		// err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
+		// if err != nil {
+		// 	slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		// 	// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// }
 	}
 }
 
