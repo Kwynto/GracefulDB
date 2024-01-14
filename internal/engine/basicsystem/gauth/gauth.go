@@ -136,7 +136,7 @@ var block sync.RWMutex
 // Internal functions
 
 // Ticket generation
-func generateTicket() string {
+func GenerateTicket() string {
 	// This function is complete
 	b := make([]byte, 32)
 	rand.Read(b)
@@ -467,7 +467,7 @@ func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
 	}
 
 	if pass == dbPass {
-		newTicket := generateTicket()
+		newTicket := GenerateTicket()
 
 		// don't change this construction
 		oldTicket, ok := ticketMap[secret.Login]

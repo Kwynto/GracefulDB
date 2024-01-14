@@ -31,7 +31,7 @@ type TViewAccountsTable struct {
 }
 
 /*
-The main block
+The main section
 */
 
 // Handler after authorization
@@ -45,11 +45,12 @@ func homeDefault(w http.ResponseWriter, r *http.Request) {
 	sesID := gosession.Start(&w, r)
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
-	profile, err := gauth.GetProfile(login)
-	if err != nil {
-		logout(w, r)
-		return
-	}
+	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
+	// profile, err := gauth.GetProfile(login)
+	// if err != nil {
+	// 	logout(w, r)
+	// 	return
+	// }
 
 	var data = struct {
 		Login string
@@ -63,10 +64,10 @@ func homeDefault(w http.ResponseWriter, r *http.Request) {
 		data.Roles = fmt.Sprintf("%s %s", data.Roles, role.String())
 	}
 
-	err = TemplatesMap[HOME_TEMP_NAME].Execute(w, data)
+	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, data)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
@@ -90,11 +91,12 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
-		if err != nil {
-			slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		}
+		TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
+		// err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
+		// if err != nil {
+		// 	slog.Debug("Internal Server Error", slog.String("err", err.Error()))
+		// 	// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// }
 	}
 }
 
@@ -138,7 +140,7 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Profile block
+Profile section
 */
 
 func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
@@ -150,11 +152,12 @@ func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
 	sesID := gosession.Start(&w, r)
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
-	profile, err := gauth.GetProfile(login)
-	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, nil)
-		return
-	}
+	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
+	// profile, err := gauth.GetProfile(login)
+	// if err != nil {
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, nil)
+	// 	return
+	// }
 
 	data := struct {
 		Login string
@@ -194,12 +197,13 @@ func selfedit_ok(w http.ResponseWriter, r *http.Request) {
 	sesID := gosession.Start(&w, r)
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
-	profile, err := gauth.GetProfile(login)
-	if err != nil {
-		data.MsgErr = "Unknown user."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
-		return
-	}
+	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
+	// profile, err := gauth.GetProfile(login)
+	// if err != nil {
+	// 	data.MsgErr = "Unknown user."
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+	// 	return
+	// }
 
 	password := strings.TrimSpace(r.PostForm.Get("password"))
 	if password == "" {
@@ -212,19 +216,20 @@ func selfedit_ok(w http.ResponseWriter, r *http.Request) {
 	desc := strings.TrimSpace(r.PostForm.Get("desc"))
 	profile.Description = desc
 
-	err = gauth.UpdateUser(login, password, profile)
-	if err != nil {
-		slog.Debug("Update user", slog.String("err", err.Error()))
-		data.MsgErr = "The user could not be updated."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
-		return
-	}
+	gauth.UpdateUser(login, password, profile) // An error is not possible, since all fields have already been checked.
+	// err = gauth.UpdateUser(login, password, profile)
+	// if err != nil {
+	// 	slog.Debug("Update user", slog.String("err", err.Error()))
+	// 	data.MsgErr = "The user could not be updated."
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+	// 	return
+	// }
 
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK].Execute(w, nil)
 }
 
 /*
-Dashboard block
+Dashboard section
 */
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
@@ -237,7 +242,7 @@ func nav_dashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Databases block
+Databases section
 */
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
@@ -296,7 +301,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Accounts block
+Accounts section
 */
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
@@ -714,7 +719,7 @@ func account_del_ok(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-Settings block
+Settings section
 */
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {

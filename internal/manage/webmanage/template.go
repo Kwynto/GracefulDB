@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log/slog"
 
+	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/auth_masq"
 	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/home_masq"
 	"github.com/Kwynto/GracefulDB/pkg/lib/helpers/masquerade/htmx_masq"
@@ -45,13 +46,17 @@ const (
 
 var TemplatesMap = make(map[string]*template.Template)
 
-func loadTemplateFromVar(name string, temp string) {
+func loadTemplateFromVar(name string, temp string) (err error) {
+	op := "internal -> WebManage -> isolated -> Open"
+	defer func() { e.Wrapper(op, err) }()
+
 	ts, err := template.New(name).Parse(temp)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
-		return
+		return err
 	}
 	TemplatesMap[name] = ts
+	return nil
 }
 
 func parseTemplates() {

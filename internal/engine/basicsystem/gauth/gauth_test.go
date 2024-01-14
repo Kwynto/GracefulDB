@@ -218,19 +218,19 @@ func Test_TProfile_IsAllowed(t *testing.T) {
 	})
 }
 
-func Test_generateTicket(t *testing.T) {
-	t.Run("generateTicket() function testing", func(t *testing.T) {
+func Test_GenerateTicket(t *testing.T) {
+	t.Run("GenerateTicket() function testing", func(t *testing.T) {
 		etalon := "string"
-		res := generateTicket()
+		res := GenerateTicket()
 		if reflect.TypeOf(res) != reflect.TypeOf(etalon) {
-			t.Error("generateTicket() error = The function returns the wrong type")
+			t.Error("GenerateTicket() error = The function returns the wrong type")
 		}
 	})
 
-	t.Run("generateTicket() function testing", func(t *testing.T) {
+	t.Run("GenerateTicket() function testing", func(t *testing.T) {
 		testVar := make(map[int]string)
 		for i := 0; i < TESTING_ITER; i++ {
-			testVar[i] = generateTicket() // calling the tested function
+			testVar[i] = GenerateTicket() // calling the tested function
 		}
 		for _, v1 := range testVar {
 			count := 0
@@ -262,7 +262,7 @@ func Test_addUser(t *testing.T) {
 	})
 
 	t.Run("addUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      NEW,
@@ -302,7 +302,7 @@ func Test_updateUser(t *testing.T) {
 	})
 
 	t.Run("updateUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -326,7 +326,7 @@ func Test_deleteUser(t *testing.T) {
 	})
 
 	t.Run("deleteUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -340,7 +340,7 @@ func Test_deleteUser(t *testing.T) {
 	})
 
 	t.Run("deleteUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -371,7 +371,7 @@ func Test_blockUser(t *testing.T) {
 	})
 
 	t.Run("blockUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -385,7 +385,7 @@ func Test_blockUser(t *testing.T) {
 	})
 
 	t.Run("blockUser() function testing - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -410,7 +410,7 @@ func Test_unblockUser(t *testing.T) {
 	})
 
 	t.Run("unblockUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -424,7 +424,7 @@ func Test_unblockUser(t *testing.T) {
 	})
 
 	t.Run("unblockUser() function testing - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -455,7 +455,7 @@ func Test_updateProfile(t *testing.T) {
 	})
 
 	t.Run("updateProfile() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -484,7 +484,7 @@ func Test_AddUser(t *testing.T) {
 	})
 
 	t.Run("AddUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      NEW,
@@ -524,7 +524,7 @@ func Test_UpdateUser(t *testing.T) {
 	})
 
 	t.Run("UpdateUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -548,7 +548,7 @@ func Test_DeleteUser(t *testing.T) {
 	})
 
 	t.Run("DeleteUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -562,7 +562,7 @@ func Test_DeleteUser(t *testing.T) {
 	})
 
 	t.Run("DeleteUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -600,7 +600,7 @@ func Test_BlockUser(t *testing.T) {
 	})
 
 	t.Run("BlockUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -614,7 +614,7 @@ func Test_BlockUser(t *testing.T) {
 	})
 
 	t.Run("BlockUser() function testing - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -645,7 +645,7 @@ func Test_UnblockUser(t *testing.T) {
 	})
 
 	t.Run("UnblockUser() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -659,7 +659,7 @@ func Test_UnblockUser(t *testing.T) {
 	})
 
 	t.Run("UnblockUser() function testing - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -696,7 +696,7 @@ func Test_UpdateProfile(t *testing.T) {
 	})
 
 	t.Run("UpdateProfile() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -766,7 +766,7 @@ func Test_CheckTicket(t *testing.T) {
 	Start()
 
 	t.Run("CheckTicket() function testing - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -787,7 +787,7 @@ func Test_CheckTicket(t *testing.T) {
 	})
 
 	t.Run("CheckTicket() function testing - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -810,7 +810,7 @@ func Test_CheckTicket(t *testing.T) {
 	})
 
 	t.Run("CheckTicket() function testing (old ticket) - positive", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -832,7 +832,7 @@ func Test_CheckTicket(t *testing.T) {
 	})
 
 	t.Run("CheckTicket() function testing (old ticket) - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -855,7 +855,7 @@ func Test_CheckTicket(t *testing.T) {
 	})
 
 	t.Run("CheckTicket() function testing (old ticket) - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -878,7 +878,7 @@ func Test_CheckTicket(t *testing.T) {
 	})
 
 	t.Run("CheckTicket() function testing (old ticket) - negative", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -932,7 +932,7 @@ func Test_NewAuth(t *testing.T) {
 	})
 
 	t.Run("NewAuth() function testing", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
@@ -952,7 +952,7 @@ func Test_NewAuth(t *testing.T) {
 	})
 
 	t.Run("NewAuth() function testing", func(t *testing.T) {
-		randStr := generateTicket()
+		randStr := GenerateTicket()
 		prof := TProfile{
 			Description: "Testing description",
 			Status:      ACTIVE,
