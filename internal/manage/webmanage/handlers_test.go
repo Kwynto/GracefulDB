@@ -1,6 +1,8 @@
 package webmanage
 
 import (
+	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -833,6 +835,1198 @@ func Test_account_create_load_form(t *testing.T) {
 		}
 	})
 }
+
+func Test_account_create_ok(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_create_ok() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_create_ok(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_create_ok() function testing - POST negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_create_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_create_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("POST", "/", nil)
+		r1.PostForm = nil
+		r1.Body = nil
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_create_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_create_ok() function testing POST positive and not value of password", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		form1.Add("password", "")
+		form1.Add("desc", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_create_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_create_ok() function testing - create error", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "root")
+		form1.Add("password", randStr)
+		form1.Add("desc", randStr)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_create_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_create_ok() function testing - all right", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		form1.Add("password", randStr1)
+		form1.Add("desc", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_create_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_create_ok() error: %v", status)
+		}
+	})
+}
+
+func Test_account_edit_load_form(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_edit_load_form() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_edit_load_form(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_load_form() function testing - Isolate positive and don't GetProfile", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_load_form() function testing - all right", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER, gauth.SYSTEM},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := fmt.Sprintf("/?user=%s", randStr)
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_load_form() error: %v", status)
+		}
+	})
+}
+
+func Test_account_edit_ok(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_edit_ok() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_edit_ok(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing - POST negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("POST", "/", nil)
+		r1.PostForm = nil
+		r1.Body = nil
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing POST positive and not value of login", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "")
+		form1.Add("password", "")
+		form1.Add("desc", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing POST positive and not value of password", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		form1.Add("password", "")
+		form1.Add("desc", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing - status error", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr)
+		form1.Add("password", randStr)
+		form1.Add("desc", randStr)
+		form1.Add("status", "0")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing - Roles", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		prof1 := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr1, randStr1, prof1)
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		form1.Add("password", randStr1)
+		form1.Add("desc", randStr1)
+		form1.Add("status", "2")
+		chtext := `["SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"]`
+		chbase := base64.StdEncoding.EncodeToString([]byte(chtext))
+		form1.Add("role_names", chbase)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_edit_ok() function testing - root user", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "root")
+		form1.Add("password", "toor")
+		form1.Add("desc", "root")
+		form1.Add("status", "2")
+		chtext := `["SYSTEM", "ADMIN", "MANAGER", "ENGINEER", "USER"]`
+		chbase := base64.StdEncoding.EncodeToString([]byte(chtext))
+		form1.Add("role_names", chbase)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_edit_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_edit_ok() error: %v", status)
+		}
+	})
+}
+
+func Test_account_ban_load_form(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_ban_load_form() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_ban_load_form(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_load_form() function testing - root user", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := "/?user=root"
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_load_form() function testing - all right", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := fmt.Sprintf("/?user=%s", randStr)
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_load_form() error: %v", status)
+		}
+	})
+}
+
+func Test_account_ban_ok(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_ban_ok() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_ban_ok(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_ok() function testing - POST negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("POST", "/", nil)
+		r1.PostForm = nil
+		r1.Body = nil
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_ok() function testing POST positive and not value of login", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_ok() function testing POST positive and don't work BlockUser", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "root")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_ban_ok() function testing - all right", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		prof1 := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr1, randStr1, prof1)
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_ban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_ban_ok() error: %v", status)
+		}
+	})
+}
+
+func Test_account_unban_load_form(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_unban_load_form() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_unban_load_form(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_load_form() function testing - root user", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := "/?user=root"
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_load_form() function testing - all right", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := fmt.Sprintf("/?user=%s", randStr)
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_load_form() error: %v", status)
+		}
+	})
+}
+
+func Test_account_unban_ok(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_unban_ok() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_unban_ok(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_ok() function testing - POST negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("POST", "/", nil)
+		r1.PostForm = nil
+		r1.Body = nil
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_ok() function testing POST positive and not value of login", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_ok() function testing POST positive and don't work UnblockUser", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "root")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_unban_ok() function testing - all right", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		prof1 := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr1, randStr1, prof1)
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_unban_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_unban_ok() error: %v", status)
+		}
+	})
+}
+
+// TODO: --
+
+// FIXME: --
 
 func Test_nav_settings(t *testing.T) {
 	gauth.Start()
