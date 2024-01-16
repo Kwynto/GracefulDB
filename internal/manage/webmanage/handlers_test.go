@@ -9,7 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
+	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
 func Test_homeDefault(t *testing.T) {
@@ -1683,7 +1687,7 @@ func Test_account_ban_ok(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
-			Status:      gauth.ACTIVE,
+			Status:      gauth.NEW,
 			Roles:       []gauth.TRole{gauth.MANAGER},
 		}
 		gauth.AddUser(randStr, randStr, prof)
@@ -2357,6 +2361,256 @@ func Test_nav_settings(t *testing.T) {
 	})
 }
 
-// TODO: --
+func Test_settings_wsc_change_sw(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
 
-// FIXME: --
+	t.Run("settings_wsc_change_sw() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		settings_wsc_change_sw(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_wsc_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_wsc_change_sw() function testing - shutdown", func(t *testing.T) {
+		config.DefaultConfig.WebSocketConnector.Enable = true
+		go websocketconn.Start(&config.DefaultConfig)
+		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_wsc_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_wsc_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_wsc_change_sw() function testing - start", func(t *testing.T) {
+		config.DefaultConfig.WebSocketConnector.Enable = false
+		closer.RunAndDelHandler(websocketconn.Shutdown)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_wsc_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_wsc_change_sw() error: %v", status)
+		}
+	})
+}
+
+func Test_settings_rest_change_sw(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("settings_rest_change_sw() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		settings_rest_change_sw(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_rest_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_rest_change_sw() function testing - shutdown", func(t *testing.T) {
+		config.DefaultConfig.RestConnector.Enable = true
+		go rest.Start(&config.DefaultConfig)
+		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_rest_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_rest_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_rest_change_sw() function testing - start", func(t *testing.T) {
+		config.DefaultConfig.RestConnector.Enable = false
+		closer.RunAndDelHandler(rest.Shutdown)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_rest_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_rest_change_sw() error: %v", status)
+		}
+	})
+}
+
+func Test_settings_grpc_change_sw(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("settings_grpc_change_sw() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		settings_grpc_change_sw(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_grpc_change_sw() error: %v", status)
+		}
+	})
+}
+
+func Test_settings_web_change_sw(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("settings_web_change_sw() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		settings_web_change_sw(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_web_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_web_change_sw() function testing - Isolate positive", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_web_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_web_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_web_change_sw() function testing - Isolate undefined user", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.UNDEFINED,
+			Roles:       []gauth.TRole{gauth.ADMIN},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_web_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_web_change_sw() error: %v", status)
+		}
+	})
+}
