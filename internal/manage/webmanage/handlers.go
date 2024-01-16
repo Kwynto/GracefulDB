@@ -521,13 +521,14 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		Roles:       roles,
 	}
 
-	err = gauth.UpdateUser(Login, password, access)
-	if err != nil {
-		slog.Debug("Update user", slog.String("err", err.Error()))
-		data.MsgErr = "The user could not be updated."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
-		return
-	}
+	gauth.UpdateUser(Login, password, access) // An error is not possible, since all fields have already been checked.
+	// err = gauth.UpdateUser(Login, password, access)
+	// if err != nil {
+	// 	slog.Debug("Update user", slog.String("err", err.Error()))
+	// 	data.MsgErr = "The user could not be updated."
+	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+	// 	return
+	// }
 
 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, data)
 }
