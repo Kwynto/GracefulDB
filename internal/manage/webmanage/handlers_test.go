@@ -2024,9 +2024,294 @@ func Test_account_unban_ok(t *testing.T) {
 	})
 }
 
-// TODO: --
+func Test_account_del_load_form(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
 
-// FIXME: --
+	t.Run("account_del_load_form() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_del_load_form(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_load_form() function testing - root user", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		testurl := "/?user=root"
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_load_form() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_load_form() function testing - all right", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w1 := httptest.NewRecorder()
+		testurl := fmt.Sprintf("/?user=%s", randStr)
+		r1 := httptest.NewRequest("GET", testurl, nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_load_form(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_load_form() error: %v", status)
+		}
+	})
+}
+
+func Test_account_del_ok(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("account_del_ok() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		account_del_ok(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_ok() function testing - POST negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("POST", "/", nil)
+		r1.PostForm = nil
+		r1.Body = nil
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_ok() function testing POST positive and not value of login", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_ok() function testing POST positive and don't work DeleteUser", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", "root")
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+
+	t.Run("account_del_ok() function testing - all right", func(t *testing.T) {
+		randStr := gauth.GenerateTicket()
+		prof := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr, randStr, prof)
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", randStr)
+		form.Add("password", randStr)
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		randStr1 := gauth.GenerateTicket()
+		prof1 := gauth.TProfile{
+			Description: "Testing description",
+			Status:      gauth.ACTIVE,
+			Roles:       []gauth.TRole{gauth.MANAGER},
+		}
+		gauth.AddUser(randStr1, randStr1, prof1)
+
+		w1 := httptest.NewRecorder()
+		form1 := url.Values{}
+		form1.Add("login", randStr1)
+		r1 := httptest.NewRequest("POST", "/", strings.NewReader(form1.Encode()))
+		r1.PostForm = form1
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		account_del_ok(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK {
+			t.Errorf("account_del_ok() error: %v", status)
+		}
+	})
+}
 
 func Test_nav_settings(t *testing.T) {
 	gauth.Start()
@@ -2071,3 +2356,7 @@ func Test_nav_settings(t *testing.T) {
 		}
 	})
 }
+
+// TODO: --
+
+// FIXME: --
