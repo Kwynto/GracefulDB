@@ -44,7 +44,15 @@ var Settings string = `
                         </tr>
                         <tr>
                             <td><h6>Freeze mode: </h6></td>
-                            <td>{{.CoreSettings.FreezeMode}}</td>
+                            <td>
+                                <div class="form-check form-switch">
+                                {{if .CoreSettings.FreezeMode}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFreezeSwitch" hx-get="/hx/settings/core_freeze_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                                {{else}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFreezeSwitch" hx-get="/hx/settings/core_freeze_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                                {{end}}
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

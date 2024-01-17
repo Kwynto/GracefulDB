@@ -8,7 +8,25 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
+type tCoreSettings struct {
+	BucketSize int
+	FreezeMode bool
+}
+
+var LocalCoreSettings tCoreSettings = tCoreSettings{
+	BucketSize: 800,
+	FreezeMode: false,
+}
+
+func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
+	return tCoreSettings{
+		BucketSize: cfg.CoreSettings.BucketSize,
+		FreezeMode: cfg.CoreSettings.FreezeMode,
+	}
+}
+
 func Engine(cfg *config.Config) {
+	LocalCoreSettings = LoadLocalCoreSettings(cfg)
 	slog.Info("The core of the DBMS was started.")
 }
 
