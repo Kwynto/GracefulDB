@@ -1047,6 +1047,16 @@ func Test_accessSave(t *testing.T) {
 	})
 }
 
+func Test_checkingTheDefaultPassword(t *testing.T) {
+	t.Run("checkingTheDefaultPassword() function testing", func(t *testing.T) {
+		res := checkingTheDefaultPassword()
+		cpass := HashMap["root"]
+		if (!res && (DEFAULT_PASSWORD == cpass)) || (res && (DEFAULT_PASSWORD != cpass)) {
+			t.Error("checkingTheDefaultPassword() error.")
+		}
+	})
+}
+
 func Test_Start(t *testing.T) {
 	AuthFile = AUTH_FILE
 	AccessFile = ACCESS_FILE

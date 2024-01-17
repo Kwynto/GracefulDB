@@ -594,6 +594,16 @@ func accessSave() {
 	}
 }
 
+// Checking the root user's password for the default value.
+func checkingTheDefaultPassword() bool {
+	dh := sha256.Sum256([]byte(DEFAULT_PASSWORD))
+	dpass := fmt.Sprintf("%x", dh)
+
+	cpass := HashMap["root"]
+
+	return dpass == cpass
+}
+
 // Package initialization
 func Start() {
 	// This function is complete
@@ -602,6 +612,10 @@ func Start() {
 	accessLoad()
 	block.Unlock()
 	slog.Info("The authentication system is running.")
+	if checkingTheDefaultPassword() {
+		warnMsg := fmt.Sprintf("The 'root' user has a default password of '%s'. Please change your password!", DEFAULT_PASSWORD)
+		slog.Warn(warnMsg)
+	}
 }
 
 // Shutting down the service
