@@ -13,6 +13,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
@@ -2357,6 +2358,82 @@ func Test_nav_settings(t *testing.T) {
 		status := w1.Code
 		if status != http.StatusOK {
 			t.Errorf("nav_settings() error: %v", status)
+		}
+	})
+}
+
+func Test_settings_core_freeze_change_sw(t *testing.T) {
+	gauth.Start()
+	parseTemplates()
+
+	t.Run("settings_core_freeze_change_sw() function testing - Isolate negative", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("GET", "/", nil)
+
+		settings_core_freeze_change_sw(w, r) // calling the tested function
+		status := w.Code
+		if status != http.StatusOK {
+			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_core_freeze_change_sw() function testing - off", func(t *testing.T) {
+		config.DefaultConfig.CoreSettings.FreezeMode = true
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_core_freeze_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK || core.LocalCoreSettings.FreezeMode {
+			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
+		}
+	})
+
+	t.Run("settings_core_freeze_change_sw() function testing - on", func(t *testing.T) {
+		config.DefaultConfig.CoreSettings.FreezeMode = false
+
+		w := httptest.NewRecorder()
+		form := url.Values{}
+		form.Add("username", "root")
+		form.Add("password", "toor")
+		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
+		r.PostForm = form
+
+		homeAuth(w, r)
+		wCooks := w.Result().Cookies()
+
+		w1 := httptest.NewRecorder()
+		r1 := httptest.NewRequest("GET", "/", nil)
+		for _, v := range wCooks {
+			r1.AddCookie(&http.Cookie{
+				Name:   v.Name,
+				Value:  v.Value,
+				MaxAge: v.MaxAge,
+			})
+		}
+
+		settings_core_freeze_change_sw(w1, r1) // calling the tested function
+		status := w1.Code
+		if status != http.StatusOK || !core.LocalCoreSettings.FreezeMode {
+			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
 		}
 	})
 }

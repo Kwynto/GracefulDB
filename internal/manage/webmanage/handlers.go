@@ -16,6 +16,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
@@ -731,6 +732,24 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 
 	data := config.DefaultConfig
 	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
+}
+
+func settings_core_freeze_change_sw(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	if config.DefaultConfig.CoreSettings.FreezeMode {
+		config.DefaultConfig.CoreSettings.FreezeMode = false
+	} else {
+		config.DefaultConfig.CoreSettings.FreezeMode = true
+	}
+	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.DefaultConfig)
+	msg := "The freeze mode has been switched."
+	slog.Warn(msg, slog.String("FreezeMode", fmt.Sprintf("%v", core.LocalCoreSettings.FreezeMode)))
+
+	nav_settings(w, r)
 }
 
 func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {

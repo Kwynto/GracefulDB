@@ -1049,9 +1049,12 @@ func Test_accessSave(t *testing.T) {
 
 func Test_checkingTheDefaultPassword(t *testing.T) {
 	t.Run("checkingTheDefaultPassword() function testing", func(t *testing.T) {
-		res := checkingTheDefaultPassword()
+		dh := sha256.Sum256([]byte(DEFAULT_PASSWORD))
+		dpass := fmt.Sprintf("%x", dh)
 		cpass := HashMap["root"]
-		if (!res && (DEFAULT_PASSWORD == cpass)) || (res && (DEFAULT_PASSWORD != cpass)) {
+
+		res := checkingTheDefaultPassword()
+		if (!res && (dpass == cpass)) || (res && (dpass != cpass)) {
 			t.Error("checkingTheDefaultPassword() error.")
 		}
 	})
