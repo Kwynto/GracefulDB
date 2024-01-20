@@ -18,8 +18,9 @@ var DisplayConfigPath string
 var DefaultConfig Config
 
 type CoreSettings struct {
-	BucketSize int  `yaml:"bucket_size" env-default:"800"`
-	FreezeMode bool `yaml:"freeze"`
+	Storage    string `yaml:"storage" env-default:"./data/"`
+	BucketSize int    `yaml:"bucket_size" env-default:"800"`
+	FreezeMode bool   `yaml:"freeze"`
 }
 
 type BufferSize struct {
@@ -70,6 +71,7 @@ func defaultConfig() Config {
 		LogPath:         "./logs/",
 		ShutdownTimeOut: 5 * time.Second,
 		CoreSettings: CoreSettings{
+			Storage:    "./data/",
 			BucketSize: 800,
 			FreezeMode: false,
 		},
