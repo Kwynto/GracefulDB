@@ -13,7 +13,9 @@ import (
 )
 
 const (
-	NAME_DB_INFO = "info.json"
+	NAME_STORAGE_INFO = "storage.json"
+	NAME_DB_INFO      = "db.json"
+	NAME_TABLE_INFO   = "table.json"
 )
 
 type tCoreSettings struct {
@@ -23,9 +25,10 @@ type tCoreSettings struct {
 }
 
 type tDBInfo struct {
-	Name    string   `json:"name"`
-	Tables  []string `json:"tables"`
-	Deleted bool     `json:"deleted"`
+	Name       string    `json:"name"`
+	Tables     []string  `json:"tables"`
+	LastUpdate time.Time `json:"lastupdate"`
+	Deleted    bool      `json:"deleted"`
 }
 
 type tCoreFile struct {
@@ -45,7 +48,9 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 
 var CoreProcessing tCoreProcessing
 
+// Marks the database as deleted, but does not delete files.
 func RemoveDB(name string) bool {
+	// This function is complete
 	var dbInfo tDBInfo
 
 	dbInfoPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, name, NAME_DB_INFO)
@@ -55,20 +60,25 @@ func RemoveDB(name string) bool {
 		return false
 	}
 
+	dbInfo.LastUpdate = time.Now()
 	dbInfo.Deleted = true
 	err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
 
 	return err2 == nil
 }
 
+// Deletes the folder and database files.
 func StrongRemoveDB(name string) bool {
+	// This function is complete
 	fullName := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, name)
 	err := os.Remove(fullName)
 
 	return err == nil
 }
 
+// Creating a new database.
 func CreateDB(name string) bool {
+	// This function is complete
 	fullName := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, name)
 	err := os.Mkdir(fullName, 0666)
 	if err != nil {
@@ -76,23 +86,13 @@ func CreateDB(name string) bool {
 	}
 
 	dbInfoPath := fmt.Sprintf("%s/%s", fullName, NAME_DB_INFO)
-	// fo, err := os.OpenFile(dbInfoPath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	// if err != nil {
-	// 	return false
-	// }
-	// defer fo.Close()
 
 	dbInfo := tDBInfo{
-		Name:    name,
-		Tables:  []string{},
-		Deleted: false,
+		Name:       name,
+		Tables:     []string{},
+		LastUpdate: time.Now(),
+		Deleted:    false,
 	}
-
-	// bytesDBInfo, err := json.Marshal(dbInfo)
-	// if err != nil {
-	// 	return false
-	// }
-	// fo.Write(bytesDBInfo)
 
 	err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
 	return err2 == nil
