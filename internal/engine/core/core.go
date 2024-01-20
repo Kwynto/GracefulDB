@@ -12,6 +12,10 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
+const (
+	NAME_DB_INFO = "info.json"
+)
+
 type tCoreSettings struct {
 	Storage    string
 	BucketSize int
@@ -19,8 +23,9 @@ type tCoreSettings struct {
 }
 
 type tDBInfo struct {
-	Name   string   `json:"name"`
-	Tables []string `json:"tables"`
+	Name    string   `json:"name"`
+	Tables  []string `json:"tables"`
+	Deleted bool     `json:"deleted"`
 }
 
 type tCoreFile struct {
@@ -40,7 +45,32 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 
 var CoreProcessing tCoreProcessing
 
-func RemoveDB(name string) bool {
+// func RemoveDB(name string) bool {
+// 	var dbInfo tDBInfo
+
+// 	dbInfoPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, name, NAME_DB_INFO)
+
+// 	fo, err := os.OpenFile(dbInfoPath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+// 	if err != nil {
+// 		return false
+// 	}
+// 	defer fo.Close()
+
+// 	decoder := json.NewDecoder(fo)
+// 	if err := decoder.Decode(&dbInfo); err != nil {
+// 		slog.Debug("Error loading the information of DB", slog.String("file", dbInfoPath))
+// 	}
+
+// 	bytesDBInfo, err := json.Marshal(dbInfo)
+// 	if err != nil {
+// 		return false
+// 	}
+// 	fo.Write(bytesDBInfo)
+
+// 	return err == nil
+// }
+
+func StrongRemoveDB(name string) bool {
 	fullName := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, name)
 	err := os.Remove(fullName)
 
@@ -54,7 +84,7 @@ func CreateDB(name string) bool {
 		return false
 	}
 
-	dbInfoPath := fmt.Sprintf("%s/%s", fullName, "info.json")
+	dbInfoPath := fmt.Sprintf("%s/%s", fullName, NAME_DB_INFO)
 	fo, err := os.OpenFile(dbInfoPath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return false
@@ -62,8 +92,9 @@ func CreateDB(name string) bool {
 	defer fo.Close()
 
 	dbInfo := tDBInfo{
-		Name:   name,
-		Tables: []string{},
+		Name:    name,
+		Tables:  []string{},
+		Deleted: false,
 	}
 	bytesDBInfo, err := json.Marshal(dbInfo)
 	if err != nil {
