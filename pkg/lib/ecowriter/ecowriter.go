@@ -12,7 +12,9 @@ var (
 	decoder *json.Decoder
 )
 
+// Saving the structure to a JSON file.
 func WriteJSON(name string, data any) (err error) {
+	// This function is complete
 	op := "pkg -> lib -> ecowriter -> WriteJSON"
 	defer func() { e.Wrapper(op, err) }()
 
@@ -36,7 +38,9 @@ func WriteJSON(name string, data any) (err error) {
 	return nil
 }
 
+// Loading a structure from a JSON file.
 func ReadJSON(name string, data any) (err error) {
+	// This function is complete
 	op := "pkg -> lib -> ecowriter -> ReadJSON"
 	defer func() { e.Wrapper(op, err) }()
 
