@@ -13,9 +13,10 @@ import (
 )
 
 const (
-	NAME_STORAGE_INFO = "storage.json"
-	NAME_DB_INFO      = "db.json"
-	NAME_TABLE_INFO   = "table.json"
+	INFOFILE_STORAGE = "storage.json"
+	INFOFILE_DB      = "db.json"
+	INFOFILE_TABLE   = "table.json"
+	INFOFILE_COLUMN  = "column.json"
 )
 
 type tCoreSettings struct {
@@ -24,11 +25,23 @@ type tCoreSettings struct {
 	FreezeMode bool
 }
 
+type tStorageInfo struct {
+	DBs     map[string]string `json:"dbs"` // [name db] name folder
+	Deleted []string          `json:"deleted"`
+}
+
 type tDBInfo struct {
-	Name       string    `json:"name"`
-	Tables     []string  `json:"tables"`
-	LastUpdate time.Time `json:"lastupdate"`
-	Deleted    bool      `json:"deleted"`
+	Name       string            `json:"name"`
+	Tables     map[string]string `json:"tables"`
+	LastUpdate time.Time         `json:"lastupdate"`
+	Deleted    bool              `json:"deleted"`
+}
+
+type tTableInfo struct {
+	Name       string            `json:"name"`
+	Columns    map[string]string `json:"columns"`
+	LastUpdate time.Time         `json:"lastupdate"`
+	Deleted    bool              `json:"deleted"`
 }
 
 type tCoreFile struct {
@@ -48,54 +61,9 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 
 var CoreProcessing tCoreProcessing
 
-// Marks the database as deleted, but does not delete files.
-func RemoveDB(name string) bool {
-	// This function is complete
-	var dbInfo tDBInfo
-
-	dbInfoPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, name, NAME_DB_INFO)
-
-	err := ecowriter.ReadJSON(dbInfoPath, &dbInfo)
-	if err != nil {
-		return false
-	}
-
-	dbInfo.LastUpdate = time.Now()
-	dbInfo.Deleted = true
-	err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
-
-	return err2 == nil
-}
-
-// Deletes the folder and database files.
-func StrongRemoveDB(name string) bool {
-	// This function is complete
-	fullName := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, name)
-	err := os.Remove(fullName)
-
-	return err == nil
-}
-
-// Creating a new database.
-func CreateDB(name string) bool {
-	// This function is complete
-	fullName := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, name)
-	err := os.Mkdir(fullName, 0666)
-	if err != nil {
-		return false
-	}
-
-	dbInfoPath := fmt.Sprintf("%s/%s", fullName, NAME_DB_INFO)
-
-	dbInfo := tDBInfo{
-		Name:       name,
-		Tables:     []string{},
-		LastUpdate: time.Now(),
-		Deleted:    false,
-	}
-
-	err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
-	return err2 == nil
+var StorageInfo tStorageInfo = tStorageInfo{
+	DBs:     make(map[string]string),
+	Deleted: make([]string, 0),
 }
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
@@ -108,10 +76,20 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 
 func Engine(cfg *config.Config) {
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
+
+	storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	err := ecowriter.ReadJSON(storagePath, &StorageInfo)
+	if err != nil {
+		StorageInfo.DBs = make(map[string]string)
+		ecowriter.WriteJSON(storagePath, StorageInfo)
+	}
+
 	slog.Info("The core of the DBMS was started.")
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
-	// -
+	storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	ecowriter.WriteJSON(storagePath, StorageInfo)
+
 	c.Done()
 }
