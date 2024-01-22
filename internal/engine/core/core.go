@@ -26,13 +26,14 @@ type tCoreSettings struct {
 }
 
 type tStorageInfo struct {
-	DBs     map[string]string `json:"dbs"` // [name db] name folder
-	Deleted []string          `json:"deleted"`
+	DBs     map[string]string `json:"dbs"`     // [name db] name folder
+	Removed []string          `json:"removed"` // Removed databases
 }
 
 type tDBInfo struct {
 	Name       string            `json:"name"`
 	Tables     map[string]string `json:"tables"`
+	Removed    []string          `json:"removed"` // Removed tables
 	LastUpdate time.Time         `json:"lastupdate"`
 	Deleted    bool              `json:"deleted"`
 }
@@ -40,6 +41,7 @@ type tDBInfo struct {
 type tTableInfo struct {
 	Name       string            `json:"name"`
 	Columns    map[string]string `json:"columns"`
+	Removed    []string          `json:"removed"` // Removed columns
 	LastUpdate time.Time         `json:"lastupdate"`
 	Deleted    bool              `json:"deleted"`
 }
@@ -63,7 +65,7 @@ var CoreProcessing tCoreProcessing
 
 var StorageInfo tStorageInfo = tStorageInfo{
 	DBs:     make(map[string]string),
-	Deleted: make([]string, 0),
+	Removed: make([]string, 0),
 }
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
