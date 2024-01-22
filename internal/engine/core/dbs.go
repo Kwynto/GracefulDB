@@ -24,7 +24,7 @@ func RemoveDB(name string) bool {
 			}
 			dbInfo.LastUpdate = time.Now()
 			dbInfo.Deleted = true
-			err2 := ecowriter.WriteJSON(dbInfoPath, &dbInfo)
+			err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
 			if err2 != nil {
 				return false
 			}
