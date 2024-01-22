@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
@@ -10,12 +11,12 @@ import (
 
 // Marks the database as deleted, but does not delete files.
 func RemoveDB(name string) bool {
-	// TODO: доделать добавление в массив Deleted в StorageInfo
+	// This function is complete
 	var dbInfo tDBInfo
 
 	folderName, ok := StorageInfo.DBs[name]
 	if ok {
-		if CheckFolderOrFile(fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderName), folderName) {
+		if CheckFolderOrFile(LocalCoreSettings.Storage, folderName) {
 			dbInfoPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, folderName, INFOFILE_DB)
 			err := ecowriter.ReadJSON(dbInfoPath, &dbInfo)
 			if err != nil {
@@ -27,6 +28,14 @@ func RemoveDB(name string) bool {
 			if err2 != nil {
 				return false
 			}
+
+			StorageInfo.Removed = append(StorageInfo.Removed, folderName)
+			delete(StorageInfo.DBs, name)
+			storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+			err3 := ecowriter.WriteJSON(storagePath, StorageInfo)
+			if err3 != nil {
+				return false
+			}
 		} else {
 			return false
 		}
@@ -35,22 +44,30 @@ func RemoveDB(name string) bool {
 	return true
 }
 
-// Deletes the folder and database files.
+// Deletes the folder and database files, if DB was mark as 'removed'
 func StrongRemoveDB(name string) bool {
-	// TODO: доделать удаление из массива Deleted в StorageInfo
-	folderName, ok := StorageInfo.DBs[name]
-	if ok {
+	// This function is complete
+	var dbInfo tDBInfo
+
+	for indRange, folderName := range StorageInfo.Removed {
 		if CheckFolderOrFile(LocalCoreSettings.Storage, folderName) {
 			fullPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderName)
-			err := os.Remove(fullPath)
+			dbInfoPath := fmt.Sprintf("%s/%s", fullPath, INFOFILE_DB)
+			err := ecowriter.ReadJSON(dbInfoPath, &dbInfo)
 			if err != nil {
 				return false
 			}
 
-			delete(StorageInfo.DBs, name)
-			storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-			ecowriter.WriteJSON(storagePath, StorageInfo)
-			return true
+			if dbInfo.Name == name {
+				err := os.Remove(fullPath)
+				if err != nil {
+					return false
+				}
+				slices.Delete(StorageInfo.Removed, indRange, indRange+1)
+				storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+				ecowriter.WriteJSON(storagePath, StorageInfo)
+				return true
+			}
 		}
 	}
 

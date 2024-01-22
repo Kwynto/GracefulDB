@@ -27,7 +27,7 @@ type tCoreSettings struct {
 
 type tStorageInfo struct {
 	DBs     map[string]string `json:"dbs"` // [name db] name folder
-	Deleted []string          `json:"deleted"`
+	Removed []string          `json:"deleted"`
 }
 
 type tDBInfo struct {
@@ -63,7 +63,7 @@ var CoreProcessing tCoreProcessing
 
 var StorageInfo tStorageInfo = tStorageInfo{
 	DBs:     make(map[string]string),
-	Deleted: make([]string, 0),
+	Removed: make([]string, 0),
 }
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
