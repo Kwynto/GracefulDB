@@ -15,6 +15,15 @@ func GenerateName() string {
 	return fmt.Sprintf("%x", b)
 }
 
+// Revision generation
+func GenerateRev() string {
+	// This function is complete
+	b := make([]byte, 4)
+	rand.Read(b)
+
+	return fmt.Sprintf("%x", b)
+}
+
 // Checking the folder name
 func CheckFolderOrFile(patch, name string) bool {
 	// This function is complete
