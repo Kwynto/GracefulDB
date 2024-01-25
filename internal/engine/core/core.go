@@ -26,29 +26,42 @@ type tCoreSettings struct {
 }
 
 type tStorageInfo struct {
-	DBs     map[string]string `json:"dbs"`     // [name db] name folder
-	Removed []string          `json:"removed"` // Removed databases
+	DBs     map[string]tDBInfo `json:"dbs"`     // [name db] tDBInfo
+	Removed []tDBInfo          `json:"removed"` // Removed databases
+}
+
+// Saving the storage structure.
+func (s tStorageInfo) Save() bool {
+	// This method is complete
+	path := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	err := ecowriter.WriteJSON(path, s)
+	return err == nil
 }
 
 type tDBInfo struct {
-	Name       string            `json:"name"`
-	Tables     map[string]string `json:"tables"`
-	Removed    []string          `json:"removed"` // Removed tables
-	LastUpdate time.Time         `json:"lastupdate"`
-	Deleted    bool              `json:"deleted"`
+	Name       string                `json:"name"`
+	Folder     string                `json:"folder"`
+	Tables     map[string]tTableInfo `json:"tables"`
+	Removed    []tTableInfo          `json:"removed"` // Removed tables
+	LastUpdate time.Time             `json:"lastupdate"`
+	Deleted    bool                  `json:"deleted"`
 }
 
 type tTableInfo struct {
-	Name       string            `json:"name"`
-	Columns    map[string]string `json:"columns"`
-	Removed    []string          `json:"removed"` // Removed columns
-	Order      []string          `json:"order"`
-	LastUpdate time.Time         `json:"lastupdate"`
-	Deleted    bool              `json:"deleted"`
+	Name       string                 `json:"name"`
+	Folder     string                 `json:"folder"`
+	Parent     string                 `json:"parent"`
+	Columns    map[string]tColumnInfo `json:"columns"`
+	Removed    []tColumnInfo          `json:"removed"` // Removed columns
+	Order      []string               `json:"order"`
+	LastUpdate time.Time              `json:"lastupdate"`
+	Deleted    bool                   `json:"deleted"`
 }
 
 type tColumnInfo struct {
 	Name       string    `json:"name"`
+	Folder     string    `json:"folder"`
+	Parents    string    `json:"parents"`
 	BucketLog  uint8     `json:"blog"`
 	BucketSize int       `json:"bsize"`
 	OldRev     string    `json:"oldrev"`
@@ -75,8 +88,8 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 var CoreProcessing tCoreProcessing
 
 var StorageInfo tStorageInfo = tStorageInfo{
-	DBs:     make(map[string]string),
-	Removed: make([]string, 0),
+	DBs:     make(map[string]tDBInfo),
+	Removed: make([]tDBInfo, 0),
 }
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
@@ -93,7 +106,7 @@ func Engine(cfg *config.Config) {
 	storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
 	err := ecowriter.ReadJSON(storagePath, &StorageInfo)
 	if err != nil {
-		StorageInfo.DBs = make(map[string]string)
+		StorageInfo.DBs = make(map[string]tDBInfo)
 		ecowriter.WriteJSON(storagePath, StorageInfo)
 	}
 

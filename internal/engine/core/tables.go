@@ -107,19 +107,17 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 func CreateTable(nameDB, nameTable string) bool {
 	// This function is complete
 	var folderName string
-	var dbInfo tDBInfo = tDBInfo{}
-	var tableInfo tTableInfo = tTableInfo{}
 
-	folderDB, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
 	}
 
-	if !CheckFolderOrFile(LocalCoreSettings.Storage, folderDB) {
+	if !CheckFolderOrFile(LocalCoreSettings.Storage, dbInfo.Folder) {
 		return false
 	}
 
-	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, folderDB)
+	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
 
 	for {
 		folderName = GenerateName()
@@ -134,25 +132,19 @@ func CreateTable(nameDB, nameTable string) bool {
 		return false
 	}
 
-	tableInfo = tTableInfo{
+	tableInfo := tTableInfo{
 		Name:       nameTable,
-		Columns:    make(map[string]string),
-		Removed:    []string{},
+		Folder:     folderName,
+		Parent:     fmt.Sprintf("%s/%s", dbInfo.Folder, folderName),
+		Columns:    make(map[string]tColumnInfo),
+		Removed:    make([]tColumnInfo, 0),
+		Order:      make([]string, 0),
 		LastUpdate: time.Now(),
 		Deleted:    false,
 	}
-	tableInfoPath := fmt.Sprintf("%s/%s", fullTableName, INFOFILE_TABLE)
-	if ecowriter.WriteJSON(tableInfoPath, &tableInfo) != nil {
-		return false
-	}
 
-	dbInfoPath := fmt.Sprintf("%s%s", pathDB, INFOFILE_DB)
-	if ecowriter.ReadJSON(dbInfoPath, &dbInfo) != nil {
-		return false
-	}
-	dbInfo.Tables[nameTable] = folderName
+	dbInfo.Tables[nameTable] = tableInfo
 	dbInfo.LastUpdate = time.Now()
-	err2 := ecowriter.WriteJSON(dbInfoPath, dbInfo)
 
-	return err2 == nil
+	return StorageInfo.Save()
 }
