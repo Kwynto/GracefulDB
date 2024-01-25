@@ -42,8 +42,19 @@ type tTableInfo struct {
 	Name       string            `json:"name"`
 	Columns    map[string]string `json:"columns"`
 	Removed    []string          `json:"removed"` // Removed columns
+	Order      []string          `json:"order"`
 	LastUpdate time.Time         `json:"lastupdate"`
 	Deleted    bool              `json:"deleted"`
+}
+
+type tColumnInfo struct {
+	Name       string    `json:"name"`
+	BucketLog  uint8     `json:"blog"`
+	BucketSize int       `json:"bsize"`
+	OldRev     string    `json:"oldrev"`
+	CurrentRev string    `json:"currentrev"`
+	LastUpdate time.Time `json:"lastupdate"`
+	Deleted    bool      `json:"deleted"`
 }
 
 type tCoreFile struct {
