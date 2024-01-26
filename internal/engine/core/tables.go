@@ -31,7 +31,7 @@ func RemoveTable(nameDB, nameTable string) bool {
 
 	StorageInfo.DBs[nameDB] = dbInfo
 
-	return StorageInfo.Save()
+	return dbInfo.Save()
 }
 
 // Deletes the folder and table files, if table was mark as 'removed'
@@ -45,7 +45,7 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 	for indRange, tableInfo := range dbInfo.Removed {
 		if tableInfo.Name == nameTable {
 			tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			err := os.Remove(tablePath)
+			err := os.RemoveAll(tablePath)
 			if err != nil {
 				return false
 			}
@@ -54,7 +54,7 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 			dbInfo.LastUpdate = time.Now()
 			StorageInfo.DBs[nameDB] = dbInfo
 
-			return StorageInfo.Save()
+			return dbInfo.Save()
 		}
 	}
 
@@ -105,5 +105,5 @@ func CreateTable(nameDB, nameTable string) bool {
 	dbInfo.LastUpdate = time.Now()
 	StorageInfo.DBs[nameDB] = dbInfo
 
-	return StorageInfo.Save()
+	return dbInfo.Save()
 }

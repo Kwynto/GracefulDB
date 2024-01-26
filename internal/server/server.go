@@ -23,7 +23,7 @@ func Run(ctx context.Context, cfg *config.Config) (err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	// TODO: Load the core of the system
-	go core.Engine(cfg)
+	go core.Start(cfg)
 	closer.AddHandler(core.Shutdown) // Register a shutdown handler.
 
 	// Basic system - begin

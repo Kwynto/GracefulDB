@@ -19,7 +19,7 @@ func RemoveDB(nameDB string) bool {
 		delete(StorageInfo.DBs, nameDB)
 	}
 
-	return StorageInfo.Save()
+	return dbInfo.Save()
 }
 
 // Deletes the folder and database files, if DB was mark as 'removed'
@@ -28,13 +28,14 @@ func StrongRemoveDB(nameDB string) bool {
 	for indRange, dbInfo := range StorageInfo.Removed {
 		if dbInfo.Name == nameDB {
 			dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
-			err := os.Remove(dbPath)
+			err := os.RemoveAll(dbPath)
 			if err != nil {
 				return false
 			}
+
 			StorageInfo.Removed = slices.Delete(StorageInfo.Removed, indRange, indRange+1)
 
-			return StorageInfo.Save()
+			return true
 		}
 	}
 
@@ -74,7 +75,6 @@ func CreateDB(nameDB string) bool {
 	}
 
 	StorageInfo.DBs[nameDB] = dbInfo
-	res := StorageInfo.Save()
 
-	return res
+	return dbInfo.Save()
 }

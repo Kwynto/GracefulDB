@@ -43,7 +43,7 @@ func RemoveColumn(nameDB, nameTable, nameColumn string) bool {
 
 	StorageInfo.DBs[nameDB] = dbInfo
 
-	return StorageInfo.Save()
+	return dbInfo.Save()
 }
 
 // Deletes the folder and column files, if column was mark as 'removed'
@@ -62,7 +62,7 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 	for indRange, columnInfo := range tableInfo.Removed {
 		if columnInfo.Name == nameColumn {
 			columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-			err := os.Remove(columnPath)
+			err := os.RemoveAll(columnPath)
 			if err != nil {
 				return false
 			}
@@ -77,7 +77,7 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 
 			StorageInfo.DBs[nameDB] = dbInfo
 
-			return StorageInfo.Save()
+			return dbInfo.Save()
 		}
 	}
 
@@ -137,5 +137,5 @@ func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 
 	StorageInfo.DBs[nameDB] = dbInfo
 
-	return StorageInfo.Save()
+	return dbInfo.Save()
 }

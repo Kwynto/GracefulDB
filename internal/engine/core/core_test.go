@@ -16,11 +16,11 @@ func Test_LoadLocalCoreSettings(t *testing.T) {
 	})
 }
 
-func Test_Engine(t *testing.T) {
-	t.Run("Engine() function testing", func(t *testing.T) {
-		Engine(&config.DefaultConfig)
+func Test_Start(t *testing.T) {
+	t.Run("Start() function testing", func(t *testing.T) {
+		Start(&config.DefaultConfig)
 		if reflect.TypeOf(LocalCoreSettings) != reflect.TypeOf(tCoreSettings{}) {
-			t.Error("Engine() error = The function returns the wrong type")
+			t.Error("Start() error = The function returns the wrong type")
 		}
 	})
 }
