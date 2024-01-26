@@ -10,7 +10,6 @@ import (
 // Marks the table as deleted, but does not delete files.
 func RemoveTable(nameDB, nameTable string) bool {
 	// This function is complete
-
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
@@ -51,7 +50,7 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 				return false
 			}
 
-			slices.Delete(dbInfo.Removed, indRange, indRange+1)
+			dbInfo.Removed = slices.Delete(dbInfo.Removed, indRange, indRange+1)
 			dbInfo.LastUpdate = time.Now()
 			StorageInfo.DBs[nameDB] = dbInfo
 

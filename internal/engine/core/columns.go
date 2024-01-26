@@ -3,8 +3,86 @@ package core
 import (
 	"fmt"
 	"os"
+	"slices"
 	"time"
 )
+
+// Marks the column as deleted, but does not delete files.
+func RemoveColumn(nameDB, nameTable, nameColumn string) bool {
+	// This function is complete
+	dbInfo, ok := StorageInfo.DBs[nameDB]
+	if !ok {
+		return false
+	}
+
+	tableInfo, ok := dbInfo.Tables[nameTable]
+	if !ok {
+		return false
+	}
+
+	columnInfo, ok := tableInfo.Columns[nameColumn]
+	if !ok {
+		return false
+	}
+
+	tNow := time.Now()
+
+	columnInfo.LastUpdate = tNow
+	columnInfo.Deleted = true
+
+	tableInfo.Removed = append(tableInfo.Removed, columnInfo)
+	delete(tableInfo.Columns, nameColumn)
+	ind := slices.Index(tableInfo.Order, nameColumn)
+	if ind != -1 {
+		tableInfo.Order = slices.Delete(tableInfo.Order, ind, ind+1)
+	}
+	tableInfo.LastUpdate = tNow
+
+	dbInfo.Tables[nameTable] = tableInfo
+	dbInfo.LastUpdate = tNow
+
+	StorageInfo.DBs[nameDB] = dbInfo
+
+	return StorageInfo.Save()
+}
+
+// Deletes the folder and column files, if column was mark as 'removed'
+func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
+	// This function is complete
+	dbInfo, ok := StorageInfo.DBs[nameDB]
+	if !ok {
+		return false
+	}
+
+	tableInfo, ok := dbInfo.Tables[nameTable]
+	if !ok {
+		return false
+	}
+
+	for indRange, columnInfo := range tableInfo.Removed {
+		if columnInfo.Name == nameColumn {
+			columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+			err := os.Remove(columnPath)
+			if err != nil {
+				return false
+			}
+
+			tNow := time.Now()
+
+			tableInfo.Removed = slices.Delete(tableInfo.Removed, indRange, indRange+1)
+			tableInfo.LastUpdate = tNow
+
+			dbInfo.Tables[nameTable] = tableInfo
+			dbInfo.LastUpdate = tNow
+
+			StorageInfo.DBs[nameDB] = dbInfo
+
+			return StorageInfo.Save()
+		}
+	}
+
+	return false
+}
 
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string) bool {

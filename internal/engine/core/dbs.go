@@ -32,7 +32,7 @@ func StrongRemoveDB(nameDB string) bool {
 			if err != nil {
 				return false
 			}
-			slices.Delete(StorageInfo.Removed, indRange, indRange+1)
+			StorageInfo.Removed = slices.Delete(StorageInfo.Removed, indRange, indRange+1)
 
 			return StorageInfo.Save()
 		}
