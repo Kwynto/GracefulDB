@@ -27,16 +27,14 @@ func StrongRemoveDB(nameDB string) bool {
 	// This function is complete
 	for indRange, dbInfo := range StorageInfo.Removed {
 		if dbInfo.Name == nameDB {
-			if CheckFolderOrFile(LocalCoreSettings.Storage, dbInfo.Folder) {
-				fullPathDB := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
-				err := os.Remove(fullPathDB)
-				if err != nil {
-					return false
-				}
-				slices.Delete(StorageInfo.Removed, indRange, indRange+1)
-
-				return StorageInfo.Save()
+			dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
+			err := os.Remove(dbPath)
+			if err != nil {
+				return false
 			}
+			slices.Delete(StorageInfo.Removed, indRange, indRange+1)
+
+			return StorageInfo.Save()
 		}
 	}
 
