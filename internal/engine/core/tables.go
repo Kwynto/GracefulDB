@@ -94,7 +94,7 @@ func CreateTable(nameDB, nameTable string) bool {
 	tableInfo := tTableInfo{
 		Name:       nameTable,
 		Folder:     folderName,
-		Parent:     fmt.Sprintf("%s/%s", dbInfo.Folder, folderName),
+		Parent:     dbInfo.Folder,
 		Columns:    make(map[string]tColumnInfo),
 		Removed:    make([]tColumnInfo, 0),
 		Order:      make([]string, 0),
@@ -104,6 +104,7 @@ func CreateTable(nameDB, nameTable string) bool {
 
 	dbInfo.Tables[nameTable] = tableInfo
 	dbInfo.LastUpdate = time.Now()
+	StorageInfo.DBs[nameDB] = dbInfo
 
 	return StorageInfo.Save()
 }

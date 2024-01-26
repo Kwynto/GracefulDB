@@ -4,47 +4,24 @@ import (
 	"fmt"
 	"os"
 	"time"
-
-	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 	// This function is complete
 	var folderName string
-	var dbInfo tDBInfo = tDBInfo{}
-	var tableInfo tTableInfo = tTableInfo{}
-	var columnInfo tColumnInfo = tColumnInfo{}
 
-	folderDB, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
 	}
 
-	if !CheckFolderOrFile(LocalCoreSettings.Storage, folderDB) {
-		return false
-	}
-
-	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, folderDB)
-	dbInfoPath := fmt.Sprintf("%s%s", pathDB, INFOFILE_DB)
-	if ecowriter.ReadJSON(dbInfoPath, &dbInfo) != nil {
-		return false
-	}
-
-	folderTable, ok := dbInfo.Tables[nameTable]
+	tableInfo, ok := dbInfo.Tables[nameTable]
 	if !ok {
 		return false
 	}
 
-	if !CheckFolderOrFile(pathDB, folderTable) {
-		return false
-	}
-
-	pathTable := fmt.Sprintf("%s%s/", pathDB, folderTable)
-	tableInfoPath := fmt.Sprintf("%s%s", pathTable, INFOFILE_TABLE)
-	if ecowriter.ReadJSON(tableInfoPath, &tableInfo) != nil {
-		return false
-	}
+	pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
 	for {
 		folderName = GenerateName()
@@ -61,8 +38,10 @@ func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 
 	tNow := time.Now()
 
-	columnInfo = tColumnInfo{
+	columnInfo := tColumnInfo{
 		Name:       nameColumn,
+		Folder:     folderName,
+		Parents:    fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
 		BucketLog:  2,
 		BucketSize: LocalCoreSettings.BucketSize,
 		OldRev:     "",
@@ -71,14 +50,14 @@ func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 		Deleted:    false,
 	}
 
-	columnInfoPath := fmt.Sprintf("%s/%s", fullColumnName, INFOFILE_COLUMN)
-	if ecowriter.WriteJSON(columnInfoPath, &columnInfo) != nil {
-		return false
-	}
-
-	tableInfo.Columns[nameColumn] = folderName
+	tableInfo.Columns[nameColumn] = columnInfo
+	tableInfo.Order = append(tableInfo.Order, nameColumn)
 	tableInfo.LastUpdate = tNow
-	err2 := ecowriter.WriteJSON(tableInfoPath, tableInfo)
 
-	return err2 == nil
+	dbInfo.Tables[nameTable] = tableInfo
+	dbInfo.LastUpdate = tNow
+
+	StorageInfo.DBs[nameDB] = dbInfo
+
+	return StorageInfo.Save()
 }
