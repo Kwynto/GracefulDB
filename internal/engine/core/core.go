@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	INFOFILE_STORAGE = "storage.json"
-	INFOFILE_DB      = "db.json"
-	INFOFILE_TABLE   = "table.json"
-	INFOFILE_COLUMN  = "column.json"
+	// INFOFILE_STORAGE = "storage.json"
+	INFOFILE_DB = "db.json"
+	// INFOFILE_TABLE   = "table.json"
+	// INFOFILE_COLUMN  = "column.json"
 )
 
 type tCoreSettings struct {
@@ -26,29 +26,71 @@ type tCoreSettings struct {
 }
 
 type tStorageInfo struct {
-	DBs     map[string]string `json:"dbs"`     // [name db] name folder
-	Removed []string          `json:"removed"` // Removed databases
+	DBs     map[string]tDBInfo `json:"dbs"`     // [name db] tDBInfo
+	Removed []tDBInfo          `json:"removed"` // Removed databases
+}
+
+func (s *tStorageInfo) Load() bool {
+	// This method is complete
+	var dbInfo tDBInfo
+
+	s.DBs = make(map[string]tDBInfo)
+	s.Removed = make([]tDBInfo, 0)
+
+	files, err := os.ReadDir(LocalCoreSettings.Storage)
+	if err != nil {
+		return false
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			nameDir := file.Name()
+			dbInfoFile := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
+			err := ecowriter.ReadJSON(dbInfoFile, &dbInfo)
+			if err == nil {
+				if dbInfo.Deleted {
+					s.Removed = append(s.Removed, dbInfo)
+				} else {
+					s.DBs[dbInfo.Name] = dbInfo
+				}
+			}
+		}
+	}
+	return true
 }
 
 type tDBInfo struct {
-	Name       string            `json:"name"`
-	Tables     map[string]string `json:"tables"`
-	Removed    []string          `json:"removed"` // Removed tables
-	LastUpdate time.Time         `json:"lastupdate"`
-	Deleted    bool              `json:"deleted"`
+	Name       string                `json:"name"`
+	Folder     string                `json:"folder"`
+	Tables     map[string]tTableInfo `json:"tables"`
+	Removed    []tTableInfo          `json:"removed"` // Removed tables
+	LastUpdate time.Time             `json:"lastupdate"`
+	Deleted    bool                  `json:"deleted"`
+}
+
+// Saving the database structure.
+func (d tDBInfo) Save() bool {
+	// This method is complete
+	path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
+	err := ecowriter.WriteJSON(path, d)
+	return err == nil
 }
 
 type tTableInfo struct {
-	Name       string            `json:"name"`
-	Columns    map[string]string `json:"columns"`
-	Removed    []string          `json:"removed"` // Removed columns
-	Order      []string          `json:"order"`
-	LastUpdate time.Time         `json:"lastupdate"`
-	Deleted    bool              `json:"deleted"`
+	Name       string                 `json:"name"`
+	Folder     string                 `json:"folder"`
+	Parent     string                 `json:"parent"`
+	Columns    map[string]tColumnInfo `json:"columns"`
+	Removed    []tColumnInfo          `json:"removed"` // Removed columns
+	Order      []string               `json:"order"`
+	LastUpdate time.Time              `json:"lastupdate"`
+	Deleted    bool                   `json:"deleted"`
 }
 
 type tColumnInfo struct {
 	Name       string    `json:"name"`
+	Folder     string    `json:"folder"`
+	Parents    string    `json:"parents"`
 	BucketLog  uint8     `json:"blog"`
 	BucketSize int       `json:"bsize"`
 	OldRev     string    `json:"oldrev"`
@@ -75,8 +117,8 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 var CoreProcessing tCoreProcessing
 
 var StorageInfo tStorageInfo = tStorageInfo{
-	DBs:     make(map[string]string),
-	Removed: make([]string, 0),
+	// DBs:     make(map[string]tDBInfo),
+	// Removed: make([]tDBInfo, 0),
 }
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
@@ -87,22 +129,17 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	}
 }
 
-func Engine(cfg *config.Config) {
+func Start(cfg *config.Config) {
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
 
-	storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	err := ecowriter.ReadJSON(storagePath, &StorageInfo)
-	if err != nil {
-		StorageInfo.DBs = make(map[string]string)
-		ecowriter.WriteJSON(storagePath, StorageInfo)
+	if !StorageInfo.Load() {
+		slog.Error("Storage activation error !!!")
 	}
 
 	slog.Info("The core of the DBMS was started.")
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
-	storagePath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	ecowriter.WriteJSON(storagePath, StorageInfo)
-
+	// -
 	c.Done()
 }
