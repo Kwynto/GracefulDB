@@ -137,6 +137,12 @@ func Start(cfg *config.Config) {
 	}
 
 	slog.Info("The core of the DBMS was started.")
+
+	// This block needs to delete
+	// fmt.Println(CreateDB("ExampleDB"))
+	// fmt.Println(CreateTable("ExampleDB", "ExampleTable"))
+	// fmt.Println(CreateColumn("ExampleDB", "ExampleTable", "example"))
+	// fmt.Println(StorageInfo)
 }
 
 func Shutdown(ctx context.Context, c *closer.Closer) {

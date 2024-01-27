@@ -71,10 +71,6 @@ func CreateTable(nameDB, nameTable string) bool {
 		return false
 	}
 
-	if !CheckFolderOrFile(LocalCoreSettings.Storage, dbInfo.Folder) {
-		return false
-	}
-
 	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
 
 	for {
@@ -85,7 +81,7 @@ func CreateTable(nameDB, nameTable string) bool {
 	}
 
 	fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
-	err := os.Mkdir(fullTableName, 0666)
+	err := os.MkdirAll(fullTableName, 0666)
 	if err != nil {
 		return false
 	}

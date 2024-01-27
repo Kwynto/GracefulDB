@@ -28,7 +28,14 @@ func GenerateRev() string {
 func CheckFolderOrFile(patch, name string) bool {
 	// This function is complete
 	fullPath := fmt.Sprintf("%s%s", patch, name)
-	_, err := os.Stat(fullPath)
+	f, err := os.Stat(fullPath)
+	if err != nil {
+		return false
+	}
 
-	return os.IsExist(err)
+	if f.IsDir() {
+		return true
+	}
+
+	return true
 }
