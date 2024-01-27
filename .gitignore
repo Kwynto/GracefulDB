@@ -26,3 +26,6 @@ vendor/
 
 # Go workspace file
 go.work
+
+# Storage of databases
+./data/*

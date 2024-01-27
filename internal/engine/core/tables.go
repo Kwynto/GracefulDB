@@ -71,15 +71,11 @@ func CreateTable(nameDB, nameTable string) bool {
 		return false
 	}
 
-	if !CheckFolderOrFile(LocalCoreSettings.Storage, dbInfo.Folder) {
-		return false
-	}
-
 	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
 
 	for {
 		folderName = GenerateName()
-		if !CheckFolderOrFile(pathDB, folderName) {
+		if !CheckFolder(pathDB, folderName) {
 			break
 		}
 	}

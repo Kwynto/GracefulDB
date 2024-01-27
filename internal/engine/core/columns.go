@@ -103,7 +103,7 @@ func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 
 	for {
 		folderName = GenerateName()
-		if !CheckFolderOrFile(pathTable, folderName) {
+		if !CheckFolder(pathTable, folderName) {
 			break
 		}
 	}
