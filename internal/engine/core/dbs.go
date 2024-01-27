@@ -54,7 +54,7 @@ func CreateDB(nameDB string) bool {
 
 	for {
 		folderDB = GenerateName()
-		if !CheckFolderOrFile(LocalCoreSettings.Storage, folderDB) {
+		if !CheckFolder(LocalCoreSettings.Storage, folderDB) {
 			break
 		}
 	}

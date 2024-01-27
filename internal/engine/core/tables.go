@@ -75,7 +75,7 @@ func CreateTable(nameDB, nameTable string) bool {
 
 	for {
 		folderName = GenerateName()
-		if !CheckFolderOrFile(pathDB, folderName) {
+		if !CheckFolder(pathDB, folderName) {
 			break
 		}
 	}
