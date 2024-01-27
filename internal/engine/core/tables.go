@@ -81,7 +81,7 @@ func CreateTable(nameDB, nameTable string) bool {
 	}
 
 	fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
-	err := os.MkdirAll(fullTableName, 0666)
+	err := os.Mkdir(fullTableName, 0666)
 	if err != nil {
 		return false
 	}
