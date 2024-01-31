@@ -88,15 +88,22 @@ type tTableInfo struct {
 }
 
 type tColumnInfo struct {
-	Name       string    `json:"name"`
-	Folder     string    `json:"folder"`
-	Parents    string    `json:"parents"`
-	BucketLog  uint8     `json:"blog"`
-	BucketSize int       `json:"bsize"`
-	OldRev     string    `json:"oldrev"`
-	CurrentRev string    `json:"currentrev"`
-	LastUpdate time.Time `json:"lastupdate"`
-	Deleted    bool      `json:"deleted"`
+	Name          string               `json:"name"`
+	Folder        string               `json:"folder"`
+	Parents       string               `json:"parents"`
+	BucketLog     uint8                `json:"blog"`
+	BucketSize    int                  `json:"bsize"`
+	OldRev        string               `json:"oldrev"`
+	CurrentRev    string               `json:"currentrev"`
+	Specification tColumnSpecification `json:"specification"`
+	LastUpdate    time.Time            `json:"lastupdate"`
+	Deleted       bool                 `json:"deleted"`
+}
+
+type tColumnSpecification struct {
+	Default string `json:"default"`
+	NotNull bool   `json:"notnull"`
+	Unique  bool   `json:"unique"`
 }
 
 type tCoreFile struct {
