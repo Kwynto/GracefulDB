@@ -2,6 +2,7 @@ package core
 
 import (
 	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"os"
 )
@@ -34,4 +35,15 @@ func CheckFolder(patch, name string) bool {
 	}
 
 	return dir.IsDir()
+}
+
+func Uint64ToBinary(i uint64) []byte {
+	bs := make([]byte, 8)
+	binary.BigEndian.PutUint64(bs, i)
+	return bs
+}
+
+func BinaryToUint64(b []byte) uint64 {
+	i := binary.BigEndian.Uint64(b)
+	return i
 }
