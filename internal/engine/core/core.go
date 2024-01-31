@@ -13,10 +13,8 @@ import (
 )
 
 const (
-	// INFOFILE_STORAGE = "storage.json"
 	INFOFILE_DB = "db.json"
-	// INFOFILE_TABLE   = "table.json"
-	// INFOFILE_COLUMN  = "column.json"
+	POSTFIX_ID  = "_id"
 )
 
 type tCoreSettings struct {
@@ -78,11 +76,13 @@ func (d tDBInfo) Save() bool {
 
 type tTableInfo struct {
 	Name       string                 `json:"name"`
+	Patronymic string                 `json:"patronymic"`
 	Folder     string                 `json:"folder"`
 	Parent     string                 `json:"parent"`
 	Columns    map[string]tColumnInfo `json:"columns"`
 	Removed    []tColumnInfo          `json:"removed"` // Removed columns
 	Order      []string               `json:"order"`
+	Count      uint64                 `json:"count"`
 	LastUpdate time.Time              `json:"lastupdate"`
 	Deleted    bool                   `json:"deleted"`
 }

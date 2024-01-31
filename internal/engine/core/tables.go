@@ -88,11 +88,13 @@ func CreateTable(nameDB, nameTable string) bool {
 
 	tableInfo := tTableInfo{
 		Name:       nameTable,
+		Patronymic: nameDB,
 		Folder:     folderName,
 		Parent:     dbInfo.Folder,
 		Columns:    make(map[string]tColumnInfo),
 		Removed:    make([]tColumnInfo, 0),
 		Order:      make([]string, 0),
+		Count:      0,
 		LastUpdate: time.Now(),
 		Deleted:    false,
 	}
