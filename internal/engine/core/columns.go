@@ -85,7 +85,7 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 }
 
 // Creating a new column.
-func CreateColumn(nameDB, nameTable, nameColumn string) bool {
+func CreateColumn(nameDB, nameTable, nameColumn string, specification tColumnSpecification) bool {
 	// This function is complete
 	var folderName string
 
@@ -117,15 +117,16 @@ func CreateColumn(nameDB, nameTable, nameColumn string) bool {
 	tNow := time.Now()
 
 	columnInfo := tColumnInfo{
-		Name:       nameColumn,
-		Folder:     folderName,
-		Parents:    fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
-		BucketLog:  2,
-		BucketSize: LocalCoreSettings.BucketSize,
-		OldRev:     "",
-		CurrentRev: GenerateRev(),
-		LastUpdate: tNow,
-		Deleted:    false,
+		Name:          nameColumn,
+		Folder:        folderName,
+		Parents:       fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
+		BucketLog:     2,
+		BucketSize:    LocalCoreSettings.BucketSize,
+		OldRev:        "",
+		CurrentRev:    GenerateRev(),
+		Specification: specification,
+		LastUpdate:    tNow,
+		Deleted:       false,
 	}
 
 	tableInfo.Columns[nameColumn] = columnInfo
