@@ -1,39 +1,36 @@
 package sqlanalyzer
 
 import (
-	"regexp"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 // DCL — язык управления данными (Data Control Language)
 
-func (q *tQuery) DCLGrant() (err error) {
+func (q *tQuery) DCLSearchGrant() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
+	op := "internal -> analyzers -> sql -> DCL -> DCLSearchGrant"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DCLRevoke() (err error) {
+func (q *tQuery) DCLSearchRevoke() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
+	op := "internal -> analyzers -> sql -> DCL -> DCLSearchRevoke"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DCLUse() (err error) {
-	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLUse"
+func (q *tQuery) DCLSearchUse() (err error) {
+	// This method is complete
+	op := "internal -> analyzers -> sql -> DCL -> DCLSearchUse"
 	defer func() { e.Wrapper(op, err) }()
 
-	re, err := regexp.Compile(`(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+;`)
-	if err != nil {
-		return err
-	}
+	re := core.RegExpCollection["SearchUse"]
 
 	location := re.FindStringIndex(q.Instruction)
 	if len(location) > 0 && location[0] == 0 {

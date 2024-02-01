@@ -2,9 +2,9 @@ package sqlanalyzer
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
@@ -19,7 +19,7 @@ func (q *tQuery) Decomposition() (err error) {
 	op := "internal -> analyzers -> sql -> Decomposition"
 	defer func() { e.Wrapper(op, err) }()
 
-	q.DCLUse()
+	q.DCLSearchUse()
 
 	return nil
 }
@@ -29,10 +29,7 @@ func (q *tQuery) HeadCleaner() (err error) {
 	op := "internal -> analyzers -> sql -> HeadCleaner"
 	defer func() { e.Wrapper(op, err) }()
 
-	re, err := regexp.Compile(``)
-	if err != nil {
-		return err
-	}
+	re := core.RegExpCollection["HeadCleaner"]
 
 	location := re.FindStringIndex(q.Instruction)
 	if len(location) > 0 && location[0] == 0 {
@@ -51,7 +48,7 @@ func Request(instruction *string, placeholder *[]string) *string {
 	var query tQuery = tQuery{
 		Instruction: *instruction,
 		Placeholder: *placeholder,
-		QueryLine:   make([]string, 5),
+		QueryLine:   make([]string, 1),
 	}
 
 	query.Decomposition()

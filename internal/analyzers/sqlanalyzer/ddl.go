@@ -4,25 +4,25 @@ import "github.com/Kwynto/GracefulDB/pkg/lib/e"
 
 // DDL — язык определения данных (Data Definition Language)
 
-func (q *tQuery) DDLCreate() (err error) {
+func (q *tQuery) DDLSearchCreate() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLCreate"
+	op := "internal -> analyzers -> sql -> DDL -> DDLSearchCreate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DDLAlter() (err error) {
+func (q *tQuery) DDLSearchAlter() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLAlter"
+	op := "internal -> analyzers -> sql -> DDL -> DDLSearchAlter"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DDLDrop() (err error) {
+func (q *tQuery) DDLSearchDrop() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLDrop"
+	op := "internal -> analyzers -> sql -> DDL -> DDLSearchDrop"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil

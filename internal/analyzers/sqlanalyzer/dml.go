@@ -4,57 +4,57 @@ import "github.com/Kwynto/GracefulDB/pkg/lib/e"
 
 // DML — язык изменения данных (Data Manipulation Language)
 
-func (q *tQuery) DMLSelect() (err error) {
+func (q *tQuery) DMLSearchSelect() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchSelect"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLInsert() (err error) {
+func (q *tQuery) DMLSearchInsert() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchInsert"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLUpdate() (err error) {
+func (q *tQuery) DMLSearchUpdate() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLUpdate"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchUpdate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLDelete() (err error) {
+func (q *tQuery) DMLSearchDelete() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchDelete"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLTruncate() (err error) {
+func (q *tQuery) DMLSearchTruncate() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchTruncate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLCommit() (err error) {
+func (q *tQuery) DMLSearchCommit() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLCommit"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchCommit"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil
 }
 
-func (q *tQuery) DMLRollback() (err error) {
+func (q *tQuery) DMLSearchRollback() (err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLRollback"
+	op := "internal -> analyzers -> sql -> DML -> DMLSearchRollback"
 	defer func() { e.Wrapper(op, err) }()
 
 	return nil

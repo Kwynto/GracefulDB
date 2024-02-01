@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
@@ -106,6 +107,29 @@ type tColumnSpecification struct {
 	Unique  bool   `json:"unique"`
 }
 
+type tRegExpCollection map[string]*regexp.Regexp
+
+func (r tRegExpCollection) CompileExp(name string, expr string) tRegExpCollection {
+	// This method is completes
+	re, err := regexp.Compile(expr)
+	if err != nil {
+		return r
+	}
+	r[name] = re
+
+	return r
+}
+
+func CompileRegExpCollection() tRegExpCollection {
+	// -
+	var recol tRegExpCollection = make(tRegExpCollection)
+
+	recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n\s*`)
+	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
+
+	return recol
+}
+
 type tCoreFile struct {
 	Descriptor *os.File
 	Expire     time.Duration
@@ -121,14 +145,17 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 	FreezeMode: false,
 }
 
-var CoreProcessing tCoreProcessing
+var RegExpCollection tRegExpCollection
 
 var StorageInfo tStorageInfo = tStorageInfo{
 	// DBs:     make(map[string]tDBInfo),
 	// Removed: make([]tDBInfo, 0),
 }
 
+var CoreProcessing tCoreProcessing
+
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
+	// This function is complete
 	return tCoreSettings{
 		Storage:    cfg.CoreSettings.Storage,
 		BucketSize: cfg.CoreSettings.BucketSize,
@@ -137,7 +164,9 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 }
 
 func Start(cfg *config.Config) {
+	// -
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
+	RegExpCollection = CompileRegExpCollection()
 
 	if !StorageInfo.Load() {
 		slog.Error("Storage activation error !!!")
