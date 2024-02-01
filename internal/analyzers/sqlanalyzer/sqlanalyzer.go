@@ -3,6 +3,7 @@ package sqlanalyzer
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
@@ -25,7 +26,7 @@ func (q *tQuery) Decomposition() (err error) {
 }
 
 func (q *tQuery) HeadCleaner() (err error) {
-	// -
+	// This method is completes
 	op := "internal -> analyzers -> sql -> HeadCleaner"
 	defer func() { e.Wrapper(op, err) }()
 
@@ -40,15 +41,28 @@ func (q *tQuery) HeadCleaner() (err error) {
 	return nil
 }
 
+func TailSign(inst string) string {
+	// This function is complete
+	r, _ := utf8.DecodeLastRuneInString(inst)
+	if r != ';' {
+		return fmt.Sprintf("%s;", inst)
+	}
+	return inst
+}
+
 // TODO: Request
 func Request(instruction *string, placeholder *[]string) *string {
 	// -
 	var res string
 
+	inst := *instruction
+	inst = strings.TrimSpace(inst)
+	inst = TailSign(inst)
+
 	var query tQuery = tQuery{
-		Instruction: *instruction,
+		Instruction: inst,
 		Placeholder: *placeholder,
-		QueryLine:   make([]string, 1),
+		QueryLine:   make([]string, 5),
 	}
 
 	query.Decomposition()
