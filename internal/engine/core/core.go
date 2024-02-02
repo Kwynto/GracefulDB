@@ -124,8 +124,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	// -
 	var recol tRegExpCollection = make(tRegExpCollection)
 
-	recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n\s*`)
+	recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
+	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT][^;]*;`)
+	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE][^;]*;`)
 
 	return recol
 }
