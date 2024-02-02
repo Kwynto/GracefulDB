@@ -20,10 +20,6 @@ func (q *tQuery) Decomposition() (err error) {
 	op := "internal -> analyzers -> sql -> Decomposition"
 	defer func() { e.Wrapper(op, err) }()
 
-	// q.DCLSearchUse()
-	// q.DCLSearchGrant()
-	// q.DCLSearchRevoke()
-
 	nameExps := []string{
 		"SearchUse",
 		"SearchGrant",
