@@ -165,10 +165,6 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 var RegExpCollection tRegExpCollection
 
 var ParsingOrder = [...]string{
-	"SearchCreate",
-	"SearchAlter",
-	"SearchDrop",
-
 	"SearchSelect",
 	"SearchInsert",
 	"SearchUpdate",
@@ -176,6 +172,10 @@ var ParsingOrder = [...]string{
 	"SearchTruncate",
 	"SearchCommit",
 	"SearchRollback",
+
+	"SearchCreate",
+	"SearchAlter",
+	"SearchDrop",
 
 	"SearchUse",
 	"SearchGrant",
