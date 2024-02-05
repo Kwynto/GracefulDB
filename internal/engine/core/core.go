@@ -123,8 +123,23 @@ func (r tRegExpCollection) CompileExp(name string, expr string) tRegExpCollectio
 func CompileRegExpCollection() tRegExpCollection {
 	// -
 	var recol tRegExpCollection = make(tRegExpCollection)
+	// recol = recol.CompileExp("LineBreak", `(?m)\n`)
+	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
+	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
 
-	recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
+	// DDL TODO: Разработать шаблоны
+	recol = recol.CompileExp("SearchCreate", `(?m)^`)
+	recol = recol.CompileExp("SearchAlter", `(?m)^`)
+	recol = recol.CompileExp("SearchDrop", `(?m)^`)
+	// DML TODO: Разработать шаблоны
+	recol = recol.CompileExp("SearchSelect", `(?m)^`)
+	recol = recol.CompileExp("SearchInsert", `(?m)^`)
+	recol = recol.CompileExp("SearchUpdate", `(?m)^`)
+	recol = recol.CompileExp("SearchDelete", `(?m)^`)
+	recol = recol.CompileExp("SearchTruncate", `(?m)^`)
+	recol = recol.CompileExp("SearchCommit", `(?m)^`)
+	recol = recol.CompileExp("SearchRollback", `(?m)^`)
+	// DCL
 	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT][^;]*;`)
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE][^;]*;`)
@@ -148,6 +163,24 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 }
 
 var RegExpCollection tRegExpCollection
+
+var ParsingOrder = [...]string{
+	"SearchSelect",
+	"SearchInsert",
+	"SearchUpdate",
+	"SearchDelete",
+	"SearchTruncate",
+	"SearchCommit",
+	"SearchRollback",
+
+	"SearchCreate",
+	"SearchAlter",
+	"SearchDrop",
+
+	"SearchUse",
+	"SearchGrant",
+	"SearchRevoke",
+}
 
 var StorageInfo tStorageInfo = tStorageInfo{
 	// DBs:     make(map[string]tDBInfo),
