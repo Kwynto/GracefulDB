@@ -1,10 +1,11 @@
 package sqlanalyzer
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 )
 
 type tQuery struct {
@@ -90,14 +91,43 @@ func Request(instruction *string, placeholder *[]string) *string {
 	var query tQuery = tQuery{
 		Instruction: inst,
 		Placeholder: *placeholder,
-		// QueryLine:   make([]string, 5),
 	}
 
-	// query.Decomposition()
+	for _, expName := range core.ParsingOrder {
+		re := core.RegExpCollection[expName]
 
-	// res = fmt.Sprint(query.QueryLine) // FIXME: Temporarily for tests
-	bres, _ := json.Marshal(query)
-	res = string(bres)
+		location := re.FindStringIndex(query.Instruction)
+		if len(location) == 1 && location[0] == 0 {
+			switch expName {
+			case "SearchCreate":
+				res, _ = query.DDLCreate()
+			case "SearchAlter":
+				res, _ = query.DDLAlter()
+			case "SearchDrop":
+				res, _ = query.DDLDrop()
+			case "SearchSelect":
+				res, _ = query.DMLSelect()
+			case "SearchInsert":
+				res, _ = query.DMLInsert()
+			case "SearchUpdate":
+				res, _ = query.DMLUpdate()
+			case "SearchDelete":
+				res, _ = query.DMLDelete()
+			case "SearchTruncate":
+				res, _ = query.DMLTruncate()
+			case "SearchCommit":
+				res, _ = query.DMLCommit()
+			case "SearchRollback":
+				res, _ = query.DMLRollback()
+			case "SearchUse":
+				res, _ = query.DCLUse()
+			case "SearchGrant":
+				res, _ = query.DCLGrant()
+			case "SearchRevoke":
+				res, _ = query.DCLRevoke()
+			}
+		}
+	}
 
 	return &res
 }
