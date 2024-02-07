@@ -43,8 +43,12 @@ func StrongRemoveDB(nameDB string) bool {
 }
 
 // Creating a new database.
-func CreateDB(nameDB string) bool {
+func CreateDB(nameDB string, secure bool) bool {
 	// This function is complete
+	if secure && RegExpCollection["EntityName"].MatchString(nameDB) {
+		return false
+	}
+
 	var folderDB string
 
 	_, ok := StorageInfo.DBs[nameDB]
