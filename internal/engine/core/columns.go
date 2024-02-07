@@ -85,8 +85,14 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 }
 
 // Creating a new column.
-func CreateColumn(nameDB, nameTable, nameColumn string, specification tColumnSpecification) bool {
+func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification tColumnSpecification) bool {
 	// This function is complete
+	if secure && RegExpCollection["EntityName"].MatchString(nameDB) &&
+		RegExpCollection["EntityName"].MatchString(nameTable) &&
+		RegExpCollection["EntityName"].MatchString(nameColumn) {
+		return false
+	}
+
 	var folderName string
 
 	dbInfo, ok := StorageInfo.DBs[nameDB]
