@@ -129,7 +129,7 @@ type tCoreProcessing struct {
 	FileDescriptors map[string]tCoreFile
 }
 
-type tState struct {
+type TState struct {
 	CurrentDB string
 }
 
@@ -145,6 +145,10 @@ var ParsingOrder = [...]string{
 	"SearchSelect",
 	"SearchInsert",
 	"SearchUpdate",
+
+	"SearchUse",
+	"SearchAuth",
+
 	"SearchDelete",
 	"SearchTruncate",
 	"SearchCommit",
@@ -154,7 +158,6 @@ var ParsingOrder = [...]string{
 	"SearchAlter",
 	"SearchDrop",
 
-	"SearchUse",
 	"SearchGrant",
 	"SearchRevoke",
 }
@@ -164,7 +167,7 @@ var StorageInfo tStorageInfo = tStorageInfo{
 	// Removed: make([]tDBInfo, 0),
 }
 
-var States map[string]tState // ticket -> tState
+var States map[string]TState // ticket -> tState
 
 var CoreProcessing tCoreProcessing
 
@@ -201,6 +204,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT][^;]*;`)
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE][^;]*;`)
+	recol = recol.CompileExp("SearchAuth", `(?m)^`)
 
 	return recol
 }
@@ -213,6 +217,8 @@ func Start(cfg *config.Config) {
 	if !StorageInfo.Load() {
 		slog.Error("Storage activation error !!!")
 	}
+
+	States = make(map[string]TState)
 
 	slog.Info("The core of the DBMS was started.")
 

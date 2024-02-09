@@ -80,35 +80,6 @@ func Test_squery(t *testing.T) {
 	})
 }
 
-func Test_vquery(t *testing.T) {
-	t.Run("vquery() function testing - GET error", func(t *testing.T) {
-		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "/", nil)
-
-		vquery(w, r) // calling the tested function
-		status := w.Code
-		if status != http.StatusMethodNotAllowed {
-			t.Error("vquery() error. GET error.")
-		}
-	})
-
-	t.Run("vquery() function testing - POST - positive", func(t *testing.T) {
-		w := httptest.NewRecorder()
-
-		form := url.Values{}
-		form.Add("instruction", "instruction")
-		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
-		// r.Form = form
-		r.PostForm = form
-
-		vquery(w, r) // calling the tested function
-		status := w.Code
-		if status != http.StatusOK {
-			t.Errorf("vquery() error. POST - an empty query. %v", status)
-		}
-	})
-}
-
 func Test_routes(t *testing.T) {
 	t.Run("routes() function testing", func(t *testing.T) {
 		res := routes() // calling the tested function

@@ -91,11 +91,16 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			sesID := gosession.Start(&w, r)
 			sesID.Set("auth", username)
 
-			secret := gtypes.VSecret{
+			secret := gtypes.Secret{
 				Login:    username,
 				Password: password,
 			}
-			gauth.NewAuth(&secret)
+			ticket, err2 := gauth.NewAuth(&secret)
+			if err2 == nil {
+				core.States[ticket] = core.TState{
+					CurrentDB: "",
+				}
+			}
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {

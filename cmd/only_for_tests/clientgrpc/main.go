@@ -15,11 +15,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CallVQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*gs.VResponse, error) {
-	request := &gs.VRequest{
+func CallSQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*gs.Response, error) {
+	request := &gs.Request{
 		Instruction: text,
 	}
-	r, err := g.VQuery(ctx, request)
+	r, err := g.SQuery(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -40,29 +40,11 @@ func main() {
 
 	var qrys = []string{
 		`Errorable Query!`,
-		`{}`,
-		`{"action":""}`,
-		`{"action":"auth", "secret":{}}`,
-		`{"action":"auth", "secret":{"login":"root", "password":"toor"}}`,
-		`{"action":"auth", "secret":{"login":"root", "password":"toor", "queryid":"any-id"}}`,
-		`{"action":"read", "secret":{}, "db":""}`,
-		`{"action":"store", "secret":{}, "db":"", "table":""}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{}}`,
-		`{"action":"manage", "secret":{}, "db":"", "table":"", "fields":{}, "data":[]}`,
-		`{"action":"auth", "secret":{}, "db":"", "table":"", "fields":{}, "data":["Errorable Query!"]}`,
-		`{"action":"read", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{}]}`,
-		`{"action":"store", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{},{}]}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow"}]}`,
-		`{"action":"manage", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":""}]}`,
-		`{"action":"auth", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"read", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"store", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
 	}
 
 	for i1, v1 := range qrys {
 		client := gs.NewGracefulServiceClient(conn)
-		r, err := CallVQuery(context.Background(), client, v1)
+		r, err := CallSQuery(context.Background(), client, v1)
 		if err != nil {
 			fmt.Println(err)
 		} else {

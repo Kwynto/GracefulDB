@@ -6,7 +6,7 @@ import "github.com/Kwynto/GracefulDB/pkg/lib/e"
 
 func (q *tQuery) DMLSelect() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchSelect"
+	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -14,7 +14,7 @@ func (q *tQuery) DMLSelect() (result string, err error) {
 
 func (q *tQuery) DMLInsert() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchInsert"
+	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -22,7 +22,7 @@ func (q *tQuery) DMLInsert() (result string, err error) {
 
 func (q *tQuery) DMLUpdate() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchUpdate"
+	op := "internal -> analyzers -> sql -> DML -> DMLUpdate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -30,7 +30,7 @@ func (q *tQuery) DMLUpdate() (result string, err error) {
 
 func (q *tQuery) DMLDelete() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchDelete"
+	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -38,7 +38,7 @@ func (q *tQuery) DMLDelete() (result string, err error) {
 
 func (q *tQuery) DMLTruncate() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchTruncate"
+	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -46,7 +46,7 @@ func (q *tQuery) DMLTruncate() (result string, err error) {
 
 func (q *tQuery) DMLCommit() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchCommit"
+	op := "internal -> analyzers -> sql -> DML -> DMLCommit"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -54,7 +54,7 @@ func (q *tQuery) DMLCommit() (result string, err error) {
 
 func (q *tQuery) DMLRollback() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLSearchRollback"
+	op := "internal -> analyzers -> sql -> DML -> DMLRollback"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil

@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-func Test_DefaultData(t *testing.T) {
-	t.Run("DefaultData() function testing", func(t *testing.T) {
-		res := DefaultData()
-		if reflect.TypeOf(res) != reflect.TypeOf(VData{}) {
-			t.Error("DefaultData() error = The function returns the wrong type")
+func Test_DefaultSecret(t *testing.T) {
+	t.Run("DefaultSecret() function testing", func(t *testing.T) {
+		res := DefaultSecret()
+		if reflect.TypeOf(res) != reflect.TypeOf(Secret{}) {
+			t.Error("DefaultSecret() error = The function returns the wrong type")
 		}
 	})
 }

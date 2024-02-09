@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
-	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
@@ -49,29 +48,10 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(*response))
 }
 
-func vquery(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		slog.Debug("The method is prohibited!", slog.String("method", r.Method))
-		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, "The method is prohibited!", http.StatusMethodNotAllowed)
-		return
-	}
-
-	r.ParseForm()
-	instruction := []byte(r.PostForm.Get("instruction"))
-
-	response := vqlanalyzer.Request(&instruction)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(*response)
-}
-
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/squery", squery)
-	mux.HandleFunc("/vquery", vquery)
 
 	return mux
 }

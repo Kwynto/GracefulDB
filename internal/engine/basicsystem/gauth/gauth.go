@@ -125,8 +125,9 @@ var (
 	HashMap   tAuth = make(tAuth, 0)
 	AccessMap       = make(tAccess, 0)
 
-	ticketMap          tTicket       = make(tTicket, 0)
-	oldTicketMap       tTicket       = make(tTicket, 0)
+	ticketMap    tTicket = make(tTicket, 0)
+	oldTicketMap tTicket = make(tTicket, 0)
+
 	reversTicketMap    tReversTicket = make(tReversTicket, 0)
 	reversOldTicketMap tReversTicket = make(tReversTicket, 0)
 )
@@ -456,7 +457,7 @@ func CheckTicket(ticket string) (login string, access TProfile, newticket string
 }
 
 // Authorization verification and ticket issuance
-func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
+func NewAuth(secret *gtypes.Secret) (ticket string, err error) {
 	// This function is complete
 	op := "internal -> engine -> gAuth -> NewAuth"
 	defer func() { e.Wrapper(op, err) }()

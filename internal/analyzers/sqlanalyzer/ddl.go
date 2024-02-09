@@ -6,7 +6,7 @@ import "github.com/Kwynto/GracefulDB/pkg/lib/e"
 
 func (q *tQuery) DDLCreate() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLSearchCreate"
+	op := "internal -> analyzers -> sql -> DDL -> DDLCreate"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -14,7 +14,7 @@ func (q *tQuery) DDLCreate() (result string, err error) {
 
 func (q *tQuery) DDLAlter() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLSearchAlter"
+	op := "internal -> analyzers -> sql -> DDL -> DDLAlter"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -22,7 +22,7 @@ func (q *tQuery) DDLAlter() (result string, err error) {
 
 func (q *tQuery) DDLDrop() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLSearchDrop"
+	op := "internal -> analyzers -> sql -> DDL -> DDLDrop"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
