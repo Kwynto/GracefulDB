@@ -95,7 +95,12 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 				Login:    username,
 				Password: password,
 			}
-			gauth.NewAuth(&secret)
+			ticket, err2 := gauth.NewAuth(&secret)
+			if err2 == nil {
+				core.States[ticket] = core.TState{
+					CurrentDB: "",
+				}
+			}
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {

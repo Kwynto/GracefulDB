@@ -125,8 +125,9 @@ var (
 	HashMap   tAuth = make(tAuth, 0)
 	AccessMap       = make(tAccess, 0)
 
-	ticketMap          tTicket       = make(tTicket, 0)
-	oldTicketMap       tTicket       = make(tTicket, 0)
+	ticketMap    tTicket = make(tTicket, 0)
+	oldTicketMap tTicket = make(tTicket, 0)
+
 	reversTicketMap    tReversTicket = make(tReversTicket, 0)
 	reversOldTicketMap tReversTicket = make(tReversTicket, 0)
 )

@@ -129,7 +129,7 @@ type tCoreProcessing struct {
 	FileDescriptors map[string]tCoreFile
 }
 
-type tState struct {
+type TState struct {
 	CurrentDB string
 }
 
@@ -167,7 +167,7 @@ var StorageInfo tStorageInfo = tStorageInfo{
 	// Removed: make([]tDBInfo, 0),
 }
 
-var States map[string]tState // ticket -> tState
+var States map[string]TState // ticket -> tState
 
 var CoreProcessing tCoreProcessing
 
@@ -217,6 +217,8 @@ func Start(cfg *config.Config) {
 	if !StorageInfo.Load() {
 		slog.Error("Storage activation error !!!")
 	}
+
+	States = make(map[string]TState)
 
 	slog.Info("The core of the DBMS was started.")
 
