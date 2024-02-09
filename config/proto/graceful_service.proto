@@ -13,8 +13,9 @@ message VResponse {
 
 // SQL
 message SRequest {
-    string instruction = 1;
-    repeated string placeholder = 2;
+    string ticket = 1;
+    string instruction = 2;
+    repeated string placeholder = 3;
 }
 
 message SResponse {
@@ -26,4 +27,5 @@ service GracefulService {
     rpc SQuery (SRequest) returns (SResponse);
 }
 
+// protoc --go_out=. --go-grpc_out=. .\config\proto\graceful_service.proto
 option go_package = "./internal/connectors/grpc/proto/graceful_service";

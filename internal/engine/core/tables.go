@@ -64,8 +64,8 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 // Creating a new table.
 func CreateTable(nameDB, nameTable string, secure bool) bool {
 	// This function is complete
-	if secure && RegExpCollection["EntityName"].MatchString(nameDB) &&
-		RegExpCollection["EntityName"].MatchString(nameTable) {
+	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) &&
+		!RegExpCollection["EntityName"].MatchString(nameTable) {
 		return false
 	}
 

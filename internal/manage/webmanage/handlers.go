@@ -16,6 +16,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
@@ -89,6 +90,12 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 		if isAuth {
 			sesID := gosession.Start(&w, r)
 			sesID.Set("auth", username)
+
+			secret := gtypes.VSecret{
+				Login:    username,
+				Password: password,
+			}
+			gauth.NewAuth(&secret)
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
@@ -281,7 +288,13 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
 
-	answer := sqlanalyzer.Request(&request, &[]string{})
+	ticket, err := gauth.GetTicket(login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	answer := sqlanalyzer.Request(&ticket, &request, &[]string{})
 
 	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 

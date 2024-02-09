@@ -9,6 +9,7 @@ import (
 )
 
 type tQuery struct {
+	Ticket      string
 	Instruction string
 	Placeholder []string
 	// QueryLine   []string
@@ -76,7 +77,7 @@ type tQuery struct {
 // }
 
 // TODO: Request
-func Request(instruction *string, placeholder *[]string) *string {
+func Request(ticket *string, instruction *string, placeholder *[]string) *string {
 	// -
 	var res string
 
@@ -89,6 +90,7 @@ func Request(instruction *string, placeholder *[]string) *string {
 	}
 
 	var query tQuery = tQuery{
+		Ticket:      *ticket,
 		Instruction: inst,
 		Placeholder: *placeholder,
 	}

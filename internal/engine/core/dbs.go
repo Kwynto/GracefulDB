@@ -45,7 +45,7 @@ func StrongRemoveDB(nameDB string) bool {
 // Creating a new database.
 func CreateDB(nameDB string, secure bool) bool {
 	// This function is complete
-	if secure && RegExpCollection["EntityName"].MatchString(nameDB) {
+	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) {
 		return false
 	}
 

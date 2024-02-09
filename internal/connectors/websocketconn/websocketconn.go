@@ -17,6 +17,7 @@ import (
 )
 
 type tSQuery struct {
+	Ticket      string   `json:"ticket"`
 	Instruction string   `json:"instruction"`
 	Placeholder []string `json:"placeholder"`
 }
@@ -66,7 +67,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reponse message
-		messageResponse := sqlanalyzer.Request(&msgSQuery.Instruction, &msgSQuery.Placeholder)
+		messageResponse := sqlanalyzer.Request(&msgSQuery.Ticket, &msgSQuery.Instruction, &msgSQuery.Placeholder)
 
 		if err := websocket.WriteMessage(messageType, []byte(*messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))

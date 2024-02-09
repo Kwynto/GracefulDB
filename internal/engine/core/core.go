@@ -129,6 +129,10 @@ type tCoreProcessing struct {
 	FileDescriptors map[string]tCoreFile
 }
 
+type tState struct {
+	CurrentDB string
+}
+
 var LocalCoreSettings tCoreSettings = tCoreSettings{
 	Storage:    "./data/",
 	BucketSize: 800,
@@ -159,6 +163,8 @@ var StorageInfo tStorageInfo = tStorageInfo{
 	// DBs:     make(map[string]tDBInfo),
 	// Removed: make([]tDBInfo, 0),
 }
+
+var States map[string]tState // ticket -> tState
 
 var CoreProcessing tCoreProcessing
 
