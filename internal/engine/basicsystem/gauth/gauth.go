@@ -456,7 +456,7 @@ func CheckTicket(ticket string) (login string, access TProfile, newticket string
 }
 
 // Authorization verification and ticket issuance
-func NewAuth(secret *gtypes.VSecret) (ticket string, err error) {
+func NewAuth(secret *gtypes.Secret) (ticket string, err error) {
 	// This function is complete
 	op := "internal -> engine -> gAuth -> NewAuth"
 	defer func() { e.Wrapper(op, err) }()

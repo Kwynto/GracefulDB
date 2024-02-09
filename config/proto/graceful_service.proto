@@ -2,29 +2,19 @@ syntax = "proto3";
 
 package graceful_service;
 
-// VQL
-message VRequest {
-    string instruction = 1;
-}
-
-message VResponse {
-    string message = 1;
-}
-
 // SQL
-message SRequest {
+message Request {
     string ticket = 1;
     string instruction = 2;
     repeated string placeholder = 3;
 }
 
-message SResponse {
+message Response {
     string message = 1;
 }
 
 service GracefulService {
-    rpc VQuery (VRequest) returns (VResponse);
-    rpc SQuery (SRequest) returns (SResponse);
+    rpc SQuery (Request) returns (Response);
 }
 
 // protoc --go_out=. --go-grpc_out=. .\config\proto\graceful_service.proto

@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
-	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
@@ -77,45 +76,10 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func vquery(w http.ResponseWriter, r *http.Request) {
-	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  conf.BufferSize.Read,
-		WriteBufferSize: conf.BufferSize.Write,
-	}
-
-	websocket, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		slog.Error("Failed to create connection", slog.String("err", err.Error()))
-		return
-	}
-	slog.Debug("Websocket Connected! - VQuery")
-
-	for {
-		// read a message
-		messageType, messageContent, err := websocket.ReadMessage()
-		if err != nil {
-			slog.Debug("Error reading the message", slog.String("err", err.Error()))
-			return
-		}
-
-		// Data processing
-		// slog.Debug(string(messageContent))
-
-		// reponse message
-		messageResponse := vqlanalyzer.Request(&messageContent)
-
-		if err := websocket.WriteMessage(messageType, *messageResponse); err != nil {
-			slog.Debug("Error sending response", slog.String("err", err.Error()))
-			return
-		}
-	}
-}
-
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/squery", squery)
-	mux.HandleFunc("/vquery", vquery)
 
 	return mux
 }

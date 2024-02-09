@@ -91,7 +91,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			sesID := gosession.Start(&w, r)
 			sesID.Set("auth", username)
 
-			secret := gtypes.VSecret{
+			secret := gtypes.Secret{
 				Login:    username,
 				Password: password,
 			}

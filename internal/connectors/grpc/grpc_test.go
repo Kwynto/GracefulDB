@@ -17,7 +17,7 @@ func Test_SQuery(t *testing.T) {
 
 	t.Run("SQuery() function testing", func(t *testing.T) {
 		ctx := context.Background()
-		req := gs.SRequest{
+		req := gs.Request{
 			Instruction: "instruction",
 			Placeholder: []string{},
 		}
@@ -28,30 +28,8 @@ func Test_SQuery(t *testing.T) {
 			t.Error("SQuery() error.")
 		}
 
-		if reflect.TypeOf(resp) != reflect.TypeOf(&gs.SResponse{}) {
+		if reflect.TypeOf(resp) != reflect.TypeOf(&gs.Response{}) {
 			t.Error("SQuery() error = The function returns the wrong type")
-		}
-	})
-}
-
-func Test_VQuery(t *testing.T) {
-
-	testingEntity := tMessageServer{}
-
-	t.Run("VQuery() function testing", func(t *testing.T) {
-		ctx := context.Background()
-		req := gs.VRequest{
-			Instruction: "instruction",
-		}
-
-		resp, err := testingEntity.VQuery(ctx, &req) // calling the tested function
-
-		if err != nil {
-			t.Error("VQuery() error.")
-		}
-
-		if reflect.TypeOf(resp) != reflect.TypeOf(&gs.VResponse{}) {
-			t.Error("VQuery() error = The function returns the wrong type")
 		}
 	})
 }

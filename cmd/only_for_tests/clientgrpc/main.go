@@ -15,11 +15,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CallVQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*gs.VResponse, error) {
-	request := &gs.VRequest{
+func CallSQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*gs.Response, error) {
+	request := &gs.Request{
 		Instruction: text,
 	}
-	r, err := g.VQuery(ctx, request)
+	r, err := g.SQuery(ctx, request)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func main() {
 
 	for i1, v1 := range qrys {
 		client := gs.NewGracefulServiceClient(conn)
-		r, err := CallVQuery(context.Background(), client, v1)
+		r, err := CallSQuery(context.Background(), client, v1)
 		if err != nil {
 			fmt.Println(err)
 		} else {
