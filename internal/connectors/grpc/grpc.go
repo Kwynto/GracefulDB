@@ -35,7 +35,7 @@ func (tMessageServer) SQuery(ctx context.Context, r *gs.SRequest) (response *gs.
 	// placeholderB := []byte(r.Placeholder)
 
 	response = &gs.SResponse{
-		Message: *sqlanalyzer.Request(&r.Instruction, &r.Placeholder),
+		Message: *sqlanalyzer.Request(&r.Ticket, &r.Instruction, &r.Placeholder),
 	}
 	slog.Debug("Response sent", slog.String("response", response.Message))
 

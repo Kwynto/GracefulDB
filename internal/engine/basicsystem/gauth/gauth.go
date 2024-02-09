@@ -146,6 +146,15 @@ func GenerateTicket() string {
 	return fmt.Sprintf("%x", b)
 }
 
+// Getting a ticket - internal
+func getTicket(login string) (ticket string, err error) {
+	ticket, ok := ticketMap[login]
+	if ok {
+		return ticket, nil
+	}
+	return "", errors.New("invalid ticket")
+}
+
 // Adding a user - internal
 func addUser(login string, password string, access TProfile) error {
 	// This function is complete
@@ -309,6 +318,15 @@ func updateProfile(login string, access TProfile) error {
 }
 
 // Public functions
+
+// Getting a ticket
+func GetTicket(login string) (ticket string, err error) {
+	// This function is complete
+	op := "internal -> engine -> gAuth -> GetTicket"
+	defer func() { e.Wrapper(op, err) }()
+
+	return getTicket(login)
+}
 
 // Adding a user
 func AddUser(login string, password string, access TProfile) (err error) {

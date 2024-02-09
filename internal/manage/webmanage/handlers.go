@@ -281,7 +281,13 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 	auth := sesID.Get("auth")
 	login := fmt.Sprint(auth)
 
-	answer := sqlanalyzer.Request(&request, &[]string{})
+	ticket, err := gauth.GetTicket(login)
+	if err != nil {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	answer := sqlanalyzer.Request(&ticket, &request, &[]string{})
 
 	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 
