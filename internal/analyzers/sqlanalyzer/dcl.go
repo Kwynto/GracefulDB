@@ -8,7 +8,7 @@ import (
 
 func (q *tQuery) DCLGrant() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLSearchGrant"
+	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -16,7 +16,7 @@ func (q *tQuery) DCLGrant() (result string, err error) {
 
 func (q *tQuery) DCLRevoke() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLSearchRevoke"
+	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil
@@ -24,7 +24,15 @@ func (q *tQuery) DCLRevoke() (result string, err error) {
 
 func (q *tQuery) DCLUse() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DCL -> DCLSearchUse"
+	op := "internal -> analyzers -> sql -> DCL -> DCLUse"
+	defer func() { e.Wrapper(op, err) }()
+
+	return "", nil
+}
+
+func (q *tQuery) DCLAuth() (result string, err error) {
+	// -
+	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
 	defer func() { e.Wrapper(op, err) }()
 
 	return "", nil

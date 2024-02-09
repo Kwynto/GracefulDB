@@ -145,6 +145,10 @@ var ParsingOrder = [...]string{
 	"SearchSelect",
 	"SearchInsert",
 	"SearchUpdate",
+
+	"SearchUse",
+	"SearchAuth",
+
 	"SearchDelete",
 	"SearchTruncate",
 	"SearchCommit",
@@ -154,7 +158,6 @@ var ParsingOrder = [...]string{
 	"SearchAlter",
 	"SearchDrop",
 
-	"SearchUse",
 	"SearchGrant",
 	"SearchRevoke",
 }
@@ -201,6 +204,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT][^;]*;`)
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE][^;]*;`)
+	recol = recol.CompileExp("SearchAuth", `(?m)^`)
 
 	return recol
 }
