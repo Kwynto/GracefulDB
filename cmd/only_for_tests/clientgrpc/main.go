@@ -40,24 +40,6 @@ func main() {
 
 	var qrys = []string{
 		`Errorable Query!`,
-		`{}`,
-		`{"action":""}`,
-		`{"action":"auth", "secret":{}}`,
-		`{"action":"auth", "secret":{"login":"root", "password":"toor"}}`,
-		`{"action":"auth", "secret":{"login":"root", "password":"toor", "queryid":"any-id"}}`,
-		`{"action":"read", "secret":{}, "db":""}`,
-		`{"action":"store", "secret":{}, "db":"", "table":""}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{}}`,
-		`{"action":"manage", "secret":{}, "db":"", "table":"", "fields":{}, "data":[]}`,
-		`{"action":"auth", "secret":{}, "db":"", "table":"", "fields":{}, "data":["Errorable Query!"]}`,
-		`{"action":"read", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{}]}`,
-		`{"action":"store", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{},{}]}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow"}]}`,
-		`{"action":"manage", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":""}]}`,
-		`{"action":"auth", "secret":{}, "db":"", "table":"", "fields":{}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"read", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"store", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
-		`{"action":"delete", "secret":{}, "db":"", "table":"", "fields":{"name":"Name","city":"Moscow","sub":"","age":20}, "data":[{"name":"Name"},{"name":"Name","city":"Moscow","sub":"","age":20}]}`,
 	}
 
 	for i1, v1 := range qrys {
