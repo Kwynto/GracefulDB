@@ -1,11 +1,13 @@
 package sqlanalyzer
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 // DCL — язык управления данными (Data Control Language)
@@ -35,9 +37,11 @@ func (q *tQuery) DCLUse() (result string, err error) {
 }
 
 func (q *tQuery) DCLAuth() (result string, err error) {
-	// -
+	// This method is complete
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
 	defer func() { e.Wrapper(op, err) }()
+
+	var res gtypes.Response
 
 	login := core.RegExpCollection["Login"].FindString(q.Instruction)
 	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
@@ -51,8 +55,23 @@ func (q *tQuery) DCLAuth() (result string, err error) {
 	password = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
 	password = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
 
-	fmt.Println(login)
-	fmt.Println(password)
+	secret := gtypes.Secret{
+		Login:    login,
+		Password: password,
+	}
+	ticket, err := gauth.NewAuth(&secret)
+	if err != nil {
+		res = gtypes.Response{
+			State: "auth error",
+		}
+	} else {
+		res = gtypes.Response{
+			State:  "ok",
+			Ticket: ticket,
+		}
+	}
 
-	return login, nil
+	result = ecowriter.EncodeString(res)
+
+	return result, nil
 }
