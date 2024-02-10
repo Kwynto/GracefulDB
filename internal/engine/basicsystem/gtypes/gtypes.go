@@ -11,6 +11,12 @@ type Secret struct {
 	// Version  string `json:"version,omitempty"`
 }
 
+type Response struct {
+	State  string `json:"state,omitempty"`
+	Ticket string `json:"ticket,omitempty"`
+	Result string `json:"result,omitempty"`
+}
+
 // type VData []RowDB
 
 // type VFields RowDB
