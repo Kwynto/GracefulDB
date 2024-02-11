@@ -17,8 +17,8 @@ func Request(ticket string, instruction string, placeholder []string) string {
 	// -
 	// Prep
 	instruction = strings.TrimSpace(instruction)
-	instruction = strings.TrimRight(instruction, ";")
-	instruction = strings.TrimSpace(instruction)
+	instruction = strings.TrimRight(instruction, "; ")
+	// instruction = strings.TrimSpace(instruction)
 
 	var query tQuery = tQuery{
 		Ticket:      ticket,
@@ -27,8 +27,6 @@ func Request(ticket string, instruction string, placeholder []string) string {
 	}
 
 	for _, expName := range core.ParsingOrder {
-		// location := core.RegExpCollection[expName].FindStringIndex(query.Instruction)
-		// if len(location) != 0 && location[0] == 0 {
 		if core.RegExpCollection[expName].MatchString(query.Instruction) {
 			switch expName {
 			case "SearchCreate":

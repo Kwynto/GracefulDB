@@ -41,8 +41,6 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-
 	login := core.RegExpCollection["Login"].FindString(q.Instruction)
 	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
 	login = strings.TrimSpace(login)
@@ -55,23 +53,32 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	password = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
 	password = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
 
+	profile, err := gauth.GetProfile(login)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State: "auth error",
+		}), nil
+	}
+
+	if profile.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State: "auth error",
+		}), nil
+	}
+
 	secret := gtypes.Secret{
 		Login:    login,
 		Password: password,
 	}
 	ticket, err := gauth.NewAuth(&secret)
 	if err != nil {
-		res = gtypes.Response{
+		return ecowriter.EncodeString(gtypes.Response{
 			State: "auth error",
-		}
-	} else {
-		res = gtypes.Response{
-			State:  "ok",
-			Ticket: ticket,
-		}
+		}), nil
 	}
 
-	result = ecowriter.EncodeString(res)
-
-	return result, nil
+	return ecowriter.EncodeString(gtypes.Response{
+		State:  "ok",
+		Ticket: ticket,
+	}), nil
 }
