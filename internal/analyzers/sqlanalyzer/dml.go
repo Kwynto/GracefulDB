@@ -4,7 +4,7 @@ import "github.com/Kwynto/GracefulDB/pkg/lib/e"
 
 // DML — язык изменения данных (Data Manipulation Language)
 
-func (q *tQuery) DMLSelect() (result string, err error) {
+func (q tQuery) DMLSelect() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
 	defer func() { e.Wrapper(op, err) }()
@@ -12,7 +12,7 @@ func (q *tQuery) DMLSelect() (result string, err error) {
 	return "DMLSelect", nil
 }
 
-func (q *tQuery) DMLInsert() (result string, err error) {
+func (q tQuery) DMLInsert() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
 	defer func() { e.Wrapper(op, err) }()
@@ -20,7 +20,7 @@ func (q *tQuery) DMLInsert() (result string, err error) {
 	return "DMLInsert", nil
 }
 
-func (q *tQuery) DMLUpdate() (result string, err error) {
+func (q tQuery) DMLUpdate() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLUpdate"
 	defer func() { e.Wrapper(op, err) }()
@@ -28,7 +28,7 @@ func (q *tQuery) DMLUpdate() (result string, err error) {
 	return "DMLUpdate", nil
 }
 
-func (q *tQuery) DMLDelete() (result string, err error) {
+func (q tQuery) DMLDelete() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
 	defer func() { e.Wrapper(op, err) }()
@@ -36,7 +36,7 @@ func (q *tQuery) DMLDelete() (result string, err error) {
 	return "DMLDelete", nil
 }
 
-func (q *tQuery) DMLTruncate() (result string, err error) {
+func (q tQuery) DMLTruncate() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
 	defer func() { e.Wrapper(op, err) }()
@@ -44,7 +44,7 @@ func (q *tQuery) DMLTruncate() (result string, err error) {
 	return "DMLTruncate", nil
 }
 
-func (q *tQuery) DMLCommit() (result string, err error) {
+func (q tQuery) DMLCommit() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLCommit"
 	defer func() { e.Wrapper(op, err) }()
@@ -52,7 +52,7 @@ func (q *tQuery) DMLCommit() (result string, err error) {
 	return "DMLCommit", nil
 }
 
-func (q *tQuery) DMLRollback() (result string, err error) {
+func (q tQuery) DMLRollback() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DML -> DMLRollback"
 	defer func() { e.Wrapper(op, err) }()

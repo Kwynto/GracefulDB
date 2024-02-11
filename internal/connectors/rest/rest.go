@@ -31,7 +31,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	var placeholder *[]string
+	var placeholder []string
 	ticket := r.PostForm.Get("ticket")
 	instruction := r.PostForm.Get("instruction")
 	placeholderJSONArray := r.PostForm.Get("placeholder")
@@ -41,11 +41,11 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := sqlanalyzer.Request(&ticket, &instruction, placeholder)
+	response := sqlanalyzer.Request(ticket, instruction, placeholder)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(*response))
+	w.Write([]byte(response))
 }
 
 func routes() *http.ServeMux {

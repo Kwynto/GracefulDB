@@ -299,7 +299,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	answer := sqlanalyzer.Request(&ticket, &request, &[]string{})
+	answer := sqlanalyzer.Request(ticket, request, []string{})
 
 	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 
@@ -312,7 +312,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 	}{
 		From:    login,
 		Request: request,
-		Answer:  *answer,
+		Answer:  answer,
 		TimeR:   timeR,
 		TimeA:   timeA,
 	}
