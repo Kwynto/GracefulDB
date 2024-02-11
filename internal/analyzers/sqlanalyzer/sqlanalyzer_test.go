@@ -7,9 +7,9 @@ func Test_Request(t *testing.T) {
 		ticket := ""
 		instruction := ""
 		placeholder := []string{}
-		res := Request(&ticket, &instruction, &placeholder)
+		res := Request(ticket, instruction, placeholder)
 
-		if *res == "" {
+		if res == "" {
 			t.Errorf("Request() error: empty result.")
 		}
 	})

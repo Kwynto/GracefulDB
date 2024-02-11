@@ -13,18 +13,17 @@ type tQuery struct {
 }
 
 // TODO: Request
-func Request(ticket *string, instruction *string, placeholder *[]string) *string {
+func Request(ticket string, instruction string, placeholder []string) string {
 	// -
 	// Prep
-	instr := *instruction
-	instr = strings.TrimSpace(instr)
-	instr = strings.TrimRight(instr, ";")
-	instr = strings.TrimSpace(instr)
+	instruction = strings.TrimSpace(instruction)
+	instruction = strings.TrimRight(instruction, ";")
+	instruction = strings.TrimSpace(instruction)
 
 	var query tQuery = tQuery{
-		Ticket:      *ticket,
-		Instruction: instr,
-		Placeholder: *placeholder,
+		Ticket:      ticket,
+		Instruction: instruction,
+		Placeholder: placeholder,
 	}
 
 	for _, expName := range core.ParsingOrder {
@@ -34,50 +33,50 @@ func Request(ticket *string, instruction *string, placeholder *[]string) *string
 			switch expName {
 			case "SearchCreate":
 				res, _ := query.DDLCreate()
-				return &res
+				return res
 			case "SearchAlter":
 				res, _ := query.DDLAlter()
-				return &res
+				return res
 			case "SearchDrop":
 				res, _ := query.DDLDrop()
-				return &res
+				return res
 			case "SearchSelect":
 				res, _ := query.DMLSelect()
-				return &res
+				return res
 			case "SearchInsert":
 				res, _ := query.DMLInsert()
-				return &res
+				return res
 			case "SearchUpdate":
 				res, _ := query.DMLUpdate()
-				return &res
+				return res
 			case "SearchDelete":
 				res, _ := query.DMLDelete()
-				return &res
+				return res
 			case "SearchTruncate":
 				res, _ := query.DMLTruncate()
-				return &res
+				return res
 			case "SearchCommit":
 				res, _ := query.DMLCommit()
-				return &res
+				return res
 			case "SearchRollback":
 				res, _ := query.DMLRollback()
-				return &res
+				return res
 			case "SearchUse":
 				res, _ := query.DCLUse()
-				return &res
+				return res
 			case "SearchGrant":
 				res, _ := query.DCLGrant()
-				return &res
+				return res
 			case "SearchRevoke":
 				res, _ := query.DCLRevoke()
-				return &res
+				return res
 			case "SearchAuth":
 				res, _ := query.DCLAuth()
-				return &res
+				return res
 			}
 		}
 	}
 
 	res := "Unknown command"
-	return &res
+	return res
 }

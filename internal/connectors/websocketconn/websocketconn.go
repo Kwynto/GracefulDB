@@ -66,9 +66,9 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reponse message
-		messageResponse := sqlanalyzer.Request(&msgSQuery.Ticket, &msgSQuery.Instruction, &msgSQuery.Placeholder)
+		messageResponse := sqlanalyzer.Request(msgSQuery.Ticket, msgSQuery.Instruction, msgSQuery.Placeholder)
 
-		if err := websocket.WriteMessage(messageType, []byte(*messageResponse)); err != nil {
+		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
 			websocket.Close()
 			return
