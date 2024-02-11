@@ -1,9 +1,7 @@
 package sqlanalyzer
 
 import (
-	"fmt"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 )
@@ -17,59 +15,69 @@ type tQuery struct {
 // TODO: Request
 func Request(ticket *string, instruction *string, placeholder *[]string) *string {
 	// -
-	var res string
-
 	// Prep
-	inst := *instruction
-	// inst = core.RegExpCollection["LineBreak"].ReplaceAllLiteralString(inst, " ")
-	inst = strings.TrimSpace(inst)
-	if r, _ := utf8.DecodeLastRuneInString(inst); r != ';' {
-		inst = fmt.Sprintf("%s;", inst)
-	}
+	instr := *instruction
+	instr = strings.TrimSpace(instr)
+	instr = strings.TrimRight(instr, ";")
+	instr = strings.TrimSpace(instr)
 
 	var query tQuery = tQuery{
 		Ticket:      *ticket,
-		Instruction: inst,
+		Instruction: instr,
 		Placeholder: *placeholder,
 	}
 
 	for _, expName := range core.ParsingOrder {
-		re := core.RegExpCollection[expName]
-
-		location := re.FindStringIndex(query.Instruction)
-		if len(location) == 1 && location[0] == 0 {
+		// location := core.RegExpCollection[expName].FindStringIndex(query.Instruction)
+		// if len(location) != 0 && location[0] == 0 {
+		if core.RegExpCollection[expName].MatchString(query.Instruction) {
 			switch expName {
 			case "SearchCreate":
-				res, _ = query.DDLCreate()
+				res, _ := query.DDLCreate()
+				return &res
 			case "SearchAlter":
-				res, _ = query.DDLAlter()
+				res, _ := query.DDLAlter()
+				return &res
 			case "SearchDrop":
-				res, _ = query.DDLDrop()
+				res, _ := query.DDLDrop()
+				return &res
 			case "SearchSelect":
-				res, _ = query.DMLSelect()
+				res, _ := query.DMLSelect()
+				return &res
 			case "SearchInsert":
-				res, _ = query.DMLInsert()
+				res, _ := query.DMLInsert()
+				return &res
 			case "SearchUpdate":
-				res, _ = query.DMLUpdate()
+				res, _ := query.DMLUpdate()
+				return &res
 			case "SearchDelete":
-				res, _ = query.DMLDelete()
+				res, _ := query.DMLDelete()
+				return &res
 			case "SearchTruncate":
-				res, _ = query.DMLTruncate()
+				res, _ := query.DMLTruncate()
+				return &res
 			case "SearchCommit":
-				res, _ = query.DMLCommit()
+				res, _ := query.DMLCommit()
+				return &res
 			case "SearchRollback":
-				res, _ = query.DMLRollback()
+				res, _ := query.DMLRollback()
+				return &res
 			case "SearchUse":
-				res, _ = query.DCLUse()
+				res, _ := query.DCLUse()
+				return &res
 			case "SearchGrant":
-				res, _ = query.DCLGrant()
+				res, _ := query.DCLGrant()
+				return &res
 			case "SearchRevoke":
-				res, _ = query.DCLRevoke()
+				res, _ := query.DCLRevoke()
+				return &res
 			case "SearchAuth":
-				res, _ = query.DCLAuth()
+				res, _ := query.DCLAuth()
+				return &res
 			}
 		}
 	}
 
+	res := "Unknown command"
 	return &res
 }

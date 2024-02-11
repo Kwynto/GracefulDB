@@ -187,24 +187,32 @@ func CompileRegExpCollection() tRegExpCollection {
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
 	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`)
+	recol = recol.CompileExp("QuotationMarks", `(?m)[\'\"]`)
+	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
 
 	// DDL TODO: Разработать шаблоны
-	recol = recol.CompileExp("SearchCreate", `(?m)^`)
-	recol = recol.CompileExp("SearchAlter", `(?m)^`)
-	recol = recol.CompileExp("SearchDrop", `(?m)^`)
+	recol = recol.CompileExp("SearchCreate", `(?m)^;`)
+	recol = recol.CompileExp("SearchAlter", `(?m)^;`)
+	recol = recol.CompileExp("SearchDrop", `(?m)^;`)
 	// DML TODO: Разработать шаблоны
-	recol = recol.CompileExp("SearchSelect", `(?m)^`)
-	recol = recol.CompileExp("SearchInsert", `(?m)^`)
-	recol = recol.CompileExp("SearchUpdate", `(?m)^`)
-	recol = recol.CompileExp("SearchDelete", `(?m)^`)
-	recol = recol.CompileExp("SearchTruncate", `(?m)^`)
-	recol = recol.CompileExp("SearchCommit", `(?m)^`)
-	recol = recol.CompileExp("SearchRollback", `(?m)^`)
+	recol = recol.CompileExp("SearchSelect", `(?m)^;`)
+	recol = recol.CompileExp("SearchInsert", `(?m)^;`)
+	recol = recol.CompileExp("SearchUpdate", `(?m)^;`)
+	recol = recol.CompileExp("SearchDelete", `(?m)^;`)
+	recol = recol.CompileExp("SearchTruncate", `(?m)^;`)
+	recol = recol.CompileExp("SearchCommit", `(?m)^;`)
+	recol = recol.CompileExp("SearchRollback", `(?m)^;`)
 	// DCL
-	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*;`)
-	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT][^;]*;`)
-	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE][^;]*;`)
-	recol = recol.CompileExp("SearchAuth", `(?m)^`)
+	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*`)
+	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
+	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE].*`)
+
+	recol = recol.CompileExp("SearchAuth", `(?m)^[aA][uU][tT][hH].+`)
+	// recol = recol.CompileExp("Auth", `(?m)^[aA][uU][tT][hH]`)
+	recol = recol.CompileExp("Login", `(?m)[lL][oO][gG][iI][nN]\s+\S+(\s+|$)`)
+	recol = recol.CompileExp("LoginWord", `(?m)[lL][oO][gG][iI][nN]`)
+	recol = recol.CompileExp("Password", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]\s+\S+(\s+|$)`)
+	recol = recol.CompileExp("PasswordWord", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]`)
 
 	return recol
 }

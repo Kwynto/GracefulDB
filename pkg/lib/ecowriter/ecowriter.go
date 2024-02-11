@@ -1,6 +1,7 @@
 package ecowriter
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 
@@ -60,4 +61,15 @@ func ReadJSON(name string, data any) (err error) {
 	}
 
 	return nil
+}
+
+func EncodeString(data any) string {
+	var buf bytes.Buffer
+
+	encoder := json.NewEncoder(&buf)
+	if err := encoder.Encode(data); err != nil {
+		return ""
+	}
+
+	return buf.String()
 }
