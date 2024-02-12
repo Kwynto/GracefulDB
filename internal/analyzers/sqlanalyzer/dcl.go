@@ -53,6 +53,12 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	password = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
 	password = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
 
+	hash := core.RegExpCollection["Hash"].FindString(q.Instruction)
+	hash = core.RegExpCollection["HashWord"].ReplaceAllLiteralString(hash, " ")
+	hash = strings.TrimSpace(hash)
+	hash = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
+	hash = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
+
 	profile, err := gauth.GetProfile(login)
 	if err != nil {
 		return ecowriter.EncodeString(gtypes.Response{
@@ -69,6 +75,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	secret := gtypes.Secret{
 		Login:    login,
 		Password: password,
+		Hash:     hash,
 	}
 	ticket, err := gauth.NewAuth(&secret)
 	if err != nil {

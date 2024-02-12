@@ -194,6 +194,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchCreate", `(?m)^;`)
 	recol = recol.CompileExp("SearchAlter", `(?m)^;`)
 	recol = recol.CompileExp("SearchDrop", `(?m)^;`)
+
 	// DML TODO: Разработать шаблоны
 	recol = recol.CompileExp("SearchSelect", `(?m)^;`)
 	recol = recol.CompileExp("SearchInsert", `(?m)^;`)
@@ -202,6 +203,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchTruncate", `(?m)^;`)
 	recol = recol.CompileExp("SearchCommit", `(?m)^;`)
 	recol = recol.CompileExp("SearchRollback", `(?m)^;`)
+
 	// DCL
 	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*`)
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
@@ -213,6 +215,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("LoginWord", `(?m)[lL][oO][gG][iI][nN]`)
 	recol = recol.CompileExp("Password", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("PasswordWord", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]`)
+	recol = recol.CompileExp("Hash", `(?m)[hH][aA][sS][hH]\s+\S+(\s+|$)`)
+	recol = recol.CompileExp("HashWord", `(?m)[hH][aA][sS][hH]`)
 
 	return recol
 }
