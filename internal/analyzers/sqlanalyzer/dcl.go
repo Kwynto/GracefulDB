@@ -33,7 +33,37 @@ func (q tQuery) DCLUse() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLUse"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DCLUse", nil
+	// TODO: сделать проверку тикета и прав.
+
+	db := core.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, " ")
+	db = strings.TrimSpace(db)
+	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
+	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+
+	if !core.RegExpCollection["EntityName"].MatchString(db) {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "invalid database name",
+		}), nil
+	}
+
+	if core.LocalCoreSettings.FreezeMode {
+		if _, ok := core.StorageInfo.DBs[db]; !ok {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: "the database does not exist",
+			}), nil
+		}
+	}
+
+	core.States[q.Ticket] = core.TState{
+		CurrentDB: db,
+	}
+
+	return ecowriter.EncodeString(gtypes.Response{
+		State:  "ok",
+		Result: db,
+	}), nil
 }
 
 func (q tQuery) DCLAuth() (result string, err error) {
@@ -53,6 +83,12 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	password = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
 	password = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
 
+	hash := core.RegExpCollection["Hash"].FindString(q.Instruction)
+	hash = core.RegExpCollection["HashWord"].ReplaceAllLiteralString(hash, " ")
+	hash = strings.TrimSpace(hash)
+	hash = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
+	hash = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
+
 	profile, err := gauth.GetProfile(login)
 	if err != nil {
 		return ecowriter.EncodeString(gtypes.Response{
@@ -69,6 +105,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	secret := gtypes.Secret{
 		Login:    login,
 		Password: password,
+		Hash:     hash,
 	}
 	ticket, err := gauth.NewAuth(&secret)
 	if err != nil {
