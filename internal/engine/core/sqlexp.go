@@ -63,7 +63,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchRollback", `(?m)^;`)
 
 	// DCL
-	recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-1]+\s*`)
+	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
+	recol = recol.CompileExp("SearchUse", "(?m)^[uU][sS][eE] *[\"'`]?[a-zA-Z][a-zA-Z0-9_-]+[\"'`]?")
+	recol = recol.CompileExp("UseWord", `(?m)[uU][sS][eE]`)
+
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE].*`)
 

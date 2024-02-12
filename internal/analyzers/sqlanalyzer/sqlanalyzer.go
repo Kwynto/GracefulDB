@@ -75,6 +75,6 @@ func Request(ticket string, instruction string, placeholder []string) string {
 		}
 	}
 
-	res := "Unknown command"
+	res := "{\"state\":\"error\",\"result\":\"unknown command\"}"
 	return res
 }
