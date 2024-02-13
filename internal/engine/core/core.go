@@ -8,13 +8,15 @@ import (
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 const (
-	INFOFILE_DB = "db.json"
-	POSTFIX_ID  = "_id"
+	INFOFILE_DB      = "db.json"
+	INFOFILE_STORAGE = "storage.json"
+	POSTFIX_ID       = "_id"
 )
 
 type tCoreSettings struct {
@@ -24,8 +26,9 @@ type tCoreSettings struct {
 }
 
 type tStorageInfo struct {
-	DBs     map[string]tDBInfo `json:"dbs"`     // [name db] tDBInfo
-	Removed []tDBInfo          `json:"removed"` // Removed databases
+	DBs     map[string]tDBInfo        `json:"dbs"`     // [name db] tDBInfo
+	Removed []tDBInfo                 `json:"removed"` // Removed databases
+	Access  map[string]gtypes.TAccess `json:"access"`  // [name db] - TAccess
 }
 
 func (s *tStorageInfo) Load() bool {
@@ -54,16 +57,34 @@ func (s *tStorageInfo) Load() bool {
 			}
 		}
 	}
+
+	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	ecowriter.ReadJSON(infoStorageFile, s.Access)
+	if err != nil {
+		s.Access = make(map[string]gtypes.TAccess)
+		err := ecowriter.WriteJSON(infoStorageFile, s.Access)
+		if err != nil {
+			return false
+		}
+	}
+
 	return true
 }
 
+func (s *tStorageInfo) Save() bool {
+	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	err := ecowriter.WriteJSON(infoStorageFile, s.Access)
+	return err == nil
+}
+
 type tDBInfo struct {
-	Name       string                `json:"name"`
-	Folder     string                `json:"folder"`
-	Tables     map[string]tTableInfo `json:"tables"`
-	Removed    []tTableInfo          `json:"removed"` // Removed tables
-	LastUpdate time.Time             `json:"lastupdate"`
-	Deleted    bool                  `json:"deleted"`
+	Name       string                    `json:"name"`
+	Folder     string                    `json:"folder"`
+	Tables     map[string]tTableInfo     `json:"tables"`
+	Removed    []tTableInfo              `json:"removed"` // Removed tables
+	Access     map[string]gtypes.TAccess `json:"access"`  // [name table] - TAccess
+	LastUpdate time.Time                 `json:"lastupdate"`
+	Deleted    bool                      `json:"deleted"`
 }
 
 // Saving the database structure.
@@ -159,5 +180,8 @@ func Start(cfg *config.Config) {
 
 func Shutdown(ctx context.Context, c *closer.Closer) {
 	// -
+	if !StorageInfo.Save() {
+		c.AddMsg("Failure to save access rights !!!")
+	}
 	c.Done()
 }
