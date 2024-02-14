@@ -75,6 +75,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
 	recol = recol.CompileExp("GrantWord", `(?m)^[gG][rR][aA][nN][tT]`)
 	recol = recol.CompileExp("GrantPrivileges", `(?m)^[gG][rR][aA][nN][tT].*[oO][nN]`)
+	recol = recol.CompileExp("GrantPrivilegesList", `(?m)[cC][rR][eE][aA][tT][eE]|[sS][eE][lL][eE][cC][tT]|[iI][nN][sS][eE][rR][tT]|[uU][pP][dD][aA][tT][eE]|[dD][eE][lL][eE][tT][eE]`)
 	recol = recol.CompileExp("GrantOnTo", `(?m)[oO][nN].*[tT][oO]`)
 	recol = recol.CompileExp("GrantToEnd", `(?m)[tT][oO].*`)
 
