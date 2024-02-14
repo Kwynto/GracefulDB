@@ -78,13 +78,13 @@ func (s *tStorageInfo) Save() bool {
 }
 
 type tDBInfo struct {
-	Name       string                    `json:"name"`
-	Folder     string                    `json:"folder"`
-	Tables     map[string]tTableInfo     `json:"tables"`
-	Removed    []tTableInfo              `json:"removed"` // Removed tables
-	Access     map[string]gtypes.TAccess `json:"access"`  // [name table] - TAccess
-	LastUpdate time.Time                 `json:"lastupdate"`
-	Deleted    bool                      `json:"deleted"`
+	Name    string                `json:"name"`
+	Folder  string                `json:"folder"`
+	Tables  map[string]tTableInfo `json:"tables"`
+	Removed []tTableInfo          `json:"removed"` // Removed tables
+	// Access     map[string]gtypes.TAccess `json:"access"`  // [name table] - TAccess
+	LastUpdate time.Time `json:"lastupdate"`
+	Deleted    bool      `json:"deleted"`
 }
 
 // Saving the database structure.

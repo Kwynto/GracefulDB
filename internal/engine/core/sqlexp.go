@@ -47,6 +47,11 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`)
 	recol = recol.CompileExp("QuotationMarks", `(?m)[\'\"]`)
 	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
+	recol = recol.CompileExp("Spaces", `(?m)\s*`)
+	recol = recol.CompileExp("Comma", `(?m),`)
+
+	recol = recol.CompileExp("ON", `(?m)[oO][nN]`)
+	recol = recol.CompileExp("TO", `(?m)[tT][oO]`)
 
 	// DDL TODO: Разработать шаблоны
 	recol = recol.CompileExp("SearchCreate", `(?m)^;`)
@@ -65,9 +70,14 @@ func CompileRegExpCollection() tRegExpCollection {
 	// DCL
 	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
 	recol = recol.CompileExp("SearchUse", "(?m)^[uU][sS][eE] *[\"'`]?[a-zA-Z][a-zA-Z0-9_-]+[\"'`]?")
-	recol = recol.CompileExp("UseWord", `(?m)[uU][sS][eE]`)
+	recol = recol.CompileExp("UseWord", `(?m)^[uU][sS][eE]`)
 
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
+	recol = recol.CompileExp("GrantWord", `(?m)^[gG][rR][aA][nN][tT]`)
+	recol = recol.CompileExp("GrantPrivileges", `(?m)^[gG][rR][aA][nN][tT].*[oO][nN]`)
+	recol = recol.CompileExp("GrantOnTo", `(?m)[oO][nN].*[tT][oO]`)
+	recol = recol.CompileExp("GrantToEnd", `(?m)[tT][oO].*`)
+
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE].*`)
 
 	recol = recol.CompileExp("SearchAuth", `(?m)^[aA][uU][tT][hH].+`)

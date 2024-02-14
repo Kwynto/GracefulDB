@@ -18,7 +18,63 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DCLGrant", nil
+	var ticket string
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		ticket = newticket
+		res.Ticket = newticket
+	} else {
+		ticket = q.Ticket
+	}
+
+	privilegesStr := core.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
+	privilegesStr = core.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(privilegesStr, "")
+	privileges := core.RegExpCollection["Comma"].Split(privilegesStr, -1)
+
+	dbsStr := core.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
+	dbsStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
+	dbs := core.RegExpCollection["Comma"].Split(dbsStr, -1)
+
+	usersStr := core.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
+	usersStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
+	users := core.RegExpCollection["Comma"].Split(usersStr, -1)
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
 }
 
 func (q tQuery) DCLRevoke() (result string, err error) {
@@ -66,7 +122,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 		ticket = q.Ticket
 	}
 
-	db := core.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, " ")
+	db := core.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	db = strings.TrimSpace(db)
 	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
 	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
@@ -106,7 +162,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 						Result: "auth error",
 					}), errors.New("auth error")
 				}
-				if !(flags.Create || flags.Read || flags.Update || flags.Delete) {
+				if !flags.AnyTrue() {
 					return ecowriter.EncodeString(gtypes.Response{
 						State:  "error",
 						Result: "auth error",

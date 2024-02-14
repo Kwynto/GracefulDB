@@ -15,9 +15,14 @@ type Response struct {
 
 type TAccessFlags struct {
 	Create bool `json:"create,omitempty"`
-	Read   bool `json:"read,omitempty"`
+	Select bool `json:"select,omitempty"`
+	Insert bool `json:"insert,omitempty"`
 	Update bool `json:"update,omitempty"`
 	Delete bool `json:"delete,omitempty"`
+}
+
+func (a TAccessFlags) AnyTrue() bool {
+	return a.Create || a.Select || a.Insert || a.Update || a.Delete
 }
 
 type TAccess struct {
