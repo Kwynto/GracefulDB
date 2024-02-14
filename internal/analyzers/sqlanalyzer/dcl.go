@@ -18,7 +18,6 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
 	defer func() { e.Wrapper(op, err) }()
 
-	// var ticket string
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -44,15 +43,10 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	}
 
 	if newticket != "" {
-		// ticket = newticket
 		res.Ticket = newticket
 	}
-	// else {
-	// 	ticket = q.Ticket
-	// }
 
 	var (
-		// privileges []string
 		dbs   []string
 		users []string
 	)
@@ -60,13 +54,6 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	privilegesStr := core.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
 	privilegesStr = core.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
 	privilegesStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
-	// privilegesStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(privilegesStr, "")
-	// privilegesStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(privilegesStr, "")
-	// privilegesStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(privilegesStr, "")
-	// privilegesIn := core.RegExpCollection["Comma"].Split(privilegesStr, -1)
-	// for _, match := range core.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1) {
-	// 	privileges = append(privileges, match)
-	// }
 	privileges := core.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1)
 
 	if len(privileges) == 0 {
