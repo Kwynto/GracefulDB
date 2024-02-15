@@ -89,14 +89,16 @@ func CompileRegExpCollection() tRegExpCollection {
 
 	recol = recol.CompileExp("SearchAuth", `(?m)^[aA][uU][tT][hH].+`)
 	// recol = recol.CompileExp("Auth", `(?m)^[aA][uU][tT][hH]`)
+	recol = recol.CompileExp("NewWord", `(?m)[nN][eE][wW]`)
+	recol = recol.CompileExp("ChangeWord", `(?m)[cC][hH][aA][nN][gG][eE]`)
 	recol = recol.CompileExp("Login", `(?m)[lL][oO][gG][iI][nN]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("LoginWord", `(?m)[lL][oO][gG][iI][nN]`)
 	recol = recol.CompileExp("Password", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("PasswordWord", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]`)
 	recol = recol.CompileExp("Hash", `(?m)[hH][aA][sS][hH]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("HashWord", `(?m)[hH][aA][sS][hH]`)
-	recol = recol.CompileExp("NewWord", `(?m)[nN][eE][wW]`)
-	recol = recol.CompileExp("ChangeWord", `(?m)[cC][hH][aA][nN][gG][eE]`)
+	recol = recol.CompileExp("Role", `(?m)[rR][oO][lL][eE].*`)
+	recol = recol.CompileExp("RoleWord", `(?m)[rR][oO][lL][eE]`)
 
 	return recol
 }

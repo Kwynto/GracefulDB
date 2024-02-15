@@ -390,6 +390,11 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
 	defer func() { e.Wrapper(op, err) }()
 
+	var roles []gauth.TRole
+
+	new := core.RegExpCollection["NewWord"].MatchString(q.Instruction)
+	change := core.RegExpCollection["ChangeWord"].MatchString(q.Instruction)
+
 	login := core.RegExpCollection["Login"].FindString(q.Instruction)
 	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
 	login = strings.TrimSpace(login)
@@ -408,14 +413,46 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	hash = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
 	hash = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
 
-	new := core.RegExpCollection["NewWord"].MatchString(q.Instruction)
-	change := core.RegExpCollection["ChangeWord"].MatchString(q.Instruction)
+	isRole := core.RegExpCollection["Role"].MatchString(q.Instruction)
+	if isRole {
+		roleStr := core.RegExpCollection["Role"].FindString(q.Instruction)
+		roleStr = core.RegExpCollection["RoleWord"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(roleStr, "")
+		roleIn := core.RegExpCollection["Comma"].Split(roleStr, -1)
+		if len(roleIn) == 0 {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: "incorrect roles",
+			}), errors.New("incorrect roles")
+		}
+		for _, role := range roleIn {
+			switch strings.ToUpper(role) {
+			case "SYSTEM":
+				roles = append(roles, gauth.SYSTEM)
+			case "ADMIN":
+				roles = append(roles, gauth.ADMIN)
+			case "MANAGER":
+				roles = append(roles, gauth.MANAGER)
+			case "ENGINEER":
+				roles = append(roles, gauth.ENGINEER)
+			case "USER":
+				roles = append(roles, gauth.USER)
+			}
+		}
+	}
 
 	if new {
 		access := gauth.TProfile{
 			Description: "",
 			Status:      gauth.NEW,
-			Roles:       []gauth.TRole{gauth.USER},
+		}
+
+		if isRole {
+			access.Roles = roles
+		} else {
+			access.Roles = []gauth.TRole{gauth.USER}
 		}
 
 		err := gauth.AddUser(login, password, access)
@@ -438,6 +475,10 @@ func (q tQuery) DCLAuth() (result string, err error) {
 				State:  "error",
 				Result: err.Error(),
 			}), err
+		}
+
+		if isRole {
+			access.Roles = roles
 		}
 
 		err = gauth.UpdateUser(login, password, access)
