@@ -152,11 +152,141 @@ func (q tQuery) DCLGrant() (result string, err error) {
 }
 
 func (q tQuery) DCLRevoke() (result string, err error) {
-	// -
+	// This method is complete
 	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DCLRevoke", nil
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	var (
+		dbs   []string
+		users []string
+	)
+
+	privilegesStr := core.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
+	privilegesStr = core.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
+	privileges := core.RegExpCollection["RevokePrivilegesList"].FindAllString(privilegesStr, -1)
+
+	if len(privileges) == 0 {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "privileges are not specified",
+		}), errors.New("privileges are not specified")
+	}
+
+	dbsStr := core.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
+	dbsStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
+	dbsIn := core.RegExpCollection["Comma"].Split(dbsStr, -1)
+	for _, db := range dbsIn {
+		if _, ok := core.StorageInfo.DBs[db]; ok {
+			dbs = append(dbs, db)
+		}
+	}
+	if len(dbs) == 0 {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "databases are not specified",
+		}), errors.New("databases are not specified")
+	}
+
+	usersStr := core.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
+	usersStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
+	usersIn := core.RegExpCollection["Comma"].Split(usersStr, -1)
+	for _, user := range usersIn {
+		if _, err := gauth.GetProfile(user); err == nil {
+			users = append(users, user)
+		}
+	}
+	if len(users) == 0 {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "users are not specified",
+		}), errors.New("users are not specified")
+	}
+
+	for _, db := range dbs {
+		dbAccess, ok := core.StorageInfo.Access[db]
+		if ok {
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == 1 || role == 3 {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					return ecowriter.EncodeString(gtypes.Response{
+						State:  "error",
+						Result: "auth error",
+					}), errors.New("auth error")
+				}
+			}
+			for _, user := range users {
+				var aFlags gtypes.TAccessFlags
+				aFlags, ok := core.StorageInfo.Access[db].Flags[user]
+				if !ok {
+					aFlags = gtypes.TAccessFlags{}
+				}
+
+				for _, privilege := range privileges {
+					switch strings.ToLower(privilege) {
+					case "create":
+						aFlags.Create = false
+					case "select":
+						aFlags.Select = false
+					case "insert":
+						aFlags.Insert = false
+					case "update":
+						aFlags.Update = false
+					case "delete":
+						aFlags.Delete = false
+					}
+				}
+
+				core.StorageInfo.Access[db].Flags[user] = aFlags
+			}
+		}
+	}
+
+	core.StorageInfo.Save()
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
 }
 
 func (q tQuery) DCLUse() (result string, err error) {
