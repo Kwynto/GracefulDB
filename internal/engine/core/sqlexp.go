@@ -95,6 +95,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("PasswordWord", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]`)
 	recol = recol.CompileExp("Hash", `(?m)[hH][aA][sS][hH]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("HashWord", `(?m)[hH][aA][sS][hH]`)
+	recol = recol.CompileExp("NewWord", `(?m)[nN][eE][wW]`)
+	recol = recol.CompileExp("ChangeWord", `(?m)[cC][hH][aA][nN][gG][eE]`)
 
 	return recol
 }

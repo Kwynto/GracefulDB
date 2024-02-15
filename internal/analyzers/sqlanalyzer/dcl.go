@@ -408,6 +408,51 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	hash = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
 	hash = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
 
+	new := core.RegExpCollection["NewWord"].MatchString(q.Instruction)
+	change := core.RegExpCollection["ChangeWord"].MatchString(q.Instruction)
+
+	if new {
+		access := gauth.TProfile{
+			Description: "",
+			Status:      gauth.NEW,
+			Roles:       []gauth.TRole{gauth.USER},
+		}
+
+		err := gauth.AddUser(login, password, access)
+		if err != nil {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: err.Error(),
+			}), err
+		}
+
+		return ecowriter.EncodeString(gtypes.Response{
+			State: "ok",
+		}), nil
+	}
+
+	if change {
+		access, err := gauth.GetProfile(login)
+		if err != nil {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: err.Error(),
+			}), err
+		}
+
+		err = gauth.UpdateUser(login, password, access)
+		if err != nil {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: err.Error(),
+			}), err
+		}
+
+		return ecowriter.EncodeString(gtypes.Response{
+			State: "ok",
+		}), nil
+	}
+
 	profile, err := gauth.GetProfile(login)
 	if err != nil {
 		return ecowriter.EncodeString(gtypes.Response{
