@@ -47,6 +47,12 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`)
 	recol = recol.CompileExp("QuotationMarks", `(?m)[\'\"]`)
 	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
+	recol = recol.CompileExp("Spaces", `(?m)\s*`)
+	recol = recol.CompileExp("Comma", `(?m),`)
+
+	recol = recol.CompileExp("ON", `(?m)[oO][nN]`)
+	recol = recol.CompileExp("TO", `(?m)[tT][oO]`)
+	recol = recol.CompileExp("FROM", `(?m)[fF][rR][oO][mM]`)
 
 	// DDL TODO: Разработать шаблоны
 	recol = recol.CompileExp("SearchCreate", `(?m)^;`)
@@ -65,19 +71,34 @@ func CompileRegExpCollection() tRegExpCollection {
 	// DCL
 	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
 	recol = recol.CompileExp("SearchUse", "(?m)^[uU][sS][eE] *[\"'`]?[a-zA-Z][a-zA-Z0-9_-]+[\"'`]?")
-	recol = recol.CompileExp("UseWord", `(?m)[uU][sS][eE]`)
+	recol = recol.CompileExp("UseWord", `(?m)^[uU][sS][eE]`)
 
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
+	recol = recol.CompileExp("GrantWord", `(?m)^[gG][rR][aA][nN][tT]`)
+	recol = recol.CompileExp("GrantPrivileges", `(?m)^[gG][rR][aA][nN][tT].*[oO][nN]`)
+	recol = recol.CompileExp("GrantPrivilegesList", `(?m)[cC][rR][eE][aA][tT][eE]|[sS][eE][lL][eE][cC][tT]|[iI][nN][sS][eE][rR][tT]|[uU][pP][dD][aA][tT][eE]|[dD][eE][lL][eE][tT][eE]`)
+	recol = recol.CompileExp("GrantOnTo", `(?m)[oO][nN].*[tT][oO]`)
+	recol = recol.CompileExp("GrantToEnd", `(?m)[tT][oO].*`)
+
 	recol = recol.CompileExp("SearchRevoke", `(?m)^[rR][eE][vV][oO][kK][eE].*`)
+	recol = recol.CompileExp("RevokeWord", `(?m)^[rR][eE][vV][oO][kK][eE]`)
+	recol = recol.CompileExp("RevokePrivileges", `(?m)^[rR][eE][vV][oO][kK][eE].*[oO][nN]`)
+	recol = recol.CompileExp("RevokePrivilegesList", `(?m)[cC][rR][eE][aA][tT][eE]|[sS][eE][lL][eE][cC][tT]|[iI][nN][sS][eE][rR][tT]|[uU][pP][dD][aA][tT][eE]|[dD][eE][lL][eE][tT][eE]`)
+	recol = recol.CompileExp("RevokeOnTo", `(?m)[oO][nN].*[tT][oO]`)
+	recol = recol.CompileExp("RevokeToEnd", `(?m)[tT][oO].*`)
 
 	recol = recol.CompileExp("SearchAuth", `(?m)^[aA][uU][tT][hH].+`)
 	// recol = recol.CompileExp("Auth", `(?m)^[aA][uU][tT][hH]`)
+	recol = recol.CompileExp("NewWord", `(?m)[nN][eE][wW]`)
+	recol = recol.CompileExp("ChangeWord", `(?m)[cC][hH][aA][nN][gG][eE]`)
 	recol = recol.CompileExp("Login", `(?m)[lL][oO][gG][iI][nN]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("LoginWord", `(?m)[lL][oO][gG][iI][nN]`)
 	recol = recol.CompileExp("Password", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("PasswordWord", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]`)
 	recol = recol.CompileExp("Hash", `(?m)[hH][aA][sS][hH]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("HashWord", `(?m)[hH][aA][sS][hH]`)
+	recol = recol.CompileExp("Role", `(?m)[rR][oO][lL][eE].*`)
+	recol = recol.CompileExp("RoleWord", `(?m)[rR][oO][lL][eE]`)
 
 	return recol
 }

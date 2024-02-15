@@ -5,6 +5,8 @@ import (
 	"os"
 	"slices"
 	"time"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
 // Marks the database as deleted, but does not delete files.
@@ -43,7 +45,7 @@ func StrongRemoveDB(nameDB string) bool {
 }
 
 // Creating a new database.
-func CreateDB(nameDB string, secure bool) bool {
+func CreateDB(nameDB string, owner string, secure bool) bool {
 	// This function is complete
 	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) {
 		return false
@@ -78,7 +80,14 @@ func CreateDB(nameDB string, secure bool) bool {
 		Deleted:    false,
 	}
 
+	dbAccess := gtypes.TAccess{
+		Owner: owner,
+		Flags: make(map[string]gtypes.TAccessFlags),
+	}
+
 	StorageInfo.DBs[nameDB] = dbInfo
+	StorageInfo.Access[nameDB] = dbAccess
+	StorageInfo.Save()
 
 	return dbInfo.Save()
 }
