@@ -16,9 +16,10 @@ type tQuery struct {
 func Request(ticket string, instruction string, placeholder []string) string {
 	// -
 	// Prep
-	instruction = strings.TrimSpace(instruction)
-	instruction = strings.TrimRight(instruction, "; ")
 	// instruction = strings.TrimSpace(instruction)
+	instruction = core.RegExpCollection["LineBreak"].ReplaceAllLiteralString(instruction, " ")
+	instruction = strings.TrimRight(instruction, "; ")
+	instruction = strings.TrimLeft(instruction, " ")
 
 	var query tQuery = tQuery{
 		Ticket:      ticket,

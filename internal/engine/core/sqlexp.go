@@ -41,7 +41,7 @@ func (r tRegExpCollection) CompileExp(name string, expr string) tRegExpCollectio
 func CompileRegExpCollection() tRegExpCollection {
 	// -
 	var recol tRegExpCollection = make(tRegExpCollection)
-	// recol = recol.CompileExp("LineBreak", `(?m)\n`)
+	recol = recol.CompileExp("LineBreak", `(?m)\n`)
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
 	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`)
@@ -88,9 +88,9 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("RevokeToEnd", `(?m)[tT][oO].*`)
 
 	recol = recol.CompileExp("SearchAuth", `(?m)^[aA][uU][tT][hH].+`)
-	// recol = recol.CompileExp("Auth", `(?m)^[aA][uU][tT][hH]`)
-	recol = recol.CompileExp("NewWord", `(?m)[nN][eE][wW]`)
-	recol = recol.CompileExp("ChangeWord", `(?m)[cC][hH][aA][nN][gG][eE]`)
+	recol = recol.CompileExp("AuthNew", `(?m)^[aA][uU][tT][hH]\s*[nN][eE][wW]`)
+	recol = recol.CompileExp("AuthChange", `(?m)^[aA][uU][tT][hH]\s*[cC][hH][aA][nN][gG][eE]`)
+	recol = recol.CompileExp("AuthRemove", `(?m)^[aA][uU][tT][hH]\s*[rR][eE][mM][oO][vV][eE]`)
 	recol = recol.CompileExp("Login", `(?m)[lL][oO][gG][iI][nN]\s+\S+(\s+|$)`)
 	recol = recol.CompileExp("LoginWord", `(?m)[lL][oO][gG][iI][nN]`)
 	recol = recol.CompileExp("Password", `(?m)[pP][aA][sS][sS][wW][oO][rR][dD]\s+\S+(\s+|$)`)
