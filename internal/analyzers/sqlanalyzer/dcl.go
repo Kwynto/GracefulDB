@@ -106,7 +106,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 			if dbAccess.Owner != login {
 				var luxUser bool = false
 				for role := range access.Roles {
-					if role == 1 || role == 3 {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
 						luxUser = true
 						break
 					}
@@ -244,7 +244,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 			if dbAccess.Owner != login {
 				var luxUser bool = false
 				for role := range access.Roles {
-					if role == 1 || role == 3 {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
 						luxUser = true
 						break
 					}
@@ -352,7 +352,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 		if dbAccess.Owner != login {
 			var luxUser bool = false
 			for role := range access.Roles {
-				if role == 1 || role == 3 {
+				if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
 					luxUser = true
 					break
 				}
@@ -392,8 +392,9 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 	var roles []gauth.TRole
 
-	new := core.RegExpCollection["NewWord"].MatchString(q.Instruction)
-	change := core.RegExpCollection["ChangeWord"].MatchString(q.Instruction)
+	new := core.RegExpCollection["AuthNew"].MatchString(q.Instruction)
+	change := core.RegExpCollection["AuthChange"].MatchString(q.Instruction)
+	remove := core.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
 
 	login := core.RegExpCollection["Login"].FindString(q.Instruction)
 	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
@@ -443,19 +444,17 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		}
 	}
 
-	if new {
-		access := gauth.TProfile{
-			Description: "",
-			Status:      gauth.NEW,
+	if new || change || remove {
+		var res gtypes.Response
+
+		if q.Ticket == "" {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: "an empty ticket",
+			}), errors.New("an empty ticket")
 		}
 
-		if isRole {
-			access.Roles = roles
-		} else {
-			access.Roles = []gauth.TRole{gauth.USER}
-		}
-
-		err := gauth.AddUser(login, password, access)
+		_, curaccess, newticket, err := gauth.CheckTicket(q.Ticket)
 		if err != nil {
 			return ecowriter.EncodeString(gtypes.Response{
 				State:  "error",
@@ -463,35 +462,86 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}), err
 		}
 
-		return ecowriter.EncodeString(gtypes.Response{
-			State: "ok",
-		}), nil
-	}
-
-	if change {
-		access, err := gauth.GetProfile(login)
-		if err != nil {
+		if curaccess.Status.IsBad() {
 			return ecowriter.EncodeString(gtypes.Response{
 				State:  "error",
-				Result: err.Error(),
-			}), err
+				Result: "auth error",
+			}), errors.New("auth error")
 		}
 
-		if isRole {
-			access.Roles = roles
+		if newticket != "" {
+			res.Ticket = newticket
 		}
 
-		err = gauth.UpdateUser(login, password, access)
-		if err != nil {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: err.Error(),
-			}), err
+		var luxUser bool = false
+		for role := range curaccess.Roles {
+			if role == int(gauth.ADMIN) || role == int(gauth.MANAGER) {
+				luxUser = true
+				break
+			}
 		}
 
-		return ecowriter.EncodeString(gtypes.Response{
-			State: "ok",
-		}), nil
+		if !luxUser {
+			res.State = "error"
+			res.Result = "auth error"
+			return ecowriter.EncodeString(res), errors.New("auth error")
+		}
+
+		if new {
+			access := gauth.TProfile{
+				Description: "",
+				Status:      gauth.NEW,
+			}
+
+			if isRole {
+				access.Roles = roles
+			} else {
+				access.Roles = []gauth.TRole{gauth.USER}
+			}
+
+			err := gauth.AddUser(login, password, access)
+			if err != nil {
+				return ecowriter.EncodeString(gtypes.Response{
+					State:  "error",
+					Result: err.Error(),
+				}), err
+			}
+		}
+
+		if change {
+			access, err := gauth.GetProfile(login)
+			if err != nil {
+				return ecowriter.EncodeString(gtypes.Response{
+					State:  "error",
+					Result: err.Error(),
+				}), err
+			}
+
+			if isRole {
+				access.Roles = roles
+			}
+
+			err = gauth.UpdateUser(login, password, access)
+			if err != nil {
+				return ecowriter.EncodeString(gtypes.Response{
+					State:  "error",
+					Result: err.Error(),
+				}), err
+			}
+		}
+
+		if remove {
+			err := gauth.DeleteUser(login)
+			if err != nil {
+				return ecowriter.EncodeString(gtypes.Response{
+					State:  "error",
+					Result: err.Error(),
+				}), err
+			}
+		}
+
+		res.State = "ok"
+		return ecowriter.EncodeString(res), nil
 	}
 
 	profile, err := gauth.GetProfile(login)
