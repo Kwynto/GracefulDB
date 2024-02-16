@@ -55,7 +55,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("FROM", `(?m)[fF][rR][oO][mM]`)
 
 	// DDL TODO: Разработать шаблоны
-	recol = recol.CompileExp("SearchCreate", `(?m)^;`)
+	recol = recol.CompileExp("SearchCreate", `(?m)^[cC][rR][eE][aA][tT][eE].*`)
+	recol = recol.CompileExp("CreateDatabaseWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)
+	recol = recol.CompileExp("CreateTableWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[tT][aA][bB][lL][eE]`)
+	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
 	recol = recol.CompileExp("SearchAlter", `(?m)^;`)
 	recol = recol.CompileExp("SearchDrop", `(?m)^;`)
 
