@@ -392,9 +392,9 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 	var roles []gauth.TRole
 
-	new := core.RegExpCollection["AuthNew"].MatchString(q.Instruction)
-	change := core.RegExpCollection["AuthChange"].MatchString(q.Instruction)
-	remove := core.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
+	isNew := core.RegExpCollection["AuthNew"].MatchString(q.Instruction)
+	isChange := core.RegExpCollection["AuthChange"].MatchString(q.Instruction)
+	isRemove := core.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
 
 	login := core.RegExpCollection["Login"].FindString(q.Instruction)
 	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
@@ -444,7 +444,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		}
 	}
 
-	if new || change || remove {
+	if isNew || isChange || isRemove {
 		var res gtypes.Response
 
 		if q.Ticket == "" {
@@ -487,7 +487,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			return ecowriter.EncodeString(res), errors.New("auth error")
 		}
 
-		if new {
+		if isNew {
 			access := gauth.TProfile{
 				Description: "",
 				Status:      gauth.NEW,
@@ -508,7 +508,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}
 		}
 
-		if change {
+		if isChange {
 			access, err := gauth.GetProfile(login)
 			if err != nil {
 				return ecowriter.EncodeString(gtypes.Response{
@@ -530,7 +530,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}
 		}
 
-		if remove {
+		if isRemove {
 			err := gauth.DeleteUser(login)
 			if err != nil {
 				return ecowriter.EncodeString(gtypes.Response{
