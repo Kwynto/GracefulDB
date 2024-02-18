@@ -19,6 +19,7 @@ func RemoveDB(nameDB string) bool {
 
 		StorageInfo.Removed = append(StorageInfo.Removed, dbInfo)
 		delete(StorageInfo.DBs, nameDB)
+		delete(StorageInfo.Access, nameDB)
 	}
 
 	return dbInfo.Save()
