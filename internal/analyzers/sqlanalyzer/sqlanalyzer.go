@@ -63,6 +63,9 @@ func Request(ticket string, instruction string, placeholder []string) string {
 			case "SearchUse":
 				res, _ := query.DCLUse()
 				return res
+			case "SearchShow":
+				res, _ := query.DCLShow()
+				return res
 			case "SearchGrant":
 				res, _ := query.DCLGrant()
 				return res

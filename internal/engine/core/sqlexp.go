@@ -19,6 +19,7 @@ var ParsingOrder = [...]string{
 	"SearchCommit",
 	"SearchRollback",
 
+	"SearchShow",
 	"SearchCreate",
 	"SearchAlter",
 	"SearchDrop",
@@ -82,6 +83,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
 	recol = recol.CompileExp("SearchUse", "(?m)^[uU][sS][eE] *[\"'`]?[a-zA-Z][a-zA-Z0-9_-]+[\"'`]?")
 	recol = recol.CompileExp("UseWord", `(?m)^[uU][sS][eE]`)
+
+	recol = recol.CompileExp("SearchShow", `(?m)^[sS][hH][oO][wW].*`)
+	recol = recol.CompileExp("ShowDatabasesWord", `(?m)[sS][hH][oO][wW]\s*[dD][aA][tT][aA][bB][aA][sS][eE][sS]`)
+	recol = recol.CompileExp("ShowTablesWord", `(?m)[sS][hH][oO][wW]\s*[tT][aA][bB][lL][eE][sS]`)
 
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
 	recol = recol.CompileExp("GrantWord", `(?m)^[gG][rR][aA][nN][tT]`)

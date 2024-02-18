@@ -13,6 +13,12 @@ type Response struct {
 	Result string `json:"result,omitempty"`
 }
 
+type ResponseArray struct {
+	State  string   `json:"state,omitempty"`
+	Ticket string   `json:"ticket,omitempty"`
+	Result []string `json:"result,omitempty"`
+}
+
 type TAccessFlags struct {
 	Create bool `json:"create,omitempty"`
 	Select bool `json:"select,omitempty"`

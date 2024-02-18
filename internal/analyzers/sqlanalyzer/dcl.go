@@ -385,6 +385,91 @@ func (q tQuery) DCLUse() (result string, err error) {
 	return ecowriter.EncodeString(res), nil
 }
 
+func (q tQuery) DCLShow() (result string, err error) {
+	// This method is complete
+	op := "internal -> analyzers -> sql -> DCL -> DCLShow"
+	defer func() { e.Wrapper(op, err) }()
+
+	var res gtypes.Response
+	var resArr gtypes.ResponseArray
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	_, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	isDBs := core.RegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
+	isTables := core.RegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
+
+	if isDBs {
+		var namesDBs []string = []string{}
+		for nameDB := range core.StorageInfo.DBs {
+			namesDBs = append(namesDBs, nameDB)
+		}
+
+		resArr.State = "ok"
+		resArr.Ticket = res.Ticket
+		resArr.Result = namesDBs
+		return ecowriter.EncodeString(resArr), nil
+	} else if isTables {
+		var namesTables []string = []string{}
+
+		state, ok := core.States[q.Ticket]
+		if !ok {
+			res.State = "error"
+			res.Result = "unknown database"
+			return ecowriter.EncodeString(res), errors.New("unknown database")
+		}
+		db := state.CurrentDB
+		if db == "" {
+			res.State = "error"
+			res.Result = "no database selected"
+			return ecowriter.EncodeString(res), errors.New("no database selected")
+		}
+
+		dbInfo, ok := core.StorageInfo.DBs[db]
+		if !ok {
+			res.State = "error"
+			res.Result = "incorrect database"
+			return ecowriter.EncodeString(res), errors.New("incorrect database")
+		}
+
+		for nameTable := range dbInfo.Tables {
+			namesTables = append(namesTables, nameTable)
+		}
+
+		resArr.State = "ok"
+		resArr.Ticket = res.Ticket
+		resArr.Result = namesTables
+		return ecowriter.EncodeString(resArr), nil
+	}
+
+	res.State = "error"
+	res.Result = "unknown command"
+	return ecowriter.EncodeString(res), nil
+}
+
 func (q tQuery) DCLAuth() (result string, err error) {
 	// This method is complete
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
