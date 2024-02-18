@@ -116,15 +116,20 @@ type tColumnInfo struct {
 	BucketSize    int                  `json:"bsize"`
 	OldRev        string               `json:"oldrev"`
 	CurrentRev    string               `json:"currentrev"`
-	Specification tColumnSpecification `json:"specification"`
+	Specification TColumnSpecification `json:"specification"`
 	LastUpdate    time.Time            `json:"lastupdate"`
 	Deleted       bool                 `json:"deleted"`
 }
 
-type tColumnSpecification struct {
+type TColumnSpecification struct {
 	Default string `json:"default"`
 	NotNull bool   `json:"notnull"`
 	Unique  bool   `json:"unique"`
+}
+
+type TColumnForWrite struct {
+	Name string
+	Spec TColumnSpecification
 }
 
 type tCoreFile struct {

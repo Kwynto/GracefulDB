@@ -59,6 +59,13 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("CreateDatabaseWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)
 	recol = recol.CompileExp("CreateTableWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[tT][aA][bB][lL][eE]`)
 	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
+	recol = recol.CompileExp("TableColumns", `(?m)\(.*\)`)
+	recol = recol.CompileExp("TableParenthesis", `(?m)[\(\)]`)
+	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]`)
+	recol = recol.CompileExp("ColumnNotNull", `(?m)[nN][oO][tT]\s*[nN][uU][lL][lL]`)
+	recol = recol.CompileExp("ColumnDefault", `(?m)[dD][eE][fF][aA][uU][lL][tT]:.+`)
+	recol = recol.CompileExp("ColumnDefaultWord", `(?m)[dD][eE][fF][aA][uU][lL][tT]:`)
+
 	recol = recol.CompileExp("SearchAlter", `(?m)^;`)
 	recol = recol.CompileExp("SearchDrop", `(?m)^;`)
 

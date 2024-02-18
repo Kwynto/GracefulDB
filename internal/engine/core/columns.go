@@ -85,7 +85,7 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 }
 
 // Creating a new column.
-func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification tColumnSpecification) bool {
+func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete
 	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) &&
 		!RegExpCollection["EntityName"].MatchString(nameTable) &&

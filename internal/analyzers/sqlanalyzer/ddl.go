@@ -14,7 +14,7 @@ import (
 // DDL — язык определения данных (Data Definition Language)
 
 func (q tQuery) DDLCreateDB() (result string, err error) {
-	// -
+	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -98,7 +98,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 }
 
 func (q tQuery) DDLCreateTable() (result string, err error) {
-	// -
+	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -133,8 +133,13 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	if isINE {
 		table = core.RegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(table, "")
 	}
+
+	columnsStr := core.RegExpCollection["TableColumns"].FindString(table)
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	table = core.RegExpCollection["TableColumns"].ReplaceAllLiteralString(table, "")
 	table = strings.TrimSpace(table)
-	// TODO: сделать извлечение названий столбцов
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
@@ -219,13 +224,61 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			res.Result = "invalid database name or table name"
 			return ecowriter.EncodeString(res), errors.New("invalid database name or table name")
 		}
+
+		var columns = []core.TColumnForWrite{}
+
+		for _, column := range columnsIn {
+			col := core.TColumnForWrite{
+				Name: "",
+				Spec: core.TColumnSpecification{
+					Default: "",
+					NotNull: false,
+					Unique:  false,
+				},
+			}
+			if core.RegExpCollection["ColumnUnique"].MatchString(column) {
+				column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
+				col.Spec.Unique = true
+			}
+			if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
+				column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
+				col.Spec.NotNull = true
+			}
+			if core.RegExpCollection["ColumnDefault"].MatchString(column) {
+				ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
+				column = core.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(column, "")
+
+				ColDef = core.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(ColDef, "")
+				ColDef = strings.TrimSpace(ColDef)
+				ColDef = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(ColDef, "")
+				ColDef = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(ColDef, "")
+
+				if col.Spec.Unique {
+					col.Spec.Default = ""
+				} else {
+					col.Spec.Default = ColDef
+				}
+			}
+
+			column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+			column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+			column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+			col.Name = column
+
+			columns = append(columns, col)
+		}
+
+		for _, column := range columns {
+			core.CreateColumn(db, table, column.Name, true, column.Spec)
+		}
 	}
+
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
 }
 
 func (q tQuery) DDLCreate() (result string, err error) {
-	// -
+	// This method is complete
 	op := "internal -> analyzers -> sql -> DDL -> DDLCreate"
 	defer func() { e.Wrapper(op, err) }()
 
