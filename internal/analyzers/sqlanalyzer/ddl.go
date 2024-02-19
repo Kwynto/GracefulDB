@@ -298,12 +298,139 @@ func (q tQuery) DDLCreate() (result string, err error) {
 	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
+func (q tQuery) DDLAlterDB() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+	var names []string
+	var oldDBName string
+	var newDBName string
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	isRT := core.RegExpCollection["AlterRenameTo"].MatchString(q.Instruction)
+
+	db := core.RegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
+	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+	if !isRT {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "invalid command format",
+		}), errors.New("invalid command format")
+	}
+
+	namesIn := core.RegExpCollection["AlterRenameTo"].Split(db, -1)
+	for _, name := range namesIn {
+		name = strings.TrimSpace(name)
+		names = append(names, name)
+	}
+
+	if len(names) > 1 {
+		oldDBName = names[0]
+		newDBName = names[1]
+	} else {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "invalid command format",
+		}), errors.New("invalid command format")
+	}
+
+	_, ok := core.StorageInfo.DBs[oldDBName]
+	if ok {
+		dbAccess, ok := core.StorageInfo.Access[oldDBName]
+		if ok {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Update {
+							return ecowriter.EncodeString(gtypes.Response{
+								State:  "error",
+								Result: "not enough rights",
+							}), errors.New("not enough rights")
+						}
+					} else {
+						return ecowriter.EncodeString(gtypes.Response{
+							State:  "error",
+							Result: "not enough rights",
+						}), errors.New("not enough rights")
+					}
+				}
+			}
+			if !core.RenameDB(oldDBName, newDBName, true) {
+				res.State = "error"
+				res.Result = "the database cannot be renamed"
+				return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTable() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
 func (q tQuery) DDLAlter() (result string, err error) {
 	// -
 	op := "internal -> analyzers -> sql -> DDL -> DDLAlter"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DDLAlter", nil
+	isDB := core.RegExpCollection["AlterDatabaseWord"].MatchString(q.Instruction)
+	isTable := core.RegExpCollection["AlterTableWord"].MatchString(q.Instruction)
+
+	if isDB {
+		return q.DDLAlterDB()
+	} else if isTable {
+		return q.DDLAlterTable()
+	}
+
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
 func (q tQuery) DDLDropDB() (result string, err error) {
