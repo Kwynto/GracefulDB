@@ -286,8 +286,6 @@ func (q tQuery) DDLCreate() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DDL -> DDLCreate"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-
 	isDB := core.RegExpCollection["CreateDatabaseWord"].MatchString(q.Instruction)
 	isTable := core.RegExpCollection["CreateTableWord"].MatchString(q.Instruction)
 
@@ -297,9 +295,7 @@ func (q tQuery) DDLCreate() (result string, err error) {
 		return q.DDLCreateTable()
 	}
 
-	res.State = "error"
-	res.Result = "unknown command"
-	return ecowriter.EncodeString(res), errors.New("unknown command")
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
 func (q tQuery) DDLAlter() (result string, err error) {
@@ -517,8 +513,6 @@ func (q tQuery) DDLDrop() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DDL -> DDLDrop"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-
 	isDB := core.RegExpCollection["DropDatabaseWord"].MatchString(q.Instruction)
 	isTable := core.RegExpCollection["DropTableWord"].MatchString(q.Instruction)
 
@@ -528,7 +522,5 @@ func (q tQuery) DDLDrop() (result string, err error) {
 		return q.DDLDropTable()
 	}
 
-	res.State = "error"
-	res.Result = "unknown command"
-	return ecowriter.EncodeString(res), errors.New("unknown command")
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }

@@ -37,6 +37,7 @@ func (s *tStorageInfo) Load() bool {
 
 	s.DBs = make(map[string]tDBInfo)
 	s.Removed = make([]tDBInfo, 0)
+	s.Access = make(map[string]gtypes.TAccess)
 
 	files, err := os.ReadDir(LocalCoreSettings.Storage)
 	if err != nil {
