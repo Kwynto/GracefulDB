@@ -13,8 +13,15 @@ type Response struct {
 	Result string `json:"result,omitempty"`
 }
 
+type ResponseArray struct {
+	State  string   `json:"state,omitempty"`
+	Ticket string   `json:"ticket,omitempty"`
+	Result []string `json:"result,omitempty"`
+}
+
 type TAccessFlags struct {
 	Create bool `json:"create,omitempty"`
+	Drop   bool `json:"drop,omitempty"`
 	Select bool `json:"select,omitempty"`
 	Insert bool `json:"insert,omitempty"`
 	Update bool `json:"update,omitempty"`
@@ -22,7 +29,7 @@ type TAccessFlags struct {
 }
 
 func (a TAccessFlags) AnyTrue() bool {
-	return a.Create || a.Select || a.Insert || a.Update || a.Delete
+	return a.Create || a.Drop || a.Select || a.Insert || a.Update || a.Delete
 }
 
 type TAccess struct {

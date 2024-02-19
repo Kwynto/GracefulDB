@@ -271,6 +271,10 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		for _, column := range columns {
 			core.CreateColumn(db, table, column.Name, true, column.Spec)
 		}
+	} else {
+		res.State = "error"
+		res.Result = "internal error"
+		return ecowriter.EncodeString(res), errors.New("internal error")
 	}
 
 	res.State = "ok"
@@ -282,8 +286,6 @@ func (q tQuery) DDLCreate() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DDL -> DDLCreate"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-
 	isDB := core.RegExpCollection["CreateDatabaseWord"].MatchString(q.Instruction)
 	isTable := core.RegExpCollection["CreateTableWord"].MatchString(q.Instruction)
 
@@ -293,9 +295,7 @@ func (q tQuery) DDLCreate() (result string, err error) {
 		return q.DDLCreateTable()
 	}
 
-	res.State = "error"
-	res.Result = "unknown command"
-	return ecowriter.EncodeString(res), errors.New("unknown command")
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
 func (q tQuery) DDLAlter() (result string, err error) {
@@ -306,10 +306,221 @@ func (q tQuery) DDLAlter() (result string, err error) {
 	return "DDLAlter", nil
 }
 
+func (q tQuery) DDLDropDB() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	isIE := core.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
+
+	db := core.RegExpCollection["DropDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	if isIE {
+		db = core.RegExpCollection["IfExistsWord"].ReplaceAllLiteralString(db, "")
+	}
+	db = strings.TrimSpace(db)
+	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
+	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+
+	_, ok := core.StorageInfo.DBs[db]
+	if !ok {
+		if isIE {
+			res.State = "error"
+			res.Result = "the database not exists"
+			return ecowriter.EncodeString(res), errors.New("the database not exists")
+		}
+
+		res.State = "ok"
+		return ecowriter.EncodeString(res), nil
+	}
+
+	dbAccess, ok := core.StorageInfo.Access[db]
+	if ok {
+		if dbAccess.Owner != login {
+			var luxUser bool = false
+			for role := range access.Roles {
+				if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+					luxUser = true
+					break
+				}
+			}
+			if !luxUser {
+				return ecowriter.EncodeString(gtypes.Response{
+					State:  "error",
+					Result: "not enough rights",
+				}), errors.New("not enough rights")
+			}
+		}
+	}
+
+	if !core.RemoveDB(db) {
+		res.State = "error"
+		res.Result = "the database cannot be deleted"
+		return ecowriter.EncodeString(res), errors.New("the database cannot be deleted")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLDropTable() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "an empty ticket",
+		}), errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: "auth error",
+		}), errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	isIE := core.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
+
+	table := core.RegExpCollection["DropTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	if isIE {
+		table = core.RegExpCollection["IfExistsWord"].ReplaceAllLiteralString(table, "")
+	}
+	table = strings.TrimSpace(table)
+	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	dbInfo, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		var flagsAcs gtypes.TAccessFlags
+		var okFlags bool = false
+		var luxUser bool = false
+
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags = dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if !okFlags {
+						return ecowriter.EncodeString(gtypes.Response{
+							State:  "error",
+							Result: "not enough rights",
+						}), errors.New("not enough rights")
+					}
+				}
+			} else {
+				luxUser = true
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			if isIE {
+				res.State = "error"
+				res.Result = "the table not exists"
+				return ecowriter.EncodeString(res), errors.New("the table not exists")
+			}
+
+			res.State = "ok"
+			return ecowriter.EncodeString(res), nil
+		}
+
+		if !luxUser && !flagsAcs.Drop {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: "not enough rights",
+			}), errors.New("not enough rights")
+		}
+
+		if !core.RemoveTable(db, table) {
+			return ecowriter.EncodeString(gtypes.Response{
+				State:  "error",
+				Result: "the table cannot be deleted",
+			}), errors.New("the table cannot be deleted")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "internal error"
+		return ecowriter.EncodeString(res), errors.New("internal error")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
 func (q tQuery) DDLDrop() (result string, err error) {
-	// -
+	// This method is complete
 	op := "internal -> analyzers -> sql -> DDL -> DDLDrop"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DDLDrop", nil
+	isDB := core.RegExpCollection["DropDatabaseWord"].MatchString(q.Instruction)
+	isTable := core.RegExpCollection["DropTableWord"].MatchString(q.Instruction)
+
+	if isDB {
+		return q.DDLDropDB()
+	} else if isTable {
+		return q.DDLDropTable()
+	}
+
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }

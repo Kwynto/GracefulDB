@@ -19,6 +19,7 @@ var ParsingOrder = [...]string{
 	"SearchCommit",
 	"SearchRollback",
 
+	"SearchShow",
 	"SearchCreate",
 	"SearchAlter",
 	"SearchDrop",
@@ -28,7 +29,7 @@ var ParsingOrder = [...]string{
 }
 
 func (r tRegExpCollection) CompileExp(name string, expr string) tRegExpCollection {
-	// This method is completes
+	// This method is complete
 	re, err := regexp.Compile(expr)
 	if err != nil {
 		return r
@@ -41,6 +42,7 @@ func (r tRegExpCollection) CompileExp(name string, expr string) tRegExpCollectio
 func CompileRegExpCollection() tRegExpCollection {
 	// -
 	var recol tRegExpCollection = make(tRegExpCollection)
+
 	recol = recol.CompileExp("LineBreak", `(?m)\n`)
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
@@ -50,6 +52,9 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("Spaces", `(?m)\s*`)
 	recol = recol.CompileExp("Comma", `(?m),`)
 
+	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
+	recol = recol.CompileExp("IfExistsWord", `(?m)[iI][fF]\s*[eE][xX][iI][sS][tT][sS]`)
+
 	recol = recol.CompileExp("ON", `(?m)[oO][nN]`)
 	recol = recol.CompileExp("TO", `(?m)[tT][oO]`)
 	recol = recol.CompileExp("FROM", `(?m)[fF][rR][oO][mM]`)
@@ -58,7 +63,6 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchCreate", `(?m)^[cC][rR][eE][aA][tT][eE].*`)
 	recol = recol.CompileExp("CreateDatabaseWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)
 	recol = recol.CompileExp("CreateTableWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[tT][aA][bB][lL][eE]`)
-	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
 	recol = recol.CompileExp("TableColumns", `(?m)\(.*\)`)
 	recol = recol.CompileExp("TableParenthesis", `(?m)[\(\)]`)
 	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]`)
@@ -67,7 +71,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("ColumnDefaultWord", `(?m)[dD][eE][fF][aA][uU][lL][tT]:`)
 
 	recol = recol.CompileExp("SearchAlter", `(?m)^;`)
-	recol = recol.CompileExp("SearchDrop", `(?m)^;`)
+
+	recol = recol.CompileExp("SearchDrop", `(?m)^[dD][rR][oO][pP].*`)
+	recol = recol.CompileExp("DropDatabaseWord", `(?m)^[dD][rR][oO][pP]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)
+	recol = recol.CompileExp("DropTableWord", `(?m)^[dD][rR][oO][pP]\s*[tT][aA][bB][lL][eE]`)
 
 	// DML TODO: Разработать шаблоны
 	recol = recol.CompileExp("SearchSelect", `(?m)^;`)
@@ -82,6 +89,10 @@ func CompileRegExpCollection() tRegExpCollection {
 	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
 	recol = recol.CompileExp("SearchUse", "(?m)^[uU][sS][eE] *[\"'`]?[a-zA-Z][a-zA-Z0-9_-]+[\"'`]?")
 	recol = recol.CompileExp("UseWord", `(?m)^[uU][sS][eE]`)
+
+	recol = recol.CompileExp("SearchShow", `(?m)^[sS][hH][oO][wW].*`)
+	recol = recol.CompileExp("ShowDatabasesWord", `(?m)[sS][hH][oO][wW]\s*[dD][aA][tT][aA][bB][aA][sS][eE][sS]`)
+	recol = recol.CompileExp("ShowTablesWord", `(?m)[sS][hH][oO][wW]\s*[tT][aA][bB][lL][eE][sS]`)
 
 	recol = recol.CompileExp("SearchGrant", `(?m)^[gG][rR][aA][nN][tT].*`)
 	recol = recol.CompileExp("GrantWord", `(?m)^[gG][rR][aA][nN][tT]`)

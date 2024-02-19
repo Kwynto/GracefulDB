@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-
-	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
 var (
@@ -16,9 +14,6 @@ var (
 // Saving the structure to a JSON file.
 func WriteJSON(name string, data any) (err error) {
 	// This function is complete
-	op := "pkg -> lib -> ecowriter -> WriteJSON"
-	defer func() { e.Wrapper(op, err) }()
-
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		if err2 := os.Remove(name); err2 != nil {
 			return err2
@@ -42,9 +37,6 @@ func WriteJSON(name string, data any) (err error) {
 // Loading a structure from a JSON file.
 func ReadJSON(name string, data any) (err error) {
 	// This function is complete
-	op := "pkg -> lib -> ecowriter -> ReadJSON"
-	defer func() { e.Wrapper(op, err) }()
-
 	if _, err := os.Stat(name); os.IsNotExist(err) {
 		return err
 	}
