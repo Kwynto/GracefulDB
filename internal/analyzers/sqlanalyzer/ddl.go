@@ -301,9 +301,9 @@ func (q tQuery) DDLCreate() (result string, err error) {
 func (q tQuery) DDLAlterDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
-	var names []string
-	var oldDBName string
-	var newDBName string
+	// var names []string
+	// var oldDBName string
+	// var newDBName string
 
 	if q.Ticket == "" {
 		return ecowriter.EncodeString(gtypes.Response{
@@ -331,11 +331,20 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 		res.Ticket = newticket
 	}
 
-	isRT := core.RegExpCollection["AlterRenameTo"].MatchString(q.Instruction)
+	isRT := core.RegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
 
-	db := core.RegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
-	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
-	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+	oldDBName := core.RegExpCollection["AlterDatabaseRenameTo"].FindString(q.Instruction)
+	oldDBName = core.RegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["RenameTo"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = strings.TrimSpace(oldDBName)
+
+	newDBName := core.RegExpCollection["AlterDatabaseRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
+	newDBName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newDBName, "")
+	newDBName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newDBName, "")
+	newDBName = strings.TrimSpace(newDBName)
+
 	if !isRT {
 		return ecowriter.EncodeString(gtypes.Response{
 			State:  "error",
@@ -343,16 +352,7 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 		}), errors.New("invalid command format")
 	}
 
-	namesIn := core.RegExpCollection["AlterRenameTo"].Split(db, -1)
-	for _, name := range namesIn {
-		name = strings.TrimSpace(name)
-		names = append(names, name)
-	}
-
-	if len(names) > 1 {
-		oldDBName = names[0]
-		newDBName = names[1]
-	} else {
+	if oldDBName == "" || newDBName == "" {
 		return ecowriter.EncodeString(gtypes.Response{
 			State:  "error",
 			Result: "invalid command format",
