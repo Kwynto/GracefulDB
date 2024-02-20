@@ -21,6 +21,7 @@ type ResponseArray struct {
 
 type TAccessFlags struct {
 	Create bool `json:"create,omitempty"`
+	Alter  bool `json:"alter,omitempty"`
 	Drop   bool `json:"drop,omitempty"`
 	Select bool `json:"select,omitempty"`
 	Insert bool `json:"insert,omitempty"`

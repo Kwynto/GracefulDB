@@ -360,12 +360,205 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	return ecowriter.EncodeString(res), nil
 }
 
-func (q tQuery) DDLAlterTable() (result string, err error) {
+func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 	// -
 	var res gtypes.Response
 
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableDrop() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	tableName := core.RegExpCollection["AlterTableDrop"].FindString(q.Instruction)
+	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["DROP"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
+	tableName = strings.TrimSpace(tableName)
+
+	colName := core.RegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
+	colName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(colName, "")
+	colName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(colName, "")
+	colName = strings.TrimSpace(colName)
+
+	if tableName == "" || colName == "" {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Drop {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			if !core.RemoveColumn(db, tableName, colName) {
+				res.State = "error"
+				res.Result = "the column cannot be deleted"
+				return ecowriter.EncodeString(res), errors.New("the column cannot be deleted")
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableModify() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTable() (result string, err error) {
+	// This method is complete
+
+	isAdd := core.RegExpCollection["AlterTableAdd"].MatchString(q.Instruction)
+	isDrop := core.RegExpCollection["AlterTableDrop"].MatchString(q.Instruction)
+	isModify := core.RegExpCollection["AlterTableModify"].MatchString(q.Instruction)
+	isRT := core.RegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
+
+	if isAdd {
+		return q.DDLAlterTableAdd()
+	} else if isDrop {
+		return q.DDLAlterTableDrop()
+	} else if isModify {
+		return q.DDLAlterTableModify()
+	} else if isRT {
+		return q.DDLAlterTableRenameTo()
+	}
+
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
 func (q tQuery) DDLAlter() (result string, err error) {
