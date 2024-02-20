@@ -73,9 +73,9 @@ func (s *tStorageInfo) Load() bool {
 }
 
 func (s *tStorageInfo) Save() bool {
+	// This method is complete
 	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	err := ecowriter.WriteJSON(infoStorageFile, s.Access)
-	return err == nil
+	return ecowriter.WriteJSON(infoStorageFile, s.Access) == nil
 }
 
 type tDBInfo struct {
@@ -92,8 +92,7 @@ type tDBInfo struct {
 func (d tDBInfo) Save() bool {
 	// This method is complete
 	path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
-	err := ecowriter.WriteJSON(path, d)
-	return err == nil
+	return ecowriter.WriteJSON(path, d) == nil
 }
 
 type tTableInfo struct {

@@ -18,10 +18,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -33,10 +30,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -72,10 +66,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 					}
 				}
 				if !luxUser {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "not enough rights",
-					}), errors.New("not enough rights")
+					return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 				}
 			}
 		}
@@ -102,10 +93,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -117,10 +105,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -174,10 +159,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				}
 				if !luxUser {
 					if !okFlags {
-						return ecowriter.EncodeString(gtypes.Response{
-							State:  "error",
-							Result: "not enough rights",
-						}), errors.New("not enough rights")
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			} else {
@@ -198,25 +180,16 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			}
 
 			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "not enough rights",
-				}), errors.New("not enough rights")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
 
 			if !core.RemoveTable(db, table) {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "the table cannot be deleted",
-				}), errors.New("the table cannot be deleted")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("the table cannot be deleted")
 			}
 		}
 
 		if !luxUser && !flagsAcs.Create {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "not enough rights",
-			}), errors.New("not enough rights")
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
 		if !core.CreateTable(db, table, true) {
@@ -298,23 +271,12 @@ func (q tQuery) DDLCreate() (result string, err error) {
 	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
-func (q tQuery) DDLAlter() (result string, err error) {
-	// -
-	op := "internal -> analyzers -> sql -> DDL -> DDLAlter"
-	defer func() { e.Wrapper(op, err) }()
-
-	return "DDLAlter", nil
-}
-
-func (q tQuery) DDLDropDB() (result string, err error) {
+func (q tQuery) DDLAlterDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -326,10 +288,121 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	isRT := core.RegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
+
+	oldDBName := core.RegExpCollection["AlterDatabaseRenameTo"].FindString(q.Instruction)
+	oldDBName = core.RegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["RenameTo"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(oldDBName, "")
+	oldDBName = strings.TrimSpace(oldDBName)
+
+	newDBName := core.RegExpCollection["AlterDatabaseRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
+	newDBName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newDBName, "")
+	newDBName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newDBName, "")
+	newDBName = strings.TrimSpace(newDBName)
+
+	if !isRT {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	if oldDBName == "" || newDBName == "" {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	_, ok := core.StorageInfo.DBs[oldDBName]
+	if ok {
+		dbAccess, ok := core.StorageInfo.Access[oldDBName]
+		if ok {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Update {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			if !core.RenameDB(oldDBName, newDBName, true) {
+				res.State = "error"
+				res.Result = "the database cannot be renamed"
+				return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTable() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlter() (result string, err error) {
+	// -
+	op := "internal -> analyzers -> sql -> DDL -> DDLAlter"
+	defer func() { e.Wrapper(op, err) }()
+
+	isDB := core.RegExpCollection["AlterDatabaseWord"].MatchString(q.Instruction)
+	isTable := core.RegExpCollection["AlterTableWord"].MatchString(q.Instruction)
+
+	if isDB {
+		return q.DDLAlterDB()
+	} else if isTable {
+		return q.DDLAlterTable()
+	}
+
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
+}
+
+func (q tQuery) DDLDropDB() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
 		return ecowriter.EncodeString(gtypes.Response{
 			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -369,10 +442,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 				}
 			}
 			if !luxUser {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "not enough rights",
-				}), errors.New("not enough rights")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
 		}
 	}
@@ -392,10 +462,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -407,10 +474,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -458,10 +522,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 				}
 				if !luxUser {
 					if !okFlags {
-						return ecowriter.EncodeString(gtypes.Response{
-							State:  "error",
-							Result: "not enough rights",
-						}), errors.New("not enough rights")
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			} else {
@@ -486,17 +547,11 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 		}
 
 		if !luxUser && !flagsAcs.Drop {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "not enough rights",
-			}), errors.New("not enough rights")
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
 		if !core.RemoveTable(db, table) {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "the table cannot be deleted",
-			}), errors.New("the table cannot be deleted")
+			return `{"state":"error", "result":"the table cannot be deleted"}`, errors.New("the table cannot be deleted")
 		}
 	} else {
 		res.State = "error"

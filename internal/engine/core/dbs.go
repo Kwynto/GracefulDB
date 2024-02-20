@@ -20,9 +20,11 @@ func RemoveDB(nameDB string) bool {
 		StorageInfo.Removed = append(StorageInfo.Removed, dbInfo)
 		delete(StorageInfo.DBs, nameDB)
 		delete(StorageInfo.Access, nameDB)
+
+		return dbInfo.Save()
 	}
 
-	return dbInfo.Save()
+	return false
 }
 
 // Deletes the folder and database files, if DB was mark as 'removed'
@@ -40,6 +42,33 @@ func StrongRemoveDB(nameDB string) bool {
 
 			return true
 		}
+	}
+
+	return false
+}
+
+// Rename a database.
+func RenameDB(oldName, newName string, secure bool) bool {
+	// This function is complete
+	if secure && !RegExpCollection["EntityName"].MatchString(newName) {
+		return false
+	}
+
+	dbInfo, okDB := StorageInfo.DBs[oldName]
+	dbAccess, okAccess := StorageInfo.Access[oldName]
+
+	if okDB && okAccess {
+		dbInfo.Name = newName
+		dbInfo.LastUpdate = time.Now()
+
+		delete(StorageInfo.DBs, oldName)
+		delete(StorageInfo.Access, oldName)
+
+		StorageInfo.DBs[newName] = dbInfo
+		StorageInfo.Access[newName] = dbAccess
+		StorageInfo.Save()
+
+		return dbInfo.Save()
 	}
 
 	return false
