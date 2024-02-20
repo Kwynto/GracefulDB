@@ -18,10 +18,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -33,10 +30,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -72,10 +66,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 					}
 				}
 				if !luxUser {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "not enough rights",
-					}), errors.New("not enough rights")
+					return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 				}
 			}
 		}
@@ -102,10 +93,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -117,10 +105,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -174,10 +159,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				}
 				if !luxUser {
 					if !okFlags {
-						return ecowriter.EncodeString(gtypes.Response{
-							State:  "error",
-							Result: "not enough rights",
-						}), errors.New("not enough rights")
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			} else {
@@ -198,25 +180,16 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			}
 
 			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "not enough rights",
-				}), errors.New("not enough rights")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
 
 			if !core.RemoveTable(db, table) {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "the table cannot be deleted",
-				}), errors.New("the table cannot be deleted")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("the table cannot be deleted")
 			}
 		}
 
 		if !luxUser && !flagsAcs.Create {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "not enough rights",
-			}), errors.New("not enough rights")
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
 		if !core.CreateTable(db, table, true) {
@@ -301,15 +274,9 @@ func (q tQuery) DDLCreate() (result string, err error) {
 func (q tQuery) DDLAlterDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
-	// var names []string
-	// var oldDBName string
-	// var newDBName string
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -321,10 +288,7 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -346,17 +310,11 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	newDBName = strings.TrimSpace(newDBName)
 
 	if !isRT {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "invalid command format",
-		}), errors.New("invalid command format")
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
 	if oldDBName == "" || newDBName == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "invalid command format",
-		}), errors.New("invalid command format")
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
 	_, ok := core.StorageInfo.DBs[oldDBName]
@@ -375,16 +333,10 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 				if !luxUser {
 					if okFlags {
 						if !flagsAcs.Update {
-							return ecowriter.EncodeString(gtypes.Response{
-								State:  "error",
-								Result: "not enough rights",
-							}), errors.New("not enough rights")
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 						}
 					} else {
-						return ecowriter.EncodeString(gtypes.Response{
-							State:  "error",
-							Result: "not enough rights",
-						}), errors.New("not enough rights")
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			}
@@ -438,10 +390,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -453,10 +402,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -496,10 +442,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 				}
 			}
 			if !luxUser {
-				return ecowriter.EncodeString(gtypes.Response{
-					State:  "error",
-					Result: "not enough rights",
-				}), errors.New("not enough rights")
+				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
 		}
 	}
@@ -519,10 +462,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
@@ -534,10 +474,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -585,10 +522,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 				}
 				if !luxUser {
 					if !okFlags {
-						return ecowriter.EncodeString(gtypes.Response{
-							State:  "error",
-							Result: "not enough rights",
-						}), errors.New("not enough rights")
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			} else {
@@ -613,17 +547,11 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 		}
 
 		if !luxUser && !flagsAcs.Drop {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "not enough rights",
-			}), errors.New("not enough rights")
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
 		if !core.RemoveTable(db, table) {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "the table cannot be deleted",
-			}), errors.New("the table cannot be deleted")
+			return `{"state":"error", "result":"the table cannot be deleted"}`, errors.New("the table cannot be deleted")
 		}
 	} else {
 		res.State = "error"
