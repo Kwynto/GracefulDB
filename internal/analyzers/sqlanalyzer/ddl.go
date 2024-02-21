@@ -106,6 +106,19 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
 	isINE := core.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
 	table := core.RegExpCollection["CreateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
@@ -121,19 +134,6 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	table = strings.TrimSpace(table)
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
-
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
-	}
 
 	dbInfo, okDB := core.StorageInfo.DBs[db]
 	if okDB {
@@ -371,6 +371,19 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
 	tableName := core.RegExpCollection["AlterTableAdd"].FindString(q.Instruction)
 	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
 	tableName = core.RegExpCollection["ADD"].ReplaceAllLiteralString(tableName, "")
@@ -427,19 +440,6 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 
 	if len(columns) < 1 {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
-	}
-
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
 	}
 
 	_, okDB := core.StorageInfo.DBs[db]
@@ -508,6 +508,19 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
 	tableName := core.RegExpCollection["AlterTableDrop"].FindString(q.Instruction)
 	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
 	tableName = core.RegExpCollection["DROP"].ReplaceAllLiteralString(tableName, "")
@@ -535,19 +548,6 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 
 	if len(columns) < 1 {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
-	}
-
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
 	}
 
 	_, okDB := core.StorageInfo.DBs[db]
@@ -939,16 +939,6 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 		res.Ticket = newticket
 	}
 
-	isIE := core.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
-
-	table := core.RegExpCollection["DropTableWord"].ReplaceAllLiteralString(q.Instruction, "")
-	if isIE {
-		table = core.RegExpCollection["IfExistsWord"].ReplaceAllLiteralString(table, "")
-	}
-	table = strings.TrimSpace(table)
-	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
-
 	state, ok := core.States[q.Ticket]
 	if !ok {
 		res.State = "error"
@@ -961,6 +951,16 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 		res.Result = "no database selected"
 		return ecowriter.EncodeString(res), errors.New("no database selected")
 	}
+
+	isIE := core.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
+
+	table := core.RegExpCollection["DropTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	if isIE {
+		table = core.RegExpCollection["IfExistsWord"].ReplaceAllLiteralString(table, "")
+	}
+	table = strings.TrimSpace(table)
+	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
 	dbInfo, okDB := core.StorageInfo.DBs[db]
 	if okDB {
