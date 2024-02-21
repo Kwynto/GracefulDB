@@ -361,7 +361,7 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 }
 
 func (q tQuery) DDLAlterTableAdd() (result string, err error) {
-	// -
+	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -442,8 +442,6 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	// TODO: тута сделать парсинг
-
 	state, ok := core.States[q.Ticket]
 	if !ok {
 		res.State = "error"
@@ -457,6 +455,46 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		return ecowriter.EncodeString(res), errors.New("no database selected")
 	}
 
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !(flagsAcs.Alter && flagsAcs.Create) {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			for _, colName := range columns {
+				if !core.CreateColumn(db, tableName, colName.Name, true, colName.Spec) {
+					res.State = "error"
+					res.Result = "the column cannot be added"
+					return ecowriter.EncodeString(res), errors.New("the column cannot be added")
+				}
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
 	// TODO: тута проверка прав и выполнение
 
 	res.State = "ok"
@@ -544,7 +582,7 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 				}
 				if !luxUser {
 					if okFlags {
-						if !flagsAcs.Drop {
+						if !(flagsAcs.Alter && flagsAcs.Drop) {
 							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 						}
 					} else {

@@ -105,6 +105,10 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 		return false
 	}
 
+	if _, ok := tableInfo.Columns[nameColumn]; ok {
+		return false
+	}
+
 	pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
 	for {
