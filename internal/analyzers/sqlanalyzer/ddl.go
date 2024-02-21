@@ -360,12 +360,333 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	return ecowriter.EncodeString(res), nil
 }
 
-func (q tQuery) DDLAlterTable() (result string, err error) {
-	// -
+func (q tQuery) DDLAlterTableAdd() (result string, err error) {
+	// This method is complete
 	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	tableName := core.RegExpCollection["AlterTableAdd"].FindString(q.Instruction)
+	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["ADD"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
+	tableName = strings.TrimSpace(tableName)
+
+	columnsStr := core.RegExpCollection["AlterTableAdd"].ReplaceAllLiteralString(q.Instruction, "")
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	var columns = []core.TColumnForWrite{}
+
+	for _, column := range columnsIn {
+		col := core.TColumnForWrite{
+			Name: "",
+			Spec: core.TColumnSpecification{
+				Default: "",
+				NotNull: false,
+				Unique:  false,
+			},
+		}
+		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
+			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
+			col.Spec.Unique = true
+		}
+		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
+			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
+			col.Spec.NotNull = true
+		}
+		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
+			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
+			column = core.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(column, "")
+
+			ColDef = core.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = strings.TrimSpace(ColDef)
+			ColDef = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(ColDef, "")
+
+			if col.Spec.Unique {
+				col.Spec.Default = ""
+			} else {
+				col.Spec.Default = ColDef
+			}
+		}
+
+		column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+		col.Name = column
+
+		columns = append(columns, col)
+	}
+
+	if len(columns) < 1 {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !(flagsAcs.Alter && flagsAcs.Create) {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			for _, colName := range columns {
+				if !core.CreateColumn(db, tableName, colName.Name, true, colName.Spec) {
+					res.State = "error"
+					res.Result = "the column cannot be added"
+					return ecowriter.EncodeString(res), errors.New("the column cannot be added")
+				}
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+	// TODO: тута проверка прав и выполнение
 
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableDrop() (result string, err error) {
+	// This method is complete
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	tableName := core.RegExpCollection["AlterTableDrop"].FindString(q.Instruction)
+	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["DROP"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
+	tableName = strings.TrimSpace(tableName)
+
+	if tableName == "" {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	columnsStr := core.RegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	var columns = []string{}
+
+	for _, column := range columnsIn {
+		column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+
+		columns = append(columns, column)
+	}
+
+	if len(columns) < 1 {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !(flagsAcs.Alter && flagsAcs.Drop) {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			for _, colName := range columns {
+				if !core.RemoveColumn(db, tableName, colName) {
+					res.State = "error"
+					res.Result = "the column cannot be deleted"
+					return ecowriter.EncodeString(res), errors.New("the column cannot be deleted")
+				}
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableModify() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
+	// -
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return ecowriter.EncodeString(gtypes.Response{
+			State:  "error",
+			Result: err.Error(),
+		}), err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	res.State = "ok"
+	return ecowriter.EncodeString(res), nil
+}
+
+func (q tQuery) DDLAlterTable() (result string, err error) {
+	// This method is complete
+
+	isAdd := core.RegExpCollection["AlterTableAdd"].MatchString(q.Instruction)
+	isDrop := core.RegExpCollection["AlterTableDrop"].MatchString(q.Instruction)
+	isModify := core.RegExpCollection["AlterTableModify"].MatchString(q.Instruction)
+	isRT := core.RegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
+
+	if isAdd {
+		return q.DDLAlterTableAdd()
+	} else if isDrop {
+		return q.DDLAlterTableDrop()
+	} else if isModify {
+		return q.DDLAlterTableModify()
+	} else if isRT {
+		return q.DDLAlterTableRenameTo()
+	}
+
+	return `{"state":"error", "result":"unknown command"}`, errors.New("unknown command")
 }
 
 func (q tQuery) DDLAlter() (result string, err error) {
