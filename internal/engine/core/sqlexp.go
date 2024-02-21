@@ -46,7 +46,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("LineBreak", `(?m)\n`)
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
-	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`)
+	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`) // protection of technical names
 	recol = recol.CompileExp("QuotationMarks", `(?m)[\'\"]`)
 	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
 	recol = recol.CompileExp("Spaces", `(?m)\s*`)

@@ -21,25 +21,16 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -57,10 +48,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	privileges := core.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1)
 
 	if len(privileges) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "privileges are not specified",
-		}), errors.New("privileges are not specified")
+		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
 	dbsStr := core.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
@@ -76,10 +64,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		}
 	}
 	if len(dbs) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "databases are not specified",
-		}), errors.New("databases are not specified")
+		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
 	usersStr := core.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
@@ -94,10 +79,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		}
 	}
 	if len(users) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "users are not specified",
-		}), errors.New("users are not specified")
+		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
 
 	for _, db := range dbs {
@@ -112,10 +94,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 					}
 				}
 				if !luxUser {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "auth error",
-					}), errors.New("auth error")
+					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
 			for _, user := range users {
@@ -159,25 +138,16 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -195,10 +165,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	privileges := core.RegExpCollection["RevokePrivilegesList"].FindAllString(privilegesStr, -1)
 
 	if len(privileges) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "privileges are not specified",
-		}), errors.New("privileges are not specified")
+		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
 	dbsStr := core.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
@@ -214,10 +181,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		}
 	}
 	if len(dbs) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "databases are not specified",
-		}), errors.New("databases are not specified")
+		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
 	usersStr := core.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
@@ -232,10 +196,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		}
 	}
 	if len(users) == 0 {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "users are not specified",
-		}), errors.New("users are not specified")
+		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
 
 	for _, db := range dbs {
@@ -250,10 +211,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 					}
 				}
 				if !luxUser {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "auth error",
-					}), errors.New("auth error")
+					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
 			for _, user := range users {
@@ -298,25 +256,16 @@ func (q tQuery) DCLUse() (result string, err error) {
 	var res gtypes.Response
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -332,18 +281,12 @@ func (q tQuery) DCLUse() (result string, err error) {
 	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
 
 	if !core.RegExpCollection["EntityName"].MatchString(db) {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "invalid database name",
-		}), errors.New("invalid database name")
+		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
 	if core.LocalCoreSettings.FreezeMode {
 		if _, ok := core.StorageInfo.DBs[db]; !ok {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "the database does not exist",
-			}), errors.New("the database does not exist")
+			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
 	}
 
@@ -361,16 +304,10 @@ func (q tQuery) DCLUse() (result string, err error) {
 			if !luxUser {
 				flags, ok := dbAccess.Flags[login]
 				if !ok {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "auth error",
-					}), errors.New("auth error")
+					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 				if !flags.AnyTrue() {
-					return ecowriter.EncodeString(gtypes.Response{
-						State:  "error",
-						Result: "auth error",
-					}), errors.New("auth error")
+					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
 		}
@@ -394,25 +331,16 @@ func (q tQuery) DCLShow() (result string, err error) {
 	var resArr gtypes.ResponseArray
 
 	if q.Ticket == "" {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "an empty ticket",
-		}), errors.New("an empty ticket")
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
 	_, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if newticket != "" {
@@ -508,10 +436,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		roleStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(roleStr, "")
 		roleIn := core.RegExpCollection["Comma"].Split(roleStr, -1)
 		if len(roleIn) == 0 {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "incorrect roles",
-			}), errors.New("incorrect roles")
+			return `{"state":"error", "result":"incorrect roles"}`, errors.New("incorrect roles")
 		}
 		for _, role := range roleIn {
 			switch strings.ToUpper(role) {
@@ -533,25 +458,16 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		var res gtypes.Response
 
 		if q.Ticket == "" {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "an empty ticket",
-			}), errors.New("an empty ticket")
+			return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 		}
 
 		_, curaccess, newticket, err := gauth.CheckTicket(q.Ticket)
 		if err != nil {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: err.Error(),
-			}), err
+			return `{"state":"error", "result":"authorization failed"}`, err
 		}
 
 		if curaccess.Status.IsBad() {
-			return ecowriter.EncodeString(gtypes.Response{
-				State:  "error",
-				Result: "auth error",
-			}), errors.New("auth error")
+			return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 		}
 
 		if newticket != "" {
@@ -631,17 +547,11 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 	profile, err := gauth.GetProfile(login)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	if profile.Status.IsBad() {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	secret := gtypes.Secret{
@@ -651,10 +561,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	}
 	ticket, err := gauth.NewAuth(&secret)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: "auth error",
-		}), errors.New("auth error")
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	return ecowriter.EncodeString(gtypes.Response{
