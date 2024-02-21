@@ -61,6 +61,38 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 	return false
 }
 
+// Rename a table.
+func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
+	// This function is complete
+	if secure && !RegExpCollection["EntityName"].MatchString(newNameTable) {
+		return false
+	}
+
+	dbInfo, okDB := StorageInfo.DBs[nameDB]
+	if okDB {
+		tableInfo, okTable := dbInfo.Tables[oldNameTable]
+		if !okTable {
+			return false
+		}
+
+		tNow := time.Now()
+
+		tableInfo.Name = newNameTable
+		tableInfo.LastUpdate = tNow
+
+		delete(dbInfo.Tables, oldNameTable)
+		dbInfo.Tables[newNameTable] = tableInfo
+		dbInfo.LastUpdate = tNow
+
+		StorageInfo.DBs[nameDB] = dbInfo
+		// StorageInfo.Save() // rewriting only Access
+
+		return dbInfo.Save()
+	}
+
+	return false
+}
+
 // Creating a new table.
 func CreateTable(nameDB, nameTable string, secure bool) bool {
 	// This function is complete

@@ -287,6 +287,9 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	}
 
 	isRT := core.RegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
+	if !isRT {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
 
 	oldDBName := core.RegExpCollection["AlterDatabaseRenameTo"].FindString(q.Instruction)
 	oldDBName = core.RegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(oldDBName, "")
@@ -299,10 +302,6 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	newDBName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newDBName, "")
 	newDBName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newDBName, "")
 	newDBName = strings.TrimSpace(newDBName)
-
-	if !isRT {
-		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
-	}
 
 	if oldDBName == "" || newDBName == "" {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
@@ -483,7 +482,6 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		res.Result = "invalid database name"
 		return ecowriter.EncodeString(res), errors.New("invalid database name")
 	}
-	// TODO: тута проверка прав и выполнение
 
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
@@ -623,7 +621,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 }
 
 func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
-	// -
+	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -643,13 +641,85 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	isRT := core.RegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
+	if !isRT {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	oldTableName := core.RegExpCollection["AlterTableRenameTo"].FindString(q.Instruction)
+	oldTableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(oldTableName, "")
+	oldTableName = core.RegExpCollection["RenameTo"].ReplaceAllLiteralString(oldTableName, "")
+	oldTableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(oldTableName, "")
+	oldTableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(oldTableName, "")
+	oldTableName = strings.TrimSpace(oldTableName)
+
+	newTableName := core.RegExpCollection["AlterTableRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
+	newTableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newTableName, "")
+	newTableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newTableName, "")
+	newTableName = strings.TrimSpace(newTableName)
+
+	if oldTableName == "" || newTableName == "" {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, ok := core.StorageInfo.Access[db]
+		if ok {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Alter {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+			if !core.RenameTable(db, oldTableName, newTableName, true) {
+				res.State = "error"
+				res.Result = "the database cannot be renamed"
+				return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
 }
 
 func (q tQuery) DDLAlterTable() (result string, err error) {
 	// This method is complete
-
 	isAdd := core.RegExpCollection["AlterTableAdd"].MatchString(q.Instruction)
 	isDrop := core.RegExpCollection["AlterTableDrop"].MatchString(q.Instruction)
 	isModify := core.RegExpCollection["AlterTableModify"].MatchString(q.Instruction)
