@@ -616,6 +616,100 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	tableName := core.RegExpCollection["AlterTableModify"].FindString(q.Instruction)
+	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["MODIFY"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
+	tableName = strings.TrimSpace(tableName)
+
+	columnsStr := core.RegExpCollection["AlterTableModify"].ReplaceAllLiteralString(q.Instruction, "")
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	var columns = []core.TColumnForWrite{}
+
+	for _, column := range columnsIn {
+		col := core.TColumnForWrite{
+			Name:    "",
+			OldName: "",
+			Spec: core.TColumnSpecification{
+				Default: "",
+				NotNull: false,
+				Unique:  false,
+			},
+		}
+		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
+			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
+			col.Spec.Unique = true
+		}
+		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
+			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
+			col.Spec.NotNull = true
+		}
+		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
+			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
+			column = core.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(column, "")
+
+			ColDef = core.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = strings.TrimSpace(ColDef)
+			ColDef = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(ColDef, "")
+
+			if col.Spec.Unique {
+				col.Spec.Default = ""
+			} else {
+				col.Spec.Default = ColDef
+			}
+		}
+
+		if core.RegExpCollection["RenameTo"].MatchString(column) {
+			names := core.RegExpCollection["RenameTo"].Split(column, -1)
+			oldName := names[0]
+			newName := names[1]
+
+			oldName = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(oldName, "")
+			oldName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(oldName, "")
+			oldName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(oldName, "")
+
+			newName = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(newName, "")
+			newName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newName, "")
+			newName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newName, "")
+
+			col.Name = newName
+			col.OldName = oldName
+		} else {
+			column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+			column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+			column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+
+			col.Name = column
+		}
+
+		if col.Name != "" && col.Name != col.OldName {
+			columns = append(columns, col)
+		}
+	}
+
+	if len(columns) < 1 {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	// TODO: доделать обработку прав и выполнение выражения
+
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
 }

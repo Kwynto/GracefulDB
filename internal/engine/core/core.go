@@ -128,8 +128,9 @@ type TColumnSpecification struct {
 }
 
 type TColumnForWrite struct {
-	Name string
-	Spec TColumnSpecification
+	Name    string
+	OldName string
+	Spec    TColumnSpecification
 }
 
 type tCoreFile struct {
