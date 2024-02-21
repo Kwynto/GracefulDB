@@ -23,10 +23,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -98,10 +95,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -281,10 +275,7 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -370,10 +361,7 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -511,10 +499,7 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -622,10 +607,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -650,10 +632,7 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -716,10 +695,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
@@ -788,10 +764,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 
 	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
-		return ecowriter.EncodeString(gtypes.Response{
-			State:  "error",
-			Result: err.Error(),
-		}), err
+		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
 	if access.Status.IsBad() {
