@@ -64,15 +64,16 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
 
 	// DDL TODO: Разработать шаблоны
+	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]\s*$`)
+	recol = recol.CompileExp("ColumnNotNull", `(?m)[nN][oO][tT]\s*[nN][uU][lL][lL]\s*$`)
+	recol = recol.CompileExp("ColumnDefault", `(?m)[dD][eE][fF][aA][uU][lL][tT]:.+`)
+	recol = recol.CompileExp("ColumnDefaultWord", `(?m)[dD][eE][fF][aA][uU][lL][tT]:`)
+	recol = recol.CompileExp("TableParenthesis", `(?m)[\(\)]`)
+
 	recol = recol.CompileExp("SearchCreate", `(?m)^[cC][rR][eE][aA][tT][eE].*`)
 	recol = recol.CompileExp("CreateDatabaseWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)
 	recol = recol.CompileExp("CreateTableWord", `(?m)^[cC][rR][eE][aA][tT][eE]\s*[tT][aA][bB][lL][eE]`)
 	recol = recol.CompileExp("TableColumns", `(?m)\(.*\)`)
-	recol = recol.CompileExp("TableParenthesis", `(?m)[\(\)]`)
-	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]`)
-	recol = recol.CompileExp("ColumnNotNull", `(?m)[nN][oO][tT]\s*[nN][uU][lL][lL]`)
-	recol = recol.CompileExp("ColumnDefault", `(?m)[dD][eE][fF][aA][uU][lL][tT]:.+`)
-	recol = recol.CompileExp("ColumnDefaultWord", `(?m)[dD][eE][fF][aA][uU][lL][tT]:`)
 
 	recol = recol.CompileExp("SearchAlter", `(?m)^[aA][lL][tT][eE][rR].*`)
 	recol = recol.CompileExp("AlterDatabaseWord", `(?m)^[aA][lL][tT][eE][rR]\s*[dD][aA][tT][aA][bB][aA][sS][eE]`)

@@ -384,6 +384,81 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	tableName := core.RegExpCollection["AlterTableAdd"].FindString(q.Instruction)
+	tableName = core.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["ADD"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(tableName, "")
+	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
+	tableName = strings.TrimSpace(tableName)
+
+	columnsStr := core.RegExpCollection["AlterTableAdd"].ReplaceAllLiteralString(q.Instruction, "")
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	var columns = []core.TColumnForWrite{}
+
+	for _, column := range columnsIn {
+		col := core.TColumnForWrite{
+			Name: "",
+			Spec: core.TColumnSpecification{
+				Default: "",
+				NotNull: false,
+				Unique:  false,
+			},
+		}
+		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
+			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
+			col.Spec.Unique = true
+		}
+		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
+			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
+			col.Spec.NotNull = true
+		}
+		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
+			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
+			column = core.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(column, "")
+
+			ColDef = core.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = strings.TrimSpace(ColDef)
+			ColDef = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(ColDef, "")
+			ColDef = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(ColDef, "")
+
+			if col.Spec.Unique {
+				col.Spec.Default = ""
+			} else {
+				col.Spec.Default = ColDef
+			}
+		}
+
+		column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+		col.Name = column
+
+		columns = append(columns, col)
+	}
+
+	if len(columns) < 1 {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
+
+	// TODO: тута сделать парсинг
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	// TODO: тута проверка прав и выполнение
+
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil
 }
@@ -419,12 +494,25 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 	tableName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(tableName, "")
 	tableName = strings.TrimSpace(tableName)
 
-	colName := core.RegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
-	colName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(colName, "")
-	colName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(colName, "")
-	colName = strings.TrimSpace(colName)
+	if tableName == "" {
+		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
+	}
 
-	if tableName == "" || colName == "" {
+	columnsStr := core.RegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
+	columnsStr = core.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+
+	var columns = []string{}
+
+	for _, column := range columnsIn {
+		column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
+		column = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(column, "")
+
+		columns = append(columns, column)
+	}
+
+	if len(columns) < 1 {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
@@ -464,10 +552,12 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 					}
 				}
 			}
-			if !core.RemoveColumn(db, tableName, colName) {
-				res.State = "error"
-				res.Result = "the column cannot be deleted"
-				return ecowriter.EncodeString(res), errors.New("the column cannot be deleted")
+			for _, colName := range columns {
+				if !core.RemoveColumn(db, tableName, colName) {
+					res.State = "error"
+					res.Result = "the column cannot be deleted"
+					return ecowriter.EncodeString(res), errors.New("the column cannot be deleted")
+				}
 			}
 		} else {
 			res.State = "error"
