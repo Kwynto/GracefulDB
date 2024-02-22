@@ -84,6 +84,68 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 	return false
 }
 
+// Changing a column.
+func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secure bool) bool {
+	// This function is complete
+	if secure && !RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
+		return false
+	}
+
+	dbInfo, okDB := StorageInfo.DBs[nameDB]
+	if !okDB {
+		return false
+	}
+
+	tableInfo, okTable := dbInfo.Tables[nameTable]
+	if !okTable {
+		return false
+	}
+
+	columnInfo, okCol := tableInfo.Columns[newDataColumn.OldName]
+	if !okCol {
+		return false
+	}
+
+	tNow := time.Now()
+
+	if newDataColumn.IsChName {
+		columnInfo.OldName = columnInfo.Name
+		columnInfo.Name = newDataColumn.Name
+	}
+	if newDataColumn.IsChDefault {
+		columnInfo.Specification.Default = newDataColumn.Spec.Default
+	}
+	if newDataColumn.IsChNotNull {
+		columnInfo.Specification.NotNull = newDataColumn.Spec.NotNull
+	}
+	if newDataColumn.IsChUniqut {
+		columnInfo.Specification.Unique = newDataColumn.Spec.Unique
+	}
+	columnInfo.LastUpdate = tNow
+
+	if newDataColumn.IsChName {
+		delete(tableInfo.Columns, newDataColumn.OldName)
+		tableInfo.Columns[newDataColumn.Name] = columnInfo
+		i := slices.Index(tableInfo.Order, newDataColumn.OldName)
+		if i > -1 {
+			tableInfo.Order[i] = newDataColumn.Name
+		} else {
+			tableInfo.Order = append(tableInfo.Order, newDataColumn.Name)
+		}
+	} else {
+		tableInfo.Columns[newDataColumn.Name] = columnInfo
+	}
+	tableInfo.LastUpdate = tNow
+
+	dbInfo.Tables[nameTable] = tableInfo
+	dbInfo.LastUpdate = tNow
+
+	StorageInfo.DBs[nameDB] = dbInfo
+	// StorageInfo.Save() // rewriting only Access
+
+	return dbInfo.Save()
+}
+
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete
@@ -128,6 +190,7 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 
 	columnInfo := tColumnInfo{
 		Name:          nameColumn,
+		OldName:       "",
 		Folder:        folderName,
 		Parents:       fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
 		BucketLog:     2,

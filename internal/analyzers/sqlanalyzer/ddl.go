@@ -596,7 +596,7 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 }
 
 func (q tQuery) DDLAlterTableModify() (result string, err error) {
-	// -
+	// This method is complete
 	var res gtypes.Response
 
 	if q.Ticket == "" {
@@ -651,14 +651,21 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				NotNull: false,
 				Unique:  false,
 			},
+			IsChName:    false,
+			IsChDefault: false,
+			IsChNotNull: false,
+			IsChUniqut:  false,
 		}
+
 		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
 			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
 			col.Spec.Unique = true
+			col.IsChUniqut = true
 		}
 		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
 			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
 			col.Spec.NotNull = true
+			col.IsChNotNull = true
 		}
 		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
 			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
@@ -674,6 +681,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			} else {
 				col.Spec.Default = ColDef
 			}
+			col.IsChDefault = true
 		}
 
 		if core.RegExpCollection["RenameTo"].MatchString(column) {
@@ -689,8 +697,13 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			newName = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(newName, "")
 			newName = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(newName, "")
 
-			col.Name = newName
-			col.OldName = oldName
+			if newName != oldName {
+				col.Name = newName
+				col.OldName = oldName
+				col.IsChName = true
+			} else {
+				col.Name = oldName
+			}
 		} else {
 			column = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
 			column = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(column, "")
@@ -699,7 +712,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			col.Name = column
 		}
 
-		if col.Name != "" && col.Name != col.OldName {
+		if col.Name != "" {
 			columns = append(columns, col)
 		}
 	}
@@ -708,7 +721,47 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	// TODO: доделать обработку прав и выполнение выражения
+	_, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, ok := core.StorageInfo.Access[db]
+		if ok {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Alter {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+
+			for _, column := range columns {
+				if !core.ChangeColumn(db, tableName, column, true) {
+					res.State = "error"
+					res.Result = "the database cannot be renamed"
+					return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+				}
+			}
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
 
 	res.State = "ok"
 	return ecowriter.EncodeString(res), nil

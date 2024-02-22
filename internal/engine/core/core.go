@@ -110,6 +110,7 @@ type tTableInfo struct {
 
 type tColumnInfo struct {
 	Name          string               `json:"name"`
+	OldName       string               `json:"oldname"` // only for core
 	Folder        string               `json:"folder"`
 	Parents       string               `json:"parents"`
 	BucketLog     uint8                `json:"blog"`
@@ -131,6 +132,12 @@ type TColumnForWrite struct {
 	Name    string
 	OldName string
 	Spec    TColumnSpecification
+
+	// Flags of changes
+	IsChName    bool
+	IsChDefault bool
+	IsChNotNull bool
+	IsChUniqut  bool
 }
 
 type tCoreFile struct {
