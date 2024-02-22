@@ -748,8 +748,8 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			for _, column := range columns {
 				if !core.ChangeColumn(db, tableName, column, true) {
 					res.State = "error"
-					res.Result = "the database cannot be renamed"
-					return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+					res.Result = "the column cannot be changed"
+					return ecowriter.EncodeString(res), errors.New("the column cannot be changed")
 				}
 			}
 		} else {

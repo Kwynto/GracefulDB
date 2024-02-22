@@ -101,7 +101,13 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 		return false
 	}
 
-	columnInfo, okCol := tableInfo.Columns[newDataColumn.OldName]
+	var name string
+	if newDataColumn.IsChName {
+		name = newDataColumn.OldName
+	} else {
+		name = newDataColumn.Name
+	}
+	columnInfo, okCol := tableInfo.Columns[name]
 	if !okCol {
 		return false
 	}
