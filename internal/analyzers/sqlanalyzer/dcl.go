@@ -398,6 +398,35 @@ func (q tQuery) DCLShow() (result string, err error) {
 	return ecowriter.EncodeString(res), nil
 }
 
+func (q tQuery) DCLDesc() (result string, err error) {
+	// -
+	op := "internal -> analyzers -> sql -> DCL -> DCLDesc"
+	defer func() { e.Wrapper(op, err) }()
+
+	var res gtypes.Response
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	_, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return `{"state":"error", "result":"authorization failed"}`, err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+	}
+
+	res.State = "error"
+	res.Result = "unknown command"
+	return ecowriter.EncodeString(res), nil
+}
+
 func (q tQuery) DCLAuth() (result string, err error) {
 	// This method is complete
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
