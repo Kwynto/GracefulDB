@@ -118,15 +118,15 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 		columnInfo.OldName = columnInfo.Name
 		columnInfo.Name = newDataColumn.Name
 	}
-	if newDataColumn.IsChDefault {
-		columnInfo.Specification.Default = newDataColumn.Spec.Default
-	}
-	if newDataColumn.IsChNotNull {
-		columnInfo.Specification.NotNull = newDataColumn.Spec.NotNull
-	}
-	if newDataColumn.IsChUniqut {
-		columnInfo.Specification.Unique = newDataColumn.Spec.Unique
-	}
+	// if newDataColumn.IsChDefault {
+	columnInfo.Specification.Default = newDataColumn.Spec.Default
+	// }
+	// if newDataColumn.IsChNotNull {
+	columnInfo.Specification.NotNull = newDataColumn.Spec.NotNull
+	// }
+	// if newDataColumn.IsChUniqut {
+	columnInfo.Specification.Unique = newDataColumn.Spec.Unique
+	// }
 	columnInfo.LastUpdate = tNow
 
 	if newDataColumn.IsChName {
@@ -155,9 +155,7 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete
-	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) &&
-		!RegExpCollection["EntityName"].MatchString(nameTable) &&
-		!RegExpCollection["EntityName"].MatchString(nameColumn) {
+	if secure && !RegExpCollection["EntityName"].MatchString(nameColumn) {
 		return false
 	}
 

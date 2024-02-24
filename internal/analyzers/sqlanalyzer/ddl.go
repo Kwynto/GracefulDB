@@ -52,6 +52,12 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 			return ecowriter.EncodeString(res), errors.New("the database exists")
 		}
 
+		if core.LocalCoreSettings.FreezeMode {
+			res.State = "error"
+			res.Result = "the database exists"
+			return ecowriter.EncodeString(res), errors.New("the database exists")
+		}
+
 		dbAccess, ok := core.StorageInfo.Access[db]
 		if ok {
 			if dbAccess.Owner != login {
@@ -173,6 +179,12 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				return ecowriter.EncodeString(res), errors.New("the table exists")
 			}
 
+			if core.LocalCoreSettings.FreezeMode {
+				res.State = "error"
+				res.Result = "the table exists"
+				return ecowriter.EncodeString(res), errors.New("the table exists")
+			}
+
 			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
 				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
@@ -191,6 +203,9 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			res.Result = "invalid database name or table name"
 			return ecowriter.EncodeString(res), errors.New("invalid database name or table name")
 		}
+
+		dbInfo = core.StorageInfo.DBs[db]
+		tableInfo := dbInfo.Tables[table]
 
 		var columns = []core.TColumnForWrite{}
 
@@ -236,6 +251,15 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		}
 
 		for _, column := range columns {
+			if _, okCol := tableInfo.Columns[column.Name]; okCol {
+				if core.LocalCoreSettings.FreezeMode {
+					res.State = "error"
+					res.Result = "the column exists"
+					return ecowriter.EncodeString(res), errors.New("the column exists")
+				}
+				core.RemoveColumn(db, table, column.Name)
+			}
+
 			core.CreateColumn(db, table, column.Name, true, column.Spec)
 		}
 	} else {
@@ -651,21 +675,21 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				NotNull: false,
 				Unique:  false,
 			},
-			IsChName:    false,
-			IsChDefault: false,
-			IsChNotNull: false,
-			IsChUniqut:  false,
+			IsChName: false,
+			// IsChDefault: false,
+			// IsChNotNull: false,
+			// IsChUniqut:  false,
 		}
 
 		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
 			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
 			col.Spec.Unique = true
-			col.IsChUniqut = true
+			// col.IsChUniqut = true
 		}
 		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
 			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
 			col.Spec.NotNull = true
-			col.IsChNotNull = true
+			// col.IsChNotNull = true
 		}
 		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
 			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
@@ -681,7 +705,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			} else {
 				col.Spec.Default = ColDef
 			}
-			col.IsChDefault = true
+			// col.IsChDefault = true
 		}
 
 		if core.RegExpCollection["RenameTo"].MatchString(column) {

@@ -59,10 +59,9 @@ func (s *tStorageInfo) Load() bool {
 		}
 	}
 
-	// FIXME: тут какая-то фигня, при загрузке не читаются права
 	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	ecowriter.ReadJSON(infoStorageFile, s.Access)
-	if err != nil {
+	errR := ecowriter.ReadJSON(infoStorageFile, &s.Access)
+	if errR != nil {
 		s.Access = make(map[string]gtypes.TAccess)
 		err := ecowriter.WriteJSON(infoStorageFile, s.Access)
 		if err != nil {
@@ -135,10 +134,10 @@ type TColumnForWrite struct {
 	Spec    TColumnSpecification
 
 	// Flags of changes
-	IsChName    bool
-	IsChDefault bool
-	IsChNotNull bool
-	IsChUniqut  bool
+	IsChName bool
+	// IsChDefault bool
+	// IsChNotNull bool
+	// IsChUniqut  bool
 }
 
 type tCoreFile struct {
