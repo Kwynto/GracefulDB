@@ -52,6 +52,12 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 			return ecowriter.EncodeString(res), errors.New("the database exists")
 		}
 
+		if core.LocalCoreSettings.FreezeMode {
+			res.State = "error"
+			res.Result = "the database exists"
+			return ecowriter.EncodeString(res), errors.New("the database exists")
+		}
+
 		dbAccess, ok := core.StorageInfo.Access[db]
 		if ok {
 			if dbAccess.Owner != login {
@@ -173,6 +179,12 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				return ecowriter.EncodeString(res), errors.New("the table exists")
 			}
 
+			if core.LocalCoreSettings.FreezeMode {
+				res.State = "error"
+				res.Result = "the table exists"
+				return ecowriter.EncodeString(res), errors.New("the table exists")
+			}
+
 			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
 				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
@@ -191,6 +203,9 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			res.Result = "invalid database name or table name"
 			return ecowriter.EncodeString(res), errors.New("invalid database name or table name")
 		}
+
+		dbInfo = core.StorageInfo.DBs[db]
+		tableInfo := dbInfo.Tables[table]
 
 		var columns = []core.TColumnForWrite{}
 
@@ -236,6 +251,15 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		}
 
 		for _, column := range columns {
+			if _, okCol := tableInfo.Columns[column.Name]; okCol {
+				if core.LocalCoreSettings.FreezeMode {
+					res.State = "error"
+					res.Result = "the column exists"
+					return ecowriter.EncodeString(res), errors.New("the column exists")
+				}
+				core.RemoveColumn(db, table, column.Name)
+			}
+
 			core.CreateColumn(db, table, column.Name, true, column.Spec)
 		}
 	} else {
