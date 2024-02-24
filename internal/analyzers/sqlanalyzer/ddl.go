@@ -651,21 +651,21 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				NotNull: false,
 				Unique:  false,
 			},
-			IsChName:    false,
-			IsChDefault: false,
-			IsChNotNull: false,
-			IsChUniqut:  false,
+			IsChName: false,
+			// IsChDefault: false,
+			// IsChNotNull: false,
+			// IsChUniqut:  false,
 		}
 
 		if core.RegExpCollection["ColumnUnique"].MatchString(column) {
 			column = core.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
 			col.Spec.Unique = true
-			col.IsChUniqut = true
+			// col.IsChUniqut = true
 		}
 		if core.RegExpCollection["ColumnNotNull"].MatchString(column) {
 			column = core.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
 			col.Spec.NotNull = true
-			col.IsChNotNull = true
+			// col.IsChNotNull = true
 		}
 		if core.RegExpCollection["ColumnDefault"].MatchString(column) {
 			ColDef := core.RegExpCollection["ColumnDefault"].FindString(column)
@@ -681,7 +681,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			} else {
 				col.Spec.Default = ColDef
 			}
-			col.IsChDefault = true
+			// col.IsChDefault = true
 		}
 
 		if core.RegExpCollection["RenameTo"].MatchString(column) {

@@ -134,10 +134,10 @@ type TColumnForWrite struct {
 	Spec    TColumnSpecification
 
 	// Flags of changes
-	IsChName    bool
-	IsChDefault bool
-	IsChNotNull bool
-	IsChUniqut  bool
+	IsChName bool
+	// IsChDefault bool
+	// IsChNotNull bool
+	// IsChUniqut  bool
 }
 
 type tCoreFile struct {
