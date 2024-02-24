@@ -155,9 +155,7 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete
-	if secure && !RegExpCollection["EntityName"].MatchString(nameDB) &&
-		!RegExpCollection["EntityName"].MatchString(nameTable) &&
-		!RegExpCollection["EntityName"].MatchString(nameColumn) {
+	if secure && !RegExpCollection["EntityName"].MatchString(nameColumn) {
 		return false
 	}
 
