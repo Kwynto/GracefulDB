@@ -1,5 +1,7 @@
 package gtypes
 
+import "time"
+
 type Secret struct {
 	Ticket   string `json:"ticket,omitempty"`
 	Login    string `json:"login,omitempty"`
@@ -17,6 +19,20 @@ type ResponseArray struct {
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
 	Result []string `json:"result,omitempty"`
+}
+
+type ResultColumn struct {
+	Field      string    `json:"field"`
+	Default    string    `json:"default"`
+	NotNull    bool      `json:"notnull"`
+	Unique     bool      `json:"unique"`
+	LastUpdate time.Time `json:"lastupdate"`
+}
+
+type ResponseColumns struct {
+	State  string         `json:"state,omitempty"`
+	Ticket string         `json:"ticket,omitempty"`
+	Result []ResultColumn `json:"result,omitempty"`
 }
 
 type TAccessFlags struct {
