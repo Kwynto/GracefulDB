@@ -398,6 +398,124 @@ func (q tQuery) DCLShow() (result string, err error) {
 	return ecowriter.EncodeString(res), nil
 }
 
+func (q tQuery) DCLDesc() (result string, err error) {
+	// This method is complete
+	op := "internal -> analyzers -> sql -> DCL -> DCLDesc"
+	defer func() { e.Wrapper(op, err) }()
+
+	var res gtypes.Response
+	var resArr gtypes.ResponseColumns
+
+	var table string
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return `{"state":"error", "result":"authorization failed"}`, err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		res.Ticket = newticket
+		resArr.Ticket = newticket
+	}
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeString(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeString(res), errors.New("no database selected")
+	}
+
+	if core.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
+		table = core.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if core.RegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
+		table = core.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if core.RegExpCollection["SearchDesc"].MatchString(q.Instruction) {
+		table = core.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
+	}
+
+	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
+	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+
+	dbInfo, okDB := core.StorageInfo.DBs[db]
+	if okDB {
+		dbAccess, okAccess := core.StorageInfo.Access[db]
+		if okAccess {
+			flagsAcs, okFlags := dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				var luxUser bool = false
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if okFlags {
+						if !flagsAcs.Select {
+							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+						}
+					} else {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			}
+
+			tableInfo, ok := dbInfo.Tables[table]
+			if !ok {
+				res.State = "error"
+				res.Result = "unknown table"
+				return ecowriter.EncodeString(res), errors.New("unknown table")
+			}
+
+			if len(tableInfo.Order) < 1 {
+				res.State = "error"
+				res.Result = "there are no columns"
+				return ecowriter.EncodeString(res), errors.New("there are no columns")
+			}
+
+			for _, colName := range tableInfo.Order {
+				column, okCol := tableInfo.Columns[colName]
+				if okCol {
+					var resColumn gtypes.ResultColumn
+
+					resColumn.Field = column.Name
+					resColumn.Default = column.Specification.Default
+					resColumn.NotNull = column.Specification.NotNull
+					resColumn.Unique = column.Specification.Unique
+					resColumn.LastUpdate = column.LastUpdate
+
+					resArr.Result = append(resArr.Result, resColumn)
+				}
+			}
+			resArr.State = "ok"
+			return ecowriter.EncodeString(resArr), nil
+		} else {
+			res.State = "error"
+			res.Result = "internal error"
+			return ecowriter.EncodeString(res), errors.New("internal error")
+		}
+	} else {
+		res.State = "error"
+		res.Result = "invalid database name"
+		return ecowriter.EncodeString(res), errors.New("invalid database name")
+	}
+}
+
 func (q tQuery) DCLAuth() (result string, err error) {
 	// This method is complete
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"

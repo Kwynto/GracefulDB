@@ -28,4 +28,4 @@ vendor/
 go.work
 
 # Storage of databases
-./data/*
+data/*
