@@ -2362,23 +2362,23 @@ func Test_nav_settings(t *testing.T) {
 	})
 }
 
-func Test_settings_core_freeze_change_sw(t *testing.T) {
+func Test_settings_core_friendly_change_sw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_core_freeze_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("settings_core_friendly_change_sw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_core_freeze_change_sw(w, r) // calling the tested function
+		settings_core_friendly_change_sw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
+			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_core_freeze_change_sw() function testing - off", func(t *testing.T) {
-		config.DefaultConfig.CoreSettings.FreezeMode = true
+	t.Run("settings_core_friendly_change_sw() function testing - off", func(t *testing.T) {
+		config.DefaultConfig.CoreSettings.FriendlyMode = true
 
 		w := httptest.NewRecorder()
 		form := url.Values{}
@@ -2400,15 +2400,15 @@ func Test_settings_core_freeze_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_core_freeze_change_sw(w1, r1) // calling the tested function
+		settings_core_friendly_change_sw(w1, r1) // calling the tested function
 		status := w1.Code
-		if status != http.StatusOK || core.LocalCoreSettings.FreezeMode {
-			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
+		if status != http.StatusOK || !core.LocalCoreSettings.FriendlyMode {
+			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_core_freeze_change_sw() function testing - on", func(t *testing.T) {
-		config.DefaultConfig.CoreSettings.FreezeMode = false
+	t.Run("settings_core_friendly_change_sw() function testing - on", func(t *testing.T) {
+		config.DefaultConfig.CoreSettings.FriendlyMode = false
 
 		w := httptest.NewRecorder()
 		form := url.Values{}
@@ -2430,10 +2430,10 @@ func Test_settings_core_freeze_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_core_freeze_change_sw(w1, r1) // calling the tested function
+		settings_core_friendly_change_sw(w1, r1) // calling the tested function
 		status := w1.Code
-		if status != http.StatusOK || !core.LocalCoreSettings.FreezeMode {
-			t.Errorf("settings_core_freeze_change_sw() error: %v", status)
+		if status != http.StatusOK || core.LocalCoreSettings.FriendlyMode {
+			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
 		}
 	})
 }

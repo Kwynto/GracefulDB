@@ -12,6 +12,9 @@ import (
 // Marks the database as deleted, but does not delete files.
 func RemoveDB(nameDB string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if ok {
 		dbInfo.LastUpdate = time.Now()
@@ -20,6 +23,7 @@ func RemoveDB(nameDB string) bool {
 		StorageInfo.Removed = append(StorageInfo.Removed, dbInfo)
 		delete(StorageInfo.DBs, nameDB)
 		delete(StorageInfo.Access, nameDB)
+		StorageInfo.Save()
 
 		return dbInfo.Save()
 	}
@@ -30,6 +34,9 @@ func RemoveDB(nameDB string) bool {
 // Deletes the folder and database files, if DB was mark as 'removed'
 func StrongRemoveDB(nameDB string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	for indRange, dbInfo := range StorageInfo.Removed {
 		if dbInfo.Name == nameDB {
 			dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
@@ -53,6 +60,9 @@ func RenameDB(oldName, newName string, secure bool) bool {
 	if secure && !RegExpCollection["EntityName"].MatchString(newName) {
 		return false
 	}
+
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
 
 	dbInfo, okDB := StorageInfo.DBs[oldName]
 	dbAccess, okAccess := StorageInfo.Access[oldName]
@@ -82,6 +92,9 @@ func CreateDB(nameDB string, owner string, secure bool) bool {
 	}
 
 	var folderDB string
+
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
 
 	_, ok := StorageInfo.DBs[nameDB]
 	if ok {

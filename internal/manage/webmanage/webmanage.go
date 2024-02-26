@@ -51,7 +51,7 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/accounts/selfedit_ok", selfedit_ok)
 
 	mux.HandleFunc("/hx/nav/settings", nav_settings)
-	mux.HandleFunc("/hx/settings/core_freeze_change_sw", settings_core_freeze_change_sw)
+	mux.HandleFunc("/hx/settings/core_friendly_change_sw", settings_core_friendly_change_sw)
 	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)
 	mux.HandleFunc("/hx/settings/rest_change_sw", settings_rest_change_sw)
 	mux.HandleFunc("/hx/settings/grpc_change_sw", settings_grpc_change_sw)

@@ -59,7 +59,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
 	dbsIn := core.RegExpCollection["Comma"].Split(dbsStr, -1)
 	for _, db := range dbsIn {
-		if _, ok := core.StorageInfo.DBs[db]; ok {
+		if _, ok := core.GetDBInfo(db); ok {
 			dbs = append(dbs, db)
 		}
 	}
@@ -83,7 +83,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	}
 
 	for _, db := range dbs {
-		dbAccess, ok := core.StorageInfo.Access[db]
+		dbAccess, ok := core.GetDBAccess(db)
 		if ok {
 			if dbAccess.Owner != login {
 				var luxUser bool = false
@@ -99,7 +99,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 			}
 			for _, user := range users {
 				var aFlags gtypes.TAccessFlags
-				aFlags, ok := core.StorageInfo.Access[db].Flags[user]
+				aFlags, ok := dbAccess.Flags[user]
 				if !ok {
 					aFlags = gtypes.TAccessFlags{}
 				}
@@ -119,15 +119,14 @@ func (q tQuery) DCLGrant() (result string, err error) {
 					}
 				}
 
-				core.StorageInfo.Access[db].Flags[user] = aFlags
+				// core.StorageInfo.Access[db].Flags[user] = aFlags
+				core.SetAccessFlags(db, user, aFlags)
 			}
 		}
 	}
 
-	core.StorageInfo.Save()
-
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DCLRevoke() (result string, err error) {
@@ -176,7 +175,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
 	dbsIn := core.RegExpCollection["Comma"].Split(dbsStr, -1)
 	for _, db := range dbsIn {
-		if _, ok := core.StorageInfo.DBs[db]; ok {
+		if _, ok := core.GetDBInfo(db); ok {
 			dbs = append(dbs, db)
 		}
 	}
@@ -200,7 +199,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	}
 
 	for _, db := range dbs {
-		dbAccess, ok := core.StorageInfo.Access[db]
+		dbAccess, ok := core.GetDBAccess(db)
 		if ok {
 			if dbAccess.Owner != login {
 				var luxUser bool = false
@@ -216,7 +215,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 			}
 			for _, user := range users {
 				var aFlags gtypes.TAccessFlags
-				aFlags, ok := core.StorageInfo.Access[db].Flags[user]
+				aFlags, ok := dbAccess.Flags[user]
 				if !ok {
 					aFlags = gtypes.TAccessFlags{}
 				}
@@ -236,15 +235,14 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 					}
 				}
 
-				core.StorageInfo.Access[db].Flags[user] = aFlags
+				// core.StorageInfo.Access[db].Flags[user] = aFlags
+				core.SetAccessFlags(db, user, aFlags)
 			}
 		}
 	}
 
-	core.StorageInfo.Save()
-
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DCLUse() (result string, err error) {
@@ -284,13 +282,13 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
-	if core.LocalCoreSettings.FreezeMode {
-		if _, ok := core.StorageInfo.DBs[db]; !ok {
+	if !core.LocalCoreSettings.FriendlyMode {
+		if _, ok := core.GetDBInfo(db); !ok {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
 	}
 
-	dbAccess, ok := core.StorageInfo.Access[db]
+	dbAccess, ok := core.GetDBAccess(db)
 	if ok {
 		if dbAccess.Owner != login {
 			var luxUser bool = false
@@ -319,7 +317,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	res.State = "ok"
 	res.Result = db
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DCLShow() (result string, err error) {
@@ -359,7 +357,7 @@ func (q tQuery) DCLShow() (result string, err error) {
 		resArr.State = "ok"
 		resArr.Ticket = res.Ticket
 		resArr.Result = namesDBs
-		return ecowriter.EncodeString(resArr), nil
+		return ecowriter.EncodeJSON(resArr), nil
 	} else if isTables {
 		var namesTables []string = []string{}
 
@@ -367,20 +365,20 @@ func (q tQuery) DCLShow() (result string, err error) {
 		if !ok {
 			res.State = "error"
 			res.Result = "unknown database"
-			return ecowriter.EncodeString(res), errors.New("unknown database")
+			return ecowriter.EncodeJSON(res), errors.New("unknown database")
 		}
 		db := state.CurrentDB
 		if db == "" {
 			res.State = "error"
 			res.Result = "no database selected"
-			return ecowriter.EncodeString(res), errors.New("no database selected")
+			return ecowriter.EncodeJSON(res), errors.New("no database selected")
 		}
 
-		dbInfo, ok := core.StorageInfo.DBs[db]
+		dbInfo, ok := core.GetDBInfo(db)
 		if !ok {
 			res.State = "error"
 			res.Result = "incorrect database"
-			return ecowriter.EncodeString(res), errors.New("incorrect database")
+			return ecowriter.EncodeJSON(res), errors.New("incorrect database")
 		}
 
 		for nameTable := range dbInfo.Tables {
@@ -390,12 +388,12 @@ func (q tQuery) DCLShow() (result string, err error) {
 		resArr.State = "ok"
 		resArr.Ticket = res.Ticket
 		resArr.Result = namesTables
-		return ecowriter.EncodeString(resArr), nil
+		return ecowriter.EncodeJSON(resArr), nil
 	}
 
 	res.State = "error"
 	res.Result = "unknown command"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DCLDesc() (result string, err error) {
@@ -430,13 +428,13 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	if core.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
@@ -451,9 +449,9 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
-	dbInfo, okDB := core.StorageInfo.DBs[db]
+	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
-		dbAccess, okAccess := core.StorageInfo.Access[db]
+		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -479,13 +477,13 @@ func (q tQuery) DCLDesc() (result string, err error) {
 			if !ok {
 				res.State = "error"
 				res.Result = "unknown table"
-				return ecowriter.EncodeString(res), errors.New("unknown table")
+				return ecowriter.EncodeJSON(res), errors.New("unknown table")
 			}
 
 			if len(tableInfo.Order) < 1 {
 				res.State = "error"
 				res.Result = "there are no columns"
-				return ecowriter.EncodeString(res), errors.New("there are no columns")
+				return ecowriter.EncodeJSON(res), errors.New("there are no columns")
 			}
 
 			for _, colName := range tableInfo.Order {
@@ -503,16 +501,16 @@ func (q tQuery) DCLDesc() (result string, err error) {
 				}
 			}
 			resArr.State = "ok"
-			return ecowriter.EncodeString(resArr), nil
+			return ecowriter.EncodeJSON(resArr), nil
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 }
 
@@ -603,7 +601,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		if !luxUser {
 			res.State = "error"
 			res.Result = "auth error"
-			return ecowriter.EncodeString(res), errors.New("auth error")
+			return ecowriter.EncodeJSON(res), errors.New("auth error")
 		}
 
 		if isNew {
@@ -620,7 +618,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 			err := gauth.AddUser(login, password, access)
 			if err != nil {
-				return ecowriter.EncodeString(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.Response{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -630,7 +628,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		if isChange {
 			access, err := gauth.GetProfile(login)
 			if err != nil {
-				return ecowriter.EncodeString(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.Response{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -642,7 +640,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 			err = gauth.UpdateUser(login, password, access)
 			if err != nil {
-				return ecowriter.EncodeString(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.Response{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -652,7 +650,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		if isRemove {
 			err := gauth.DeleteUser(login)
 			if err != nil {
-				return ecowriter.EncodeString(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.Response{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -660,7 +658,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		}
 
 		res.State = "ok"
-		return ecowriter.EncodeString(res), nil
+		return ecowriter.EncodeJSON(res), nil
 	}
 
 	profile, err := gauth.GetProfile(login)
@@ -682,7 +680,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	return ecowriter.EncodeString(gtypes.Response{
+	return ecowriter.EncodeJSON(gtypes.Response{
 		State:  "ok",
 		Ticket: ticket,
 	}), nil

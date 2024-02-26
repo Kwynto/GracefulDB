@@ -10,6 +10,9 @@ import (
 // Marks the column as deleted, but does not delete files.
 func RemoveColumn(nameDB, nameTable, nameColumn string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
@@ -49,6 +52,9 @@ func RemoveColumn(nameDB, nameTable, nameColumn string) bool {
 // Deletes the folder and column files, if column was mark as 'removed'
 func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
@@ -90,6 +96,9 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	if secure && !RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
 		return false
 	}
+
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
 
 	dbInfo, okDB := StorageInfo.DBs[nameDB]
 	if !okDB {
@@ -147,7 +156,6 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	dbInfo.LastUpdate = tNow
 
 	StorageInfo.DBs[nameDB] = dbInfo
-	// StorageInfo.Save() // rewriting only Access
 
 	return dbInfo.Save()
 }
@@ -160,6 +168,9 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 	}
 
 	var folderName string
+
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
 
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {

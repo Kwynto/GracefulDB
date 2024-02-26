@@ -66,7 +66,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("MODIFY", `(?m)[mM][oO][dD][iI][fF][yY]`)
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
 
-	// DDL TODO: Разработать шаблоны
+	// DDL
 	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]\s*$`)
 	recol = recol.CompileExp("ColumnNotNull", `(?m)[nN][oO][tT]\s*[nN][uU][lL][lL]\s*$`)
 	recol = recol.CompileExp("ColumnDefault", `(?m)[dD][eE][fF][aA][uU][lL][tT]:.+`)

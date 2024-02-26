@@ -43,13 +43,13 @@ var Settings string = `
                             <td>{{.CoreSettings.BucketSize}}</td>
                         </tr>
                         <tr>
-                            <td><h6>Freeze mode: </h6></td>
+                            <td><h6>Friendly mode: </h6></td>
                             <td>
                                 <div class="form-check form-switch">
-                                {{if .CoreSettings.FreezeMode}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFreezeSwitch" hx-get="/hx/settings/core_freeze_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                                {{if .CoreSettings.FriendlyMode}}
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
                                 {{else}}
-                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFreezeSwitch" hx-get="/hx/settings/core_freeze_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
                                 {{end}}
                                 </div>
                             </td>
