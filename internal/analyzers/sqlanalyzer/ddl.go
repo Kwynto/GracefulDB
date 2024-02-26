@@ -49,13 +49,13 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 		if isINE {
 			res.State = "error"
 			res.Result = "the database exists"
-			return ecowriter.EncodeString(res), errors.New("the database exists")
+			return ecowriter.EncodeJSON(res), errors.New("the database exists")
 		}
 
 		if !core.LocalCoreSettings.FriendlyMode {
 			res.State = "error"
 			res.Result = "the database exists"
-			return ecowriter.EncodeString(res), errors.New("the database exists")
+			return ecowriter.EncodeJSON(res), errors.New("the database exists")
 		}
 
 		dbAccess, ok := core.StorageInfo.Access[db]
@@ -77,18 +77,18 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 		if !core.RemoveDB(db) {
 			res.State = "error"
 			res.Result = "the database cannot be deleted"
-			return ecowriter.EncodeString(res), errors.New("the database cannot be deleted")
+			return ecowriter.EncodeJSON(res), errors.New("the database cannot be deleted")
 		}
 	}
 
 	if !core.CreateDB(db, login, true) {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLCreateTable() (result string, err error) {
@@ -116,13 +116,13 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	isINE := core.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
@@ -168,7 +168,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 
 		_, okTable := dbInfo.Tables[table]
@@ -176,13 +176,13 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			if isINE {
 				res.State = "error"
 				res.Result = "the table exists"
-				return ecowriter.EncodeString(res), errors.New("the table exists")
+				return ecowriter.EncodeJSON(res), errors.New("the table exists")
 			}
 
 			if !core.LocalCoreSettings.FriendlyMode {
 				res.State = "error"
 				res.Result = "the table exists"
-				return ecowriter.EncodeString(res), errors.New("the table exists")
+				return ecowriter.EncodeJSON(res), errors.New("the table exists")
 			}
 
 			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
@@ -201,7 +201,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		if !core.CreateTable(db, table, true) {
 			res.State = "error"
 			res.Result = "invalid database name or table name"
-			return ecowriter.EncodeString(res), errors.New("invalid database name or table name")
+			return ecowriter.EncodeJSON(res), errors.New("invalid database name or table name")
 		}
 
 		dbInfo = core.StorageInfo.DBs[db]
@@ -255,7 +255,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				if !core.LocalCoreSettings.FriendlyMode {
 					res.State = "error"
 					res.Result = "the column exists"
-					return ecowriter.EncodeString(res), errors.New("the column exists")
+					return ecowriter.EncodeJSON(res), errors.New("the column exists")
 				}
 				core.RemoveColumn(db, table, column.Name)
 			}
@@ -265,11 +265,11 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	} else {
 		res.State = "error"
 		res.Result = "internal error"
-		return ecowriter.EncodeString(res), errors.New("internal error")
+		return ecowriter.EncodeJSON(res), errors.New("internal error")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLCreate() (result string, err error) {
@@ -357,21 +357,21 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 			if !core.RenameDB(oldDBName, newDBName, true) {
 				res.State = "error"
 				res.Result = "the database cannot be renamed"
-				return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+				return ecowriter.EncodeJSON(res), errors.New("the database cannot be renamed")
 			}
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLAlterTableAdd() (result string, err error) {
@@ -399,13 +399,13 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	tableName := core.RegExpCollection["AlterTableAdd"].FindString(q.Instruction)
@@ -493,22 +493,22 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 				if !core.CreateColumn(db, tableName, colName.Name, true, colName.Spec) {
 					res.State = "error"
 					res.Result = "the column cannot be added"
-					return ecowriter.EncodeString(res), errors.New("the column cannot be added")
+					return ecowriter.EncodeJSON(res), errors.New("the column cannot be added")
 				}
 			}
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLAlterTableDrop() (result string, err error) {
@@ -536,13 +536,13 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	tableName := core.RegExpCollection["AlterTableDrop"].FindString(q.Instruction)
@@ -601,22 +601,22 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 				if !core.RemoveColumn(db, tableName, colName) {
 					res.State = "error"
 					res.Result = "the column cannot be deleted"
-					return ecowriter.EncodeString(res), errors.New("the column cannot be deleted")
+					return ecowriter.EncodeJSON(res), errors.New("the column cannot be deleted")
 				}
 			}
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLAlterTableModify() (result string, err error) {
@@ -644,13 +644,13 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	tableName := core.RegExpCollection["AlterTableModify"].FindString(q.Instruction)
@@ -773,22 +773,22 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				if !core.ChangeColumn(db, tableName, column, true) {
 					res.State = "error"
 					res.Result = "the column cannot be changed"
-					return ecowriter.EncodeString(res), errors.New("the column cannot be changed")
+					return ecowriter.EncodeJSON(res), errors.New("the column cannot be changed")
 				}
 			}
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
@@ -816,13 +816,13 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	isRT := core.RegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
@@ -872,21 +872,21 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 			if !core.RenameTable(db, oldTableName, newTableName, true) {
 				res.State = "error"
 				res.Result = "the database cannot be renamed"
-				return ecowriter.EncodeString(res), errors.New("the database cannot be renamed")
+				return ecowriter.EncodeJSON(res), errors.New("the database cannot be renamed")
 			}
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 	} else {
 		res.State = "error"
 		res.Result = "invalid database name"
-		return ecowriter.EncodeString(res), errors.New("invalid database name")
+		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLAlterTable() (result string, err error) {
@@ -962,11 +962,11 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 		if isIE {
 			res.State = "error"
 			res.Result = "the database not exists"
-			return ecowriter.EncodeString(res), errors.New("the database not exists")
+			return ecowriter.EncodeJSON(res), errors.New("the database not exists")
 		}
 
 		res.State = "ok"
-		return ecowriter.EncodeString(res), nil
+		return ecowriter.EncodeJSON(res), nil
 	}
 
 	dbAccess, ok := core.StorageInfo.Access[db]
@@ -988,11 +988,11 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	if !core.RemoveDB(db) {
 		res.State = "error"
 		res.Result = "the database cannot be deleted"
-		return ecowriter.EncodeString(res), errors.New("the database cannot be deleted")
+		return ecowriter.EncodeJSON(res), errors.New("the database cannot be deleted")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLDropTable() (result string, err error) {
@@ -1020,13 +1020,13 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	if !ok {
 		res.State = "error"
 		res.Result = "unknown database"
-		return ecowriter.EncodeString(res), errors.New("unknown database")
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
 	}
 	db := state.CurrentDB
 	if db == "" {
 		res.State = "error"
 		res.Result = "no database selected"
-		return ecowriter.EncodeString(res), errors.New("no database selected")
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
 	isIE := core.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
@@ -1066,7 +1066,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 		} else {
 			res.State = "error"
 			res.Result = "internal error"
-			return ecowriter.EncodeString(res), errors.New("internal error")
+			return ecowriter.EncodeJSON(res), errors.New("internal error")
 		}
 
 		_, okTable := dbInfo.Tables[table]
@@ -1074,11 +1074,11 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 			if isIE {
 				res.State = "error"
 				res.Result = "the table not exists"
-				return ecowriter.EncodeString(res), errors.New("the table not exists")
+				return ecowriter.EncodeJSON(res), errors.New("the table not exists")
 			}
 
 			res.State = "ok"
-			return ecowriter.EncodeString(res), nil
+			return ecowriter.EncodeJSON(res), nil
 		}
 
 		if !luxUser && !flagsAcs.Drop {
@@ -1091,11 +1091,11 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	} else {
 		res.State = "error"
 		res.Result = "internal error"
-		return ecowriter.EncodeString(res), errors.New("internal error")
+		return ecowriter.EncodeJSON(res), errors.New("internal error")
 	}
 
 	res.State = "ok"
-	return ecowriter.EncodeString(res), nil
+	return ecowriter.EncodeJSON(res), nil
 }
 
 func (q tQuery) DDLDrop() (result string, err error) {

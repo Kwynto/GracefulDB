@@ -4,16 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"strings"
+	"sync"
 )
 
 var (
-	encoder *json.Encoder
-	decoder *json.Decoder
+	fEncoder *json.Encoder
+	fDecoder *json.Decoder
+	fBlock   sync.RWMutex
 )
 
-// Saving the structure to a JSON file.
+// Saving the structure to a JSON-file.
 func WriteJSON(name string, data any) (err error) {
 	// This function is complete
+	fBlock.Lock()
+	defer fBlock.Unlock()
+
 	if _, err := os.Stat(name); !os.IsNotExist(err) {
 		if err2 := os.Remove(name); err2 != nil {
 			return err2
@@ -26,17 +32,20 @@ func WriteJSON(name string, data any) (err error) {
 	}
 	defer wFile.Close()
 
-	encoder = json.NewEncoder(wFile)
-	if err := encoder.Encode(data); err != nil {
+	fEncoder = json.NewEncoder(wFile)
+	if err := fEncoder.Encode(data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// Loading a structure from a JSON file.
+// Loading a structure from a JSON-file.
 func ReadJSON(name string, data any) (err error) {
 	// This function is complete
+	fBlock.RLock()
+	defer fBlock.RUnlock()
+
 	if _, err := os.Stat(name); os.IsNotExist(err) {
 		return err
 	}
@@ -47,15 +56,16 @@ func ReadJSON(name string, data any) (err error) {
 	}
 	defer rFile.Close()
 
-	decoder = json.NewDecoder(rFile)
-	if err := decoder.Decode(data); err != nil {
+	fDecoder = json.NewDecoder(rFile)
+	if err := fDecoder.Decode(data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func EncodeString(data any) string {
+// Packing data in JSON-string
+func EncodeJSON(data any) string {
 	var buf bytes.Buffer
 
 	encoder := json.NewEncoder(&buf)
@@ -64,4 +74,17 @@ func EncodeString(data any) string {
 	}
 
 	return buf.String()
+}
+
+// Getting data from JSON-string
+func DecodeJSON(str string) any {
+	var data any
+	reader := strings.NewReader(str)
+
+	decoder := json.NewDecoder(reader)
+	if err := decoder.Decode(&data); err != nil {
+		return nil
+	}
+
+	return data
 }
