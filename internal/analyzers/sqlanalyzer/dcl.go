@@ -284,7 +284,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
-	if core.LocalCoreSettings.FreezeMode {
+	if !core.LocalCoreSettings.FriendlyMode {
 		if _, ok := core.StorageInfo.DBs[db]; !ok {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}

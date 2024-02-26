@@ -20,7 +20,8 @@ var DefaultConfig Config
 type CoreSettings struct {
 	Storage    string `yaml:"storage" env-default:"./data/"`
 	BucketSize int    `yaml:"bucket_size" env-default:"800"`
-	FreezeMode bool   `yaml:"freeze"`
+	// FreezeMode bool   `yaml:"freeze"`
+	FriendlyMode bool `yaml:"friendly"`
 }
 
 type BufferSize struct {
@@ -71,9 +72,9 @@ func defaultConfig() Config {
 		LogPath:         "./logs/",
 		ShutdownTimeOut: 5 * time.Second,
 		CoreSettings: CoreSettings{
-			Storage:    "./data/",
-			BucketSize: 800,
-			FreezeMode: false,
+			Storage:      "./data/",
+			BucketSize:   800,
+			FriendlyMode: true,
 		},
 		WebSocketConnector: WebSocketConnector{
 			Enable:  true,

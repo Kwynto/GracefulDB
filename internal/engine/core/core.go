@@ -22,7 +22,8 @@ const (
 type tCoreSettings struct {
 	Storage    string
 	BucketSize int
-	FreezeMode bool
+	// FreezeMode bool
+	FriendlyMode bool
 }
 
 type tStorageInfo struct {
@@ -156,7 +157,8 @@ type TState struct {
 var LocalCoreSettings tCoreSettings = tCoreSettings{
 	Storage:    "./data/",
 	BucketSize: 800,
-	FreezeMode: false,
+	// FreezeMode: false,
+	FriendlyMode: true,
 }
 
 var StorageInfo tStorageInfo = tStorageInfo{
@@ -173,7 +175,8 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	return tCoreSettings{
 		Storage:    cfg.CoreSettings.Storage,
 		BucketSize: cfg.CoreSettings.BucketSize,
-		FreezeMode: cfg.CoreSettings.FreezeMode,
+		// FreezeMode: cfg.CoreSettings.FreezeMode,
+		FriendlyMode: cfg.CoreSettings.FriendlyMode,
 	}
 }
 

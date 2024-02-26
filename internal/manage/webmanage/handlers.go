@@ -752,20 +752,20 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }
 
-func settings_core_freeze_change_sw(w http.ResponseWriter, r *http.Request) {
+func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	if config.DefaultConfig.CoreSettings.FreezeMode {
-		config.DefaultConfig.CoreSettings.FreezeMode = false
+	if config.DefaultConfig.CoreSettings.FriendlyMode {
+		config.DefaultConfig.CoreSettings.FriendlyMode = false
 	} else {
-		config.DefaultConfig.CoreSettings.FreezeMode = true
+		config.DefaultConfig.CoreSettings.FriendlyMode = true
 	}
 	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.DefaultConfig)
-	msg := "The freeze mode has been switched."
-	slog.Warn(msg, slog.String("FreezeMode", fmt.Sprintf("%v", core.LocalCoreSettings.FreezeMode)))
+	msg := "The friendly mode has been switched."
+	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.LocalCoreSettings.FriendlyMode)))
 
 	nav_settings(w, r)
 }

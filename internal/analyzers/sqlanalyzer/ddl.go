@@ -52,7 +52,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 			return ecowriter.EncodeString(res), errors.New("the database exists")
 		}
 
-		if core.LocalCoreSettings.FreezeMode {
+		if !core.LocalCoreSettings.FriendlyMode {
 			res.State = "error"
 			res.Result = "the database exists"
 			return ecowriter.EncodeString(res), errors.New("the database exists")
@@ -179,7 +179,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				return ecowriter.EncodeString(res), errors.New("the table exists")
 			}
 
-			if core.LocalCoreSettings.FreezeMode {
+			if !core.LocalCoreSettings.FriendlyMode {
 				res.State = "error"
 				res.Result = "the table exists"
 				return ecowriter.EncodeString(res), errors.New("the table exists")
@@ -252,7 +252,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 
 		for _, column := range columns {
 			if _, okCol := tableInfo.Columns[column.Name]; okCol {
-				if core.LocalCoreSettings.FreezeMode {
+				if !core.LocalCoreSettings.FriendlyMode {
 					res.State = "error"
 					res.Result = "the column exists"
 					return ecowriter.EncodeString(res), errors.New("the column exists")
