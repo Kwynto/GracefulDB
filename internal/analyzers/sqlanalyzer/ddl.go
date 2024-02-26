@@ -44,7 +44,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
 	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
 
-	_, ok := core.StorageInfo.DBs[db]
+	_, ok := core.GetDBInfo(db)
 	if ok {
 		if isINE {
 			res.State = "error"
@@ -58,7 +58,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 			return ecowriter.EncodeJSON(res), errors.New("the database exists")
 		}
 
-		dbAccess, ok := core.StorageInfo.Access[db]
+		dbAccess, ok := core.GetDBAccess(db)
 		if ok {
 			if dbAccess.Owner != login {
 				var luxUser bool = false
@@ -141,13 +141,13 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
-	dbInfo, okDB := core.StorageInfo.DBs[db]
+	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
 		var flagsAcs gtypes.TAccessFlags
 		var okFlags bool = false
 		var luxUser bool = false
 
-		dbAccess, okAccess := core.StorageInfo.Access[db]
+		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
 			flagsAcs, okFlags = dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -204,7 +204,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 			return ecowriter.EncodeJSON(res), errors.New("invalid database name or table name")
 		}
 
-		dbInfo = core.StorageInfo.DBs[db]
+		dbInfo, _ = core.GetDBInfo(db)
 		tableInfo := dbInfo.Tables[table]
 
 		var columns = []core.TColumnForWrite{}
@@ -331,9 +331,9 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, ok := core.StorageInfo.DBs[oldDBName]
+	_, ok := core.GetDBInfo(oldDBName)
 	if ok {
-		dbAccess, ok := core.StorageInfo.Access[oldDBName]
+		dbAccess, ok := core.GetDBAccess(oldDBName)
 		if ok {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -466,9 +466,9 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.StorageInfo.DBs[db]
+	_, okDB := core.GetDBInfo(db)
 	if okDB {
-		dbAccess, okAccess := core.StorageInfo.Access[db]
+		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -574,9 +574,9 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.StorageInfo.DBs[db]
+	_, okDB := core.GetDBInfo(db)
 	if okDB {
-		dbAccess, okAccess := core.StorageInfo.Access[db]
+		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -745,9 +745,9 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.StorageInfo.DBs[db]
+	_, okDB := core.GetDBInfo(db)
 	if okDB {
-		dbAccess, ok := core.StorageInfo.Access[db]
+		dbAccess, ok := core.GetDBAccess(db)
 		if ok {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -846,9 +846,9 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.StorageInfo.DBs[db]
+	_, okDB := core.GetDBInfo(db)
 	if okDB {
-		dbAccess, ok := core.StorageInfo.Access[db]
+		dbAccess, ok := core.GetDBAccess(db)
 		if ok {
 			flagsAcs, okFlags := dbAccess.Flags[login]
 			if dbAccess.Owner != login {
@@ -957,7 +957,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
 	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
 
-	_, ok := core.StorageInfo.DBs[db]
+	_, ok := core.GetDBInfo(db)
 	if !ok {
 		if isIE {
 			res.State = "error"
@@ -969,7 +969,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 		return ecowriter.EncodeJSON(res), nil
 	}
 
-	dbAccess, ok := core.StorageInfo.Access[db]
+	dbAccess, ok := core.GetDBAccess(db)
 	if ok {
 		if dbAccess.Owner != login {
 			var luxUser bool = false
@@ -1039,13 +1039,13 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
-	dbInfo, okDB := core.StorageInfo.DBs[db]
+	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
 		var flagsAcs gtypes.TAccessFlags
 		var okFlags bool = false
 		var luxUser bool = false
 
-		dbAccess, okAccess := core.StorageInfo.Access[db]
+		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
 			flagsAcs, okFlags = dbAccess.Flags[login]
 			if dbAccess.Owner != login {

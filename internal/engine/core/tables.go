@@ -10,6 +10,9 @@ import (
 // Marks the table as deleted, but does not delete files.
 func RemoveTable(nameDB, nameTable string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
@@ -37,6 +40,9 @@ func RemoveTable(nameDB, nameTable string) bool {
 // Deletes the folder and table files, if table was mark as 'removed'
 func StrongRemoveTable(nameDB, nameTable string) bool {
 	// This function is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {
 		return false
@@ -68,6 +74,9 @@ func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 		return false
 	}
 
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	dbInfo, okDB := StorageInfo.DBs[nameDB]
 	if okDB {
 		tableInfo, okTable := dbInfo.Tables[oldNameTable]
@@ -85,7 +94,6 @@ func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 		dbInfo.LastUpdate = tNow
 
 		StorageInfo.DBs[nameDB] = dbInfo
-		// StorageInfo.Save() // rewriting only Access
 
 		return dbInfo.Save()
 	}
@@ -101,6 +109,9 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 	}
 
 	var folderName string
+
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
 
 	dbInfo, ok := StorageInfo.DBs[nameDB]
 	if !ok {

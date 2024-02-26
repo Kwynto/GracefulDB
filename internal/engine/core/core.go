@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
@@ -19,10 +20,11 @@ const (
 	POSTFIX_ID       = "_id"
 )
 
+var storageBlock sync.RWMutex
+
 type tCoreSettings struct {
-	Storage    string
-	BucketSize int
-	// FreezeMode bool
+	Storage      string
+	BucketSize   int
 	FriendlyMode bool
 }
 
@@ -32,8 +34,45 @@ type tStorageInfo struct {
 	Access  map[string]gtypes.TAccess `json:"access"`  // [name db] - TAccess
 }
 
+func GetDBInfo(nameDB string) (tDBInfo, bool) {
+	// This function is complete
+	storageBlock.RLock()
+	defer storageBlock.RUnlock()
+
+	info, ok := StorageInfo.DBs[nameDB]
+	if !ok {
+		return tDBInfo{}, false
+	}
+
+	return info, true
+}
+
+func GetDBAccess(nameDB string) (gtypes.TAccess, bool) {
+	// This function is complete
+	storageBlock.RLock()
+	defer storageBlock.RUnlock()
+
+	access, ok := StorageInfo.Access[nameDB]
+	if !ok {
+		return gtypes.TAccess{}, false
+	}
+
+	return access, true
+}
+
+func SetAccessFlags(db, user string, flags gtypes.TAccessFlags) {
+	// This procedure is complete
+	storageBlock.Lock()
+	StorageInfo.Access[db].Flags[user] = flags
+	StorageInfo.Save()
+	storageBlock.Unlock()
+}
+
 func (s *tStorageInfo) Load() bool {
 	// This method is complete
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
 	var dbInfo tDBInfo
 
 	s.DBs = make(map[string]tDBInfo)
@@ -75,6 +114,7 @@ func (s *tStorageInfo) Load() bool {
 
 func (s *tStorageInfo) Save() bool {
 	// This method is complete
+	// Don't use mutex
 	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
 	return ecowriter.WriteJSON(infoStorageFile, s.Access) == nil
 }
@@ -92,6 +132,7 @@ type tDBInfo struct {
 // Saving the database structure.
 func (d tDBInfo) Save() bool {
 	// This method is complete
+	// Don't use mutex
 	path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
 	return ecowriter.WriteJSON(path, d) == nil
 }
