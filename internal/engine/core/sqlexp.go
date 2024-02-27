@@ -15,7 +15,6 @@ var ParsingOrder = [...]string{
 	"SearchAuth",
 
 	"SearchDelete",
-	"SearchTruncate",
 	"SearchCommit",
 	"SearchRollback",
 
@@ -26,6 +25,7 @@ var ParsingOrder = [...]string{
 	"SearchExplain",
 	"SearchDescribe",
 	"SearchDesc",
+	"SearchTruncateTable",
 
 	"SearchGrant",
 	"SearchRevoke",
@@ -96,9 +96,11 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SearchInsert", `(?m)^;`)
 	recol = recol.CompileExp("SearchUpdate", `(?m)^;`)
 	recol = recol.CompileExp("SearchDelete", `(?m)^;`)
-	recol = recol.CompileExp("SearchTruncate", `(?m)^;`)
 	recol = recol.CompileExp("SearchCommit", `(?m)^;`)
 	recol = recol.CompileExp("SearchRollback", `(?m)^;`)
+
+	recol = recol.CompileExp("SearchTruncateTable", `(?m)^[tT][rR][uU][nN][cC][aA][tT][eE]\s*[tT][aA][bB][lL][eE].*`)
+	recol = recol.CompileExp("TruncateTableWord", `(?m)^[tT][rR][uU][nN][cC][aA][tT][eE]\s*[tT][aA][bB][lL][eE]`)
 
 	// DCL
 	// recol = recol.CompileExp("SearchUse", `(?m)^[uU][sS][eE]\s*[a-zA-Z][a-zA-Z0-9_-]+\s*`)
