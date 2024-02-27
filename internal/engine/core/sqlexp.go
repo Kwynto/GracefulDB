@@ -20,11 +20,11 @@ var ParsingOrder = [...]string{
 
 	"SearchShow",
 	"SearchCreate",
-	"SearchAlter",
-	"SearchDrop",
 	"SearchExplain",
 	"SearchDescribe",
 	"SearchDesc",
+	"SearchDrop",
+	"SearchAlter",
 	"SearchTruncateTable",
 
 	"SearchGrant",
@@ -93,7 +93,15 @@ func CompileRegExpCollection() tRegExpCollection {
 
 	// DML TODO: Разработать шаблоны
 	recol = recol.CompileExp("SearchSelect", `(?m)^;`)
-	recol = recol.CompileExp("SearchInsert", `(?m)^;`)
+
+	recol = recol.CompileExp("SearchInsert", `(?m)^[iI][nN][sS][eE][rR][tT]\s*[iI][nN][tT][oO].*`)
+	recol = recol.CompileExp("InsertWord", `(?m)^[iI][nN][sS][eE][rR][tT]\s*[iI][nN][tT][oO]`)
+	recol = recol.CompileExp("InsertValuesToEnd", `(?m)[vV][aA][lL][uU][eE][sS].*`)
+	recol = recol.CompileExp("InsertColParenthesis", `(?m)\(.*\)`)
+	recol = recol.CompileExp("InsertParenthesis", `(?m)[\(\)]`)
+	recol = recol.CompileExp("InsertValuesWord", `(?m)[vV][aA][lL][uU][eE][sS]`)
+	recol = recol.CompileExp("InsertSplitParenthesis", `(?m)\),\s*\(`)
+
 	recol = recol.CompileExp("SearchUpdate", `(?m)^;`)
 	recol = recol.CompileExp("SearchDelete", `(?m)^;`)
 	recol = recol.CompileExp("SearchCommit", `(?m)^;`)
