@@ -54,8 +54,6 @@ type TAccess struct {
 	Flags map[string]TAccessFlags `json:"flags,omitempty"` // login - TAccessFlags
 }
 
-type TInsertRow map[string]string
-
 func DefaultSecret() Secret {
 	return Secret{}
 }

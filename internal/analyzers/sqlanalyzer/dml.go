@@ -22,7 +22,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 }
 
 func (q tQuery) DMLInsert() (result string, err error) {
-	// -
+	// This method is complete
 	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
 	defer func() { e.Wrapper(op, err) }()
 
@@ -58,8 +58,6 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	// TODO: парсинг выражения
-
 	instruction := core.RegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
 	valuesStr := core.RegExpCollection["InsertValuesToEnd"].FindString(instruction)
 	instruction = core.RegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(instruction, "")
@@ -93,8 +91,6 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		}
 		rowsIn = append(rowsIn, rowIn)
 	}
-
-	var row = make(gtypes.TInsertRow)
 
 	_, okDB := core.GetDBInfo(db)
 	if okDB {
@@ -130,12 +126,9 @@ func (q tQuery) DMLInsert() (result string, err error) {
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
-		// TODO: выполнить вставку в таблицу
-
-		// if !core.TruncateTable(db, table) {
-		// 	return `{"state":"error", "result":"the table cannot be truncated"}`, errors.New("the table cannot be truncated")
-		// }
-
+		if !core.InsertRows(db, table, columnsIn, rowsIn) {
+			return `{"state":"error", "result":"the record(s) cannot be inserted"}`, errors.New("the record cannot be inserted")
+		}
 	} else {
 		res.State = "error"
 		res.Result = "internal error"
