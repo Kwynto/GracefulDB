@@ -51,8 +51,8 @@ func Request(ticket string, instruction string, placeholder []string) string {
 			case "SearchDelete":
 				res, _ := query.DMLDelete()
 				return res
-			case "SearchTruncate":
-				res, _ := query.DMLTruncate()
+			case "SearchTruncateTable":
+				res, _ := query.DMLTruncateTable()
 				return res
 			case "SearchCommit":
 				res, _ := query.DMLCommit()

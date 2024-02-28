@@ -101,6 +101,15 @@ func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 	return false
 }
 
+func TruncateTable(nameDB, nameTable string) bool {
+	storageBlock.Lock()
+	defer storageBlock.Unlock()
+
+	// TODO: написать очистку таблицы
+
+	return true
+}
+
 // Creating a new table.
 func CreateTable(nameDB, nameTable string, secure bool) bool {
 	// This function is complete
