@@ -97,6 +97,10 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 		return false
 	}
 
+	if newDataColumn.Spec.Default != "" {
+		newDataColumn.Spec.Default = Encode64(newDataColumn.Spec.Default)
+	}
+
 	storageBlock.Lock()
 	defer storageBlock.Unlock()
 
@@ -168,6 +172,10 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 	}
 
 	var folderName string
+
+	if specification.Default != "" {
+		specification.Default = Encode64(specification.Default)
+	}
 
 	storageBlock.Lock()
 	defer storageBlock.Unlock()

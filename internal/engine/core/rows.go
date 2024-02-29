@@ -53,12 +53,12 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 			var vStore string
 			ind := slices.Index(columns, column.Name)
 			if ind != -1 {
-				vStore = row[ind] // TODO: make Base64
+				vStore = Encode64(row[ind])
 			} else {
 				if column.Specification.NotNull {
 					return nil, false
 				}
-				vStore = column.Specification.Default // TODO: make Base64
+				vStore = column.Specification.Default
 			}
 			colStore.Id = rowCount
 			colStore.Time = tNow
