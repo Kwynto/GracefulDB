@@ -44,7 +44,6 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 	for _, row := range rows {
 		var rowStore = tRowForStore{}
 		tableInfo.Count++
-		rowCount := tableInfo.Count
 		for _, column := range tableInfo.Columns {
 			var colStore = tColumnForStore{}
 
@@ -60,13 +59,15 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 				}
 				vStore = column.Specification.Default
 			}
-			colStore.Id = rowCount
+			colStore.Id = tableInfo.Count
 			colStore.Time = tNow
 			colStore.Value = vStore
 			rowStore.Row = append(rowStore.Row, colStore)
 		}
-		rowStore.Id = rowCount
+		rowStore.Id = tableInfo.Count
 		rowStore.Time = tNow
+		rowStore.DB = nameDB
+		rowStore.Table = nameTable
 
 		rowsForStore = append(rowsForStore, rowStore)
 	}
@@ -76,7 +77,7 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 		result = append(result, row.Id)
 	}
 
-	go InsertForBuffer(nameDB, nameTable, rowsForStore)
+	go InsertIntoBuffer(rowsForStore)
 
 	dbInfo.Tables[nameTable] = tableInfo
 	StorageInfo.DBs[nameDB] = dbInfo

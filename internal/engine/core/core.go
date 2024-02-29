@@ -190,9 +190,11 @@ type tColumnForStore struct {
 }
 
 type tRowForStore struct {
-	Id   uint64
-	Time int64
-	Row  []tColumnForStore
+	Id    uint64
+	Time  int64
+	DB    string
+	Table string
+	Row   []tColumnForStore
 }
 
 type tCoreFile struct {

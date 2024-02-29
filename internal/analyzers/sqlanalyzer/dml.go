@@ -98,11 +98,23 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		rowsIn = append(rowsIn, rowIn)
 	}
 
-	_, okDB := core.GetDBInfo(db)
+LabelCheck:
+	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
 		var flagsAcs gtypes.TAccessFlags
 		var okFlags bool = false
 		var luxUser bool = false
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			if core.LocalCoreSettings.FriendlyMode {
+				if !core.CreateTable(db, table, true) {
+					return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+				}
+				goto LabelCheck
+			}
+			return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+		}
 
 		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
@@ -123,9 +135,7 @@ func (q tQuery) DMLInsert() (result string, err error) {
 				luxUser = true
 			}
 		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
+			return `{"state":"error", "result":"internal error"}`, errors.New("internal error")
 		}
 
 		if !luxUser && !flagsAcs.Insert {
@@ -137,9 +147,13 @@ func (q tQuery) DMLInsert() (result string, err error) {
 			return `{"state":"error", "result":"the record(s) cannot be inserted"}`, errors.New("the record cannot be inserted")
 		}
 	} else {
-		res.State = "error"
-		res.Result = "internal error"
-		return ecowriter.EncodeJSON(res), errors.New("internal error")
+		if core.LocalCoreSettings.FriendlyMode {
+			if !core.CreateDB(db, login, true) {
+				return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
+			}
+			goto LabelCheck
+		}
+		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
 	resArr.State = "ok"
@@ -221,11 +235,23 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
-	_, okDB := core.GetDBInfo(db)
+LabelCheck:
+	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
 		var flagsAcs gtypes.TAccessFlags
 		var okFlags bool = false
 		var luxUser bool = false
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			if core.LocalCoreSettings.FriendlyMode {
+				if !core.CreateTable(db, table, true) {
+					return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+				}
+				goto LabelCheck
+			}
+			return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+		}
 
 		dbAccess, okAccess := core.GetDBAccess(db)
 		if okAccess {
@@ -246,9 +272,7 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 				luxUser = true
 			}
 		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
+			return `{"state":"error", "result":"internal error"}`, errors.New("internal error")
 		}
 
 		if !luxUser && !flagsAcs.Delete {
@@ -259,9 +283,13 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 			return `{"state":"error", "result":"the table cannot be truncated"}`, errors.New("the table cannot be truncated")
 		}
 	} else {
-		res.State = "error"
-		res.Result = "internal error"
-		return ecowriter.EncodeJSON(res), errors.New("internal error")
+		if core.LocalCoreSettings.FriendlyMode {
+			if !core.CreateDB(db, login, true) {
+				return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
+			}
+			goto LabelCheck
+		}
+		return `{"state":"error", "result":"internal error"}`, errors.New("internal error")
 	}
 
 	res.State = "ok"
