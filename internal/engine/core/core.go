@@ -167,7 +167,7 @@ type tColumnInfo struct {
 type TColumnSpecification struct {
 	Default string `json:"default"`
 	NotNull bool   `json:"notnull"`
-	Unique  bool   `json:"unique"`
+	Unique  bool   `json:"unique"` // FIXME: not used
 }
 
 type TColumnForWrite struct {
@@ -180,6 +180,21 @@ type TColumnForWrite struct {
 	// IsChDefault bool
 	// IsChNotNull bool
 	// IsChUniqut  bool
+}
+
+type tColumnForStore struct {
+	Field string
+	Id    uint64
+	Time  int64
+	Value string
+}
+
+type tRowForStore struct {
+	Id    uint64
+	Time  int64
+	DB    string
+	Table string
+	Row   []tColumnForStore
 }
 
 type tCoreFile struct {

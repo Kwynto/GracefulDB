@@ -325,8 +325,10 @@ func (q tQuery) DCLShow() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLShow"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-	var resArr gtypes.ResponseArray
+	var (
+		res    gtypes.Response
+		resArr gtypes.ResponseStrings
+	)
 
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")

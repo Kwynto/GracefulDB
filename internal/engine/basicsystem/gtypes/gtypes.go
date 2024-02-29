@@ -15,10 +15,16 @@ type Response struct {
 	Result string `json:"result,omitempty"`
 }
 
-type ResponseArray struct {
+type ResponseStrings struct {
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
 	Result []string `json:"result,omitempty"`
+}
+
+type ResponseUints struct {
+	State  string   `json:"state,omitempty"`
+	Ticket string   `json:"ticket,omitempty"`
+	Result []uint64 `json:"result,omitempty"`
 }
 
 type ResultColumn struct {
@@ -46,7 +52,7 @@ type TAccessFlags struct {
 }
 
 func (a TAccessFlags) AnyTrue() bool {
-	return a.Create || a.Drop || a.Select || a.Insert || a.Update || a.Delete
+	return a.Create || a.Alter || a.Drop || a.Select || a.Insert || a.Update || a.Delete
 }
 
 type TAccess struct {

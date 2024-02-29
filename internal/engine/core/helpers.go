@@ -2,6 +2,7 @@ package core
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"fmt"
 	"os"
@@ -46,4 +47,16 @@ func Uint64ToBinary(i uint64) []byte {
 func BinaryToUint64(b []byte) uint64 {
 	i := binary.BigEndian.Uint64(b)
 	return i
+}
+
+func Encode64(inStr string) string {
+	return base64.StdEncoding.EncodeToString([]byte(inStr))
+}
+
+func Decode64(inB64 string) string {
+	decodeData, err := base64.StdEncoding.DecodeString(inB64)
+	if err != nil {
+		return ""
+	}
+	return string(decodeData)
 }
