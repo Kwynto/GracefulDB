@@ -26,7 +26,12 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
+	var (
+		resultIds []uint64
+		okInsert  bool
+		res       gtypes.Response
+		resArr    gtypes.ResponseUints
+	)
 
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
@@ -42,6 +47,7 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	}
 
 	if newticket != "" {
+		resArr.Ticket = newticket
 		res.Ticket = newticket
 	}
 
@@ -126,7 +132,8 @@ func (q tQuery) DMLInsert() (result string, err error) {
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
-		if !core.InsertRows(db, table, columnsIn, rowsIn) {
+		resultIds, okInsert = core.InsertRows(db, table, columnsIn, rowsIn)
+		if !okInsert {
 			return `{"state":"error", "result":"the record(s) cannot be inserted"}`, errors.New("the record cannot be inserted")
 		}
 	} else {
@@ -135,8 +142,9 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("internal error")
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	resArr.State = "ok"
+	resArr.Result = resultIds
+	return ecowriter.EncodeJSON(resArr), nil
 }
 
 func (q tQuery) DMLUpdate() (result string, err error) {
