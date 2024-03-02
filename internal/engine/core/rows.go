@@ -66,6 +66,8 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 		}
 		rowStore.Id = tableInfo.Count
 		rowStore.Time = tNow
+		rowStore.Status = 0
+		rowStore.Shape = 0
 		rowStore.DB = nameDB
 		rowStore.Table = nameTable
 

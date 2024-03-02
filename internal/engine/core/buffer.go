@@ -1,6 +1,9 @@
 package core
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type tWriteBuffer struct {
 	Area     []tRowForStore
@@ -27,6 +30,9 @@ var WriteBuffer = tCollectBuffers{
 	Switch: 1,
 }
 
+var signalWrite = make(chan struct{}, 1024)
+var signalSD = make(chan struct{}, 1)
+
 func InsertIntoBuffer(rowsForStore []tRowForStore) {
 	// -
 	WriteBuffer.Block.Lock()
@@ -38,8 +44,32 @@ func InsertIntoBuffer(rowsForStore []tRowForStore) {
 	case 2:
 		WriteBuffer.SecondBox.Area = append(WriteBuffer.SecondBox.Area, rowsForStore...)
 	}
+	signalWrite <- struct{}{}
 }
 
-// func WriteBufferToDisk(writeSignal <-chan bool) {
+func WriteBufferService() {
+loop:
+	select {
+	case <-signalWrite:
+		if !writeBufferToDisk() {
+			time.Sleep(1 * time.Second)
+			signalWrite <- struct{}{}
+		}
+		goto loop
+	case <-signalSD:
+		WriteBuffer.Block.Lock()
+		fLen := len(WriteBuffer.FirstBox.Area) != 0
+		sLen := len(WriteBuffer.SecondBox.Area) != 0
+		WriteBuffer.Block.Unlock()
+		if fLen || sLen {
+			writeBufferToDisk()
+			signalSD <- struct{}{}
+			goto loop
+		}
+	}
+}
 
-// }
+func writeBufferToDisk() bool {
+
+	return false
+}
