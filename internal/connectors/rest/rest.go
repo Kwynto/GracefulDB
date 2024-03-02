@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
@@ -22,7 +22,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
-func squery(w http.ResponseWriter, r *http.Request) {
+func query(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		slog.Debug("The method is prohibited!", slog.String("method", http.MethodPost))
 		w.Header().Set("Allow", http.MethodPost)
@@ -41,7 +41,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := sqlanalyzer.Request(ticket, instruction, placeholder)
+	response := vqlanalyzer.Request(ticket, instruction, placeholder)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
@@ -51,7 +51,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
-	mux.HandleFunc("/squery", squery)
+	mux.HandleFunc("/query", query)
 
 	return mux
 }

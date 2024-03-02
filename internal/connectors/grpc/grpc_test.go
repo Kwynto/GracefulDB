@@ -11,25 +11,25 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
-func Test_SQuery(t *testing.T) {
+func Test_Query(t *testing.T) {
 
 	testingEntity := tMessageServer{}
 
-	t.Run("SQuery() function testing", func(t *testing.T) {
+	t.Run("Query() function testing", func(t *testing.T) {
 		ctx := context.Background()
 		req := gs.Request{
 			Instruction: "instruction",
 			Placeholder: []string{},
 		}
 
-		resp, err := testingEntity.SQuery(ctx, &req) // calling the tested function
+		resp, err := testingEntity.Query(ctx, &req) // calling the tested function
 
 		if err != nil {
-			t.Error("SQuery() error.")
+			t.Error("Query() error.")
 		}
 
 		if reflect.TypeOf(resp) != reflect.TypeOf(&gs.Response{}) {
-			t.Error("SQuery() error = The function returns the wrong type")
+			t.Error("Query() error = The function returns the wrong type")
 		}
 	})
 }

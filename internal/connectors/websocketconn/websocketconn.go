@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type tSQuery struct {
+type tVQuery struct {
 	Ticket      string   `json:"ticket"`
 	Instruction string   `json:"instruction"`
 	Placeholder []string `json:"placeholder"`
@@ -32,8 +32,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
-func squery(w http.ResponseWriter, r *http.Request) {
-	var msgSQuery *tSQuery
+func query(w http.ResponseWriter, r *http.Request) {
+	var msgSQuery *tVQuery
 
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  conf.BufferSize.Read,
@@ -66,7 +66,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reponse message
-		messageResponse := sqlanalyzer.Request(msgSQuery.Ticket, msgSQuery.Instruction, msgSQuery.Placeholder)
+		messageResponse := vqlanalyzer.Request(msgSQuery.Ticket, msgSQuery.Instruction, msgSQuery.Placeholder)
 
 		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
@@ -79,7 +79,7 @@ func squery(w http.ResponseWriter, r *http.Request) {
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", home)
-	mux.HandleFunc("/squery", squery)
+	mux.HandleFunc("/query", query)
 
 	return mux
 }

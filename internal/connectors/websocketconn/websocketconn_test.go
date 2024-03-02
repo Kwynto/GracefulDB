@@ -39,20 +39,20 @@ func Test_home(t *testing.T) {
 }
 
 func Test_squery(t *testing.T) {
-	t.Run("squery() function testing - negative", func(t *testing.T) {
+	t.Run("query() function testing - negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		squery(w, r) // calling the tested function
+		query(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusBadRequest {
-			t.Errorf("squery() error. Status: %v", status)
+			t.Errorf("query() error. Status: %v", status)
 		}
 	})
 
-	t.Run("squery() function testing #1", func(t *testing.T) {
+	t.Run("query() function testing #1", func(t *testing.T) {
 		// Create test server with the echo handler.
-		s := httptest.NewServer(http.HandlerFunc(squery))
+		s := httptest.NewServer(http.HandlerFunc(query))
 		defer s.Close()
 		// Convert http://127.0.0.1 to ws://127.0.0.
 		u := "ws" + strings.TrimPrefix(s.URL, "http")
@@ -66,20 +66,20 @@ func Test_squery(t *testing.T) {
 		// Send message to server, read response and check to see if it's what we expect.
 
 		if err := ws.WriteMessage(websocket.TextMessage, []byte("hello")); err != nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		_, p, err := ws.ReadMessage()
 		if err != nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		if len(p) == 0 {
-			t.Error("squery() error.")
+			t.Error("query() error.")
 		}
 	})
 
-	t.Run("squery() function testing #2", func(t *testing.T) {
+	t.Run("query() function testing #2", func(t *testing.T) {
 		// Create test server with the echo handler.
-		s := httptest.NewServer(http.HandlerFunc(squery))
+		s := httptest.NewServer(http.HandlerFunc(query))
 		defer s.Close()
 		// Convert http://127.0.0.1 to ws://127.0.0.
 		u := "ws" + strings.TrimPrefix(s.URL, "http")
@@ -93,20 +93,20 @@ func Test_squery(t *testing.T) {
 		// Send message to server, read response and check to see if it's what we expect.
 
 		if err := ws.WriteMessage(websocket.TextMessage, []byte("{\"hello\": \"hello\"}")); err != nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		_, p, err := ws.ReadMessage()
 		if err != nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		if len(p) == 0 {
-			t.Error("squery() error.")
+			t.Error("query() error.")
 		}
 	})
 
-	t.Run("squery() function testing #3", func(t *testing.T) {
+	t.Run("query() function testing #3", func(t *testing.T) {
 		// Create test server with the echo handler.
-		s := httptest.NewServer(http.HandlerFunc(squery))
+		s := httptest.NewServer(http.HandlerFunc(query))
 		defer s.Close()
 		// Convert http://127.0.0.1 to ws://127.0.0.
 		u := "ws" + strings.TrimPrefix(s.URL, "http")
@@ -120,15 +120,15 @@ func Test_squery(t *testing.T) {
 		// Send message to server, read response and check to see if it's what we expect.
 
 		if err := ws.WriteMessage(websocket.TextMessage, []byte("{\"hello\": \"hello\"}")); err != nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		ws.Close()
 		_, p, err := ws.ReadMessage()
 		if err == nil {
-			t.Errorf("squery() error: %v", err)
+			t.Errorf("query() error: %v", err)
 		}
 		if len(p) != 0 {
-			t.Error("squery() error.")
+			t.Error("query() error.")
 		}
 	})
 }

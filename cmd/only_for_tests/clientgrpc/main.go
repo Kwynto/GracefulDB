@@ -19,7 +19,7 @@ func CallSQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*
 	request := &gs.Request{
 		Instruction: text,
 	}
-	r, err := g.SQuery(ctx, request)
+	r, err := g.Query(ctx, request)
 	if err != nil {
 		return nil, err
 	}
