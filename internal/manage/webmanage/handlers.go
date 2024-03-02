@@ -10,7 +10,7 @@ import (
 
 	"github.com/Kwynto/gosession"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
@@ -299,7 +299,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	answer := sqlanalyzer.Request(ticket, request, []string{})
+	answer := vqlanalyzer.Request(ticket, request, []string{})
 
 	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 

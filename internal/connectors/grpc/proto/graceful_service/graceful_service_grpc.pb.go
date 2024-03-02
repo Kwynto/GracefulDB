@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	GracefulService_SQuery_FullMethodName = "/graceful_service.GracefulService/SQuery"
+	GracefulService_Query_FullMethodName = "/graceful_service.GracefulService/Query"
 )
 
 // GracefulServiceClient is the client API for GracefulService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GracefulServiceClient interface {
-	SQuery(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	Query(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 }
 
 type gracefulServiceClient struct {
@@ -37,9 +37,9 @@ func NewGracefulServiceClient(cc grpc.ClientConnInterface) GracefulServiceClient
 	return &gracefulServiceClient{cc}
 }
 
-func (c *gracefulServiceClient) SQuery(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (c *gracefulServiceClient) Query(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, GracefulService_SQuery_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, GracefulService_Query_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (c *gracefulServiceClient) SQuery(ctx context.Context, in *Request, opts ..
 // All implementations must embed UnimplementedGracefulServiceServer
 // for forward compatibility
 type GracefulServiceServer interface {
-	SQuery(context.Context, *Request) (*Response, error)
+	Query(context.Context, *Request) (*Response, error)
 	mustEmbedUnimplementedGracefulServiceServer()
 }
 
@@ -58,8 +58,8 @@ type GracefulServiceServer interface {
 type UnimplementedGracefulServiceServer struct {
 }
 
-func (UnimplementedGracefulServiceServer) SQuery(context.Context, *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SQuery not implemented")
+func (UnimplementedGracefulServiceServer) Query(context.Context, *Request) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
 func (UnimplementedGracefulServiceServer) mustEmbedUnimplementedGracefulServiceServer() {}
 
@@ -74,20 +74,20 @@ func RegisterGracefulServiceServer(s grpc.ServiceRegistrar, srv GracefulServiceS
 	s.RegisterService(&GracefulService_ServiceDesc, srv)
 }
 
-func _GracefulService_SQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _GracefulService_Query_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GracefulServiceServer).SQuery(ctx, in)
+		return srv.(GracefulServiceServer).Query(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GracefulService_SQuery_FullMethodName,
+		FullMethod: GracefulService_Query_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GracefulServiceServer).SQuery(ctx, req.(*Request))
+		return srv.(GracefulServiceServer).Query(ctx, req.(*Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -100,8 +100,8 @@ var GracefulService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*GracefulServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SQuery",
-			Handler:    _GracefulService_SQuery_Handler,
+			MethodName: "Query",
+			Handler:    _GracefulService_Query_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

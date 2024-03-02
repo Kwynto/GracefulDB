@@ -120,13 +120,12 @@ func (s *tStorageInfo) Save() bool {
 }
 
 type tDBInfo struct {
-	Name    string                `json:"name"`
-	Folder  string                `json:"folder"`
-	Tables  map[string]tTableInfo `json:"tables"`
-	Removed []tTableInfo          `json:"removed"` // Removed tables
-	// Access     map[string]gtypes.TAccess `json:"access"`  // [name table] - TAccess
-	LastUpdate time.Time `json:"lastupdate"`
-	Deleted    bool      `json:"deleted"`
+	Name       string                `json:"name"`
+	Folder     string                `json:"folder"`
+	Tables     map[string]tTableInfo `json:"tables"`
+	Removed    []tTableInfo          `json:"removed"` // Removed tables
+	LastUpdate time.Time             `json:"lastupdate"`
+	Deleted    bool                  `json:"deleted"`
 }
 
 // Saving the database structure.
@@ -190,11 +189,13 @@ type tColumnForStore struct {
 }
 
 type tRowForStore struct {
-	Id    uint64
-	Time  int64
-	DB    string
-	Table string
-	Row   []tColumnForStore
+	Id     uint64
+	Time   int64
+	Status int64 // memoried = 0  -  saved = 1  -  stored = 2
+	Shape  int64 // primary = 0  -  required = 1  -  updated = 2  -  deleted = 3
+	DB     string
+	Table  string
+	Row    []tColumnForStore
 }
 
 type tCoreFile struct {
@@ -211,9 +212,8 @@ type TState struct {
 }
 
 var LocalCoreSettings tCoreSettings = tCoreSettings{
-	Storage:    "./data/",
-	BucketSize: 800,
-	// FreezeMode: false,
+	Storage:      "./data/",
+	BucketSize:   800,
 	FriendlyMode: true,
 }
 
@@ -229,9 +229,8 @@ var CoreProcessing tCoreProcessing
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	// This function is complete
 	return tCoreSettings{
-		Storage:    cfg.CoreSettings.Storage,
-		BucketSize: cfg.CoreSettings.BucketSize,
-		// FreezeMode: cfg.CoreSettings.FreezeMode,
+		Storage:      cfg.CoreSettings.Storage,
+		BucketSize:   cfg.CoreSettings.BucketSize,
 		FriendlyMode: cfg.CoreSettings.FriendlyMode,
 	}
 }
@@ -247,6 +246,8 @@ func Start(cfg *config.Config) {
 
 	States = make(map[string]TState)
 
+	go WriteBufferService()
+
 	slog.Info("The core of the DBMS was started.")
 }
 
@@ -255,5 +256,6 @@ func Shutdown(ctx context.Context, c *closer.Closer) {
 	if !StorageInfo.Save() {
 		c.AddMsg("Failure to save access rights !!!")
 	}
+	signalSD <- struct{}{}
 	c.Done()
 }

@@ -1,4 +1,4 @@
-package sqlanalyzer
+package vqlanalyzer
 
 import (
 	"errors"

@@ -14,7 +14,7 @@ message Response {
 }
 
 service GracefulService {
-    rpc SQuery (Request) returns (Response);
+    rpc Query (Request) returns (Response);
 }
 
 // protoc --go_out=. --go-grpc_out=. .\config\proto\graceful_service.proto
