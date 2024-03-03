@@ -164,6 +164,12 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	return dbInfo.Save()
 }
 
+func GetFullPathColumn(db, table, column string) string {
+	dbInfo, _ := GetDBInfo(db)
+	col := dbInfo.Tables[table].Columns[column]
+	return fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder)
+}
+
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete

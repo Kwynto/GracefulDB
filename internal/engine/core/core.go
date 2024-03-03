@@ -198,15 +198,6 @@ type tRowForStore struct {
 	Row    []tColumnForStore
 }
 
-type tCoreFile struct {
-	Descriptor *os.File
-	Expire     time.Duration
-}
-
-type tCoreProcessing struct {
-	FileDescriptors map[string]tCoreFile
-}
-
 type TState struct {
 	CurrentDB string
 }
@@ -223,8 +214,6 @@ var StorageInfo tStorageInfo = tStorageInfo{
 }
 
 var States map[string]TState // ticket -> tState
-
-var CoreProcessing tCoreProcessing
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	// This function is complete
