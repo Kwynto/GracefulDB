@@ -164,10 +164,22 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	return dbInfo.Save()
 }
 
-func GetFullPathColumn(db, table, column string) string {
+func GetDescriptionColumn(db, table, column string) (dc tDescColumn) {
 	dbInfo, _ := GetDBInfo(db)
 	col := dbInfo.Tables[table].Columns[column]
-	return fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder)
+
+	dc = tDescColumn{
+		DB:         db,
+		Table:      table,
+		Column:     column,
+		Path:       fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder),
+		Spec:       col.Specification,
+		CurrentRev: col.CurrentRev,
+		BucketSize: col.BucketSize,
+		BucketLog:  col.BucketLog,
+	}
+
+	return dc
 }
 
 // Creating a new column.
