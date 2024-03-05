@@ -131,15 +131,10 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 		columnInfo.OldName = columnInfo.Name
 		columnInfo.Name = newDataColumn.Name
 	}
-	// if newDataColumn.IsChDefault {
+
 	columnInfo.Specification.Default = newDataColumn.Spec.Default
-	// }
-	// if newDataColumn.IsChNotNull {
 	columnInfo.Specification.NotNull = newDataColumn.Spec.NotNull
-	// }
-	// if newDataColumn.IsChUniqut {
 	columnInfo.Specification.Unique = newDataColumn.Spec.Unique
-	// }
 	columnInfo.LastUpdate = tNow
 
 	if newDataColumn.IsChName {
@@ -164,11 +159,12 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	return dbInfo.Save()
 }
 
-func GetDescriptionColumn(db, table, column string) (dc tDescColumn) {
+func GetDescriptionColumn(db, table, column string) tDescColumn {
+	// This function is complete
 	dbInfo, _ := GetDBInfo(db)
 	col := dbInfo.Tables[table].Columns[column]
 
-	dc = tDescColumn{
+	return tDescColumn{
 		DB:         db,
 		Table:      table,
 		Column:     column,
@@ -178,8 +174,6 @@ func GetDescriptionColumn(db, table, column string) (dc tDescColumn) {
 		BucketSize: col.BucketSize,
 		BucketLog:  col.BucketLog,
 	}
-
-	return dc
 }
 
 // Creating a new column.
