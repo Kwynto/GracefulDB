@@ -60,3 +60,20 @@ func Decode64(inB64 string) string {
 	}
 	return string(decodeData)
 }
+
+func intPow(acc, base uint64, exponent uint8) uint64 {
+	if exponent == 1 {
+		return acc
+	}
+	return intPow(acc*base, base, exponent-1)
+}
+
+func Pow(base uint64, exponent uint8) uint64 {
+	if exponent == 0 {
+		return 1
+	}
+	if exponent == 1 {
+		return base
+	}
+	return intPow(base*base, base, exponent-1)
+}

@@ -24,7 +24,7 @@ var storageBlock sync.RWMutex
 
 type tCoreSettings struct {
 	Storage      string
-	BucketSize   int
+	BucketSize   int64
 	FriendlyMode bool
 }
 
@@ -155,7 +155,7 @@ type tColumnInfo struct {
 	Folder        string               `json:"folder"`
 	Parents       string               `json:"parents"`
 	BucketLog     uint8                `json:"blog"`
-	BucketSize    int                  `json:"bsize"`
+	BucketSize    int64                `json:"bsize"`
 	OldRev        string               `json:"oldrev"`
 	CurrentRev    string               `json:"currentrev"`
 	Specification TColumnSpecification `json:"specification"`
@@ -183,8 +183,8 @@ type TColumnForWrite struct {
 
 type tColumnForStore struct {
 	Field string
-	Id    uint64
-	Time  int64
+	Id    uint64 // FIXME: Need delete
+	Time  int64  // FIXME: Need delete
 	Value string
 }
 
@@ -196,15 +196,6 @@ type tRowForStore struct {
 	DB     string
 	Table  string
 	Row    []tColumnForStore
-}
-
-type tCoreFile struct {
-	Descriptor *os.File
-	Expire     time.Duration
-}
-
-type tCoreProcessing struct {
-	FileDescriptors map[string]tCoreFile
 }
 
 type TState struct {
@@ -223,8 +214,6 @@ var StorageInfo tStorageInfo = tStorageInfo{
 }
 
 var States map[string]TState // ticket -> tState
-
-var CoreProcessing tCoreProcessing
 
 func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	// This function is complete

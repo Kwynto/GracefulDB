@@ -19,7 +19,7 @@ var DefaultConfig Config
 
 type CoreSettings struct {
 	Storage    string `yaml:"storage" env-default:"./data/"`
-	BucketSize int    `yaml:"bucket_size" env-default:"800"`
+	BucketSize int64  `yaml:"bucket_size" env-default:"800"`
 	// FreezeMode bool   `yaml:"freeze"`
 	FriendlyMode bool `yaml:"friendly"`
 }

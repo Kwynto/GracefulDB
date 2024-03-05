@@ -18,20 +18,13 @@ type tCollectBuffers struct {
 }
 
 var WriteBuffer = tCollectBuffers{
-	// FirstBox: tWriteBuffer{
-	// 	Area:     []tRowForStore{},
-	// 	BlockBuf: sync.RWMutex{},
-	// },
-	// SecondBox: tWriteBuffer{
-	// 	Area:     []tRowForStore{},
-	// 	BlockBuf: sync.RWMutex{},
-	// },
-	// Block:  sync.RWMutex{},
 	Switch: 1,
 }
 
-var signalWrite = make(chan struct{}, 1024)
-var signalSD = make(chan struct{}, 1)
+var (
+	signalWrite = make(chan struct{}, 1024)
+	signalSD    = make(chan struct{}, 1)
+)
 
 func InsertIntoBuffer(rowsForStore []tRowForStore) {
 	// -
@@ -67,9 +60,4 @@ loop:
 			goto loop
 		}
 	}
-}
-
-func writeBufferToDisk() bool {
-
-	return false
 }
