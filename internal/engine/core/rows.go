@@ -5,15 +5,11 @@ import (
 	"time"
 )
 
-func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]uint64, bool) {
-	for _, row := range rows {
-		if len(columns) != len(row) {
-			return nil, false
-		}
-	}
+func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) ([]uint64, bool) {
+	var rows [][]string
 
 	for _, col := range columns {
-		if col == "_id" || col == "_time" {
+		if col == "_id" || col == "_time" || col == "_status" || col == "_shape" {
 			return nil, false
 		}
 	}
@@ -40,6 +36,28 @@ func InsertRows(nameDB, nameTable string, columns []string, rows [][]string) ([]
 	tNow := time.Now().Unix()
 
 	var rowsForStore []tRowForStore
+
+	for _, row := range rowsin {
+		var trow []string
+
+		lCol := len(columns)
+		lRow := len(row)
+
+		if lCol != lRow {
+			if lCol < lRow {
+				trow = row[:lCol]
+			}
+			if lCol > lRow {
+				trow = row
+				for i := lRow; i < lCol; i++ {
+					trow = append(trow, tableInfo.Columns[columns[i]].Specification.Default)
+				}
+			}
+		} else {
+			trow = row
+		}
+		rows = append(rows, trow)
+	}
 
 	for _, row := range rows {
 		var rowStore = tRowForStore{}

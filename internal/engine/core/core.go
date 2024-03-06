@@ -29,19 +29,19 @@ type tCoreSettings struct {
 }
 
 type tStorageInfo struct {
-	DBs     map[string]tDBInfo        `json:"dbs"`     // [name db] tDBInfo
-	Removed []tDBInfo                 `json:"removed"` // Removed databases
+	DBs     map[string]TDBInfo        `json:"dbs"`     // [name db] tDBInfo
+	Removed []TDBInfo                 `json:"removed"` // Removed databases
 	Access  map[string]gtypes.TAccess `json:"access"`  // [name db] - TAccess
 }
 
-func GetDBInfo(nameDB string) (tDBInfo, bool) {
+func GetDBInfo(nameDB string) (TDBInfo, bool) {
 	// This function is complete
 	storageBlock.RLock()
 	defer storageBlock.RUnlock()
 
 	info, ok := StorageInfo.DBs[nameDB]
 	if !ok {
-		return tDBInfo{}, false
+		return TDBInfo{}, false
 	}
 
 	return info, true
@@ -73,10 +73,10 @@ func (s *tStorageInfo) Load() bool {
 	storageBlock.Lock()
 	defer storageBlock.Unlock()
 
-	var dbInfo tDBInfo
+	var dbInfo TDBInfo
 
-	s.DBs = make(map[string]tDBInfo)
-	s.Removed = make([]tDBInfo, 0)
+	s.DBs = make(map[string]TDBInfo)
+	s.Removed = make([]TDBInfo, 0)
 	s.Access = make(map[string]gtypes.TAccess)
 
 	files, err := os.ReadDir(LocalCoreSettings.Storage)
@@ -119,37 +119,37 @@ func (s *tStorageInfo) Save() bool {
 	return ecowriter.WriteJSON(infoStorageFile, s.Access) == nil
 }
 
-type tDBInfo struct {
+type TDBInfo struct {
 	Name       string                `json:"name"`
 	Folder     string                `json:"folder"`
-	Tables     map[string]tTableInfo `json:"tables"`
-	Removed    []tTableInfo          `json:"removed"` // Removed tables
+	Tables     map[string]TTableInfo `json:"tables"`
+	Removed    []TTableInfo          `json:"removed"` // Removed tables
 	LastUpdate time.Time             `json:"lastupdate"`
 	Deleted    bool                  `json:"deleted"`
 }
 
 // Saving the database structure.
-func (d tDBInfo) Save() bool {
+func (d TDBInfo) Save() bool {
 	// This method is complete
 	// Don't use mutex
 	path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
 	return ecowriter.WriteJSON(path, d) == nil
 }
 
-type tTableInfo struct {
+type TTableInfo struct {
 	Name       string                 `json:"name"`
 	Patronymic string                 `json:"patronymic"`
 	Folder     string                 `json:"folder"`
 	Parent     string                 `json:"parent"`
-	Columns    map[string]tColumnInfo `json:"columns"`
-	Removed    []tColumnInfo          `json:"removed"` // Removed columns
+	Columns    map[string]TColumnInfo `json:"columns"`
+	Removed    []TColumnInfo          `json:"removed"` // Removed columns
 	Order      []string               `json:"order"`
 	Count      uint64                 `json:"count"`
 	LastUpdate time.Time              `json:"lastupdate"`
 	Deleted    bool                   `json:"deleted"`
 }
 
-type tColumnInfo struct {
+type TColumnInfo struct {
 	Name          string               `json:"name"`
 	OldName       string               `json:"oldname"` // only for core
 	Folder        string               `json:"folder"`

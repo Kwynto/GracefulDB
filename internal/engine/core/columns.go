@@ -223,7 +223,7 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 
 	tNow := time.Now()
 
-	columnInfo := tColumnInfo{
+	columnInfo := TColumnInfo{
 		Name:          nameColumn,
 		OldName:       "",
 		Folder:        folderName,

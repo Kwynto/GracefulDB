@@ -114,11 +114,11 @@ func CreateDB(nameDB string, owner string, secure bool) bool {
 		return false
 	}
 
-	dbInfo := tDBInfo{
+	dbInfo := TDBInfo{
 		Name:       nameDB,
 		Folder:     folderDB,
-		Tables:     make(map[string]tTableInfo),
-		Removed:    make([]tTableInfo, 0),
+		Tables:     make(map[string]TTableInfo),
+		Removed:    make([]TTableInfo, 0),
 		LastUpdate: time.Now(),
 		Deleted:    false,
 	}
