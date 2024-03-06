@@ -142,13 +142,13 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		return false
 	}
 
-	tableInfo := tTableInfo{
+	tableInfo := TTableInfo{
 		Name:       nameTable,
 		Patronymic: nameDB,
 		Folder:     folderName,
 		Parent:     dbInfo.Folder,
-		Columns:    make(map[string]tColumnInfo),
-		Removed:    make([]tColumnInfo, 0),
+		Columns:    make(map[string]TColumnInfo),
+		Removed:    make([]TColumnInfo, 0),
 		Order:      make([]string, 0),
 		Count:      0,
 		LastUpdate: time.Now(),

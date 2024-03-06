@@ -31,6 +31,7 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		okInsert  bool
 		res       gtypes.Response
 		resArr    gtypes.ResponseUints
+		columnsIn = make([]string, 0)
 	)
 
 	if q.Ticket == "" {
@@ -73,7 +74,7 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	columnsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
 	columnsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(columnsStr, "")
 	columnsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(columnsStr, "")
-	columnsIn := core.RegExpCollection["Comma"].Split(columnsStr, -1)
+	columnsIn = core.RegExpCollection["Comma"].Split(columnsStr, -1)
 
 	table := core.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
 	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
@@ -114,6 +115,11 @@ LabelCheck:
 				goto LabelCheck
 			}
 			return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+		}
+
+		if len(columnsIn) == 0 || columnsIn[0] == "" {
+			// clear(columnsIn)
+			columnsIn = dbInfo.Tables[table].Order
 		}
 
 		dbAccess, okAccess := core.GetDBAccess(db)

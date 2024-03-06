@@ -2,22 +2,9 @@ package core
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
-	"slices"
-	"strings"
 	"sync"
-	"time"
 )
-
-type tCoreFile struct {
-	Descriptor *os.File
-	Expire     time.Time
-}
-
-type tCoreProcessing struct {
-	FileDescriptors map[string]tCoreFile
-}
 
 type tDescColumn struct {
 	DB         string
@@ -31,14 +18,12 @@ type tDescColumn struct {
 }
 
 var (
-	CoreProcessing  tCoreProcessing
 	fileSystemBlock sync.RWMutex
 )
 
 func writeBufferToDisk() bool {
+	// This function is complete
 	var rows *[]tRowForStore
-	var tempCollect = []string{}
-	var deskColumns = make(map[string]tDescColumn)
 
 	WriteBuffer.Block.Lock()
 	workBuff := WriteBuffer.Switch
@@ -49,17 +34,6 @@ func writeBufferToDisk() bool {
 		WriteBuffer.Switch = 1
 	}
 	WriteBuffer.Block.Unlock()
-
-	tNow := time.Now()
-
-	for name, desc := range CoreProcessing.FileDescriptors {
-		if desc.Expire.Compare(tNow) == -1 {
-			CoreProcessing.FileDescriptors[name].Descriptor.Close()
-			delete(CoreProcessing.FileDescriptors, name)
-			slog.Debug("Delete file description", slog.String("desc", name)) // FIXME: Need delete this slog
-		}
-
-	}
 
 	switch workBuff {
 	case 1:
@@ -72,32 +46,15 @@ func writeBufferToDisk() bool {
 		rows = &WriteBuffer.SecondBox.Area
 	}
 
-	// возможно под удаление - начало
-	for _, row := range *rows {
-		for _, col := range row.Row {
-			tc := fmt.Sprintf("%s|%s|%s", row.DB, row.Table, col.Field)
-			tempCollect = append(tempCollect, tc)
-		}
-	}
-	tempCollect = slices.Compact(tempCollect)
-
-	for _, tStr := range tempCollect {
-		tArr := strings.Split(tStr, "|")
-		dc := GetDescriptionColumn(tArr[0], tArr[1], tArr[2])
-		// deskColumns = append(deskColumns, dc)
-		deskColumns[tStr] = dc
-	}
-	// возможно под удаление - конец
-
 	fileSystemBlock.Lock()
 	defer fileSystemBlock.Unlock()
 
 	for _, row := range *rows {
-		head := fmt.Sprintf("%d|%d|%d|%d|", row.Id, row.Time, row.Status, row.Shape)
+		head := fmt.Sprintf("%d|%d|1|%d|", row.Id, row.Time, row.Shape)
 		for _, col := range row.Row {
 			fullValue := fmt.Sprintf("%s%s\n", head, col.Value)
-			key := fmt.Sprintf("%s|%s|%s", row.DB, row.Table, col.Field)
-			dc := deskColumns[key]
+
+			dc := GetDescriptionColumn(row.DB, row.Table, col.Field)
 
 			maxBucket := Pow(2, dc.BucketLog)
 			hashid := row.Id % maxBucket
@@ -105,25 +62,26 @@ func writeBufferToDisk() bool {
 				hashid = Pow(2, dc.BucketLog)
 			}
 
-			fileName := fmt.Sprintf("%s_%d", dc.CurrentRev, hashid)
+			fileName := fmt.Sprintf("%s%s_%d", dc.Path, dc.CurrentRev, hashid)
 
-			_, ok := CoreProcessing.FileDescriptors[key]
-			if !ok {
-				rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-				if err != nil {
-					return false
-				}
-				CoreProcessing.FileDescriptors[key] = tCoreFile{
-					Descriptor: rwFile,
-					Expire:     tNow.Add(time.Minute),
-				}
-				// defer rwFile.Close()
-			}
-
-			if _, err := CoreProcessing.FileDescriptors[key].Descriptor.WriteString(fullValue); err != nil {
+			rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+			if err != nil {
 				return false
 			}
+
+			if _, err := rwFile.WriteString(fullValue); err != nil {
+				rwFile.Close()
+				return false
+			}
+			rwFile.Close()
 		}
+	}
+
+	switch workBuff {
+	case 1:
+		clear(WriteBuffer.FirstBox.Area)
+	case 2:
+		clear(WriteBuffer.SecondBox.Area)
 	}
 
 	return true
