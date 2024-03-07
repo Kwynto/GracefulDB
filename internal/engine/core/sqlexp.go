@@ -102,7 +102,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("InsertValuesWord", `(?m)[vV][aA][lL][uU][eE][sS]`)
 	recol = recol.CompileExp("InsertSplitParenthesis", `(?m)\),\s*\(`)
 
-	recol = recol.CompileExp("SearchUpdate", `(?m)^;`)
+	recol = recol.CompileExp("SearchUpdate", `(?m)^[uU][pP][dD][aA][tT][eE].*[sS][sE][tT].*`)
+
 	recol = recol.CompileExp("SearchDelete", `(?m)^;`)
 	recol = recol.CompileExp("SearchCommit", `(?m)^;`)
 	recol = recol.CompileExp("SearchRollback", `(?m)^;`)
