@@ -5,6 +5,15 @@ import (
 	"time"
 )
 
+type TUpdaateStruct struct {
+	Where   string
+	Couples map[string]string
+}
+
+func UpdateRows(nameDB, nameTable string, ColsVals TUpdaateStruct) ([]uint64, bool) {
+	return []uint64{}, true
+}
+
 func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) ([]uint64, bool) {
 	var rows [][]string
 

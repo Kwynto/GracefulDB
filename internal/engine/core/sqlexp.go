@@ -54,6 +54,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
 	recol = recol.CompileExp("Spaces", `(?m)\s*`)
 	recol = recol.CompileExp("Comma", `(?m),`)
+	recol = recol.CompileExp("SignEqual", `(?m)=`)
 
 	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
 	recol = recol.CompileExp("IfExistsWord", `(?m)[iI][fF]\s*[eE][xX][iI][sS][tT][sS]`)
@@ -65,6 +66,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("DROP", `(?m)[dD][rR][oO][pP]`)
 	recol = recol.CompileExp("MODIFY", `(?m)[mM][oO][dD][iI][fF][yY]`)
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
+	recol = recol.CompileExp("Where", `(?m)[wW][hH][eE][rR][eE]`)
+	recol = recol.CompileExp("WhereToEnd", `(?m)[wW][hH][eE][rR][eE].*`)
 
 	// DDL
 	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]\s*$`)
@@ -103,6 +106,9 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("InsertSplitParenthesis", `(?m)\),\s*\(`)
 
 	recol = recol.CompileExp("SearchUpdate", `(?m)^[uU][pP][dD][aA][tT][eE].*[sS][sE][tT].*`)
+	recol = recol.CompileExp("UpdateWord", `(?m)^[uU][pP][dD][aA][tT][eE]`)
+	recol = recol.CompileExp("UpdateSetToEnd", `(?m)\s*[sS][eE][tT]\s.*`)
+	recol = recol.CompileExp("UpdateSetWord", `(?m)\s*[sS][eE][tT]\s`)
 
 	recol = recol.CompileExp("SearchDelete", `(?m)^;`)
 	recol = recol.CompileExp("SearchCommit", `(?m)^;`)

@@ -174,10 +174,13 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	var (
 		resultIds []uint64
-		okInsert  bool
+		okUpdate  bool
 		res       gtypes.Response
 		resArr    gtypes.ResponseUints
-		columnsIn = make([]string, 0)
+		// columnsIn = make([]string, 0)
+		columnsValuesIn = core.TUpdaateStruct{
+			Couples: make(map[string]string),
+		}
 	)
 
 	if q.Ticket == "" {
@@ -211,39 +214,45 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	instruction := core.RegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
-	valuesStr := core.RegExpCollection["InsertValuesToEnd"].FindString(instruction)
-	instruction = core.RegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(instruction, "")
+	instruction := core.RegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
+	whereStr := core.RegExpCollection["WhereToEnd"].FindString(instruction)
+	whereStr = core.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+	columnsValuesIn.Where = whereStr
 
-	columnsStr := core.RegExpCollection["InsertColParenthesis"].FindString(instruction)
-	columnsStr = core.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(columnsStr, "")
-	columnsIn = core.RegExpCollection["Comma"].Split(columnsStr, -1)
+	instruction = core.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
 
-	table := core.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
+	columnsValuesStr := core.RegExpCollection["UpdateSetToEnd"].FindString(instruction)
+	columnsValuesStr = core.RegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(columnsValuesStr, "")
+	columnsValuesArr := core.RegExpCollection["Comma"].Split(columnsValuesStr, -1)
+
+	if len(columnsValuesArr) == 0 || columnsValuesArr[0] == "" {
+		return `{"state":"error", "result":"incorrect command syntax"}`, errors.New("incorrect command syntax")
+	}
+
+	for _, colVal := range columnsValuesArr {
+		colValArr := core.RegExpCollection["SignEqual"].Split(colVal, -1)
+		col := colValArr[0]
+		val := colValArr[1]
+
+		col = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
+		col = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
+		col = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+
+		if len(col) == 0 {
+			return `{"state":"error", "result":"incorrect syntax"}`, errors.New("incorrect syntax")
+		}
+
+		val = strings.TrimSpace(val)
+		val = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(val, "")
+		val = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(val, "")
+
+		columnsValuesIn.Couples[col] = val
+	}
+
+	table := core.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
 	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
-
-	var rowsIn [][]string
-	valuesStr = core.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
-	valuesArr := core.RegExpCollection["InsertSplitParenthesis"].Split(valuesStr, -1)
-	for _, value := range valuesArr {
-		value = core.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(value, "")
-		valueIn := core.RegExpCollection["Comma"].Split(value, -1)
-		var rowIn []string
-		for _, val := range valueIn {
-			val = strings.TrimSpace(val)
-			val = strings.TrimRight(val, `"'`)
-			val = strings.TrimRight(val, "`")
-			val = strings.TrimLeft(val, `"'`)
-			val = strings.TrimLeft(val, "`")
-			rowIn = append(rowIn, val)
-		}
-		rowsIn = append(rowsIn, rowIn)
-	}
 
 LabelCheck:
 	dbInfo, okDB := core.GetDBInfo(db)
@@ -261,11 +270,6 @@ LabelCheck:
 				goto LabelCheck
 			}
 			return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
-		}
-
-		if len(columnsIn) == 0 || columnsIn[0] == "" {
-			// clear(columnsIn)
-			columnsIn = dbInfo.Tables[table].Order
 		}
 
 		dbAccess, okAccess := core.GetDBAccess(db)
@@ -290,13 +294,13 @@ LabelCheck:
 			return `{"state":"error", "result":"internal error"}`, errors.New("internal error")
 		}
 
-		if !luxUser && !flagsAcs.Insert {
+		if !luxUser && !flagsAcs.Update {
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
-		resultIds, okInsert = core.InsertRows(db, table, columnsIn, rowsIn)
-		if !okInsert {
-			return `{"state":"error", "result":"the record(s) cannot be inserted"}`, errors.New("the record cannot be inserted")
+		resultIds, okUpdate = core.UpdateRows(db, table, columnsValuesIn)
+		if !okUpdate {
+			return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 		}
 	} else {
 		if core.LocalCoreSettings.FriendlyMode {
