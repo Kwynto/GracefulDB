@@ -41,6 +41,18 @@ type ResponseColumns struct {
 	Result []ResultColumn `json:"result,omitempty"`
 }
 
+type TConditions struct {
+	Type      string
+	Key       string
+	Operation string
+	Value     string
+}
+
+type TUpdaateStruct struct {
+	Where   []TConditions
+	Couples map[string]string
+}
+
 type TAccessFlags struct {
 	Create bool `json:"create,omitempty"`
 	Alter  bool `json:"alter,omitempty"`

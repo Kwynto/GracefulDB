@@ -177,10 +177,11 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		okUpdate  bool
 		res       gtypes.Response
 		resArr    gtypes.ResponseUints
-		// columnsIn = make([]string, 0)
-		columnsValuesIn = core.TUpdaateStruct{
+		updateIn  = gtypes.TUpdaateStruct{
+			Where:   make([]gtypes.TConditions, 0, 4),
 			Couples: make(map[string]string),
 		}
+		expression = make([]gtypes.TConditions, 0, 4)
 	)
 
 	if q.Ticket == "" {
@@ -217,7 +218,71 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	instruction := core.RegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
 	whereStr := core.RegExpCollection["WhereToEnd"].FindString(instruction)
 	whereStr = core.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
-	columnsValuesIn.Where = whereStr
+	// columnsValuesIn.Where = whereStr
+
+	for {
+		headCond := core.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
+		condition := core.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
+		keyIn := condition[0]
+		valueIn := condition[1]
+
+		keyIn = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
+
+		valueIn = strings.TrimSpace(valueIn)
+		valueIn = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
+		valueIn = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
+
+		if keyIn == "" {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		if valueIn == "" {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+
+		exp := gtypes.TConditions{
+			Type:  "operation",
+			Key:   keyIn,
+			Value: valueIn,
+		}
+
+		if core.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
+			exp.Operation = "<="
+		} else if core.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
+			exp.Operation = ">="
+		} else if core.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
+			exp.Operation = "<"
+		} else if core.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
+			exp.Operation = ">"
+		} else if core.RegExpCollection["WhereOperation_="].MatchString(headCond) {
+			exp.Operation = "="
+		} else if core.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
+			exp.Operation = "like"
+		} else {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		expression = append(expression, exp)
+
+		whereStr = core.RegExpCollection["WhereExpression"].FindString(whereStr)
+		logicOper := core.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
+		// logicOper = strings.TrimSpace(logicOper)
+
+		if core.RegExpCollection["OR"].MatchString(logicOper) {
+			expression = append(expression, gtypes.TConditions{
+				Type: "or",
+			})
+		} else if core.RegExpCollection["AND"].MatchString(logicOper) {
+			expression = append(expression, gtypes.TConditions{
+				Type: "and",
+			})
+		} else {
+			break
+		}
+
+		whereStr = core.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
+	}
+	updateIn.Where = append(updateIn.Where, expression...)
 
 	instruction = core.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
 
@@ -246,7 +311,7 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		val = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(val, "")
 		val = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(val, "")
 
-		columnsValuesIn.Couples[col] = val
+		updateIn.Couples[col] = val
 	}
 
 	table := core.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
@@ -298,7 +363,7 @@ LabelCheck:
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
-		resultIds, okUpdate = core.UpdateRows(db, table, columnsValuesIn)
+		resultIds, okUpdate = core.UpdateRows(db, table, updateIn)
 		if !okUpdate {
 			return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 		}

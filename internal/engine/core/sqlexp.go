@@ -66,8 +66,20 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("DROP", `(?m)[dD][rR][oO][pP]`)
 	recol = recol.CompileExp("MODIFY", `(?m)[mM][oO][dD][iI][fF][yY]`)
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
-	recol = recol.CompileExp("Where", `(?m)[wW][hH][eE][rR][eE]`)
+
 	recol = recol.CompileExp("WhereToEnd", `(?m)[wW][hH][eE][rR][eE].*`)
+	recol = recol.CompileExp("Where", `(?m)[wW][hH][eE][rR][eE]`)
+	recol = recol.CompileExp("WhereExpression", `(?m)(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+).*`)
+	recol = recol.CompileExp("WhereExpression_And_Or_Word", `(?m)^(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+)`)
+	recol = recol.CompileExp("AND", `(?m)[aA][nN][dD]`)
+	recol = recol.CompileExp("OR", `(?m)[oO][rR]`)
+	recol = recol.CompileExp("WhereOperationConditions", `(?m)(<|>|<=|>=|=|[lL][iI][kK][eE])`)
+	recol = recol.CompileExp("WhereOperation_<=", `(?m)<=`)
+	recol = recol.CompileExp("WhereOperation_>=", `(?m)>=`)
+	recol = recol.CompileExp("WhereOperation_<", `(?m)<`)
+	recol = recol.CompileExp("WhereOperation_>", `(?m)>`)
+	recol = recol.CompileExp("WhereOperation_=", `(?m)=`)
+	recol = recol.CompileExp("WhereOperation_LIKE", `(?m)[lL][iI][kK][eE]`)
 
 	// DDL
 	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]\s*$`)

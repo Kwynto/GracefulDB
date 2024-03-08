@@ -3,14 +3,11 @@ package core
 import (
 	"slices"
 	"time"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-type TUpdaateStruct struct {
-	Where   string
-	Couples map[string]string
-}
-
-func UpdateRows(nameDB, nameTable string, ColsVals TUpdaateStruct) ([]uint64, bool) {
+func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
 	return []uint64{}, true
 }
 
