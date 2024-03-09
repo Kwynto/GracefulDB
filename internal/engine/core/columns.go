@@ -5,6 +5,8 @@ import (
 	"os"
 	"slices"
 	"time"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 )
 
 // Marks the column as deleted, but does not delete files.
@@ -93,7 +95,7 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 // Changing a column.
 func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secure bool) bool {
 	// This function is complete
-	if secure && !RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
+	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
 		return false
 	}
 
@@ -179,7 +181,7 @@ func GetDescriptionColumn(db, table, column string) tDescColumn {
 // Creating a new column.
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
 	// This function is complete
-	if secure && !RegExpCollection["EntityName"].MatchString(nameColumn) {
+	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameColumn) {
 		return false
 	}
 

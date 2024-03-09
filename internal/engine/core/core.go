@@ -227,7 +227,7 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 func Start(cfg *config.Config) {
 	// -
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
-	RegExpCollection = CompileRegExpCollection()
+	// RegExpCollection = CompileRegExpCollection()
 
 	if !StorageInfo.Load() {
 		slog.Error("Storage activation error !!!")

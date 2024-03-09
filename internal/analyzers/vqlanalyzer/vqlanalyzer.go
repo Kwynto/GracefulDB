@@ -3,7 +3,7 @@ package vqlanalyzer
 import (
 	"strings"
 
-	"github.com/Kwynto/GracefulDB/internal/engine/core"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 )
 
 type tQuery struct {
@@ -17,7 +17,7 @@ func Request(ticket string, instruction string, placeholder []string) string {
 	// -
 	// Prep
 	// instruction = strings.TrimSpace(instruction)
-	instruction = core.RegExpCollection["LineBreak"].ReplaceAllLiteralString(instruction, " ")
+	instruction = vqlexp.RegExpCollection["LineBreak"].ReplaceAllLiteralString(instruction, " ")
 	instruction = strings.TrimRight(instruction, "; ")
 	instruction = strings.TrimLeft(instruction, " ")
 
@@ -27,8 +27,8 @@ func Request(ticket string, instruction string, placeholder []string) string {
 		Placeholder: placeholder,
 	}
 
-	for _, expName := range core.ParsingOrder {
-		if core.RegExpCollection[expName].MatchString(query.Instruction) {
+	for _, expName := range vqlexp.ParsingOrder {
+		if vqlexp.RegExpCollection[expName].MatchString(query.Instruction) {
 			switch expName {
 			case "SearchCreate":
 				res, _ := query.DDLCreate()

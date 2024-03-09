@@ -1,4 +1,4 @@
-package core
+package vqlexp
 
 import "regexp"
 
@@ -174,4 +174,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("RoleWord", `(?m)[rR][oO][lL][eE]`)
 
 	return recol
+}
+
+func init() {
+	RegExpCollection = CompileRegExpCollection()
 }

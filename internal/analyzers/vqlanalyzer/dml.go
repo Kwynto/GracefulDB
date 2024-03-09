@@ -6,6 +6,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
@@ -65,28 +66,28 @@ func (q tQuery) DMLInsert() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	instruction := core.RegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
-	valuesStr := core.RegExpCollection["InsertValuesToEnd"].FindString(instruction)
-	instruction = core.RegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(instruction, "")
+	instruction := vqlexp.RegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
+	valuesStr := vqlexp.RegExpCollection["InsertValuesToEnd"].FindString(instruction)
+	instruction = vqlexp.RegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(instruction, "")
 
-	columnsStr := core.RegExpCollection["InsertColParenthesis"].FindString(instruction)
-	columnsStr = core.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(columnsStr, "")
-	columnsIn = core.RegExpCollection["Comma"].Split(columnsStr, -1)
+	columnsStr := vqlexp.RegExpCollection["InsertColParenthesis"].FindString(instruction)
+	columnsStr = vqlexp.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(columnsStr, "")
+	columnsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
+	columnsStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(columnsStr, "")
+	columnsStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(columnsStr, "")
+	columnsIn = vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
 
-	table := core.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
-	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table := vqlexp.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
+	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
 	var rowsIn [][]string
-	valuesStr = core.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
-	valuesArr := core.RegExpCollection["InsertSplitParenthesis"].Split(valuesStr, -1)
+	valuesStr = vqlexp.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
+	valuesArr := vqlexp.RegExpCollection["InsertSplitParenthesis"].Split(valuesStr, -1)
 	for _, value := range valuesArr {
-		value = core.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(value, "")
-		valueIn := core.RegExpCollection["Comma"].Split(value, -1)
+		value = vqlexp.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(value, "")
+		valueIn := vqlexp.RegExpCollection["Comma"].Split(value, -1)
 		var rowIn []string
 		for _, val := range valueIn {
 			val = strings.TrimSpace(val)
@@ -215,24 +216,24 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	instruction := core.RegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
-	whereStr := core.RegExpCollection["WhereToEnd"].FindString(instruction)
-	whereStr = core.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+	instruction := vqlexp.RegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
+	whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
+	whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
 	// columnsValuesIn.Where = whereStr
 
 	for {
-		headCond := core.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
-		condition := core.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
+		headCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
+		condition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
 		keyIn := condition[0]
 		valueIn := condition[1]
 
-		keyIn = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
 
 		valueIn = strings.TrimSpace(valueIn)
-		valueIn = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
-		valueIn = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
+		valueIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
+		valueIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
 
 		if keyIn == "" {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
@@ -247,32 +248,32 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 			Value: valueIn,
 		}
 
-		if core.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
+		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
 			exp.Operation = "<="
-		} else if core.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
+		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
 			exp.Operation = ">="
-		} else if core.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
+		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
 			exp.Operation = "<"
-		} else if core.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
+		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
 			exp.Operation = ">"
-		} else if core.RegExpCollection["WhereOperation_="].MatchString(headCond) {
+		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(headCond) {
 			exp.Operation = "="
-		} else if core.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
+		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
 			exp.Operation = "like"
 		} else {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 		}
 		expression = append(expression, exp)
 
-		whereStr = core.RegExpCollection["WhereExpression"].FindString(whereStr)
-		logicOper := core.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
+		whereStr = vqlexp.RegExpCollection["WhereExpression"].FindString(whereStr)
+		logicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
 		// logicOper = strings.TrimSpace(logicOper)
 
-		if core.RegExpCollection["OR"].MatchString(logicOper) {
+		if vqlexp.RegExpCollection["OR"].MatchString(logicOper) {
 			expression = append(expression, gtypes.TConditions{
 				Type: "or",
 			})
-		} else if core.RegExpCollection["AND"].MatchString(logicOper) {
+		} else if vqlexp.RegExpCollection["AND"].MatchString(logicOper) {
 			expression = append(expression, gtypes.TConditions{
 				Type: "and",
 			})
@@ -280,44 +281,44 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 			break
 		}
 
-		whereStr = core.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
+		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
 	}
 	updateIn.Where = append(updateIn.Where, expression...)
 
-	instruction = core.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
+	instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
 
-	columnsValuesStr := core.RegExpCollection["UpdateSetToEnd"].FindString(instruction)
-	columnsValuesStr = core.RegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(columnsValuesStr, "")
-	columnsValuesArr := core.RegExpCollection["Comma"].Split(columnsValuesStr, -1)
+	columnsValuesStr := vqlexp.RegExpCollection["UpdateSetToEnd"].FindString(instruction)
+	columnsValuesStr = vqlexp.RegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(columnsValuesStr, "")
+	columnsValuesArr := vqlexp.RegExpCollection["Comma"].Split(columnsValuesStr, -1)
 
 	if len(columnsValuesArr) == 0 || columnsValuesArr[0] == "" {
 		return `{"state":"error", "result":"incorrect command syntax"}`, errors.New("incorrect command syntax")
 	}
 
 	for _, colVal := range columnsValuesArr {
-		colValArr := core.RegExpCollection["SignEqual"].Split(colVal, -1)
+		colValArr := vqlexp.RegExpCollection["SignEqual"].Split(colVal, -1)
 		col := colValArr[0]
 		val := colValArr[1]
 
-		col = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
-		col = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
+		col = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
+		col = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
 
 		if len(col) == 0 {
 			return `{"state":"error", "result":"incorrect syntax"}`, errors.New("incorrect syntax")
 		}
 
 		val = strings.TrimSpace(val)
-		val = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(val, "")
-		val = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(val, "")
+		val = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(val, "")
+		val = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(val, "")
 
 		updateIn.Couples[col] = val
 	}
 
-	table := core.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
-	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table := vqlexp.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
+	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
 LabelCheck:
 	dbInfo, okDB := core.GetDBInfo(db)
@@ -443,10 +444,10 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	table := core.RegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	table := vqlexp.RegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	table = strings.TrimSpace(table)
-	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
 LabelCheck:
 	dbInfo, okDB := core.GetDBInfo(db)
