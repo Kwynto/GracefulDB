@@ -150,52 +150,17 @@ type TTableInfo struct {
 }
 
 type TColumnInfo struct {
-	Name          string               `json:"name"`
-	OldName       string               `json:"oldname"` // only for core
-	Folder        string               `json:"folder"`
-	Parents       string               `json:"parents"`
-	BucketLog     uint8                `json:"blog"`
-	BucketSize    int64                `json:"bsize"`
-	OldRev        string               `json:"oldrev"`
-	CurrentRev    string               `json:"currentrev"`
-	Specification TColumnSpecification `json:"specification"`
-	LastUpdate    time.Time            `json:"lastupdate"`
-	Deleted       bool                 `json:"deleted"`
-}
-
-type TColumnSpecification struct {
-	Default string `json:"default"`
-	NotNull bool   `json:"notnull"`
-	Unique  bool   `json:"unique"` // FIXME: not used
-}
-
-type TColumnForWrite struct {
-	Name    string
-	OldName string
-	Spec    TColumnSpecification
-
-	// Flags of changes
-	IsChName bool
-	// IsChDefault bool
-	// IsChNotNull bool
-	// IsChUniqut  bool
-}
-
-type tColumnForStore struct {
-	Field string
-	Id    uint64 // FIXME: Need delete
-	Time  int64  // FIXME: Need delete
-	Value string
-}
-
-type tRowForStore struct {
-	Id     uint64
-	Time   int64
-	Status int64 // memoried = 0  -  saved = 1  -  stored = 2
-	Shape  int64 // primary = 0  -  required = 1  -  updated = 2  -  deleted = 3
-	DB     string
-	Table  string
-	Row    []tColumnForStore
+	Name          string                      `json:"name"`
+	OldName       string                      `json:"oldname"` // only for core
+	Folder        string                      `json:"folder"`
+	Parents       string                      `json:"parents"`
+	BucketLog     uint8                       `json:"blog"`
+	BucketSize    int64                       `json:"bsize"`
+	OldRev        string                      `json:"oldrev"`
+	CurrentRev    string                      `json:"currentrev"`
+	Specification gtypes.TColumnSpecification `json:"specification"`
+	LastUpdate    time.Time                   `json:"lastupdate"`
+	Deleted       bool                        `json:"deleted"`
 }
 
 type TState struct {

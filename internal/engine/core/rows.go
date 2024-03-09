@@ -41,7 +41,7 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 
 	tNow := time.Now().Unix()
 
-	var rowsForStore []tRowForStore
+	var rowsForStore []gtypes.TRowForStore
 
 	for _, row := range rowsin {
 		var trow []string
@@ -66,10 +66,10 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 	}
 
 	for _, row := range rows {
-		var rowStore = tRowForStore{}
+		var rowStore = gtypes.TRowForStore{}
 		tableInfo.Count++
 		for _, column := range tableInfo.Columns {
-			var colStore = tColumnForStore{}
+			var colStore = gtypes.TColumnForStore{}
 
 			colStore.Field = column.Name
 

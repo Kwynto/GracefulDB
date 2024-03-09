@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 )
 
@@ -92,8 +93,8 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 	return false
 }
 
-// Changing a column.
-func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secure bool) bool {
+// Changing a column
+func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite, secure bool) bool {
 	// This function is complete
 	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
 		return false
@@ -161,12 +162,12 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn TColumnForWrite, secur
 	return dbInfo.Save()
 }
 
-func GetDescriptionColumn(db, table, column string) tDescColumn {
+func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
 	// This function is complete
 	dbInfo, _ := GetDBInfo(db)
 	col := dbInfo.Tables[table].Columns[column]
 
-	return tDescColumn{
+	return gtypes.TDescColumn{
 		DB:         db,
 		Table:      table,
 		Column:     column,
@@ -178,8 +179,8 @@ func GetDescriptionColumn(db, table, column string) tDescColumn {
 	}
 }
 
-// Creating a new column.
-func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification TColumnSpecification) bool {
+// Creating a new column
+func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification gtypes.TColumnSpecification) bool {
 	// This function is complete
 	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameColumn) {
 		return false

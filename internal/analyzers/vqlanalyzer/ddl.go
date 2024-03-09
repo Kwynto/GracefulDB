@@ -208,12 +208,12 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 		dbInfo, _ = core.GetDBInfo(db)
 		tableInfo := dbInfo.Tables[table]
 
-		var columns = []core.TColumnForWrite{}
+		var columns = []gtypes.TColumnForWrite{}
 
 		for _, column := range columnsIn {
-			col := core.TColumnForWrite{
+			col := gtypes.TColumnForWrite{
 				Name: "",
-				Spec: core.TColumnSpecification{
+				Spec: gtypes.TColumnSpecification{
 					Default: "",
 					NotNull: false,
 					Unique:  false,
@@ -420,12 +420,12 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 	columnsStr = vqlexp.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
 	columnsIn := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
 
-	var columns = []core.TColumnForWrite{}
+	var columns = []gtypes.TColumnForWrite{}
 
 	for _, column := range columnsIn {
-		col := core.TColumnForWrite{
+		col := gtypes.TColumnForWrite{
 			Name: "",
-			Spec: core.TColumnSpecification{
+			Spec: gtypes.TColumnSpecification{
 				Default: "",
 				NotNull: false,
 				Unique:  false,
@@ -665,13 +665,13 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 	columnsStr = vqlexp.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
 	columnsIn := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
 
-	var columns = []core.TColumnForWrite{}
+	var columns = []gtypes.TColumnForWrite{}
 
 	for _, column := range columnsIn {
-		col := core.TColumnForWrite{
+		col := gtypes.TColumnForWrite{
 			Name:    "",
 			OldName: "",
-			Spec: core.TColumnSpecification{
+			Spec: gtypes.TColumnSpecification{
 				Default: "",
 				NotNull: false,
 				Unique:  false,
