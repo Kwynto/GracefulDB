@@ -1,12 +1,66 @@
 package gtypes
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-type Secret struct {
-	Ticket   string `json:"ticket,omitempty"`
-	Login    string `json:"login,omitempty"`
-	Password string `json:"password,omitempty"`
-	Hash     string `json:"hash,omitempty"`
+type TColumnSpecification struct {
+	Default string `json:"default"`
+	NotNull bool   `json:"notnull"`
+	Unique  bool   `json:"unique"` // FIXME: not used
+}
+
+type TColumnForWrite struct {
+	Name    string
+	OldName string
+	Spec    TColumnSpecification
+
+	// Flags of changes
+	IsChName bool
+	// IsChDefault bool
+	// IsChNotNull bool
+	// IsChUniqut  bool
+}
+
+type TColumnForStore struct {
+	Field string
+	Id    uint64 // FIXME: Need delete
+	Time  int64  // FIXME: Need delete
+	Value string
+}
+
+type TRowForStore struct {
+	Id     uint64
+	Time   int64
+	Status int64 // memoried = 0  -  saved = 1  -  stored = 2
+	Shape  int64 // primary = 0  -  required = 1  -  updated = 2  -  deleted = 3
+	DB     string
+	Table  string
+	Row    []TColumnForStore
+}
+
+type TWriteBuffer struct {
+	Area     []TRowForStore
+	BlockBuf sync.RWMutex
+}
+
+type TCollectBuffers struct {
+	FirstBox  TWriteBuffer
+	SecondBox TWriteBuffer
+	Block     sync.RWMutex
+	Switch    uint8
+}
+
+type TDescColumn struct {
+	DB         string
+	Table      string
+	Column     string
+	Path       string
+	Spec       TColumnSpecification
+	CurrentRev string
+	BucketSize int64
+	BucketLog  uint8
 }
 
 type Response struct {
@@ -39,6 +93,25 @@ type ResponseColumns struct {
 	State  string         `json:"state,omitempty"`
 	Ticket string         `json:"ticket,omitempty"`
 	Result []ResultColumn `json:"result,omitempty"`
+}
+
+type TConditions struct {
+	Type      string
+	Key       string
+	Operation string
+	Value     string
+}
+
+type TUpdaateStruct struct {
+	Where   []TConditions
+	Couples map[string]string
+}
+
+type Secret struct {
+	Ticket   string `json:"ticket,omitempty"`
+	Login    string `json:"login,omitempty"`
+	Password string `json:"password,omitempty"`
+	Hash     string `json:"hash,omitempty"`
 }
 
 type TAccessFlags struct {

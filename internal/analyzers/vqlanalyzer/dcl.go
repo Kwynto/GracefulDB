@@ -6,6 +6,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
@@ -42,22 +43,22 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		users []string
 	)
 
-	privilegesStr := core.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
-	privilegesStr = core.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
-	privilegesStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
-	privileges := core.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1)
+	privilegesStr := vqlexp.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
+	privilegesStr = vqlexp.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
+	privileges := vqlexp.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1)
 
 	if len(privileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	dbsStr := core.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
-	dbsStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
-	dbsIn := core.RegExpCollection["Comma"].Split(dbsStr, -1)
+	dbsStr := vqlexp.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
+	dbsStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
+	dbsIn := vqlexp.RegExpCollection["Comma"].Split(dbsStr, -1)
 	for _, db := range dbsIn {
 		if _, ok := core.GetDBInfo(db); ok {
 			dbs = append(dbs, db)
@@ -67,12 +68,12 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	usersStr := core.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
-	usersStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
-	usersIn := core.RegExpCollection["Comma"].Split(usersStr, -1)
+	usersStr := vqlexp.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
+	usersStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
+	usersIn := vqlexp.RegExpCollection["Comma"].Split(usersStr, -1)
 	for _, user := range usersIn {
 		if _, err := gauth.GetProfile(user); err == nil {
 			users = append(users, user)
@@ -158,22 +159,22 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		users []string
 	)
 
-	privilegesStr := core.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
-	privilegesStr = core.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(privilegesStr, "")
-	privilegesStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
-	privileges := core.RegExpCollection["RevokePrivilegesList"].FindAllString(privilegesStr, -1)
+	privilegesStr := vqlexp.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
+	privilegesStr = vqlexp.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(privilegesStr, "")
+	privilegesStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
+	privileges := vqlexp.RegExpCollection["RevokePrivilegesList"].FindAllString(privilegesStr, -1)
 
 	if len(privileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	dbsStr := core.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
-	dbsStr = core.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
-	dbsIn := core.RegExpCollection["Comma"].Split(dbsStr, -1)
+	dbsStr := vqlexp.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
+	dbsStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(dbsStr, "")
+	dbsStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(dbsStr, "")
+	dbsIn := vqlexp.RegExpCollection["Comma"].Split(dbsStr, -1)
 	for _, db := range dbsIn {
 		if _, ok := core.GetDBInfo(db); ok {
 			dbs = append(dbs, db)
@@ -183,12 +184,12 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	usersStr := core.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
-	usersStr = core.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
-	usersIn := core.RegExpCollection["Comma"].Split(usersStr, -1)
+	usersStr := vqlexp.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
+	usersStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(usersStr, "")
+	usersStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(usersStr, "")
+	usersIn := vqlexp.RegExpCollection["Comma"].Split(usersStr, -1)
 	for _, user := range usersIn {
 		if _, err := gauth.GetProfile(user); err == nil {
 			users = append(users, user)
@@ -273,12 +274,12 @@ func (q tQuery) DCLUse() (result string, err error) {
 		ticket = q.Ticket
 	}
 
-	db := core.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	db := vqlexp.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	db = strings.TrimSpace(db)
-	db = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
-	db = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+	db = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
+	db = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
 
-	if !core.RegExpCollection["EntityName"].MatchString(db) {
+	if !vqlexp.RegExpCollection["EntityName"].MatchString(db) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
@@ -347,8 +348,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 		res.Ticket = newticket
 	}
 
-	isDBs := core.RegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
-	isTables := core.RegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
+	isDBs := vqlexp.RegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
+	isTables := vqlexp.RegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
 
 	if isDBs {
 		var namesDBs []string = []string{}
@@ -439,17 +440,17 @@ func (q tQuery) DCLDesc() (result string, err error) {
 		return ecowriter.EncodeJSON(res), errors.New("no database selected")
 	}
 
-	if core.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
-		table = core.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
-	} else if core.RegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
-		table = core.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
-	} else if core.RegExpCollection["SearchDesc"].MatchString(q.Instruction) {
-		table = core.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
+	if vqlexp.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
+		table = vqlexp.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if vqlexp.RegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
+		table = vqlexp.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if vqlexp.RegExpCollection["SearchDesc"].MatchString(q.Instruction) {
+		table = vqlexp.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
 	}
 
-	table = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
 	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
@@ -523,36 +524,36 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 	var roles []gauth.TRole
 
-	isNew := core.RegExpCollection["AuthNew"].MatchString(q.Instruction)
-	isChange := core.RegExpCollection["AuthChange"].MatchString(q.Instruction)
-	isRemove := core.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
+	isNew := vqlexp.RegExpCollection["AuthNew"].MatchString(q.Instruction)
+	isChange := vqlexp.RegExpCollection["AuthChange"].MatchString(q.Instruction)
+	isRemove := vqlexp.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
 
-	login := core.RegExpCollection["Login"].FindString(q.Instruction)
-	login = core.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
+	login := vqlexp.RegExpCollection["Login"].FindString(q.Instruction)
+	login = vqlexp.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
 	login = strings.TrimSpace(login)
-	login = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(login, "")
-	login = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(login, "")
+	login = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(login, "")
+	login = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(login, "")
 
-	password := core.RegExpCollection["Password"].FindString(q.Instruction)
-	password = core.RegExpCollection["PasswordWord"].ReplaceAllLiteralString(password, " ")
+	password := vqlexp.RegExpCollection["Password"].FindString(q.Instruction)
+	password = vqlexp.RegExpCollection["PasswordWord"].ReplaceAllLiteralString(password, " ")
 	password = strings.TrimSpace(password)
-	password = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
-	password = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
+	password = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(password, "")
+	password = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(password, "")
 
-	hash := core.RegExpCollection["Hash"].FindString(q.Instruction)
-	hash = core.RegExpCollection["HashWord"].ReplaceAllLiteralString(hash, " ")
+	hash := vqlexp.RegExpCollection["Hash"].FindString(q.Instruction)
+	hash = vqlexp.RegExpCollection["HashWord"].ReplaceAllLiteralString(hash, " ")
 	hash = strings.TrimSpace(hash)
-	hash = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
-	hash = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
+	hash = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(hash, "")
+	hash = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(hash, "")
 
-	isRole := core.RegExpCollection["Role"].MatchString(q.Instruction)
+	isRole := vqlexp.RegExpCollection["Role"].MatchString(q.Instruction)
 	if isRole {
-		roleStr := core.RegExpCollection["Role"].FindString(q.Instruction)
-		roleStr = core.RegExpCollection["RoleWord"].ReplaceAllLiteralString(roleStr, "")
-		roleStr = core.RegExpCollection["Spaces"].ReplaceAllLiteralString(roleStr, "")
-		roleStr = core.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(roleStr, "")
-		roleStr = core.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(roleStr, "")
-		roleIn := core.RegExpCollection["Comma"].Split(roleStr, -1)
+		roleStr := vqlexp.RegExpCollection["Role"].FindString(q.Instruction)
+		roleStr = vqlexp.RegExpCollection["RoleWord"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(roleStr, "")
+		roleStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(roleStr, "")
+		roleIn := vqlexp.RegExpCollection["Comma"].Split(roleStr, -1)
 		if len(roleIn) == 0 {
 			return `{"state":"error", "result":"incorrect roles"}`, errors.New("incorrect roles")
 		}

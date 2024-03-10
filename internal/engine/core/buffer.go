@@ -1,23 +1,12 @@
 package core
 
 import (
-	"sync"
 	"time"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-type tWriteBuffer struct {
-	Area     []tRowForStore
-	BlockBuf sync.RWMutex
-}
-
-type tCollectBuffers struct {
-	FirstBox  tWriteBuffer
-	SecondBox tWriteBuffer
-	Block     sync.RWMutex
-	Switch    uint8
-}
-
-var WriteBuffer = tCollectBuffers{
+var WriteBuffer = gtypes.TCollectBuffers{
 	Switch: 1,
 }
 
@@ -26,7 +15,7 @@ var (
 	signalSD    = make(chan struct{}, 1)
 )
 
-func InsertIntoBuffer(rowsForStore []tRowForStore) {
+func InsertIntoBuffer(rowsForStore []gtypes.TRowForStore) {
 	// -
 	WriteBuffer.Block.Lock()
 	defer WriteBuffer.Block.Unlock()

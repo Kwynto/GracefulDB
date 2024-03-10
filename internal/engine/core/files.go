@@ -4,18 +4,9 @@ import (
 	"fmt"
 	"os"
 	"sync"
-)
 
-type tDescColumn struct {
-	DB         string
-	Table      string
-	Column     string
-	Path       string
-	Spec       TColumnSpecification
-	CurrentRev string
-	BucketSize int64
-	BucketLog  uint8
-}
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+)
 
 var (
 	fileSystemBlock sync.RWMutex
@@ -23,7 +14,7 @@ var (
 
 func writeBufferToDisk() bool {
 	// This function is complete
-	var rows *[]tRowForStore
+	var rows *[]gtypes.TRowForStore
 
 	WriteBuffer.Block.Lock()
 	workBuff := WriteBuffer.Switch
