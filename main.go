@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 	"os/signal"
@@ -15,7 +16,15 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
 )
 
+var (
+	//go:embed LICENSE
+	license string
+)
+
 func main() {
+	// Greeting
+	fmt.Println(license)
+
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(configPath)
