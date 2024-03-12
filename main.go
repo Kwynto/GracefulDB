@@ -13,7 +13,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/server"
 
-	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 )
 
 var (
@@ -37,7 +37,7 @@ func main() {
 	}
 
 	// Init logger: slog
-	prettylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
+	ordinarylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
 	slog.Info("Starting GracefulDB", slog.String("env", config.DefaultConfig.Env))
 	slog.Info("Configuration loaded", slog.String("file", config.DisplayConfigPath))
 	slog.Debug("debug messages are enabled")

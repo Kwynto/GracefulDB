@@ -9,7 +9,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
-	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 )
 
 const (
@@ -74,7 +74,7 @@ func Start(cfg *config.Config) {
 
 	srvWeb = &http.Server{
 		Addr:     address,
-		ErrorLog: prettylogger.LogServerError,
+		ErrorLog: ordinarylogger.LogServerError,
 		Handler:  muxWeb,
 	}
 

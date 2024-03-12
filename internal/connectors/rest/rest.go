@@ -10,7 +10,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
-	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 )
 
 var address string
@@ -62,7 +62,7 @@ func Start(cfg *config.Config) {
 
 	srvRest = &http.Server{
 		Addr:     address,
-		ErrorLog: prettylogger.LogServerError,
+		ErrorLog: ordinarylogger.LogServerError,
 		Handler:  muxRest,
 	}
 

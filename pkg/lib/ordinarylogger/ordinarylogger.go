@@ -1,4 +1,4 @@
-package prettylogger
+package ordinarylogger
 
 import (
 	"context"
@@ -17,7 +17,7 @@ const (
 	EnvProd = "prod"
 )
 
-type PrettyHandler struct {
+type OrdinaryHandler struct {
 	slog.Handler
 	lScreen *log.Logger
 	lFile   *log.Logger
@@ -28,7 +28,7 @@ var IoFile *os.File // io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
 
-func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
+func (h *OrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	var strFileOut string
 
 	level := r.Level.String() + ":"
@@ -92,7 +92,7 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 	return nil
 }
 
-func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *PrettyHandler {
+func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *OrdinaryHandler {
 	var gbdlevel slog.Level
 	switch env {
 	case EnvDev:
@@ -101,7 +101,7 @@ func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *Prett
 		gbdlevel = slog.LevelInfo
 	}
 
-	h := &PrettyHandler{
+	h := &OrdinaryHandler{
 		Handler: slog.NewJSONHandler(outScreen, &slog.HandlerOptions{
 			Level: gbdlevel,
 		}),
@@ -124,7 +124,7 @@ func setupLogger(logPath, logEnv string) *slog.Logger {
 
 	IoFile := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
 
-	LogHandler = newPrettyHandler(os.Stdout, IoFile, logEnv)
+	LogHandler = newOrdinaryHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
 
 	return nlog
