@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"os"
 	"os/signal"
@@ -12,10 +13,19 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/server"
 
-	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
+	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
+)
+
+var (
+	//go:embed LICENSE
+	license string
 )
 
 func main() {
+	// Greeting
+	fmt.Println(colorterm.StringYellowH(license))
+
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(configPath)
@@ -28,7 +38,7 @@ func main() {
 	}
 
 	// Init logger: slog
-	prettylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
+	ordinarylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
 	slog.Info("Starting GracefulDB", slog.String("env", config.DefaultConfig.Env))
 	slog.Info("Configuration loaded", slog.String("file", config.DisplayConfigPath))
 	slog.Debug("debug messages are enabled")

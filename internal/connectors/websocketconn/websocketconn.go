@@ -10,7 +10,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
-	"github.com/Kwynto/GracefulDB/pkg/lib/prettylogger"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 
 	"github.com/gorilla/websocket"
 )
@@ -92,7 +92,7 @@ func Start(cfg *config.Config) {
 
 	srvWS = &http.Server{
 		Addr:     address,
-		ErrorLog: prettylogger.LogServerError,
+		ErrorLog: ordinarylogger.LogServerError,
 		Handler:  muxWS,
 	}
 

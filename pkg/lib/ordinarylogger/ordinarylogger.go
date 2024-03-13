@@ -1,4 +1,4 @@
-package prettylogger
+package ordinarylogger
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/fatih/color"
+	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	EnvProd = "prod"
 )
 
-type PrettyHandler struct {
+type OrdinaryHandler struct {
 	slog.Handler
 	lScreen *log.Logger
 	lFile   *log.Logger
@@ -28,20 +28,20 @@ var IoFile *os.File // io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
 
-func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
+func (h *OrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	var strFileOut string
 
 	level := r.Level.String() + ":"
 
 	switch r.Level {
 	case slog.LevelDebug:
-		level = color.MagentaString(level)
+		level = colorterm.StringMagenta(level)
 	case slog.LevelInfo:
-		level = color.GreenString(level)
+		level = colorterm.StringGreen(level)
 	case slog.LevelWarn:
-		level = color.YellowString(level)
+		level = colorterm.StringYellow(level)
 	case slog.LevelError:
-		level = color.RedString(level)
+		level = colorterm.StringRed(level)
 	}
 
 	fields := make(map[string]interface{}, r.NumAttrs())
@@ -84,15 +84,15 @@ func (h *PrettyHandler) Handle(ctx context.Context, r slog.Record) error {
 		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", timeStrFile, r.Level, r.Message, strAttrsFileOut)
 	}
 
-	msg := color.CyanString(r.Message)
+	msg := colorterm.StringCyan(r.Message)
 
-	h.lScreen.Println(timeStrScreen, level, msg, color.WhiteString(strAttrsScreenOut))
+	h.lScreen.Println(timeStrScreen, level, msg, colorterm.StringWhite(strAttrsScreenOut))
 	h.lFile.Println(strFileOut)
 
 	return nil
 }
 
-func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *PrettyHandler {
+func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *OrdinaryHandler {
 	var gbdlevel slog.Level
 	switch env {
 	case EnvDev:
@@ -101,7 +101,7 @@ func newPrettyHandler(outScreen io.Writer, outFile io.Writer, env string) *Prett
 		gbdlevel = slog.LevelInfo
 	}
 
-	h := &PrettyHandler{
+	h := &OrdinaryHandler{
 		Handler: slog.NewJSONHandler(outScreen, &slog.HandlerOptions{
 			Level: gbdlevel,
 		}),
@@ -124,7 +124,7 @@ func setupLogger(logPath, logEnv string) *slog.Logger {
 
 	IoFile := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
 
-	LogHandler = newPrettyHandler(os.Stdout, IoFile, logEnv)
+	LogHandler = newOrdinaryHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
 
 	return nlog

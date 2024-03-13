@@ -1,4 +1,4 @@
-package prettylogger
+package ordinarylogger
 
 import (
 	"context"
@@ -152,22 +152,22 @@ func Test_Handle(t *testing.T) {
 	})
 }
 
-func Test_newPrettyHandler(t *testing.T) {
+func Test_newOrdinaryHandler(t *testing.T) {
 	iof := openLogFile(fmt.Sprintf("%s%s%s", TEST_LOG_PATH, "dev", ".log"))
 
-	logHandler1 := newPrettyHandler(os.Stdout, iof, "dev")
+	logHandler1 := newOrdinaryHandler(os.Stdout, iof, "dev")
 
-	t.Run("newPrettyHandler() function testing", func(t *testing.T) {
-		if r1 := reflect.TypeOf(logHandler1); r1 != reflect.TypeOf(&PrettyHandler{}) {
-			t.Errorf("newPrettyHandler() error: type mismatch: %v", r1)
+	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
+		if r1 := reflect.TypeOf(logHandler1); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+			t.Errorf("newOrdinaryHandler() error: type mismatch: %v", r1)
 		}
 	})
 
-	logHandler2 := newPrettyHandler(os.Stdout, iof, "prod")
+	logHandler2 := newOrdinaryHandler(os.Stdout, iof, "prod")
 
-	t.Run("newPrettyHandler() function testing", func(t *testing.T) {
-		if r1 := reflect.TypeOf(logHandler2); r1 != reflect.TypeOf(&PrettyHandler{}) {
-			t.Errorf("newPrettyHandler() error: type mismatch: %v", r1)
+	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
+		if r1 := reflect.TypeOf(logHandler2); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+			t.Errorf("newOrdinaryHandler() error: type mismatch: %v", r1)
 		}
 	})
 }
@@ -190,7 +190,7 @@ func Test_setupLogger(t *testing.T) {
 			t.Errorf("setupLogger() error: type mismatch: %v", r1)
 		}
 
-		if r1 := reflect.TypeOf(inlog.Handler()); r1 != reflect.TypeOf(&PrettyHandler{}) {
+		if r1 := reflect.TypeOf(inlog.Handler()); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
 			t.Errorf("setupLogger() error: type of handler mismatch: %v", r1)
 		}
 	})
@@ -219,7 +219,7 @@ func Test_Init(t *testing.T) {
 			t.Errorf("Init() error: type mismatch: %v", r1)
 		}
 
-		if r1 := reflect.TypeOf(slog.Default().Handler()); r1 != reflect.TypeOf(&PrettyHandler{}) {
+		if r1 := reflect.TypeOf(slog.Default().Handler()); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
 			t.Errorf("Init() error: type of handler mismatch in slog.Default: %v", r1)
 		}
 	})
