@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/fatih/color"
+	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 )
 
 const (
@@ -35,13 +35,13 @@ func (h *OrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	switch r.Level {
 	case slog.LevelDebug:
-		level = color.MagentaString(level)
+		level = colorterm.StringMagenta(level)
 	case slog.LevelInfo:
-		level = color.GreenString(level)
+		level = colorterm.StringGreen(level)
 	case slog.LevelWarn:
-		level = color.YellowString(level)
+		level = colorterm.StringYellow(level)
 	case slog.LevelError:
-		level = color.RedString(level)
+		level = colorterm.StringRed(level)
 	}
 
 	fields := make(map[string]interface{}, r.NumAttrs())
@@ -84,9 +84,9 @@ func (h *OrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", timeStrFile, r.Level, r.Message, strAttrsFileOut)
 	}
 
-	msg := color.CyanString(r.Message)
+	msg := colorterm.StringCyan(r.Message)
 
-	h.lScreen.Println(timeStrScreen, level, msg, color.WhiteString(strAttrsScreenOut))
+	h.lScreen.Println(timeStrScreen, level, msg, colorterm.StringWhite(strAttrsScreenOut))
 	h.lFile.Println(strFileOut)
 
 	return nil

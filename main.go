@@ -13,6 +13,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/server"
 
+	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 )
 
@@ -23,7 +24,7 @@ var (
 
 func main() {
 	// Greeting
-	fmt.Println(license)
+	fmt.Println(colorterm.StringYellowH(license))
 
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
