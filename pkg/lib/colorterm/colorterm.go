@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Kwynto/isatty"
 	"github.com/mattn/go-colorable"
-	"github.com/mattn/go-isatty"
 	"golang.org/x/sys/windows"
 )
 

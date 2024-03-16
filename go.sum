@@ -3,6 +3,8 @@ github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Kwynto/gosession v0.3.0 h1:oecl4EZliQkibPxcdx6hyvOeWq1vWitiu1ttvioTtkk=
 github.com/Kwynto/gosession v0.3.0/go.mod h1:t9ebCczcC/w08whDLwShIZ59finO9EyRkiQf5B31m90=
+github.com/Kwynto/isatty v0.0.0-20240315100545-67642426cab2 h1:PPgYz49E72Fik2U56URztTG9Gd/inryfjs2Sbdjor3g=
+github.com/Kwynto/isatty v0.0.0-20240315100545-67642426cab2/go.mod h1:/gZShF+pYx9oexYSLSZ0lGxxsx/D5S90ibZ1rnj53ag=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg=
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
