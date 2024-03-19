@@ -19,7 +19,7 @@ func Test_parseTemplates(t *testing.T) {
 
 func Test_loadTemplateFromVar(t *testing.T) {
 	t.Run("loadTemplateFromVar() function testing - positive", func(t *testing.T) {
-		err := loadTemplateFromVar(HOME_TEMP_NAME, home_masq.HtmlHome) // calling the tested function
+		err := LoadTemplateFromString(HOME_TEMP_NAME, home_masq.HtmlHome) // calling the tested function
 		if err != nil {
 			t.Error("loadTemplateFromVar() error.")
 		}
@@ -32,7 +32,7 @@ func Test_loadTemplateFromVar(t *testing.T) {
 		</html>
 		`
 
-		err := loadTemplateFromVar("wrongStr", wrongStr) // calling the tested function
+		err := LoadTemplateFromString("wrongStr", wrongStr) // calling the tested function
 		if err == nil {
 			t.Error("loadTemplateFromVar() error.")
 		}

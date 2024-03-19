@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	_ "embed"
+	"embed"
 	"fmt"
 	"os"
 	"os/signal"
@@ -11,6 +11,7 @@ import (
 	"log/slog"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
+	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/internal/server"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
@@ -20,17 +21,24 @@ import (
 var (
 	//go:embed LICENSE
 	license string
+
+	//go:embed ui/html
+	uiHtmlDir embed.FS
+
+	//go:embed ui/static
+	uiStaticDir embed.FS
 )
 
 func main() {
 	// Greeting
 	fmt.Println(colorterm.StringYellowH(license))
 
+	// Set UI
+	webmanage.SetUiDirs(&uiHtmlDir, &uiStaticDir)
+
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(configPath)
-
-	startCtx := context.Background()
 
 	if config.DefaultConfig.Env == "test" {
 		fmt.Println("You should set up the configuration file correctly.")
@@ -44,6 +52,7 @@ func main() {
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking
+	startCtx := context.Background()
 	ctx, stop := signal.NotifyContext(startCtx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

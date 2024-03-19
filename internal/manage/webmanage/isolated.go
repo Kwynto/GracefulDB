@@ -12,11 +12,11 @@ import (
 
 // Isolation of statistical data for web access.
 
-type isolatedFS struct {
+type IsolatedFS struct {
 	fs http.FileSystem
 }
 
-func (ifs isolatedFS) Open(path string) (f http.File, err error) {
+func (ifs IsolatedFS) Open(path string) (f http.File, err error) {
 	op := "internal -> WebManage -> isolated -> Open"
 	defer func() { e.Wrapper(op, err) }()
 

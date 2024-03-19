@@ -20,8 +20,8 @@
   <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet"> -->
 
   <!--Stylesheet -->
-  <link rel="stylesheet" href="./static/css/bg.css">
-  <link rel="stylesheet" href="./static/css/dash.css">
+  <link rel="stylesheet" href="./ui/static/css/bg.css">
+  <link rel="stylesheet" href="./ui/static/css/dash.css">
   
   <script src="./ui/static/js/jquery-3.7.1.min.js"></script>
   <script src="./ui/static/js/htmx.min.js"></script>
@@ -364,7 +364,7 @@
   </section>
 
   <section class="user-menu">
-    <div class="user-name"><i class="fa fa-user"></i> rootUser</div>
+    <div class="user-name"><i class="fa fa-user" title="{{.Roles}}"></i> {{.Login}}</div>
     <div class="content-user-menu">
       <a href="#" id="uBtnYourProfile"><i class="fa fa-user-cog"></i> Your profile</a>
       <a href="#" id="uBtnLogOut"><i class="fa fa-sign-out-alt"></i> Log Out</a>
@@ -373,106 +373,10 @@
 
   <div id="idMainUnit">
     <div class="hat">
-      <div class="header">Header header</div>
-      <div class="deschead">Description description, description description description.</div>
+      <div class="header">Dashboard</div>
+      <div class="deschead"></div>
     </div>
-    <div class="main-content">
-      <div class="content-row">
-        <p class="content-cel">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</p>
-      </div>
-      <div class="content-row">
-        <p class="content-cel">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</p>
-        <p class="content-cel">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</p>
-      </div>
-      <div class="content-row">
-        <div class="content-cel-table">
-          <button type="button" class="btn btn-info" hx-get="/hx/nav/accounts" hx-target="#idMainUnit"><i class="fa fa-sync-alt"></i></button>
-          <button type="button" class="btn btn-success" id="aBtnCreateAccount" hx-get="/hx/accounts/create_load_form" hx-target="#createModalSpace"><i class="fa fa-plus-square"></i> Create a user</button><br>
-          <table>
-            <thead>
-                <tr class="tr-head">
-                    <th>#</th>
-                    <th>Login</th>
-                    <th>Status</th>
-                    <th>Roles</th>
-                    <th>Description</th>
-                    <th>Control</th>
-                </tr>
-            </thead>
-            <tbody>
-              <tr class="tr-cont">
-                <td class="td-c">1</td>
-                <td class="td-c">root</td>
-                <td class="td-c">ACTIVE</td>
-                <td class="td-c">ADMIN</td>
-                <td class="td-l">Description</td>
-                <td class="td-r">
-                  <button type="button" class="btn btn-sm btn-success" disabled><i class="fa fa-edit"></i> Edit</button>
-                  <button type="button" class="btn btn-sm btn-success trigger-edit" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
-                  <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
-                  <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
-                  <button type="button" class="btn btn-sm btn-warning trigger-unban" style="width: 100px;" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace"><i class="fa fa-undo"></i> UnBlock</button>
-                  <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
-                  <button type="button" class="btn btn-sm btn-warning trigger-ban" style="width: 100px;" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
-                  <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
-                </td>
-              </tr>
-              <tr class="tr-cont">
-                <td class="td-c">1</td>
-                <td class="td-c">root</td>
-                <td class="td-c">ACTIVE</td>
-                <td class="td-c">ADMIN</td>
-                <td class="td-l">Description</td>
-                <td class="td-r">
-                  <button type="button" class="btn btn-sm btn-success" disabled><i class="fa fa-edit"></i> Edit</button>
-                  <button type="button" class="btn btn-sm btn-success trigger-edit" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
-                  <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
-                  <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
-                  <button type="button" class="btn btn-sm btn-warning trigger-unban" style="width: 100px;" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace"><i class="fa fa-undo"></i> UnBlock</button>
-                  <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
-                  <button type="button" class="btn btn-sm btn-warning trigger-ban" style="width: 100px;" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
-                  <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
-                </td>
-              </tr>
-            </tbody>
-        </table>
-        </div>
-      </div>
-      <div class="content-row">
-        <div class="content-cel-25">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</div>
-        <div class="content-cel-25">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</div>
-        <div class="content-space-25"></div>
-        <div class="content-cel-25">
-              <input class="form-check-input" type="checkbox" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
-              <input class="form-check-input" type="checkbox" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
-        </div>
-      </div>
-      <div class="content-row">
-        <div class="content-space-25"></div>
-        <div class="content-cel-50">
-          <h1>Header 1</h1>
-          <h2>Header 2</h2>
-          <h3>Header 3</h3>
-          <h4>Header 4</h4>
-          <h5>Header 5</h5>
-          <h6>Header 6</h6>
-        </div>
-        <div class="content-cel-25">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</div>
-      </div>
-      <div class="content-row">
-        <div class="content-space-5"></div>
-        <div class="content-cel-20">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</div>
-        <div class="content-space-10"></div>
-        <div class="content-cel-50">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sint fugiat dolorum tenetur, id, neque cumque hic alias eligendi nulla eveniet maxime dolorem eius molestiae. Pariatur quis totam sed voluptates vero? Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis vel praesentium, et, harum inventore placeat minima aspernatur doloribus velit ex libero iure rem. Sed maxime iure voluptas at dolor velit?</div>
-        <div class="content-space-5"></div>
-        <div class="content-cel-10">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quidem praesentium maiores rerum animi eius ex corporis repudiandae fugiat libero est dolore, corrupti vero sunt, aperiam molestiae doloribus debitis at consequatur.</div>
-      </div>
-      <div class="content-row">
-        <div class="content-cel-25"></div>
-        <div class="content-cel-50"></div>
-        <div class="content-cel-25"></div>
-      </div>
-    </div>
+    
   </div>
 
   <!-- Modal Profile -->
@@ -577,7 +481,7 @@
             </div>
             <div class="modal-form-line">
               <label for="desc-input" class="col-form-label">Description:</label>
-              <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Description}}">
+              <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="">
             </div>
             <div class="modal-form-line">
               <label for="status-select" class="col-form-label">Status:</label> UNDEFINED (You must select the status)

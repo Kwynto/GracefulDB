@@ -124,7 +124,7 @@ func Test_homeDefault(t *testing.T) {
 			{{ .errorexp }}
 		</html>
 		`
-		loadTemplateFromVar(HOME_TEMP_NAME, wrongStr)
+		LoadTemplateFromString(HOME_TEMP_NAME, wrongStr)
 
 		homeDefault(w1, r1) // calling the tested function
 		status := w1.Code
