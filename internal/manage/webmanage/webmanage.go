@@ -58,9 +58,14 @@ func routes() *http.ServeMux {
 	mux.HandleFunc("/hx/settings/web_change_sw", settings_web_change_sw)
 
 	// Isolation of static files
-	fileServer := http.FileServer(isolatedFS{http.Dir("./ui/static/")})
-	mux.Handle("/static", http.NotFoundHandler())
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	// fileServer := http.FileServer(IsolatedFS{http.Dir("./ui/static/")})
+	// mux.Handle("/static", http.NotFoundHandler())
+	// mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
+	// Embed of static file
+	fileServer := http.FileServer(http.FS(uiStaticDir))
+	mux.Handle("/ui/static", http.NotFoundHandler())
+	mux.Handle("/ui/static/", fileServer)
 
 	return mux
 }

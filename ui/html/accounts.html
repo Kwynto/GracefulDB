@@ -1,0 +1,52 @@
+<div class="hat">
+  <div class="header">Accounts</div>
+  <div class="deschead">In this section, you can manage DBMS users.</div>
+</div>
+<div class="main-content">
+  <div class="content-row">
+    <div class="content-cel-table">
+      <button type="button" class="btn btn-info" hx-get="/hx/nav/accounts" hx-target="#idMainUnit"><i class="fa fa-sync-alt"></i></button>
+      <button type="button" class="btn btn-success" id="aBtnCreateAccount" hx-get="/hx/accounts/create_load_form" hx-target="#createModalSpace"><i class="fa fa-plus-square"></i> Create a user</button><br>
+      <table>
+        <thead>
+            <tr class="tr-head">
+                <th>#</th>
+                <th>Login</th>
+                <th>Status</th>
+                <th>Roles</th>
+                <th>Description</th>
+                <th>Control</th>
+            </tr>
+        </thead>
+        <tbody>
+          {{ range $ind, $data := . }}
+          <tr class="tr-cont">
+            <td class="td-c"> {{ $ind }} </td>
+            <td class="td-c"> {{ $data.Login }} </td>
+            <td class="td-c"> {{ $data.Status }} </td>
+            <td class="td-c"> {{ $data.Roles }} </td>
+            <td class="td-l"> {{ $data.Description }} </td>
+            <td class="td-r">
+              {{ if $data.System }}
+              <button type="button" class="btn btn-sm btn-success" disabled><i class="fa fa-edit"></i> Edit</button>
+              {{ else }}
+              <button type="button" class="btn btn-sm btn-success trigger-edit" hx-get="/hx/accounts/edit_load_form?user={{$data.Login}}" hx-target="#editModalSpace"><i class="fa fa-edit"></i> Edit</button>
+              {{ end }}
+              {{ if or $data.Superuser $data.System }}
+              <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
+              <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
+              {{ else if $data.Baned }}
+              <button type="button" class="btn btn-sm btn-warning trigger-unban" style="width: 100px;" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace"><i class="fa fa-undo"></i> UnBlock</button>
+              <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
+              {{ else }}
+              <button type="button" class="btn btn-sm btn-warning trigger-ban" style="width: 100px;" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace"><i class="fa fa-ban"></i> Block</button>
+              <button type="button" class="btn btn-sm btn-danger trigger-del" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
+              {{ end }}
+            </td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

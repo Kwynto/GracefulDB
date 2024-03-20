@@ -1,0 +1,168 @@
+    <div class="hat">
+      <div class="header">Settings</div>
+      <div class="deschead">The server configuration can be changed via the configuration file.<br>
+        Here you can only switch components quickly.
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="content-row">
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">Basic settings</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Environment: </h5></td>
+                <td>{{.Env}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>LogPath: </h5></td>
+                <td>{{.LogPath}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>ShutdownTimeOut: </h5></td>
+                <td>{{.ShutdownTimeOut}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">Core settings</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Bucket size: </h5></td>
+                <td>{{.CoreSettings.BucketSize}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Friendly mode: </h5></td>
+                <td>
+                    {{if .CoreSettings.FriendlyMode}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                    {{else}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idCoreFriendlySwitch" hx-get="/hx/settings/core_friendly_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                    {{end}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-space-25"></div>
+        <div class="content-space-25"></div>
+      </div>
+
+      <div class="content-row">
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">Web Socket Connector</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Enable: </h5></td>
+                <td>
+                    {{if .WebSocketConnector.Enable}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                    {{else}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idWSCSwitch" hx-get="/hx/settings/wsc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                    {{end}}
+                </td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Address: </h5></td>
+                <td>{{.WebSocketConnector.Address}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Port: </h5></td>
+                <td>{{.WebSocketConnector.Port}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>BufferSize - Read: </h5></td>
+                <td>{{.WebSocketConnector.BufferSize.Read}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>BufferSize - Write: </h5></td>
+                <td>{{.WebSocketConnector.BufferSize.Write}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">REST Connector</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Enable: </h5></td>
+                <td>
+                    {{if .RestConnector.Enable}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                    {{else}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idRestSwitch" hx-get="/hx/settings/rest_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                    {{end}}
+                </td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Address: </h5></td>
+                <td>{{.RestConnector.Address}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Port: </h5></td>
+                <td>{{.RestConnector.Port}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">gRPC Connector</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Enable: </h5></td>
+                <td>
+                    {{if .GrpcConnector.Enable}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" checked>
+                    {{else}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idGrpcSwitch" hx-get="/hx/settings/grpc_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s">
+                    {{end}}
+                </td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Address: </h5></td>
+                <td>{{.GrpcConnector.Address}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Port: </h5></td>
+                <td>{{.GrpcConnector.Port}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="content-cel-25">
+          <h4 style="margin-left: 40px; color: blue;">GracefulDB Web Manager</h4>
+          <table>
+            <tbody>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Enable: </h5></td>
+                <td>
+                    {{if .WebServer.Enable}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled checked>
+                    {{else}}
+                        <input class="form-check-input" type="checkbox" role="switch" id="idWebSwitch" hx-get="/hx/settings/web_change_sw" hx-target="#idMainUnit" hx-trigger="click delay:1s" disabled>
+                    {{end}}
+                </td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Address: </h5></td>
+                <td>{{.WebServer.Address}}</td>
+              </tr>
+              <tr class="tr-cont" style="height: 40px;">
+                <td><h5>Port: </h5></td>
+                <td>{{.WebServer.Port}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
