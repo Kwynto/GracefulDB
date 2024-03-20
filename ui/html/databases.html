@@ -2,3 +2,14 @@
   <div class="header">Databases</div>
   <div class="deschead"></div>
 </div>
+<div class="main-content">
+  <div class="content-console" id="dbAnswerOut">
+  </div>
+</div>
+
+<section class="footerterm">
+  <form hx-post="/hx/databases/request" hx-target="#dbAnswerOut" hx-swap="beforeend" hx-trigger="submit">
+    <input type="text" value="" name="request" id="request-input" placeholder="Enter query">
+    <input type="submit" class="hidden" value="Send">
+  </form>
+</section>

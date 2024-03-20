@@ -19,9 +19,9 @@ const (
 	BLOCK_TEMP_DASHBOARD     = "ui/html/dashboard.html"
 
 	BLOCK_TEMP_DATABASES               = "ui/html/databases.html"
-	BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "DatabaseRequestAnswer"
+	BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "ui/html/dbreqanswer.html"
 
-	BLOCK_TEMP_ACCOUNTS                  = "Accounts"
+	BLOCK_TEMP_ACCOUNTS                  = "ui/html/accounts.html"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "AccountCreateFormOk"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "AccountCreateFormError"
@@ -41,7 +41,7 @@ const (
 	BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD     = "AccountSelfeditFormLoad"
 	BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR    = "AccountSelfeditFormError"
 
-	BLOCK_TEMP_SETTINGS = "Settings"
+	BLOCK_TEMP_SETTINGS = "ui/html/settings.html"
 )
 
 var TemplatesMap = make(map[string]*template.Template)
@@ -105,9 +105,11 @@ func parseTemplates() {
 
 	// LoadTemplateFromString(BLOCK_TEMP_DATABASES, htmx_masq.Databases)
 	LoadTemplateFromEmbed(BLOCK_TEMP_DATABASES)
-	LoadTemplateFromString(BLOCK_TEMP_DATABASE_REQUEST_ANSWER, htmx_masq.DatabaseRequestAnswer)
+	// LoadTemplateFromString(BLOCK_TEMP_DATABASE_REQUEST_ANSWER, htmx_masq.DatabaseRequestAnswer)
+	LoadTemplateFromEmbed(BLOCK_TEMP_DATABASE_REQUEST_ANSWER)
 
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNTS, htmx_masq.Accounts)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNTS, htmx_masq.Accounts)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNTS)
 
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK, htmx_masq.AccountCreateFormOk)
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD, htmx_masq.AccountCreateFormLoad)
@@ -133,5 +135,6 @@ func parseTemplates() {
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD, htmx_masq.SelfEditFormLoad)
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR, htmx_masq.SelfEditFormError)
 
-	LoadTemplateFromString(BLOCK_TEMP_SETTINGS, htmx_masq.Settings)
+	// LoadTemplateFromString(BLOCK_TEMP_SETTINGS, htmx_masq.Settings)
+	LoadTemplateFromEmbed(BLOCK_TEMP_SETTINGS)
 }

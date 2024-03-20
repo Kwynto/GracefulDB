@@ -523,7 +523,7 @@ table {
   border: 2px solid rgba(1, 1, 1, 1);
 }
 .btn:disabled {
-  border: 0px solid rgba(1, 1, 1, 1);
+  border: 2px solid rgba(1, 1, 1, 1);
   color: gray;
 }
 .btn:hover {
@@ -531,7 +531,7 @@ table {
   border: 2px double rgba(255, 255, 255, 1);
 }
 .btn:disabled:hover {
-  border: 0px solid rgba(1, 1, 1, 1);
+  border: 2px solid rgba(1, 1, 1, 1);
   color: gray;
 }
 .btn-sm {
