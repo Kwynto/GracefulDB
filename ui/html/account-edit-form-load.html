@@ -1,0 +1,99 @@
+<div class="modal-header">
+    <h1 class="modal-title" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideEditModal();"><i class="fa fa-times"></i></button>
+</div>
+{{ if .System }} 
+<div class="modal-body modal-left">
+    SYSTEM USER (This user cannot be changed.) 
+</div>
+{{ else }}
+<div class="modal-body modal-left">
+    <form id="edit-user-form" hx-post="/hx/accounts/edit_ok" hx-target="#editModalSpace" hx-trigger="submit">
+        <div class="modal-form-line">
+            <label for="login-input" class="col-form-label">Login:</label> <b>{{.Login}}</b>
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+        </div>
+        <div class="modal-form-line">
+            <label for="password-input" class="col-form-label">New password:</label>
+            <input type="password" class="form-control" name="password" id="password-input" placeholder="password" value="">
+        </div>
+        {{ if ne .Login "root" }} 
+        <div class="modal-form-line">
+            <label for="desc-input" class="col-form-label">Description:</label>
+            <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Description}}">
+        </div>
+        <div class="modal-form-line">
+            <label for="status-select" class="col-form-label">Status:</label>{{ if eq .Status 0 }}  UNDEFINED (You must select the status) {{ end }}
+            <select class="form-select" id="status-select" name="status">
+                {{ if eq .Status 1 }} <option value="1" selected>NEW</option> {{ else }} <option value="1">NEW</option> {{ end }}
+                {{ if eq .Status 2 }} <option value="2" selected>ACTIVE</option> {{ else }} <option value="2">ACTIVE</option> {{ end }}
+                {{ if eq .Status 3 }} <option value="3" selected>BANED</option> {{ else }} <option value="3">BANED</option> {{ end }}
+            </select>
+        </div>
+        <div class="modal-form-line">
+            Roles:<br>
+            <div class="modal-form-line">
+                <input class="form-check-input" type="checkbox" name="role_names" value="SYSTEM" id="checkEdit0" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "SYSTEM" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                disabled>
+                <label class="col-form-label" for="checkEdit0"> SYSTEM</label>
+            </div>
+            <div class="modal-form-line">
+                <input class="form-check-input" type="checkbox" name="role_names" value="ADMIN" id="checkEdit1" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "ADMIN" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="col-form-label" for="checkEdit1"> ADMIN</label>
+            </div>
+            <div class="modal-form-line">
+                <input class="form-check-input" type="checkbox" name="role_names" value="MANAGER" id="checkEdit2" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "MANAGER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="col-form-label" for="checkEdit2"> MANAGER</label>
+            </div>
+            <div class="modal-form-line">
+                <input class="form-check-input" type="checkbox" name="role_names" value="ENGINEER" id="checkEdit3" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "ENGINEER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="col-form-label" for="checkEdit3"> ENGINEER</label>
+            </div>
+            <div class="modal-form-line">
+                <input class="form-check-input" type="checkbox" name="role_names" value="USER" id="checkEdit4" 
+                {{ range $key, $role := .Roles }}
+                    {{ if eq $role "USER" }}
+                        checked 
+                    {{ end }}
+                {{ end }}
+                >
+                <label class="col-form-label" for="checkEdit4"> USER</label>
+            </div>
+        </div>
+        {{ else }}
+            <div class="modal-form-line">
+                <label for="desc-input" class="col-form-label">Description:</label> <b>{{.Description}}</b>
+                <input type="hidden" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Description}}">
+            </div>
+            You cannot change the permissions of this user.
+        {{ end }}
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-cancel" hx-on:click="hideEditModal();">Cancel</button>
+    <button type="submit" form="edit-user-form" class="btn btn-primary">Save</button>
+</div>
+{{ end }}

@@ -22,15 +22,15 @@ const (
 	BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "ui/html/dbreqanswer.html"
 
 	BLOCK_TEMP_ACCOUNTS                  = "ui/html/accounts.html"
-	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "AccountCreateFormOk"
-	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "AccountCreateFormLoad"
-	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "AccountCreateFormError"
-	BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK      = "AccountEditFormOk"
-	BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD    = "AccountEditFormLoad"
-	BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR   = "AccountEditFormError"
-	BLOCK_TEMP_ACCOUNT_BAN_FORM_OK       = "AccountBanFormOk"
-	BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD     = "AccountBanFormLoad"
-	BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR    = "AccountBanFormError"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "ui/html/account-create-form-ok.html"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD  = "ui/html/account-create-form-load.html"
+	BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR = "ui/html/account-create-form-error.html"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK      = "ui/html/account-edit-form-ok.html"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD    = "ui/html/account-edit-form-load.html"
+	BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR   = "ui/html/account-edit-form-error.html"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_OK       = "ui/html/account-ban-form-ok.html"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD     = "ui/html/account-ban-form-load.html"
+	BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR    = "ui/html/account-ban-form-error.html"
 	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK     = "AccountUnBanFormOk"
 	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD   = "AccountUnBanFormLoad"
 	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR  = "AccountUnBanFormError"
@@ -111,17 +111,26 @@ func parseTemplates() {
 	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNTS, htmx_masq.Accounts)
 	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNTS)
 
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK, htmx_masq.AccountCreateFormOk)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD, htmx_masq.AccountCreateFormLoad)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR, htmx_masq.AccountCreateFormError)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK, htmx_masq.AccountCreateFormOk)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD, htmx_masq.AccountCreateFormLoad)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR, htmx_masq.AccountCreateFormError)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR)
 
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK, htmx_masq.AccountEditFormOk)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD, htmx_masq.AccountEditFormLoad)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR, htmx_masq.AccountEditFormError)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK, htmx_masq.AccountEditFormOk)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD, htmx_masq.AccountEditFormLoad)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR, htmx_masq.AccountEditFormError)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR)
 
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK, htmx_masq.AccountBanFormOk)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD, htmx_masq.AccountBanFormLoad)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR, htmx_masq.AccountBanFormError)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK, htmx_masq.AccountBanFormOk)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_BAN_FORM_OK)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD, htmx_masq.AccountBanFormLoad)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR, htmx_masq.AccountBanFormError)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR)
 
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK, htmx_masq.AccountUnBanFormOk)
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD, htmx_masq.AccountUnBanFormLoad)
