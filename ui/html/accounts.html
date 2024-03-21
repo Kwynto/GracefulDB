@@ -36,7 +36,7 @@
               <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" disabled><i class="fa fa-ban"></i> Block</button>
               <button type="button" class="btn btn-sm btn-danger" disabled><i class="fa fa-trash-alt"></i> Remove</button>
               {{ else if $data.Baned }}
-              <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace"><i class="fa fa-undo"></i> UnBlock</button>
+              <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" hx-get="/hx/accounts/unban_load_form?user={{$data.Login}}" hx-target="#unbanModalSpace" hx-on:click="showUnBanModal();"><i class="fa fa-undo"></i> UnBlock</button>
               <button type="button" class="btn btn-sm btn-danger" hx-get="/hx/accounts/del_load_form?user={{$data.Login}}" hx-target="#delModalSpace"><i class="fa fa-trash-alt"></i> Remove</button>
               {{ else }}
               <button type="button" class="btn btn-sm btn-warning" style="width: 100px;" hx-get="/hx/accounts/ban_load_form?user={{$data.Login}}" hx-target="#banModalSpace" hx-on:click="showBanModal();"><i class="fa fa-ban"></i> Block</button>

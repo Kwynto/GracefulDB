@@ -31,9 +31,9 @@ const (
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_OK       = "ui/html/account-ban-form-ok.html"
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD     = "ui/html/account-ban-form-load.html"
 	BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR    = "ui/html/account-ban-form-error.html"
-	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK     = "AccountUnBanFormOk"
-	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD   = "AccountUnBanFormLoad"
-	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR  = "AccountUnBanFormError"
+	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK     = "ui/html/account-unban-form-ok.html"
+	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD   = "ui/html/account-unban-form-load.html"
+	BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR  = "ui/html/account-unban-form-error.html"
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_OK       = "AccountDelFormOk"
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD     = "AccountDelFormLoad"
 	BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR    = "AccountDelFormError"
@@ -132,9 +132,12 @@ func parseTemplates() {
 	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR, htmx_masq.AccountBanFormError)
 	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR)
 
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK, htmx_masq.AccountUnBanFormOk)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD, htmx_masq.AccountUnBanFormLoad)
-	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR, htmx_masq.AccountUnBanFormError)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK, htmx_masq.AccountUnBanFormOk)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD, htmx_masq.AccountUnBanFormLoad)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD)
+	// LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR, htmx_masq.AccountUnBanFormError)
+	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR)
 
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_DEL_FORM_OK, htmx_masq.AccountDelFormOk)
 	LoadTemplateFromString(BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD, htmx_masq.AccountDelFormLoad)

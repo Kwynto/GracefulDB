@@ -1,0 +1,9 @@
+<div class="modal-header" hx-get="/hx/nav/accounts" hx-trigger="load" hx-target="#idMainUnit">
+    <h1 class="modal-title" id="unbanModalLabel">UnBlock user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideUnBanModal();"><i class="fa fa-times"></i></button>
+</div>
+<div class="modal-body modal-center">
+    Congratulations! The <b>{{.Login}}</b> user has been unblocked.<br>
+</div>
+<div class="modal-footer">
+</div>

@@ -49,6 +49,16 @@ function hideBanModal() {
     htmx.addClass(htmx.find("#banModal"), 'hidden');
 }
 
+// UnBan modal
+function showUnBanModal() {
+    htmx.removeClass(htmx.find("#unbanModal"), "hidden");
+    htmx.addClass(htmx.find("#unbanModal"), "showed");
+}
+function hideUnBanModal() {
+    htmx.removeClass(htmx.find("#unbanModal"), "showed");
+    htmx.addClass(htmx.find("#unbanModal"), 'hidden');
+}
+
 jQuery(document).ready(function(){
     // $("#uBtnLogOut").click(function() {
     //     $("#logoutModal").removeClass("hidden").addClass("showed");
@@ -94,12 +104,12 @@ jQuery(document).ready(function(){
     //     $("#banModal").removeClass("showed").addClass("hidden");
     // });
     
-    $("#unbanModalBtnClose").click(function() {
-        $("#unbanModal").removeClass("showed").addClass("hidden");
-    });
-    $("#unbanModalCancel").click(function() {
-        $("#unbanModal").removeClass("showed").addClass("hidden");
-    });
+    // $("#unbanModalBtnClose").click(function() {
+    //     $("#unbanModal").removeClass("showed").addClass("hidden");
+    // });
+    // $("#unbanModalCancel").click(function() {
+    //     $("#unbanModal").removeClass("showed").addClass("hidden");
+    // });
 
     $("#delModalBtnClose").click(function() {
         $("#delModal").removeClass("showed").addClass("hidden");
