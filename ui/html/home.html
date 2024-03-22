@@ -555,7 +555,7 @@
       <div class="modal-content" id="unbanModalSpace">
         <div class="modal-header">
           <h1 class="modal-title" id="unbanModalLabel">UnBlock user</h1>
-          <button type="button" class="btn-close" id="unbanModalBtnClose"><i class="fa fa-times"></i></button>
+          <button type="button" class="btn-close"><i class="fa fa-times"></i></button>
         </div>
         <div class="modal-body modal-center">
           <form id="unban-user-form" hx-post="/hx/accounts/unban_ok" hx-target="#unbanModalSpace" hx-trigger="submit">
@@ -566,7 +566,7 @@
           UnBlock the <b>{{.Login}}</b> user?
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-cancel" id="unbanModalCancel">Cancel</button>
+          <button type="button" class="btn btn-cancel">Cancel</button>
           <button type="submit" form="unban-user-form" class="btn btn-primary">UnBlock</button>
         </div>
       </div>
@@ -577,8 +577,8 @@
     <div class="modal-dialog">
       <div class="modal-content" id="delModalSpace">
         <div class="modal-header">
-          <h1 class="modal-title" id="delModalLabel">Delete user</h1>
-          <button type="button" class="btn-close" id="delModalBtnClose"><i class="fa fa-times"></i></button>
+          <h1 class="modal-title" id="delModalLabel">Remove user</h1>
+          <button type="button" class="btn-close"><i class="fa fa-times"></i></button>
         </div>
         <div class="modal-body modal-center">
           <form id="del-user-form" hx-post="/hx/accounts/del_ok" hx-target="#delModalSpace" hx-trigger="submit">
@@ -590,7 +590,7 @@
           Delete the {{.Login}} user?
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-cancel" id="delModalCancel">Cancel</button>
+          <button type="button" class="btn btn-cancel">Cancel</button>
           <button type="submit" form="del-user-form" class="btn btn-primary">Delete</button>
         </div>
       </div>
