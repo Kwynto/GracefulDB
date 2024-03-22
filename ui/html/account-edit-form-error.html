@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <h1 class="modal-title" id="editModalLabel">Edit user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideEditModal();"><i class="fa fa-times"></i></button>
+</div>
+<div class="modal-body modal-left">
+    User update error.<br>
+    The <b>{{.Login}}</b> user cannot be updated.<br>
+    <p style="color: red;">{{.MsgErr}}</p>
+</div>
+<div class="modal-footer">
+</div>

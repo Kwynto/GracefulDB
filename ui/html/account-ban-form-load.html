@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <h1 class="modal-title" id="banModalLabel">Block user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideBanModal();"><i class="fa fa-times"></i></button>
+</div>
+<div class="modal-body modal-center">
+    <form id="ban-user-form" hx-post="/hx/accounts/ban_ok" hx-target="#banModalSpace" hx-trigger="submit">
+        <div class="modal-form-line">
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+        </div>
+    </form>
+    Block the <b>{{.Login}}</b> user?
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-cancel" hx-on:click="hideBanModal();">Cancel</button>
+    <button type="submit" form="ban-user-form" class="btn btn-primary">Block</button>
+</div>

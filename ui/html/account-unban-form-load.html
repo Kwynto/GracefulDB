@@ -1,0 +1,16 @@
+<div class="modal-header">
+    <h1 class="modal-title" id="unbanModalLabel">UnBlock user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideUnBanModal();"><i class="fa fa-times"></i></button>
+</div>
+<div class="modal-body modal-center">
+    <form id="unban-user-form" hx-post="/hx/accounts/unban_ok" hx-target="#unbanModalSpace" hx-trigger="submit">
+        <div class="modal-form-line">
+            <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}">
+        </div>
+    </form>
+    UnBlock the <b>{{.Login}}</b> user?
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-cancel" hx-on:click="hideUnBanModal();">Cancel</button>
+    <button type="submit" form="unban-user-form" class="btn btn-primary">UnBlock</button>
+</div>

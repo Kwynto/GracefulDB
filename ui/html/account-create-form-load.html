@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h1 class="modal-title" id="createModalLabel">Create user</h1>
+    <button type="button" class="btn-close" hx-on:click="hideCreateModal();"><i class="fa fa-times"></i></button>
+  </div>
+  <div class="modal-body modal-left">
+    <form id="create-user-form" hx-post="/hx/accounts/create_ok" hx-target="#createModalSpace" hx-trigger="submit">
+      <div class="modal-form-line">
+        <label for="login-input" class="col-form-label">Login:</label>
+        <input type="text" class="form-control" name="login" id="login-input" placeholder="login">
+      </div>
+      <div class="modal-form-line">
+        <label for="password-input" class="col-form-label">Password:</label>
+        <input type="password" class="form-control" name="password" id="password-input" placeholder="password">
+      </div>
+      <div class="modal-form-line">
+        <label for="desc-input" class="col-form-label">Description:</label>
+        <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description">
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-cancel" hx-on:click="hideCreateModal();">Cancel</button>
+    <button type="submit" form="create-user-form" class="btn btn-primary">Create</button>
+  </div>
+  
