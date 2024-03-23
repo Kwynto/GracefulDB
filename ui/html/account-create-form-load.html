@@ -6,11 +6,11 @@
     <form id="create-user-form" hx-post="/hx/accounts/create_ok" hx-target="#createModalSpace" hx-trigger="submit">
       <div class="modal-form-line">
         <label for="login-input" class="col-form-label">Login:</label>
-        <input type="text" class="form-control" name="login" id="login-input" placeholder="login">
+        <input type="text" class="form-control" name="login" id="login-input" placeholder="login" required>
       </div>
       <div class="modal-form-line">
         <label for="password-input" class="col-form-label">Password:</label>
-        <input type="password" class="form-control" name="password" id="password-input" placeholder="password">
+        <input type="password" class="form-control" name="password" id="password-input" placeholder="password" required>
       </div>
       <div class="modal-form-line">
         <label for="desc-input" class="col-form-label">Description:</label>

@@ -1,0 +1,29 @@
+<div class="modal-header">
+  <h1 class="modal-title" id="profileModalLabel">Your profile</h1>
+  <button type="button" class="btn-close" hx-on:click="hideProfileModal();"><i class="fa fa-times"></i></button>
+</div>
+<div class="modal-body modal-left">
+  <form id="profile-user-form" hx-post="/hx/accounts/selfedit_ok" hx-target="#profileModalSpace" hx-trigger="submit">
+    <div class="modal-form-line">
+      <label for="login-input" class="col-form-label">Login:</label> <b>{{ .Login }}</b>
+      <input type="hidden" class="form-control" name="login" id="login-input" value="{{.Login}}" disabled>
+    </div>
+    <div class="modal-form-line">
+      <label for="password-input" class="col-form-label">New password:</label>
+      <input type="password" class="form-control" name="password" id="password-input" placeholder="password" value="" required>
+    </div>
+    <div class="modal-form-line">
+      {{ if eq .Login "root"}}
+        <label for="desc-input" class="col-form-label">Description:</label> <b>{{.Desc}}</b>
+        <input type="hidden" class="form-control" name="desc" id="desc-input" value="{{.Desc}}">
+      {{ else }}
+        <label for="desc-input" class="col-form-label">Description:</label>
+        <input type="text" class="form-control" name="desc" id="desc-input" placeholder="description" value="{{.Desc}}">
+      {{ end }}
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-cancel" hx-on:click="hideProfileModal();">Cancel</button>
+  <button type="submit" form="profile-user-form" class="btn btn-primary">Save</button>
+</div>

@@ -17,15 +17,12 @@
   
   <!-- Icon Font Stylesheet -->
   <link href="./ui/static/css/fontawesome/css/all.min.css" rel="stylesheet">
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet"> -->
 
   <!--Stylesheet -->
   <link rel="stylesheet" href="./ui/static/css/bg.css">
   <link rel="stylesheet" href="./ui/static/css/dash.css">
   
-  <!-- <script src="./ui/static/js/jquery-3.7.1.min.js"></script> -->
   <script src="./ui/static/js/htmx.min.js"></script>
-  <!-- <script src="./ui/static/js/class-tools.js"></script> -->
 </head>
 
 <body>
@@ -367,8 +364,8 @@
   <section class="user-menu">
     <div class="user-name"><i class="fa fa-user" title="{{.Roles}}"></i> {{.Login}}</div>
     <div class="content-user-menu">
-      <a href="#" id="uBtnYourProfile"><i class="fa fa-user-cog"></i> Your profile</a>
-      <a href="#" id="uBtnLogOut"><i class="fa fa-sign-out-alt"></i> Log Out</a>
+      <a hx-get="/hx/accounts/selfedit_load_form" hx-target="#profileModalSpace" hx-on:click="showProfileModal();"><i class="fa fa-user-cog"></i> Your profile</a>
+      <a id="uBtnLogOut"><i class="fa fa-sign-out-alt"></i> Log Out</a>
     </div>
   </section>
 
@@ -386,7 +383,7 @@
       <div class="modal-content" id="profileModalSpace">
         <div class="modal-header">
           <h1 class="modal-title" id="profileModalLabel">Your profile</h1>
-          <button type="button" class="btn-close" id="profileModalBtnClose"><i class="fa fa-times"></i></button>
+          <button type="button" class="btn-close"><i class="fa fa-times"></i></button>
         </div>
         <div class="modal-body modal-left">
           <form id="profile-user-form" hx-post="/hx/accounts/selfedit_ok" hx-target="#profileModalSpace" hx-trigger="submit">
@@ -405,7 +402,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-cancel" id="profileModalCancel">Cancel</button>
+          <button type="button" class="btn btn-cancel">Cancel</button>
           <button type="submit" form="profile-user-form" class="btn btn-primary">Save</button>
         </div>
       </div>
