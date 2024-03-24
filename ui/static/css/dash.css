@@ -559,6 +559,7 @@ table {
 .form-check-input:before {
   content: '';
   position: absolute;
+  top: -5px;
   width: 50px;
   height: 25px;
   background: #333;
@@ -571,6 +572,7 @@ table {
   content: '';
   position: absolute;
   left: 0px;
+  top: -5px;
   width: 25px;
   height: 25px;
   background: #fff;
