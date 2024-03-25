@@ -36,17 +36,6 @@ body {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   transition: 2s;
 }
-/* .hexagon::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-  pointer-events: none;
-  background-color: rgba(255, 255, 255, 0.01);
-  z-index: 3;
-} */
 
 #cursor {
   position: fixed;
