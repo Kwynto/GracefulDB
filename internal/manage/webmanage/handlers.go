@@ -267,7 +267,20 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
-func database_request(w http.ResponseWriter, r *http.Request) {
+/*
+Console section
+*/
+
+func nav_console(w http.ResponseWriter, r *http.Request) {
+	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
+		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		return
+	}
+
+	TemplatesMap[BLOCK_TEMP_CONSOLE].Execute(w, nil)
+}
+
+func console_request(w http.ResponseWriter, r *http.Request) {
 	timeR := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
@@ -316,7 +329,7 @@ func database_request(w http.ResponseWriter, r *http.Request) {
 		TimeR:   timeR,
 		TimeA:   timeA,
 	}
-	TemplatesMap[BLOCK_TEMP_DATABASE_REQUEST_ANSWER].Execute(w, data)
+	TemplatesMap[BLOCK_TEMP_CONSOLE_REQUEST_ANSWER].Execute(w, data)
 }
 
 /*

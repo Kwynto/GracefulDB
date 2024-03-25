@@ -588,22 +588,22 @@ func Test_nav_databases(t *testing.T) {
 	})
 }
 
-func Test_database_request(t *testing.T) {
+func Test_console_request(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("database_request() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("console_request() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		database_request(w, r) // calling the tested function
+		console_request(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("database_request() error: %v", status)
+			t.Errorf("console_request() error: %v", status)
 		}
 	})
 
-	t.Run("database_request() function testing - POST negative", func(t *testing.T) {
+	t.Run("console_request() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -624,14 +624,14 @@ func Test_database_request(t *testing.T) {
 			})
 		}
 
-		database_request(w1, r1) // calling the tested function
+		console_request(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("database_request() error: %v", status)
+			t.Errorf("console_request() error: %v", status)
 		}
 	})
 
-	t.Run("database_request() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("console_request() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -662,14 +662,14 @@ func Test_database_request(t *testing.T) {
 			})
 		}
 
-		database_request(w1, r1) // calling the tested function
+		console_request(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("database_request() error: %v", status)
+			t.Errorf("console_request() error: %v", status)
 		}
 	})
 
-	t.Run("database_request() function testing - all right", func(t *testing.T) {
+	t.Run("console_request() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -701,10 +701,10 @@ func Test_database_request(t *testing.T) {
 			})
 		}
 
-		database_request(w1, r1) // calling the tested function
+		console_request(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("database_request() error: %v", status)
+			t.Errorf("console_request() error: %v", status)
 		}
 	})
 }

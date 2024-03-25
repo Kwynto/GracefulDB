@@ -17,8 +17,11 @@ const (
 	BLOCK_TEMP_ACCESS_DENIED = "ui/html/accessdenied.html"
 	BLOCK_TEMP_DASHBOARD     = "ui/html/dashboard.html"
 
-	BLOCK_TEMP_DATABASES               = "ui/html/databases.html"
-	BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "ui/html/dbreqanswer.html"
+	BLOCK_TEMP_DATABASES = "ui/html/databases.html"
+	// BLOCK_TEMP_DATABASE_REQUEST_ANSWER = "ui/html/dbreqanswer.html"
+
+	BLOCK_TEMP_CONSOLE                = "ui/html/console.html"
+	BLOCK_TEMP_CONSOLE_REQUEST_ANSWER = "ui/html/termreqanswer.html"
 
 	BLOCK_TEMP_ACCOUNTS                  = "ui/html/accounts.html"
 	BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK    = "ui/html/account-create-form-ok.html"
@@ -98,7 +101,10 @@ func parseTemplates() {
 	LoadTemplateFromEmbed(BLOCK_TEMP_DASHBOARD)
 
 	LoadTemplateFromEmbed(BLOCK_TEMP_DATABASES)
-	LoadTemplateFromEmbed(BLOCK_TEMP_DATABASE_REQUEST_ANSWER)
+	// LoadTemplateFromEmbed(BLOCK_TEMP_DATABASE_REQUEST_ANSWER)
+
+	LoadTemplateFromEmbed(BLOCK_TEMP_CONSOLE)
+	LoadTemplateFromEmbed(BLOCK_TEMP_CONSOLE_REQUEST_ANSWER)
 
 	LoadTemplateFromEmbed(BLOCK_TEMP_ACCOUNTS)
 
