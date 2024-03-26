@@ -96,7 +96,7 @@ type ResponseColumns struct {
 }
 
 type TConditions struct {
-	Type      string
+	Type      string // "operation", "or", "and"
 	Key       string
 	Operation string
 	Value     string

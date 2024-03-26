@@ -50,11 +50,11 @@ func CompileRegExpCollection() tRegExpCollection {
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
 	recol = recol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`) // protection of technical names
-	recol = recol.CompileExp("QuotationMarks", `(?m)[\'\"]`)
-	recol = recol.CompileExp("SpecQuotationMark", "(?m)[`]")
+	recol = recol.CompileExp("QuotationMarks", `(?m)^[\'\"]|[\'\"]$`)
+	recol = recol.CompileExp("SpecQuotationMark", "(?m)^[`]|[`]$")
 	recol = recol.CompileExp("Spaces", `(?m)\s*`)
 	recol = recol.CompileExp("Comma", `(?m),`)
-	recol = recol.CompileExp("SignEqual", `(?m)=`)
+	recol = recol.CompileExp("SignEqual", `=`) // FIXME: there may be problems with the equality symbol inside the values
 
 	recol = recol.CompileExp("IfNotExistsWord", `(?m)[iI][fF]\s*[nN][oO][tT]\s*[eE][xX][iI][sS][tT][sS]`)
 	recol = recol.CompileExp("IfExistsWord", `(?m)[iI][fF]\s*[eE][xX][iI][sS][tT][sS]`)
@@ -67,8 +67,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("MODIFY", `(?m)[mM][oO][dD][iI][fF][yY]`)
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
 
-	recol = recol.CompileExp("WhereToEnd", `(?m)[wW][hH][eE][rR][eE].*`)
-	recol = recol.CompileExp("Where", `(?m)[wW][hH][eE][rR][eE]`)
+	recol = recol.CompileExp("WhereToEnd", `(?m)\s+[wW][hH][eE][rR][eE].*`)
+	recol = recol.CompileExp("Where", `(?m)\s+[wW][hH][eE][rR][eE]\s+`)
 	recol = recol.CompileExp("WhereExpression", `(?m)(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+).*`)
 	recol = recol.CompileExp("WhereExpression_And_Or_Word", `(?m)^(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+)`)
 	recol = recol.CompileExp("AND", `(?m)[aA][nN][dD]`)

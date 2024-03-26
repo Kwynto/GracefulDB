@@ -240,7 +240,7 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		}
 		if valueIn == "" {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
-		}
+		} // null value, maybe delete a condition
 
 		exp := gtypes.TConditions{
 			Type:  "operation",

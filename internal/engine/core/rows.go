@@ -8,6 +8,7 @@ import (
 )
 
 func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
+	// -
 	return []uint64{}, true
 }
 
