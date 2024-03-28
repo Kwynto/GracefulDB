@@ -107,6 +107,14 @@ type TUpdaateStruct struct {
 	Couples map[string]string
 }
 
+type TSelectStruct struct {
+	Groupby  string
+	Orderby  string
+	Where    []TConditions
+	Columns  []string
+	Distinct bool
+}
+
 type Secret struct {
 	Ticket   string `json:"ticket,omitempty"`
 	Login    string `json:"login,omitempty"`

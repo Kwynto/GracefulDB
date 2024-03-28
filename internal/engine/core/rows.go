@@ -7,6 +7,11 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
+func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint64, bool) {
+	// -
+	return []uint64{}, true
+}
+
 func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
 	// -
 	return []uint64{}, true

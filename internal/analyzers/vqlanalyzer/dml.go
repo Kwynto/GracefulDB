@@ -19,7 +19,147 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DMLSelect", nil
+	var (
+		resultIds []uint64
+		okSelect  bool
+		res       gtypes.Response
+		resArr    gtypes.ResponseUints
+		selectIn  = gtypes.TSelectStruct{
+			Where:    make([]gtypes.TConditions, 0, 4),
+			Columns:  make([]string, 0, 4),
+			Distinct: false,
+		}
+	)
+
+	if q.Ticket == "" {
+		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	if err != nil {
+		return `{"state":"error", "result":"authorization failed"}`, err
+	}
+
+	if access.Status.IsBad() {
+		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+	}
+
+	if newticket != "" {
+		resArr.Ticket = newticket
+		res.Ticket = newticket
+	}
+
+	state, ok := core.States[q.Ticket]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown database"
+		return ecowriter.EncodeJSON(res), errors.New("unknown database")
+	}
+	db := state.CurrentDB
+	if db == "" {
+		res.State = "error"
+		res.Result = "no database selected"
+		return ecowriter.EncodeJSON(res), errors.New("no database selected")
+	}
+
+	// Parsing an expression - Begin
+
+	instruction := vqlexp.RegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
+
+	groupbyStr := vqlexp.RegExpCollection["GroupbyToEnd"].FindString(instruction)
+	instruction = vqlexp.RegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(instruction, "")
+	groupbyStr = vqlexp.RegExpCollection["Groupby"].ReplaceAllLiteralString(groupbyStr, "")
+
+	orderbyStr := vqlexp.RegExpCollection["OrderbyToEnd"].FindString(instruction)
+	instruction = vqlexp.RegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(instruction, "")
+	orderbyStr = vqlexp.RegExpCollection["Orderby"].ReplaceAllLiteralString(orderbyStr, "")
+
+	whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
+	instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
+	whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+
+	table := vqlexp.RegExpCollection["SelectFromToEnd"].FindString(instruction)
+	instruction = vqlexp.RegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(instruction, "")
+	table = vqlexp.RegExpCollection["SelectFromWord"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+
+	distinctBool := vqlexp.RegExpCollection["SelectDistinctWord"].MatchString(instruction)
+	if distinctBool {
+		instruction = vqlexp.RegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(instruction, "")
+	}
+
+	selectIn.Distinct = distinctBool
+
+	columnsStr := strings.TrimSpace(instruction)
+	columns := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
+	for _, col := range columns {
+		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
+		col = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
+		col = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+		if col != "" {
+			selectIn.Columns = append(selectIn.Columns, col)
+		}
+	}
+
+	expression, err := parseWhere(whereStr)
+	if err != nil {
+		return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+	}
+	selectIn.Where = append(selectIn.Where, expression...)
+
+	// Parsing an expression - End
+
+	dbInfo, okDB := core.GetDBInfo(db)
+	if okDB {
+		var flagsAcs gtypes.TAccessFlags
+		var okFlags bool = false
+		var luxUser bool = false
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+		}
+
+		dbAccess, okAccess := core.GetDBAccess(db)
+		if okAccess {
+			flagsAcs, okFlags = dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if !okFlags {
+						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+					}
+				}
+			} else {
+				luxUser = true
+			}
+		} else {
+			return `{"state":"error", "result":"internal error"}`, errors.New("internal error")
+		}
+
+		if !luxUser && !flagsAcs.Select {
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+		}
+
+		// TODO: Make an implementation in the kernel
+		resultIds, okSelect = core.SelectRows(db, table, selectIn)
+		if !okSelect {
+			return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
+		}
+	} else {
+		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
+	}
+
+	resArr.State = "ok"
+	resArr.Result = resultIds
+	return ecowriter.EncodeJSON(resArr), nil
 }
 
 func (q tQuery) DMLInsert() (result string, err error) {
@@ -182,7 +322,6 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 			Where:   make([]gtypes.TConditions, 0, 4),
 			Couples: make(map[string]string),
 		}
-		expression = make([]gtypes.TConditions, 0, 4)
 	)
 
 	if q.Ticket == "" {
@@ -221,67 +360,9 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
 	// columnsValuesIn.Where = whereStr
 
-	for {
-		headCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
-		condition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
-		keyIn := condition[0]
-		valueIn := condition[1]
-
-		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
-
-		valueIn = strings.TrimSpace(valueIn)
-		valueIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
-		valueIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
-
-		if keyIn == "" {
-			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
-		}
-		if valueIn == "" {
-			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
-		} // null value, maybe delete a condition
-
-		exp := gtypes.TConditions{
-			Type:  "operation",
-			Key:   keyIn,
-			Value: valueIn,
-		}
-
-		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
-			exp.Operation = "<="
-		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
-			exp.Operation = ">="
-		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
-			exp.Operation = "<"
-		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
-			exp.Operation = ">"
-		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(headCond) {
-			exp.Operation = "="
-		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
-			exp.Operation = "like"
-		} else {
-			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
-		}
-		expression = append(expression, exp)
-
-		whereStr = vqlexp.RegExpCollection["WhereExpression"].FindString(whereStr)
-		logicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
-		// logicOper = strings.TrimSpace(logicOper)
-
-		if vqlexp.RegExpCollection["OR"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
-				Type: "or",
-			})
-		} else if vqlexp.RegExpCollection["AND"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
-				Type: "and",
-			})
-		} else {
-			break
-		}
-
-		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
+	expression, err := parseWhere(whereStr)
+	if err != nil {
+		return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 	}
 	updateIn.Where = append(updateIn.Where, expression...)
 
@@ -364,6 +445,7 @@ LabelCheck:
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
+		// TODO: Make an implementation in the kernel
 		resultIds, okUpdate = core.UpdateRows(db, table, updateIn)
 		if !okUpdate {
 			return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
@@ -493,6 +575,7 @@ LabelCheck:
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
+		// TODO: Make an implementation in the kernel
 		if !core.TruncateTable(db, table) {
 			return `{"state":"error", "result":"the table cannot be truncated"}`, errors.New("the table cannot be truncated")
 		}
@@ -508,4 +591,73 @@ LabelCheck:
 
 	res.State = "ok"
 	return ecowriter.EncodeJSON(res), nil
+}
+
+// Helpers
+
+func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
+	var expression = make([]gtypes.TConditions, 0, 4)
+	for {
+		headCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
+		condition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
+		keyIn := condition[0]
+		valueIn := condition[1]
+
+		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
+
+		valueIn = strings.TrimSpace(valueIn)
+		valueIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
+		valueIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
+
+		if keyIn == "" {
+			return []gtypes.TConditions{}, errors.New("condition error")
+		}
+		if valueIn == "" {
+			return []gtypes.TConditions{}, errors.New("condition error")
+		} // null value, maybe delete a condition
+
+		exp := gtypes.TConditions{
+			Type:  "operation",
+			Key:   keyIn,
+			Value: valueIn,
+		}
+
+		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
+			exp.Operation = "<="
+		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
+			exp.Operation = ">="
+		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
+			exp.Operation = "<"
+		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
+			exp.Operation = ">"
+		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(headCond) {
+			exp.Operation = "="
+		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
+			exp.Operation = "like"
+		} else {
+			return []gtypes.TConditions{}, errors.New("condition error")
+		}
+		expression = append(expression, exp)
+
+		whereStr = vqlexp.RegExpCollection["WhereExpression"].FindString(whereStr)
+		logicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
+		// logicOper = strings.TrimSpace(logicOper)
+
+		if vqlexp.RegExpCollection["OR"].MatchString(logicOper) {
+			expression = append(expression, gtypes.TConditions{
+				Type: "or",
+			})
+		} else if vqlexp.RegExpCollection["AND"].MatchString(logicOper) {
+			expression = append(expression, gtypes.TConditions{
+				Type: "and",
+			})
+		} else {
+			break
+		}
+
+		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
+	}
+	return expression, nil
 }

@@ -67,8 +67,14 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("MODIFY", `(?m)[mM][oO][dD][iI][fF][yY]`)
 	recol = recol.CompileExp("RenameTo", `(?m)[rR][eE][nN][aA][mM][eE]\s*[tT][oO]`)
 
+	recol = recol.CompileExp("GroupbyToEnd", `(?m)\s+[gG][rR][oO][uU][pP]\s+[bB][yY].*`)
+	recol = recol.CompileExp("Groupby", `(?m)^\s*[gG][rR][oO][uU][pP]\s+[bB][yY]`)
+
+	recol = recol.CompileExp("OrderbyToEnd", `(?m)\s+[oO][rR][dD][eE][rR]\s+[bB][yY].*`)
+	recol = recol.CompileExp("Orderby", `(?m)^\s*[oO][rR][dD][eE][rR]\s+[bB][yY]`)
+
 	recol = recol.CompileExp("WhereToEnd", `(?m)\s+[wW][hH][eE][rR][eE].*`)
-	recol = recol.CompileExp("Where", `(?m)\s+[wW][hH][eE][rR][eE]\s+`)
+	recol = recol.CompileExp("Where", `(?m)^\s*[wW][hH][eE][rR][eE]\s+`)
 	recol = recol.CompileExp("WhereExpression", `(?m)(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+).*`)
 	recol = recol.CompileExp("WhereExpression_And_Or_Word", `(?m)^(\s+[aA][nN][dD]\s+|\s+[oO][rR]\s+)`)
 	recol = recol.CompileExp("AND", `(?m)[aA][nN][dD]`)
@@ -107,7 +113,11 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("DropTableWord", `(?m)^[dD][rR][oO][pP]\s*[tT][aA][bB][lL][eE]`)
 
 	// DML TODO: Разработать шаблоны
-	recol = recol.CompileExp("SearchSelect", `(?m)^;`)
+	recol = recol.CompileExp("SearchSelect", `(?m)^[sS][eE][lL][eE][cC][tT]\s*.*`)
+	recol = recol.CompileExp("SelectWord", `(?m)^[sS][eE][lL][eE][cC][tT]`)
+	recol = recol.CompileExp("SelectFromToEnd", `(?m)\s+[fF][rR][oO][mM].*`)
+	recol = recol.CompileExp("SelectFromWord", `(?m)^\s*[fF][rR][oO][mM]`)
+	recol = recol.CompileExp("SelectDistinctWord", `(?m)^\s*[dD][iI][sS][tT][iI][nN][cC][tT]`)
 
 	recol = recol.CompileExp("SearchInsert", `(?m)^[iI][nN][sS][eE][rR][tT]\s*[iI][nN][tT][oO].*`)
 	recol = recol.CompileExp("InsertWord", `(?m)^[iI][nN][sS][eE][rR][tT]\s*[iI][nN][tT][oO]`)
