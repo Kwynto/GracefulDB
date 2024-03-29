@@ -96,15 +96,31 @@ type ResponseColumns struct {
 }
 
 type TConditions struct {
-	Type      string
+	Type      string // "operation", "or", "and"
 	Key       string
 	Operation string
 	Value     string
 }
 
+type TOrderBy struct {
+	Cols []string
+	Sort []uint8 // 0 - undef, 1 - asc, 2 - desc
+}
+
 type TUpdaateStruct struct {
 	Where   []TConditions
 	Couples map[string]string
+}
+
+type TSelectStruct struct {
+	IsOrder  bool
+	IsGroup  bool
+	IsWhere  bool
+	Orderby  TOrderBy
+	Groupby  []string
+	Where    []TConditions
+	Columns  []string
+	Distinct bool
 }
 
 type Secret struct {
