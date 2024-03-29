@@ -72,6 +72,8 @@ func CompileRegExpCollection() tRegExpCollection {
 
 	recol = recol.CompileExp("OrderbyToEnd", `(?m)\s+[oO][rR][dD][eE][rR]\s+[bB][yY].*`)
 	recol = recol.CompileExp("Orderby", `(?m)^\s*[oO][rR][dD][eE][rR]\s+[bB][yY]`)
+	recol = recol.CompileExp("ASC", `(?m)\s*[aA][sS][cC]\s*`)
+	recol = recol.CompileExp("DESC", `(?m)\s*[dD][eE][sS][cC]\s*`)
 
 	recol = recol.CompileExp("WhereToEnd", `(?m)\s+[wW][hH][eE][rR][eE].*`)
 	recol = recol.CompileExp("Where", `(?m)^\s*[wW][hH][eE][rR][eE]\s+`)

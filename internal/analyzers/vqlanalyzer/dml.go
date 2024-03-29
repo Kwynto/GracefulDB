@@ -66,17 +66,36 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 	instruction := vqlexp.RegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
 
-	groupbyStr := vqlexp.RegExpCollection["GroupbyToEnd"].FindString(instruction)
-	instruction = vqlexp.RegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(instruction, "")
-	groupbyStr = vqlexp.RegExpCollection["Groupby"].ReplaceAllLiteralString(groupbyStr, "")
+	orderbyStr := ""
+	groupbyStr := ""
+	isOrder := false
+	isGroup := false
 
-	orderbyStr := vqlexp.RegExpCollection["OrderbyToEnd"].FindString(instruction)
-	instruction = vqlexp.RegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(instruction, "")
-	orderbyStr = vqlexp.RegExpCollection["Orderby"].ReplaceAllLiteralString(orderbyStr, "")
+	if vqlexp.RegExpCollection["OrderbyToEnd"].MatchString(instruction) {
+		orderbyStr = vqlexp.RegExpCollection["OrderbyToEnd"].FindString(instruction)
+		instruction = vqlexp.RegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(instruction, "")
+		orderbyStr = vqlexp.RegExpCollection["Orderby"].ReplaceAllLiteralString(orderbyStr, "")
+		isOrder = true
+	}
 
-	whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
-	instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
-	whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+	if vqlexp.RegExpCollection["GroupbyToEnd"].MatchString(instruction) {
+		groupbyStr = vqlexp.RegExpCollection["GroupbyToEnd"].FindString(instruction)
+		instruction = vqlexp.RegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(instruction, "")
+		groupbyStr = vqlexp.RegExpCollection["Groupby"].ReplaceAllLiteralString(groupbyStr, "")
+		isGroup = true
+	}
+
+	if vqlexp.RegExpCollection["WhereToEnd"].MatchString(instruction) {
+		whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
+		instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
+		whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+		expression, err := parseWhere(whereStr)
+		if err != nil {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		selectIn.Where = append(selectIn.Where, expression...)
+		selectIn.IsWhere = true
+	}
 
 	table := vqlexp.RegExpCollection["SelectFromToEnd"].FindString(instruction)
 	instruction = vqlexp.RegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(instruction, "")
@@ -84,12 +103,14 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	if table == "" {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
 
 	distinctBool := vqlexp.RegExpCollection["SelectDistinctWord"].MatchString(instruction)
 	if distinctBool {
 		instruction = vqlexp.RegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(instruction, "")
 	}
-
 	selectIn.Distinct = distinctBool
 
 	columnsStr := strings.TrimSpace(instruction)
@@ -102,12 +123,27 @@ func (q tQuery) DMLSelect() (result string, err error) {
 			selectIn.Columns = append(selectIn.Columns, col)
 		}
 	}
-
-	expression, err := parseWhere(whereStr)
-	if err != nil {
-		return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+	if len(selectIn.Columns) < 1 {
+		return `{"state":"error", "result":"no columns"}`, errors.New("no columns")
 	}
-	selectIn.Where = append(selectIn.Where, expression...)
+
+	if isOrder {
+		orderbyExp, err := parseOrderBy(orderbyStr, selectIn.Columns)
+		if err != nil {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		selectIn.Orderby = orderbyExp
+		selectIn.IsOrder = isOrder
+	}
+
+	if isGroup {
+		groupbyCols, err := parseGroupBy(groupbyStr, selectIn.Columns)
+		if err != nil {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		selectIn.Groupby = append(selectIn.Groupby, groupbyCols...)
+		selectIn.IsGroup = isGroup
+	}
 
 	// Parsing an expression - End
 
@@ -591,73 +627,4 @@ LabelCheck:
 
 	res.State = "ok"
 	return ecowriter.EncodeJSON(res), nil
-}
-
-// Helpers
-
-func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
-	var expression = make([]gtypes.TConditions, 0, 4)
-	for {
-		headCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
-		condition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
-		keyIn := condition[0]
-		valueIn := condition[1]
-
-		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
-
-		valueIn = strings.TrimSpace(valueIn)
-		valueIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
-		valueIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
-
-		if keyIn == "" {
-			return []gtypes.TConditions{}, errors.New("condition error")
-		}
-		if valueIn == "" {
-			return []gtypes.TConditions{}, errors.New("condition error")
-		} // null value, maybe delete a condition
-
-		exp := gtypes.TConditions{
-			Type:  "operation",
-			Key:   keyIn,
-			Value: valueIn,
-		}
-
-		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
-			exp.Operation = "<="
-		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
-			exp.Operation = ">="
-		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
-			exp.Operation = "<"
-		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
-			exp.Operation = ">"
-		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(headCond) {
-			exp.Operation = "="
-		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
-			exp.Operation = "like"
-		} else {
-			return []gtypes.TConditions{}, errors.New("condition error")
-		}
-		expression = append(expression, exp)
-
-		whereStr = vqlexp.RegExpCollection["WhereExpression"].FindString(whereStr)
-		logicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
-		// logicOper = strings.TrimSpace(logicOper)
-
-		if vqlexp.RegExpCollection["OR"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
-				Type: "or",
-			})
-		} else if vqlexp.RegExpCollection["AND"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
-				Type: "and",
-			})
-		} else {
-			break
-		}
-
-		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
-	}
-	return expression, nil
 }
