@@ -18,6 +18,8 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
+	// Pre checking
+
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
@@ -35,6 +37,8 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	// Parsing an expression - Begin
+
 	isINE := vqlexp.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
 	db := vqlexp.RegExpCollection["CreateDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
@@ -44,6 +48,10 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 	db = strings.TrimSpace(db)
 	db = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
 	db = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+
+	// Parsing an expression - End
+
+	// Post checking
 
 	_, ok := core.GetDBInfo(db)
 	if ok {
@@ -82,6 +90,8 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 		}
 	}
 
+	// Execution
+
 	if !core.CreateDB(db, login, true) {
 		res.State = "error"
 		res.Result = "invalid database name"
@@ -96,35 +106,20 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	isINE := vqlexp.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
@@ -141,6 +136,10 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 	table = strings.TrimSpace(table)
 	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+
+	// Parsing an expression - End
+
+	// Post checking, post parsing and execution
 
 	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
@@ -294,6 +293,8 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
+	// Pre checking
+
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
@@ -310,6 +311,8 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	if newticket != "" {
 		res.Ticket = newticket
 	}
+
+	// Parsing an expression - Begin
 
 	isRT := vqlexp.RegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
 	if !isRT {
@@ -331,6 +334,10 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 	if oldDBName == "" || newDBName == "" {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
+
+	// Parsing an expression - End
+
+	// Post checking and execution
 
 	_, ok := core.GetDBInfo(oldDBName)
 	if ok {
@@ -379,35 +386,20 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	tableName := vqlexp.RegExpCollection["AlterTableAdd"].FindString(q.Instruction)
 	tableName = vqlexp.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
@@ -467,45 +459,31 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.GetDBInfo(db)
-	if okDB {
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags := dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if okFlags {
-						if !(flagsAcs.Alter && flagsAcs.Create) {
-							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-						}
-					} else {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			}
-			for _, colName := range columns {
-				if !core.CreateColumn(db, tableName, colName.Name, true, colName.Spec) {
-					res.State = "error"
-					res.Result = "the column cannot be added"
-					return ecowriter.EncodeJSON(res), errors.New("the column cannot be added")
-				}
-			}
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
-	} else {
+	// Parsing an expression - End
+
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	if err != nil {
 		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser {
+		if !(flagsAcs.Alter && flagsAcs.Create) {
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+		}
+	}
+
+	// Request execution
+
+	for _, colName := range columns {
+		if !core.CreateColumn(db, tableName, colName.Name, true, colName.Spec) {
+			res.State = "error"
+			res.Result = "the column cannot be added"
+			return ecowriter.EncodeJSON(res), errors.New("the column cannot be added")
+		}
 	}
 
 	res.State = "ok"
@@ -516,35 +494,20 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	tableName := vqlexp.RegExpCollection["AlterTableDrop"].FindString(q.Instruction)
 	tableName = vqlexp.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
@@ -575,45 +538,30 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.GetDBInfo(db)
-	if okDB {
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags := dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if okFlags {
-						if !(flagsAcs.Alter && flagsAcs.Drop) {
-							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-						}
-					} else {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			}
-			for _, colName := range columns {
-				if !core.RemoveColumn(db, tableName, colName) {
-					res.State = "error"
-					res.Result = "the column cannot be deleted"
-					return ecowriter.EncodeJSON(res), errors.New("the column cannot be deleted")
-				}
-			}
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
-	} else {
+	// Parsing an expression - End
+
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	if err != nil {
 		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser {
+		if !(flagsAcs.Alter && flagsAcs.Drop) {
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+		}
+	}
+
+	// Request execution
+	for _, colName := range columns {
+		if !core.RemoveColumn(db, tableName, colName) {
+			res.State = "error"
+			res.Result = "the column cannot be deleted"
+			return ecowriter.EncodeJSON(res), errors.New("the column cannot be deleted")
+		}
 	}
 
 	res.State = "ok"
@@ -624,35 +572,20 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	tableName := vqlexp.RegExpCollection["AlterTableModify"].FindString(q.Instruction)
 	tableName = vqlexp.RegExpCollection["AlterTableWord"].ReplaceAllLiteralString(tableName, "")
@@ -746,46 +679,31 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.GetDBInfo(db)
-	if okDB {
-		dbAccess, ok := core.GetDBAccess(db)
-		if ok {
-			flagsAcs, okFlags := dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if okFlags {
-						if !flagsAcs.Alter {
-							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-						}
-					} else {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			}
+	// Parsing an expression - End
 
-			for _, column := range columns {
-				if !core.ChangeColumn(db, tableName, column, true) {
-					res.State = "error"
-					res.Result = "the column cannot be changed"
-					return ecowriter.EncodeJSON(res), errors.New("the column cannot be changed")
-				}
-			}
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
-	} else {
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	if err != nil {
 		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser {
+		if !flagsAcs.Alter {
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+		}
+	}
+
+	// Request execution
+
+	for _, column := range columns {
+		if !core.ChangeColumn(db, tableName, column, true) {
+			res.State = "error"
+			res.Result = "the column cannot be changed"
+			return ecowriter.EncodeJSON(res), errors.New("the column cannot be changed")
+		}
 	}
 
 	res.State = "ok"
@@ -796,35 +714,20 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	isRT := vqlexp.RegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
 	if !isRT {
@@ -847,43 +750,29 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	_, okDB := core.GetDBInfo(db)
-	if okDB {
-		dbAccess, ok := core.GetDBAccess(db)
-		if ok {
-			flagsAcs, okFlags := dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if okFlags {
-						if !flagsAcs.Alter {
-							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-						}
-					} else {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			}
-			if !core.RenameTable(db, oldTableName, newTableName, true) {
-				res.State = "error"
-				res.Result = "the database cannot be renamed"
-				return ecowriter.EncodeJSON(res), errors.New("the database cannot be renamed")
-			}
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
-	} else {
+	// Parsing an expression - End
+
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, oldTableName, login, access)
+	if err != nil {
 		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser {
+		if !flagsAcs.Alter {
+			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+		}
+	}
+
+	// Request execution
+
+	if !core.RenameTable(db, oldTableName, newTableName, true) {
+		res.State = "error"
+		res.Result = "the database cannot be renamed"
+		return ecowriter.EncodeJSON(res), errors.New("the database cannot be renamed")
 	}
 
 	res.State = "ok"
@@ -931,6 +820,8 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
+	// Pre checking
+
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
@@ -948,6 +839,8 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	// Parsing an expression - Begin
+
 	isIE := vqlexp.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
 
 	db := vqlexp.RegExpCollection["DropDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
@@ -957,6 +850,10 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 	db = strings.TrimSpace(db)
 	db = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
 	db = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(db, "")
+
+	// Parsing an expression - End
+
+	// Post checking
 
 	_, ok := core.GetDBInfo(db)
 	if !ok {
@@ -986,6 +883,8 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 		}
 	}
 
+	// Request execution
+
 	if !core.RemoveDB(db) {
 		res.State = "error"
 		res.Result = "the database cannot be deleted"
@@ -1000,35 +899,20 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	// This method is complete
 	var res gtypes.Response
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
 		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	isIE := vqlexp.RegExpCollection["IfExistsWord"].MatchString(q.Instruction)
 
@@ -1040,59 +924,25 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
-	dbInfo, okDB := core.GetDBInfo(db)
-	if okDB {
-		var flagsAcs gtypes.TAccessFlags
-		var okFlags bool = false
-		var luxUser bool = false
+	// Parsing an expression - End
 
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags = dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if !okFlags {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			} else {
-				luxUser = true
-			}
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
+	// Post checking
 
-		_, okTable := dbInfo.Tables[table]
-		if !okTable {
-			if isIE {
-				res.State = "error"
-				res.Result = "the table not exists"
-				return ecowriter.EncodeJSON(res), errors.New("the table not exists")
-			}
-
-			res.State = "ok"
-			return ecowriter.EncodeJSON(res), nil
-		}
-
-		if !luxUser && !flagsAcs.Drop {
-			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-		}
-
-		if !core.RemoveTable(db, table) {
-			return `{"state":"error", "result":"the table cannot be deleted"}`, errors.New("the table cannot be deleted")
-		}
-	} else {
+	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	if err != nil {
 		res.State = "error"
-		res.Result = "internal error"
-		return ecowriter.EncodeJSON(res), errors.New("internal error")
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser && !flagsAcs.Drop {
+		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+	}
+
+	// Request execution
+
+	if !core.RemoveTable(db, table) {
+		return `{"state":"error", "result":"the table cannot be deleted"}`, errors.New("the table cannot be deleted")
 	}
 
 	res.State = "ok"
