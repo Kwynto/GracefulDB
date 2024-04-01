@@ -5,8 +5,10 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 )
 
 // Helpers for VQLAnalyzer
@@ -143,4 +145,125 @@ func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
 		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
 	}
 	return expression, nil
+}
+
+func preChecker(ticket string) (login string, db string, access gauth.TProfile, newticket string, err error) {
+	if ticket == "" {
+		return login, db, access, newticket, errors.New("an empty ticket")
+	}
+
+	login, access, newticket, err = gauth.CheckTicket(ticket)
+	if err != nil {
+		return login, db, access, newticket, err
+	}
+
+	if access.Status.IsBad() {
+		return login, db, access, newticket, errors.New("auth error")
+	}
+
+	state, ok := core.States[ticket]
+	if !ok {
+		return login, db, access, newticket, errors.New("unknown database")
+	}
+	db = state.CurrentDB
+	if db == "" {
+		return login, db, access, newticket, errors.New("no database selected")
+	}
+
+	return login, db, access, newticket, nil
+}
+
+func angryPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
+	dbInfo, okDB := core.GetDBInfo(db)
+	if okDB {
+		var okFlags bool = false
+		flagsAcs = gtypes.TAccessFlags{}
+		luxUser = false
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			return luxUser, flagsAcs, errors.New("invalid table name")
+		}
+
+		dbAccess, okAccess := core.GetDBAccess(db)
+		if okAccess {
+			flagsAcs, okFlags = dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if !okFlags {
+						return luxUser, flagsAcs, errors.New("not enough rights")
+					}
+				}
+			} else {
+				luxUser = true
+			}
+		} else {
+			return luxUser, flagsAcs, errors.New("internal error")
+		}
+
+		return luxUser, flagsAcs, nil
+
+	} else {
+		return luxUser, flagsAcs, errors.New("invalid database name")
+	}
+}
+
+func friendlyPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
+LabelCheck:
+	dbInfo, okDB := core.GetDBInfo(db)
+	if okDB {
+		var okFlags bool = false
+		flagsAcs = gtypes.TAccessFlags{}
+		luxUser = false
+
+		_, okTable := dbInfo.Tables[table]
+		if !okTable {
+			if core.LocalCoreSettings.FriendlyMode {
+				if !core.CreateTable(db, table, true) {
+					return luxUser, flagsAcs, errors.New("invalid table name")
+				}
+				goto LabelCheck
+			}
+			return luxUser, flagsAcs, errors.New("invalid table name")
+		}
+
+		dbAccess, okAccess := core.GetDBAccess(db)
+		if okAccess {
+			flagsAcs, okFlags = dbAccess.Flags[login]
+			if dbAccess.Owner != login {
+				for role := range access.Roles {
+					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
+						luxUser = true
+						break
+					}
+				}
+				if !luxUser {
+					if !okFlags {
+						return luxUser, flagsAcs, errors.New("not enough rights")
+					}
+				}
+			} else {
+				luxUser = true
+			}
+		} else {
+			return luxUser, flagsAcs, errors.New("internal error")
+		}
+
+		return luxUser, flagsAcs, nil
+
+	} else {
+		if core.LocalCoreSettings.FriendlyMode {
+			if !core.CreateDB(db, login, true) {
+				return luxUser, flagsAcs, errors.New("invalid database name")
+			}
+			goto LabelCheck
+		}
+		return luxUser, flagsAcs, errors.New("internal error")
+	}
 }

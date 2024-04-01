@@ -20,6 +20,12 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var res gtypes.Response
+	var (
+		dbs   []string
+		users []string
+	)
+
+	// Pre checking
 
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
@@ -38,10 +44,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		res.Ticket = newticket
 	}
 
-	var (
-		dbs   []string
-		users []string
-	)
+	// Parsing an expression - Begin
 
 	privilegesStr := vqlexp.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
 	privilegesStr = vqlexp.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
@@ -82,6 +85,10 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	if len(users) == 0 {
 		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
+
+	// Parsing an expression - End
+
+	// Post checking and execution
 
 	for _, db := range dbs {
 		dbAccess, ok := core.GetDBAccess(db)
@@ -136,6 +143,12 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var res gtypes.Response
+	var (
+		dbs   []string
+		users []string
+	)
+
+	// Pre checking
 
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
@@ -154,10 +167,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		res.Ticket = newticket
 	}
 
-	var (
-		dbs   []string
-		users []string
-	)
+	// Parsing an expression - Begin
 
 	privilegesStr := vqlexp.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
 	privilegesStr = vqlexp.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(privilegesStr, "")
@@ -198,6 +208,10 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	if len(users) == 0 {
 		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
+
+	// Parsing an expression - End
+
+	// Post checking and execution
 
 	for _, db := range dbs {
 		dbAccess, ok := core.GetDBAccess(db)
@@ -254,6 +268,8 @@ func (q tQuery) DCLUse() (result string, err error) {
 	var ticket string
 	var res gtypes.Response
 
+	// Pre checking
+
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
@@ -274,6 +290,8 @@ func (q tQuery) DCLUse() (result string, err error) {
 		ticket = q.Ticket
 	}
 
+	// Parsing an expression - Begin
+
 	db := vqlexp.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	db = strings.TrimSpace(db)
 	db = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(db, "")
@@ -288,6 +306,10 @@ func (q tQuery) DCLUse() (result string, err error) {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
 	}
+
+	// Parsing an expression - End
+
+	// Post checking
 
 	dbAccess, ok := core.GetDBAccess(db)
 	if ok {
@@ -312,6 +334,8 @@ func (q tQuery) DCLUse() (result string, err error) {
 		}
 	}
 
+	// Request execution
+
 	core.States[ticket] = core.TState{
 		CurrentDB: db,
 	}
@@ -331,6 +355,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 		resArr gtypes.ResponseStrings
 	)
 
+	// Pre checking
+
 	if q.Ticket == "" {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
@@ -348,8 +374,14 @@ func (q tQuery) DCLShow() (result string, err error) {
 		res.Ticket = newticket
 	}
 
+	// Parsing an expression - Begin
+
 	isDBs := vqlexp.RegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
 	isTables := vqlexp.RegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
+
+	// Parsing an expression - End
+
+	// Post checking and execution
 
 	if isDBs {
 		var namesDBs []string = []string{}
@@ -409,36 +441,21 @@ func (q tQuery) DCLDesc() (result string, err error) {
 
 	var table string
 
-	if q.Ticket == "" {
-		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
-	}
+	// Pre checking
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	login, db, access, newticket, err := preChecker(q.Ticket)
 	if err != nil {
-		return `{"state":"error", "result":"authorization failed"}`, err
-	}
-
-	if access.Status.IsBad() {
-		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
 	}
 
 	if newticket != "" {
-		res.Ticket = newticket
 		resArr.Ticket = newticket
+		res.Ticket = newticket
 	}
 
-	state, ok := core.States[q.Ticket]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown database"
-		return ecowriter.EncodeJSON(res), errors.New("unknown database")
-	}
-	db := state.CurrentDB
-	if db == "" {
-		res.State = "error"
-		res.Result = "no database selected"
-		return ecowriter.EncodeJSON(res), errors.New("no database selected")
-	}
+	// Parsing an expression - Begin
 
 	if vqlexp.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
 		table = vqlexp.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
@@ -452,69 +469,59 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
 
+	// Parsing an expression - End
+
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	if err != nil {
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser && !flagsAcs.Select {
+		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+	}
+
+	// Request execution
+
 	dbInfo, okDB := core.GetDBInfo(db)
-	if okDB {
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags := dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
-						break
-					}
-				}
-				if !luxUser {
-					if okFlags {
-						if !flagsAcs.Select {
-							return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-						}
-					} else {
-						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
-					}
-				}
-			}
-
-			tableInfo, ok := dbInfo.Tables[table]
-			if !ok {
-				res.State = "error"
-				res.Result = "unknown table"
-				return ecowriter.EncodeJSON(res), errors.New("unknown table")
-			}
-
-			if len(tableInfo.Order) < 1 {
-				res.State = "error"
-				res.Result = "there are no columns"
-				return ecowriter.EncodeJSON(res), errors.New("there are no columns")
-			}
-
-			for _, colName := range tableInfo.Order {
-				column, okCol := tableInfo.Columns[colName]
-				if okCol {
-					var resColumn gtypes.ResultColumn
-
-					resColumn.Field = column.Name
-					resColumn.Default = column.Specification.Default
-					resColumn.NotNull = column.Specification.NotNull
-					resColumn.Unique = column.Specification.Unique
-					resColumn.LastUpdate = column.LastUpdate
-
-					resArr.Result = append(resArr.Result, resColumn)
-				}
-			}
-			resArr.State = "ok"
-			return ecowriter.EncodeJSON(resArr), nil
-		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
-		}
-	} else {
+	if !okDB {
 		res.State = "error"
 		res.Result = "invalid database name"
 		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
 	}
+
+	tableInfo, ok := dbInfo.Tables[table]
+	if !ok {
+		res.State = "error"
+		res.Result = "unknown table"
+		return ecowriter.EncodeJSON(res), errors.New("unknown table")
+	}
+
+	if len(tableInfo.Order) < 1 {
+		res.State = "error"
+		res.Result = "there are no columns"
+		return ecowriter.EncodeJSON(res), errors.New("there are no columns")
+	}
+
+	for _, colName := range tableInfo.Order {
+		column, okCol := tableInfo.Columns[colName]
+		if okCol {
+			var resColumn gtypes.ResultColumn
+
+			resColumn.Field = column.Name
+			resColumn.Default = column.Specification.Default
+			resColumn.NotNull = column.Specification.NotNull
+			resColumn.Unique = column.Specification.Unique
+			resColumn.LastUpdate = column.LastUpdate
+
+			resArr.Result = append(resArr.Result, resColumn)
+		}
+	}
+	resArr.State = "ok"
+	return ecowriter.EncodeJSON(resArr), nil
 }
 
 func (q tQuery) DCLAuth() (result string, err error) {
@@ -523,6 +530,8 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var roles []gauth.TRole
+
+	// Parsing an expression - Begin
 
 	isNew := vqlexp.RegExpCollection["AuthNew"].MatchString(q.Instruction)
 	isChange := vqlexp.RegExpCollection["AuthChange"].MatchString(q.Instruction)
@@ -572,6 +581,10 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}
 		}
 	}
+
+	// Parsing an expression - End
+
+	// Request execution
 
 	if isNew || isChange || isRemove {
 		var res gtypes.Response
