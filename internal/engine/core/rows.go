@@ -7,6 +7,11 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
+func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
+	// -
+	return []uint64{}, true
+}
+
 func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint64, bool) {
 	// -
 	return []uint64{}, true
@@ -89,8 +94,8 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 				}
 				vStore = column.Specification.Default
 			}
-			colStore.Id = tableInfo.Count
-			colStore.Time = tNow
+			// colStore.Id = tableInfo.Count
+			// colStore.Time = tNow
 			colStore.Value = vStore
 			rowStore.Row = append(rowStore.Row, colStore)
 		}

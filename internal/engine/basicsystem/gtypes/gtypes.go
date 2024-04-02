@@ -25,19 +25,19 @@ type TColumnForWrite struct {
 
 type TColumnForStore struct {
 	Field string
-	Id    uint64 // FIXME: Need delete
-	Time  int64  // FIXME: Need delete
+	// Id    uint64 // FIXME: Need delete
+	// Time  int64  // FIXME: Need delete
 	Value string
 }
 
 type TRowForStore struct {
+	Row    []TColumnForStore
 	Id     uint64
 	Time   int64
 	Status int64 // memoried = 0  -  saved = 1  -  stored = 2
 	Shape  int64 // primary = 0  -  required = 1  -  updated = 2  -  deleted = 3
 	DB     string
 	Table  string
-	Row    []TColumnForStore
 }
 
 type TWriteBuffer struct {
@@ -70,15 +70,15 @@ type Response struct {
 }
 
 type ResponseStrings struct {
+	Result []string `json:"result,omitempty"`
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
-	Result []string `json:"result,omitempty"`
 }
 
 type ResponseUints struct {
+	Result []uint64 `json:"result,omitempty"`
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
-	Result []uint64 `json:"result,omitempty"`
 }
 
 type ResultColumn struct {
@@ -113,14 +113,19 @@ type TUpdaateStruct struct {
 }
 
 type TSelectStruct struct {
-	IsOrder  bool
-	IsGroup  bool
-	IsWhere  bool
 	Orderby  TOrderBy
 	Groupby  []string
 	Where    []TConditions
 	Columns  []string
+	IsOrder  bool
+	IsGroup  bool
+	IsWhere  bool
 	Distinct bool
+}
+
+type TDeleteStruct struct {
+	Where   []TConditions
+	IsWhere bool
 }
 
 type Secret struct {
