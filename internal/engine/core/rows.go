@@ -7,8 +7,42 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
+func whereOper(cond gtypes.TConditions) []uint64 {
+	// -
+
+	return []uint64{}
+}
+
+func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
+	// -
+	if len(where) < 1 {
+		return acc
+	}
+
+	head := where[0]
+	tail := where[1:]
+
+	switch head.Type {
+	case "operation":
+		resIds := whereOper(head)
+		acc = append(acc, resIds...)
+	case "or":
+		// resIds := whereOr(head)
+		// acc = append(acc, resIds...)
+	case "and":
+		// resIds := whereAnd(head)
+		// acc = append(acc, resIds...)
+	}
+
+	return whereSelection(acc, tail)
+}
+
 func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
 	// -
+	var whereIds []uint64 = []uint64{}
+
+	whereIds = whereSelection(whereIds, deleteIn.Where)
+
 	return []uint64{}, true
 }
 
