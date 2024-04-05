@@ -7,11 +7,11 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-func whereOper(cond gtypes.TConditions) []uint64 {
-	// -
+// func whereOper(cond gtypes.TConditions) []uint64 {
+// 	// -
 
-	return []uint64{}
-}
+// 	return []uint64{}
+// }
 
 func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
 	// -
@@ -19,31 +19,73 @@ func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
 		return acc
 	}
 
-	head := where[0]
-	tail := where[1:]
+	// head := where[0]
+	// tail := where[1:]
 
-	switch head.Type {
-	case "operation":
-		resIds := whereOper(head)
-		acc = append(acc, resIds...)
-	case "or":
-		// resIds := whereOr(head)
-		// acc = append(acc, resIds...)
-	case "and":
-		// resIds := whereAnd(head)
-		// acc = append(acc, resIds...)
-	}
+	// switch head.Type {
+	// case "operation":
 
-	return whereSelection(acc, tail)
+	// 	resIds := whereOper(head)
+	// 	acc = append(acc, resIds...)
+	// case "or":
+	// 	// resIds := whereOr(head)
+	// 	// acc = append(acc, resIds...)
+	// case "and":
+	// 	// resIds := whereAnd(head)
+	// 	// acc = append(acc, resIds...)
+	// }
+
+	// return whereSelection(acc, tail)
+	return []uint64{}
 }
 
 func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
-	// -
+	// - ! Почти готово
 	var whereIds []uint64 = []uint64{}
+	var rowsForStore []gtypes.TRowForStore
+
+	if !deleteIn.IsWhere {
+		if TruncateTable(nameDB, nameTable) { // FIXME: Додумать и доделать удаление всех
+			return whereIds, true
+		}
+	}
+
+	// chacking keys
+	for _, whereElem := range deleteIn.Where {
+		if whereElem.Type == "operation" {
+			_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
+			if !ok {
+				return []uint64{}, false
+			}
+		}
+	}
 
 	whereIds = whereSelection(whereIds, deleteIn.Where)
 
-	return []uint64{}, true
+	tNow := time.Now().Unix()
+
+	StorageInfo.DBs[nameDB].Tables[nameTable].Columns
+
+	// Deleting by changing the status of records and setting zero values
+	for _, id := range whereIds {
+		var rowStore = gtypes.TRowForStore{}
+		rowStore.Id = id
+		rowStore.Time = tNow
+		rowStore.Status = 0
+		rowStore.Shape = 3 // this is code of delete
+		rowStore.DB = nameDB
+		rowStore.Table = nameTable
+		rowStore.Row = []gtypes.TColumnForStore{
+			Field: "",
+			Value: "",
+		}
+
+		rowsForStore = append(rowsForStore, rowStore)
+	}
+
+	go InsertIntoBuffer(rowsForStore)
+
+	return whereIds, true
 }
 
 func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint64, bool) {
