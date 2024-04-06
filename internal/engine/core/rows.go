@@ -7,6 +7,96 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
+// func whereOper(cond gtypes.TConditions) []uint64 {
+// 	// -
+
+// 	return []uint64{}
+// }
+
+func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
+	// -
+	if len(where) < 1 {
+		return acc
+	}
+
+	// head := where[0]
+	// tail := where[1:]
+
+	// switch head.Type {
+	// case "operation":
+
+	// 	resIds := whereOper(head)
+	// 	acc = append(acc, resIds...)
+	// case "or":
+	// 	// resIds := whereOr(head)
+	// 	// acc = append(acc, resIds...)
+	// case "and":
+	// 	// resIds := whereAnd(head)
+	// 	// acc = append(acc, resIds...)
+	// }
+
+	// return whereSelection(acc, tail)
+	return []uint64{}
+}
+
+func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
+	// - ! Почти готово
+	var whereIds []uint64 = []uint64{}
+	var rowsForStore []gtypes.TRowForStore
+	var cols []string = []string{}
+
+	if !deleteIn.IsWhere {
+		if TruncateTable(nameDB, nameTable) { // FIXME: Додумать и доделать удаление всех
+			return whereIds, true
+		}
+	}
+
+	// chacking keys
+	for _, whereElem := range deleteIn.Where {
+		if whereElem.Type == "operation" {
+			_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
+			if !ok {
+				return []uint64{}, false
+			}
+		}
+	}
+
+	tableInfo, ok := StorageInfo.DBs[nameDB].Tables[nameTable]
+	if !ok {
+		return []uint64{}, false
+	}
+	for _, col := range tableInfo.Columns {
+		cols = append(cols, col.Name)
+	}
+
+	whereIds = whereSelection(whereIds, deleteIn.Where)
+
+	tNow := time.Now().Unix()
+
+	// Deleting by changing the status of records and setting zero values
+	for _, id := range whereIds {
+		var rowStore = gtypes.TRowForStore{}
+		rowStore.Id = id
+		rowStore.Time = tNow
+		rowStore.Status = 0
+		rowStore.Shape = 3 // this is code of delete
+		rowStore.DB = nameDB
+		rowStore.Table = nameTable
+		for _, col := range cols {
+			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
+				Field: col,
+				Value: "",
+			})
+		}
+
+		rowsForStore = append(rowsForStore, rowStore)
+	}
+
+	go InsertIntoBuffer(rowsForStore)
+
+	return whereIds, true
+}
+
 func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint64, bool) {
 	// -
 	return []uint64{}, true
@@ -89,8 +179,8 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 				}
 				vStore = column.Specification.Default
 			}
-			colStore.Id = tableInfo.Count
-			colStore.Time = tNow
+			// colStore.Id = tableInfo.Count
+			// colStore.Time = tNow
 			colStore.Value = vStore
 			rowStore.Row = append(rowStore.Row, colStore)
 		}

@@ -24,9 +24,6 @@ func (q tQuery) DMLSelect() (result string, err error) {
 		res       gtypes.Response
 		resArr    gtypes.ResponseUints
 		selectIn  = gtypes.TSelectStruct{
-			IsOrder: false,
-			IsGroup: false,
-			IsWhere: false,
 			Orderby: gtypes.TOrderBy{
 				Cols: make([]string, 0, 4),
 				Sort: make([]uint8, 0, 4),
@@ -34,6 +31,9 @@ func (q tQuery) DMLSelect() (result string, err error) {
 			Groupby:  make([]string, 0, 4),
 			Where:    make([]gtypes.TConditions, 0, 4),
 			Columns:  make([]string, 0, 4),
+			IsOrder:  false,
+			IsGroup:  false,
+			IsWhere:  false,
 			Distinct: false,
 		}
 	)
@@ -373,7 +373,80 @@ func (q tQuery) DMLDelete() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
 	defer func() { e.Wrapper(op, err) }()
 
-	return "DMLDelete", nil
+	var (
+		resultIds []uint64
+		okDel     bool
+		res       gtypes.Response
+		resArr    gtypes.ResponseUints
+		deleteIn  = gtypes.TDeleteStruct{
+			Where:   make([]gtypes.TConditions, 0, 4),
+			IsWhere: false,
+		}
+	)
+
+	// Pre checking
+
+	login, db, access, newticket, err := preChecker(q.Ticket)
+	if err != nil {
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if newticket != "" {
+		resArr.Ticket = newticket
+		res.Ticket = newticket
+	}
+
+	// Parsing an expression - Begin
+
+	instruction := vqlexp.RegExpCollection["DeleteWord"].ReplaceAllLiteralString(q.Instruction, "")
+
+	if vqlexp.RegExpCollection["WhereToEnd"].MatchString(instruction) {
+		whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
+		instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
+		whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
+		expression, err := parseWhere(whereStr)
+		if err != nil {
+			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
+		}
+		deleteIn.Where = append(deleteIn.Where, expression...)
+		deleteIn.IsWhere = true
+	}
+
+	table := vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(instruction, "")
+	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
+	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	if table == "" {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
+
+	// Parsing an expression - End
+
+	// Post checking
+
+	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	if err != nil {
+		res.State = "error"
+		res.Result = err.Error()
+		return ecowriter.EncodeJSON(res), err
+	}
+
+	if !luxUser && !flagsAcs.Delete {
+		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
+	}
+
+	// Request execution
+
+	// TODO: Make an implementation in the kernel
+	resultIds, okDel = core.DeleteRows(db, table, deleteIn)
+	if !okDel {
+		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
+	}
+
+	resArr.State = "ok"
+	resArr.Result = resultIds
+	return ecowriter.EncodeJSON(resArr), nil
 }
 
 func (q tQuery) DMLCommit() (result string, err error) {
