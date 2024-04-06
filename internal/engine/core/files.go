@@ -50,7 +50,7 @@ func writeBufferToDisk() bool {
 			maxBucket := Pow(2, dc.BucketLog)
 			hashid := row.Id % maxBucket
 			if hashid == 0 {
-				hashid = Pow(2, dc.BucketLog)
+				hashid = maxBucket
 			}
 
 			fileName := fmt.Sprintf("%s%s_%d", dc.Path, dc.CurrentRev, hashid)

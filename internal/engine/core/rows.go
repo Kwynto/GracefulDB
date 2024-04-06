@@ -43,6 +43,7 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 	// - ! Почти готово
 	var whereIds []uint64 = []uint64{}
 	var rowsForStore []gtypes.TRowForStore
+	var cols []string = []string{}
 
 	if !deleteIn.IsWhere {
 		if TruncateTable(nameDB, nameTable) { // FIXME: Додумать и доделать удаление всех
@@ -60,11 +61,17 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		}
 	}
 
+	tableInfo, ok := StorageInfo.DBs[nameDB].Tables[nameTable]
+	if !ok {
+		return []uint64{}, false
+	}
+	for _, col := range tableInfo.Columns {
+		cols = append(cols, col.Name)
+	}
+
 	whereIds = whereSelection(whereIds, deleteIn.Where)
 
 	tNow := time.Now().Unix()
-
-	StorageInfo.DBs[nameDB].Tables[nameTable].Columns
 
 	// Deleting by changing the status of records and setting zero values
 	for _, id := range whereIds {
@@ -75,9 +82,11 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		rowStore.Shape = 3 // this is code of delete
 		rowStore.DB = nameDB
 		rowStore.Table = nameTable
-		rowStore.Row = []gtypes.TColumnForStore{
-			Field: "",
-			Value: "",
+		for _, col := range cols {
+			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
+				Field: col,
+				Value: "",
+			})
 		}
 
 		rowsForStore = append(rowsForStore, rowStore)
