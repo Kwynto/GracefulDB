@@ -40,28 +40,38 @@ func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
 }
 
 func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
-	// - ! Почти готово
+	// - ! It's almost done
 	var whereIds []uint64 = []uint64{}
 	var rowsForStore []gtypes.TRowForStore
 	var cols []string = []string{}
 
 	if !deleteIn.IsWhere {
-		if TruncateTable(nameDB, nameTable) { // FIXME: Додумать и доделать удаление всех
-			return whereIds, true
+		deleteIn.Where[0] = gtypes.TConditions{
+			Type:      "operation",
+			Key:       "_id",
+			Operation: ">",
+			Value:     "0",
 		}
+		deleteIn.IsWhere = true
 	}
 
 	// chacking keys
 	for _, whereElem := range deleteIn.Where {
 		if whereElem.Type == "operation" {
-			_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
-			if !ok {
-				return []uint64{}, false
+			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
+				_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
+				if !ok {
+					return []uint64{}, false
+				}
 			}
 		}
 	}
 
-	tableInfo, ok := StorageInfo.DBs[nameDB].Tables[nameTable]
+	dbInfo, okDB := GetDBInfo(nameDB)
+	if !okDB {
+		return []uint64{}, false
+	}
+	tableInfo, ok := dbInfo.Tables[nameTable]
 	if !ok {
 		return []uint64{}, false
 	}
@@ -69,7 +79,7 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(whereIds, deleteIn.Where)
+	whereIds = whereSelection(whereIds, deleteIn.Where) // TODO: do it
 
 	tNow := time.Now().Unix()
 

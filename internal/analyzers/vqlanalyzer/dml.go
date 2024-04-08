@@ -91,8 +91,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	instruction = vqlexp.RegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(instruction, "")
 	table = vqlexp.RegExpCollection["SelectFromWord"].ReplaceAllLiteralString(table, "")
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = trimQuotationMarks(table)
 	if table == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
@@ -107,8 +106,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	columns := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
 	for _, col := range columns {
 		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+		col = trimQuotationMarks(col)
 		if col != "" {
 			selectIn.Columns = append(selectIn.Columns, col)
 		}
@@ -199,14 +197,12 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	columnsStr := vqlexp.RegExpCollection["InsertColParenthesis"].FindString(instruction)
 	columnsStr = vqlexp.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(columnsStr, "")
 	columnsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(columnsStr, "")
+	columnsStr = trimQuotationMarks(columnsStr)
 	columnsIn = vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
 
 	table := vqlexp.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = trimQuotationMarks(table)
 
 	var rowsIn [][]string
 	valuesStr = vqlexp.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
@@ -321,24 +317,21 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		val := colValArr[1]
 
 		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+		col = trimQuotationMarks(col)
 
 		if len(col) == 0 {
 			return `{"state":"error", "result":"incorrect syntax"}`, errors.New("incorrect syntax")
 		}
 
 		val = strings.TrimSpace(val)
-		val = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(val, "")
-		val = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(val, "")
+		val = trimQuotationMarks(val)
 
 		updateIn.Couples[col] = val
 	}
 
 	table := vqlexp.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = trimQuotationMarks(table)
 
 	// Parsing an expression - End
 
@@ -415,8 +408,7 @@ func (q tQuery) DMLDelete() (result string, err error) {
 	}
 
 	table := vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(instruction, "")
-	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = trimQuotationMarks(table)
 	if table == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
@@ -489,8 +481,7 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 
 	table := vqlexp.RegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	table = strings.TrimSpace(table)
-	table = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(table, "")
+	table = trimQuotationMarks(table)
 
 	// Parsing an expression - End
 
