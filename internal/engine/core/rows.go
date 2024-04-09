@@ -7,40 +7,64 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-// func whereOper(cond gtypes.TConditions) []uint64 {
-// 	// -
-
-// 	return []uint64{}
-// }
-
-func whereSelection(acc []uint64, where []gtypes.TConditions) []uint64 {
+func findWhereIds(cond gtypes.TConditions) []uint64 {
 	// -
+	// TODO: do it
+	return []uint64{}
+}
+
+func mergeOr(first, second []uint64) []uint64 {
+	// This function is complete
+	resIds := append(first, second...)
+	slices.Sort(resIds)
+	resIds = slices.Compact(resIds)
+
+	resIds = slices.Clip(resIds)
+	return resIds
+}
+
+func mergeAnd(first, second []uint64) []uint64 {
+	// This function is complete
+	var resIds = make([]uint64, 4)
+
+	for _, sElem := range second {
+		if slices.Contains(first, sElem) {
+			resIds = append(resIds, sElem)
+		}
+	}
+
+	resIds = slices.Clip(resIds)
+	return resIds
+}
+
+func whereSelection(where []gtypes.TConditions) []uint64 {
+	// - It's almost done
+	var (
+		acc         []uint64 = make([]uint64, 4)
+		progressIds []uint64 = make([]uint64, 4)
+	)
+
 	if len(where) < 1 {
 		return acc
 	}
 
-	// head := where[0]
-	// tail := where[1:]
+	for _, elem := range where {
+		switch elem.Type {
+		case "operation":
+			clear(progressIds)
+			progressIds = findWhereIds(elem) // TODO: do it
+		case "or":
+			acc = mergeOr(acc, progressIds)
+		case "and":
+			acc = mergeAnd(acc, progressIds)
+		}
+	}
 
-	// switch head.Type {
-	// case "operation":
-
-	// 	resIds := whereOper(head)
-	// 	acc = append(acc, resIds...)
-	// case "or":
-	// 	// resIds := whereOr(head)
-	// 	// acc = append(acc, resIds...)
-	// case "and":
-	// 	// resIds := whereAnd(head)
-	// 	// acc = append(acc, resIds...)
-	// }
-
-	// return whereSelection(acc, tail)
-	return []uint64{}
+	return acc
 }
 
 func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
-	// - ! It's almost done
+	// This function is complete
 	var whereIds []uint64 = []uint64{}
 	var rowsForStore []gtypes.TRowForStore
 	var cols []string = []string{}
@@ -79,7 +103,7 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(whereIds, deleteIn.Where) // TODO: do it
+	whereIds = whereSelection(deleteIn.Where)
 
 	tNow := time.Now().Unix()
 
@@ -102,7 +126,9 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		rowsForStore = append(rowsForStore, rowStore)
 	}
 
-	go InsertIntoBuffer(rowsForStore)
+	if len(whereIds) > 0 {
+		go InsertIntoBuffer(rowsForStore)
+	}
 
 	return whereIds, true
 }
@@ -118,6 +144,7 @@ func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uin
 }
 
 func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) ([]uint64, bool) {
+	// This function is complete
 	var rows [][]string
 
 	for _, col := range columns {

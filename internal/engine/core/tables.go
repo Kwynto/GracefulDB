@@ -146,7 +146,7 @@ func TruncateTable(nameDB, nameTable string) bool {
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(whereIds, deleteIn.Where)
+	whereIds = whereSelection(deleteIn.Where)
 
 	tNow := time.Now().Unix()
 
@@ -169,7 +169,9 @@ func TruncateTable(nameDB, nameTable string) bool {
 		rowsForStore = append(rowsForStore, rowStore)
 	}
 
-	go InsertIntoBuffer(rowsForStore)
+	if len(whereIds) > 0 {
+		go InsertIntoBuffer(rowsForStore)
+	}
 
 	return true
 }
