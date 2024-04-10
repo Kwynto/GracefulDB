@@ -42,6 +42,7 @@ func whereSelection(where []gtypes.TConditions) []uint64 {
 	var (
 		acc         []uint64 = make([]uint64, 4)
 		progressIds []uint64 = make([]uint64, 4)
+		selector    string   = ""
 	)
 
 	if len(where) < 1 {
@@ -53,10 +54,19 @@ func whereSelection(where []gtypes.TConditions) []uint64 {
 		case "operation":
 			clear(progressIds)
 			progressIds = findWhereIds(elem) // TODO: do it
+			switch selector {
+			case "or":
+				acc = mergeOr(acc, progressIds)
+			case "and":
+				acc = mergeAnd(acc, progressIds)
+			default:
+				acc = append(acc, progressIds...)
+				selector = ""
+			}
 		case "or":
-			acc = mergeOr(acc, progressIds)
+			selector = "or"
 		case "and":
-			acc = mergeAnd(acc, progressIds)
+			selector = "and"
 		}
 	}
 

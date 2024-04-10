@@ -122,18 +122,6 @@ func TruncateTable(nameDB, nameTable string) bool {
 	}
 	deleteIn.IsWhere = true
 
-	// chacking keys
-	for _, whereElem := range deleteIn.Where {
-		if whereElem.Type == "operation" {
-			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
-				_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
-				if !ok {
-					return false
-				}
-			}
-		}
-	}
-
 	dbInfo, okDB := GetDBInfo(nameDB)
 	if !okDB {
 		return false
