@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 )
 
@@ -104,10 +105,73 @@ func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 }
 
 func TruncateTable(nameDB, nameTable string) bool {
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	// This function is complete
+	var whereIds []uint64 = []uint64{}
+	var rowsForStore []gtypes.TRowForStore
+	var cols []string = []string{}
+	var deleteIn gtypes.TDeleteStruct = gtypes.TDeleteStruct{
+		Where:   make([]gtypes.TConditions, 2),
+		IsWhere: false,
+	}
 
-	// TODO: написать очистку таблицы
+	deleteIn.Where[0] = gtypes.TConditions{
+		Type:      "operation",
+		Key:       "_id",
+		Operation: ">",
+		Value:     "0",
+	}
+	deleteIn.IsWhere = true
+
+	// chacking keys
+	for _, whereElem := range deleteIn.Where {
+		if whereElem.Type == "operation" {
+			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
+				_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
+				if !ok {
+					return false
+				}
+			}
+		}
+	}
+
+	dbInfo, okDB := GetDBInfo(nameDB)
+	if !okDB {
+		return false
+	}
+	tableInfo, ok := dbInfo.Tables[nameTable]
+	if !ok {
+		return false
+	}
+	for _, col := range tableInfo.Columns {
+		cols = append(cols, col.Name)
+	}
+
+	whereIds = whereSelection(deleteIn.Where)
+
+	tNow := time.Now().Unix()
+
+	// Deleting by changing the status of records and setting zero values
+	for _, id := range whereIds {
+		var rowStore = gtypes.TRowForStore{}
+		rowStore.Id = id
+		rowStore.Time = tNow
+		rowStore.Status = 0
+		rowStore.Shape = 3 // this is code of delete
+		rowStore.DB = nameDB
+		rowStore.Table = nameTable
+		for _, col := range cols {
+			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
+				Field: col,
+				Value: "",
+			})
+		}
+
+		rowsForStore = append(rowsForStore, rowStore)
+	}
+
+	if len(whereIds) > 0 {
+		go InsertIntoBuffer(rowsForStore)
+	}
 
 	return true
 }

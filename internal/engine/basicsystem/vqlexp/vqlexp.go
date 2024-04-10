@@ -88,6 +88,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	recol = recol.CompileExp("WhereOperation_>", `(?m)>`)
 	recol = recol.CompileExp("WhereOperation_=", `(?m)=`)
 	recol = recol.CompileExp("WhereOperation_LIKE", `(?m)[lL][iI][kK][eE]`)
+	recol = recol.CompileExp("WhereOperation_REGEXP", `(?m)[rR][eE][gG][eE][xX][pP]`)
 
 	// DDL
 	recol = recol.CompileExp("ColumnUnique", `(?m)[uU][nN][iI][qQ][uU][eE]\s*$`)

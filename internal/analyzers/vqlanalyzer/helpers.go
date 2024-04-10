@@ -37,8 +37,7 @@ func parseOrderBy(orderbyStr string, columns []string) (gtypes.TOrderBy, error) 
 		}
 
 		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(col, "")
-		col = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(col, "")
+		col = trimQuotationMarks(col)
 		if col != "" {
 			obCols.Cols = append(obCols.Cols, col)
 			obCols.Sort = append(obCols.Sort, uad)
@@ -63,8 +62,7 @@ func parseGroupBy(groupbyStr string, columns []string) ([]string, error) {
 	groupbyArr := vqlexp.RegExpCollection["Comma"].Split(groupbyStr, -1)
 	for _, gbCol := range groupbyArr {
 		gbCol = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(gbCol, "")
-		gbCol = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(gbCol, "")
-		gbCol = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(gbCol, "")
+		gbCol = trimQuotationMarks(gbCol)
 		if gbCol != "" {
 			gbCols = append(gbCols, gbCol)
 		}
@@ -89,12 +87,10 @@ func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
 		valueIn := condition[1]
 
 		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(keyIn, "")
+		keyIn = trimQuotationMarks(keyIn)
 
 		valueIn = strings.TrimSpace(valueIn)
-		valueIn = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(valueIn, "")
-		valueIn = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(valueIn, "")
+		valueIn = trimQuotationMarks(valueIn)
 
 		if keyIn == "" {
 			return []gtypes.TConditions{}, errors.New("condition error")
@@ -121,6 +117,8 @@ func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
 			exp.Operation = "="
 		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
 			exp.Operation = "like"
+		} else if vqlexp.RegExpCollection["WhereOperation_REGEXP"].MatchString(headCond) {
+			exp.Operation = "regexp"
 		} else {
 			return []gtypes.TConditions{}, errors.New("condition error")
 		}
@@ -145,6 +143,20 @@ func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
 		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
 	}
 	return expression, nil
+}
+
+func trimQuotationMarks(input string) string {
+	if vqlexp.RegExpCollection["QuotationMarks"].MatchString(input) {
+		input = vqlexp.RegExpCollection["QuotationMarks"].ReplaceAllLiteralString(input, "")
+		return input
+	}
+
+	if vqlexp.RegExpCollection["SpecQuotationMark"].MatchString(input) {
+		input = vqlexp.RegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(input, "")
+		return input
+	}
+
+	return input
 }
 
 func preChecker(ticket string) (login string, db string, access gauth.TProfile, newticket string, err error) {
