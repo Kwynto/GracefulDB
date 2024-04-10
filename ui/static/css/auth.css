@@ -110,7 +110,7 @@ Log in form
   color: #efe;
   outline: none;
 }
-.graceful-login input:invalid {
+.graceful-login input:user-invalid {
   border: 2px solid red;
   box-shadow: 0 0 5px rgba(255, 0, 0, 0.2), inset 0 0 5px rgba(255, 0, 0, 0.1), 0 2px 0 #000;
 }
