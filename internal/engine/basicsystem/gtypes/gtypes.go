@@ -128,6 +128,11 @@ type TDeleteStruct struct {
 	IsWhere bool
 }
 
+type TAdditionalData struct {
+	Db    string
+	Table string
+}
+
 type Secret struct {
 	Ticket   string `json:"ticket,omitempty"`
 	Login    string `json:"login,omitempty"`

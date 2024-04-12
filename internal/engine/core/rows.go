@@ -2,15 +2,105 @@ package core
 
 import (
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-func findWhereIds(cond gtypes.TConditions) []uint64 {
+func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// -
 	// TODO: do it
-	return []uint64{}
+	var (
+		resIds               = make([]uint64, 4)
+		progressIds []uint64 = make([]uint64, 4)
+	)
+
+	if cond.Type != "operation" {
+		return []uint64{}
+	}
+
+	if cond.Key == "_id" {
+		if cond.Operation == "=" {
+			if value, err := strconv.ParseUint(cond.Value, 10, 64); err == nil {
+				progressIds = append(progressIds, value)
+			}
+		}
+
+		if cond.Operation == ">" {
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			value++
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			for i := value; i <= countVal; i++ {
+				progressIds = append(progressIds, i)
+			}
+		}
+
+		if cond.Operation == ">=" {
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			for i := value; i <= countVal; i++ {
+				progressIds = append(progressIds, i)
+			}
+		}
+
+		if cond.Operation == "<" {
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			if countVal < value {
+				value = countVal
+			}
+			for i := uint64(1); i < value; i++ {
+				progressIds = append(progressIds, i)
+			}
+		}
+
+		if cond.Operation == "<=" {
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			if countVal < value {
+				value = countVal
+			}
+			for i := uint64(1); i <= value; i++ {
+				progressIds = append(progressIds, i)
+			}
+		}
+
+		if cond.Operation == "like" {
+			return []uint64{}
+		}
+
+		if cond.Operation == "regexp" {
+			return []uint64{}
+		}
+
+		// switch cond.Operation {
+		// case "<=":
+		// case ">=":
+		// case "<":
+		// case ">":
+		// case "=":
+		// case "like":
+		// case "regexp":
+		// }
+	}
+
+	// do it
+	resIds = append(resIds, progressIds...)
+
+	return resIds
 }
 
 func mergeOr(first, second []uint64) []uint64 {
@@ -37,7 +127,7 @@ func mergeAnd(first, second []uint64) []uint64 {
 	return resIds
 }
 
-func whereSelection(where []gtypes.TConditions) []uint64 {
+func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// - It's almost done
 	var (
 		acc         []uint64 = make([]uint64, 4)
@@ -53,7 +143,7 @@ func whereSelection(where []gtypes.TConditions) []uint64 {
 		switch elem.Type {
 		case "operation":
 			clear(progressIds)
-			progressIds = findWhereIds(elem) // TODO: do it
+			progressIds = findWhereIds(elem, additionalData) // TODO: do it
 			switch selector {
 			case "or":
 				acc = mergeOr(acc, progressIds)
@@ -113,7 +203,12 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(deleteIn.Where)
+	additionalData := gtypes.TAdditionalData{
+		Db:    nameDB,
+		Table: nameTable,
+	}
+
+	whereIds = whereSelection(deleteIn.Where, additionalData)
 
 	tNow := time.Now().Unix()
 

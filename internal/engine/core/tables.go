@@ -134,7 +134,12 @@ func TruncateTable(nameDB, nameTable string) bool {
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(deleteIn.Where)
+	additionalData := gtypes.TAdditionalData{
+		Db:    nameDB,
+		Table: nameTable,
+	}
+
+	whereIds = whereSelection(deleteIn.Where, additionalData)
 
 	tNow := time.Now().Unix()
 
