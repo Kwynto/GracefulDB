@@ -467,7 +467,7 @@ func (q tQuery) DCLDesc() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()

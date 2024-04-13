@@ -220,3 +220,13 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 
 	return dbInfo.Save()
 }
+
+func IfExistTable(db, table string) bool {
+	dbInfo, okDb := GetDBInfo(db)
+	if !okDb {
+		return false
+	}
+	_, okTab := dbInfo.Tables[table]
+
+	return okTab
+}

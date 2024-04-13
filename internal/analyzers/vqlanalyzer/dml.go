@@ -96,6 +96,10 @@ func (q tQuery) DMLSelect() (result string, err error) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
+	if !core.IfExistTable(db, table) {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
+
 	distinctBool := vqlexp.RegExpCollection["SelectDistinctWord"].MatchString(instruction)
 	if distinctBool {
 		instruction = vqlexp.RegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(instruction, "")
@@ -137,7 +141,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -203,6 +207,10 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	table := vqlexp.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
 	table = trimQuotationMarks(table)
+
+	if !core.IfExistTable(db, table) {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
 
 	var rowsIn [][]string
 	valuesStr = vqlexp.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
@@ -333,6 +341,10 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
 	table = trimQuotationMarks(table)
 
+	if !core.IfExistTable(db, table) {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
+
 	// Parsing an expression - End
 
 	// Post checking
@@ -413,11 +425,15 @@ func (q tQuery) DMLDelete() (result string, err error) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
+	if !core.IfExistTable(db, table) {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
+
 	// Parsing an expression - End
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -482,6 +498,10 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 	table := vqlexp.RegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	table = strings.TrimSpace(table)
 	table = trimQuotationMarks(table)
+
+	if !core.IfExistTable(db, table) {
+		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
+	}
 
 	// Parsing an expression - End
 

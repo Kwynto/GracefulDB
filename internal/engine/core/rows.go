@@ -10,7 +10,7 @@ import (
 
 func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// -
-	// TODO: do it
+
 	var (
 		resIds               = make([]uint64, 4)
 		progressIds []uint64 = make([]uint64, 4)
@@ -21,50 +21,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 	}
 
 	if cond.Key == "_id" {
-		if cond.Operation == "=" {
-			if value, err := strconv.ParseUint(cond.Value, 10, 64); err == nil {
-				progressIds = append(progressIds, value)
-			}
-		}
-
-		if cond.Operation == ">" {
-			value, err := strconv.ParseUint(cond.Value, 10, 64)
-			if err != nil {
-				return []uint64{}
-			}
-			value++
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
-			for i := value; i <= countVal; i++ {
-				progressIds = append(progressIds, i)
-			}
-		}
-
-		if cond.Operation == ">=" {
-			value, err := strconv.ParseUint(cond.Value, 10, 64)
-			if err != nil {
-				return []uint64{}
-			}
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
-			for i := value; i <= countVal; i++ {
-				progressIds = append(progressIds, i)
-			}
-		}
-
-		if cond.Operation == "<" {
-			value, err := strconv.ParseUint(cond.Value, 10, 64)
-			if err != nil {
-				return []uint64{}
-			}
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
-			if countVal < value {
-				value = countVal
-			}
-			for i := uint64(1); i < value; i++ {
-				progressIds = append(progressIds, i)
-			}
-		}
-
-		if cond.Operation == "<=" {
+		switch cond.Operation {
+		case "<=":
 			value, err := strconv.ParseUint(cond.Value, 10, 64)
 			if err != nil {
 				return []uint64{}
@@ -76,30 +34,55 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			for i := uint64(1); i <= value; i++ {
 				progressIds = append(progressIds, i)
 			}
+		case ">=":
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			for i := value; i <= countVal; i++ {
+				progressIds = append(progressIds, i)
+			}
+		case "<":
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			if countVal < value {
+				value = countVal
+			}
+			for i := uint64(1); i < value; i++ {
+				progressIds = append(progressIds, i)
+			}
+		case ">":
+			value, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+			value++
+			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			for i := value; i <= countVal; i++ {
+				progressIds = append(progressIds, i)
+			}
+		case "=":
+			if value, err := strconv.ParseUint(cond.Value, 10, 64); err == nil {
+				progressIds = append(progressIds, value)
+			}
+			// case "like":
+			// 	return []uint64{}
+			// case "regexp":
+			// 	return []uint64{}
 		}
-
-		if cond.Operation == "like" {
-			return []uint64{}
-		}
-
-		if cond.Operation == "regexp" {
-			return []uint64{}
-		}
-
-		// switch cond.Operation {
-		// case "<=":
-		// case ">=":
-		// case "<":
-		// case ">":
-		// case "=":
-		// case "like":
-		// case "regexp":
-		// }
 	}
+	progressIds = slices.Clip(progressIds)
 
-	// do it
+	// TODO: do it
+
+	// TODO: make a check of all IDs before returning values
 	resIds = append(resIds, progressIds...)
 
+	// resIds = slices.Clip(resIds)
 	return resIds
 }
 
