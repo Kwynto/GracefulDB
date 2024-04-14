@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"slices"
 	"strconv"
 	"time"
@@ -78,6 +79,71 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 	progressIds = slices.Clip(progressIds)
 
 	// TODO: do it
+	// if cond.Key == "_time" {
+	// 	switch cond.Operation {
+	// 	case "<=":
+	// 		tableInfo := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table]
+	// 		for _, col := range tableInfo.Columns {
+	// 			folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, col.Parents, col.Folder)
+	// 			files, err := os.ReadDir(folderPath)
+	// 			if err != nil {
+	// 				break
+	// 			}
+	// 			for _, file := range files {
+	// 				if !file.IsDir() {
+	// 					// nameFile := file.Name()
+	// 					// strings.Contains(nameFile, col.CurrentRev)
+	// 					fullNameFile := fmt.Sprintf("%s/%s", folderPath, file.Name())
+	// 					bRead, err := os.ReadFile(fullNameFile)
+	// 					if err != nil {
+	// 						break
+	// 					}
+	// 					sRead := string(bRead)
+	// 				}
+	// 			}
+	// 			break // you only need to check any one cell from the row
+	// 		}
+	// 	// case ">=":
+	// 	// case "<":
+	// 	// case ">":
+	// 	// case "=":
+	// 		// case "like":
+	// 		// 	return []uint64{}
+	// 		// case "regexp":
+	// 		// 	return []uint64{}
+
+	// 	}
+	// }
+
+	// if cond.Key == "_status" {
+	// 	switch cond.Operation {
+	// 	case "<=":
+	// 	case ">=":
+	// 	case "<":
+	// 	case ">":
+	// 	case "=":
+	// 		// case "like":
+	// 		// 	return []uint64{}
+	// 		// case "regexp":
+	// 		// 	return []uint64{}
+
+	// 	}
+	// }
+
+	// if cond.Key == "_shape" {
+	// 	switch cond.Operation {
+	// 	case "<=":
+	// 	case ">=":
+	// 	case "<":
+	// 	case ">":
+	// 	case "=":
+	// 		// case "like":
+	// 		// 	return []uint64{}
+	// 		// case "regexp":
+	// 		// 	return []uint64{}
+
+	// 	}
+	// }
 
 	// TODO: make a check of all IDs before returning values
 	resIds = append(resIds, progressIds...)
@@ -300,6 +366,7 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 				vStore = Encode64(row[ind])
 			} else {
 				if column.Specification.NotNull {
+					fmt.Println("Point 4")
 					return nil, false
 				}
 				vStore = column.Specification.Default
