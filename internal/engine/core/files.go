@@ -40,49 +40,37 @@ func writeBufferToDisk() bool {
 	fileSystemBlock.Lock()
 	defer fileSystemBlock.Unlock()
 
-	// надо оптимизировать этот цикл
 	for _, row := range *rows {
 		dbInfo, _ := GetDBInfo(row.DB)
 		tableInfo := dbInfo.Tables[row.Table]
+
 		serviceCol := fmt.Sprintf("%d|%d|1|%d\n", row.Id, row.Time, row.Shape)
 
-		sMaxBucket := Pow(2, tableInfo.BucketLog)
-		shashid := row.Id % sMaxBucket
-		if shashid == 0 {
-			shashid = sMaxBucket
+		maxBucket := Pow(2, tableInfo.BucketLog)
+		hashid := row.Id % maxBucket
+		if hashid == 0 {
+			hashid = maxBucket
 		}
 
-		sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, shashid)
+		sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
 		srwFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if err != nil {
-			fmt.Println("Point 1")
 			return false
 		}
-
 		if _, err := srwFile.WriteString(serviceCol); err != nil {
 			srwFile.Close()
-			fmt.Println("Point 2")
 			return false
 		}
 		srwFile.Close()
 
-		// head := fmt.Sprintf("%d|%d|1|%d|", row.Id, row.Time, row.Shape)
 		head := fmt.Sprintf("%d|", row.Id)
 		for _, col := range row.Row {
 			fullValue := fmt.Sprintf("%s%s\n", head, col.Value)
 
-			// -
-			dc := GetDescriptionColumn(row.DB, row.Table, col.Field)
+			colInfo := tableInfo.Columns[col.Field]
+			path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
 
-			// -
-			maxBucket := Pow(2, dc.BucketLog)
-			hashid := row.Id % maxBucket
-			if hashid == 0 {
-				hashid = maxBucket
-			}
-
-			// -
-			fileName := fmt.Sprintf("%s%s_%d", dc.Path, dc.CurrentRev, hashid)
+			fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
 
 			rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 			if err != nil {
@@ -99,9 +87,9 @@ func writeBufferToDisk() bool {
 
 	switch workBuff {
 	case 1:
-		clear(WriteBuffer.FirstBox.Area)
+		WriteBuffer.FirstBox.Area = nil
 	case 2:
-		clear(WriteBuffer.SecondBox.Area)
+		WriteBuffer.SecondBox.Area = nil
 	}
 
 	return true

@@ -162,23 +162,23 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite
 	return dbInfo.Save()
 }
 
-func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
-	// This function is complete
-	dbInfo, _ := GetDBInfo(db)
-	tableInfo := dbInfo.Tables[table]
-	col := tableInfo.Columns[column]
+// func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
+// 	// This function is complete
+// 	dbInfo, _ := GetDBInfo(db)
+// 	tableInfo := dbInfo.Tables[table]
+// 	col := tableInfo.Columns[column]
 
-	return gtypes.TDescColumn{
-		DB:         db,
-		Table:      table,
-		Column:     column,
-		Path:       fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder),
-		Spec:       col.Specification,
-		CurrentRev: tableInfo.CurrentRev,
-		BucketSize: tableInfo.BucketSize,
-		BucketLog:  tableInfo.BucketLog,
-	}
-}
+// 	return gtypes.TDescColumn{
+// 		DB:         db,
+// 		Table:      table,
+// 		Column:     column,
+// 		Path:       fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder),
+// 		Spec:       col.Specification,
+// 		CurrentRev: tableInfo.CurrentRev,
+// 		BucketSize: tableInfo.BucketSize,
+// 		BucketLog:  tableInfo.BucketLog,
+// 	}
+// }
 
 // Creating a new column
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification gtypes.TColumnSpecification) bool {

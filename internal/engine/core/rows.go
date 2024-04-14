@@ -179,8 +179,8 @@ func mergeAnd(first, second []uint64) []uint64 {
 func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// - It's almost done
 	var (
-		acc         []uint64 = make([]uint64, 4)
-		progressIds []uint64 = make([]uint64, 4)
+		acc         []uint64 // = make([]uint64, 4)
+		progressIds []uint64 // = make([]uint64, 4)
 		selector    string   = ""
 	)
 
@@ -191,7 +191,7 @@ func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditiona
 	for _, elem := range where {
 		switch elem.Type {
 		case "operation":
-			clear(progressIds)
+			progressIds = nil
 			progressIds = findWhereIds(elem, additionalData) // TODO: do it
 			switch selector {
 			case "or":
