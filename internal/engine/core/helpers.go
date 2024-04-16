@@ -1,6 +1,8 @@
 package core
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/binary"
@@ -62,6 +64,7 @@ func Decode64(inB64 string) string {
 }
 
 func intPow(acc, base uint64, exponent uint8) uint64 {
+	// This function is complete
 	if exponent == 1 {
 		return acc
 	}
@@ -69,6 +72,7 @@ func intPow(acc, base uint64, exponent uint8) uint64 {
 }
 
 func Pow(base uint64, exponent uint8) uint64 {
+	// This function is complete
 	if exponent == 0 {
 		return 1
 	}
@@ -76,4 +80,28 @@ func Pow(base uint64, exponent uint8) uint64 {
 		return base
 	}
 	return intPow(base*base, base, exponent-1)
+}
+
+func FileRead(name string) (string, error) {
+	// This function is complete
+
+	// bRead, err := os.ReadFile(name)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// return string(bRead), nil
+
+	f, err := os.Open(name)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	buf := bytes.Buffer{}
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		buf.WriteString(sc.Text())
+	}
+
+	return buf.String(), nil
 }

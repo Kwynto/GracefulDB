@@ -2,8 +2,10 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
@@ -76,74 +78,85 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			// 	return []uint64{}
 		}
 	}
-	progressIds = slices.Clip(progressIds)
+
+	if cond.Key == "_time" {
+		tableInfo := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table]
+		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+		if err != nil {
+			return []uint64{}
+		}
+
+		files, err := os.ReadDir(folderPath)
+		if err != nil {
+			return []uint64{}
+		}
+
+		for _, file := range files {
+			if !file.IsDir() {
+				fileName := file.Name()
+				if strings.Contains(fileName, tableInfo.CurrentRev) {
+					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+					fileText, err := FileRead(fullNameFile)
+					if err != nil {
+						continue
+					}
+					fileData := strings.Split(fileText, "\n")
+					for _, line := range fileData {
+						lineData := strings.Split(line, "|")
+						valueId, valueTime := lineData[0], lineData[1] // id, time, status, shape
+						value, err := strconv.ParseUint(valueId, 10, 64)
+						if err != nil {
+							continue
+						}
+						valueTimeBase, err := strconv.ParseUint(valueTime, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						switch cond.Operation {
+						case "<=":
+							if valueTimeBase <= valueCond {
+								progressIds = append(progressIds, value)
+							}
+						case ">=":
+							if valueTimeBase >= valueCond {
+								progressIds = append(progressIds, value)
+							}
+						case "<":
+							if valueTimeBase < valueCond {
+								progressIds = append(progressIds, value)
+							}
+						case ">":
+							if valueTimeBase > valueCond {
+								progressIds = append(progressIds, value)
+							}
+						case "=":
+							if valueTimeBase == valueCond {
+								progressIds = append(progressIds, value)
+							}
+
+							// case "like":
+							// 	return []uint64{}
+							// case "regexp":
+							// 	return []uint64{}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	// TODO: do it
-	// if cond.Key == "_time" {
-	// 	switch cond.Operation {
-	// 	case "<=":
-	// 		tableInfo := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table]
-	// 		for _, col := range tableInfo.Columns {
-	// 			folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, col.Parents, col.Folder)
-	// 			files, err := os.ReadDir(folderPath)
-	// 			if err != nil {
-	// 				break
-	// 			}
-	// 			for _, file := range files {
-	// 				if !file.IsDir() {
-	// 					// nameFile := file.Name()
-	// 					// strings.Contains(nameFile, col.CurrentRev)
-	// 					fullNameFile := fmt.Sprintf("%s/%s", folderPath, file.Name())
-	// 					bRead, err := os.ReadFile(fullNameFile)
-	// 					if err != nil {
-	// 						break
-	// 					}
-	// 					sRead := string(bRead)
-	// 				}
-	// 			}
-	// 			break // you only need to check any one cell from the row
-	// 		}
-	// 	// case ">=":
-	// 	// case "<":
-	// 	// case ">":
-	// 	// case "=":
-	// 		// case "like":
-	// 		// 	return []uint64{}
-	// 		// case "regexp":
-	// 		// 	return []uint64{}
-
-	// 	}
-	// }
-
 	// if cond.Key == "_status" {
-	// 	switch cond.Operation {
-	// 	case "<=":
-	// 	case ">=":
-	// 	case "<":
-	// 	case ">":
-	// 	case "=":
-	// 		// case "like":
-	// 		// 	return []uint64{}
-	// 		// case "regexp":
-	// 		// 	return []uint64{}
-
-	// 	}
 	// }
 
 	// if cond.Key == "_shape" {
-	// 	switch cond.Operation {
-	// 	case "<=":
-	// 	case ">=":
-	// 	case "<":
-	// 	case ">":
-	// 	case "=":
-	// 		// case "like":
-	// 		// 	return []uint64{}
-	// 		// case "regexp":
-	// 		// 	return []uint64{}
-
-	// 	}
 	// }
+
+	slices.Sort(progressIds)
+	progressIds = slices.Clip(progressIds)
 
 	// TODO: make a check of all IDs before returning values
 	resIds = append(resIds, progressIds...)
