@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"sync"
 
@@ -87,9 +88,17 @@ func writeBufferToDisk() bool {
 
 	switch workBuff {
 	case 1:
-		WriteBuffer.FirstBox.Area = nil
+		if rand.Intn(100) == 0 {
+			WriteBuffer.FirstBox.Area = nil
+		} else {
+			WriteBuffer.FirstBox.Area = WriteBuffer.FirstBox.Area[:0]
+		}
 	case 2:
-		WriteBuffer.SecondBox.Area = nil
+		if rand.Intn(100) == 0 {
+			WriteBuffer.SecondBox.Area = nil
+		} else {
+			WriteBuffer.SecondBox.Area = WriteBuffer.SecondBox.Area[:0]
+		}
 	}
 
 	return true

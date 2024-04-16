@@ -13,7 +13,6 @@ import (
 
 func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// -
-
 	var (
 		resIds               = make([]uint64, 4)
 		progressIds []uint64 = make([]uint64, 4)
@@ -23,6 +22,12 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		return []uint64{}
 	}
 
+	dbInfo, ok := GetDBInfo(additionalData.Db)
+	if !ok {
+		return []uint64{}
+	}
+	tableInfo := dbInfo.Tables[additionalData.Table]
+
 	if cond.Key == "_id" {
 		switch cond.Operation {
 		case "<=":
@@ -30,7 +35,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			if err != nil {
 				return []uint64{}
 			}
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			countVal := tableInfo.Count
 			if countVal < value {
 				value = countVal
 			}
@@ -42,7 +47,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			if err != nil {
 				return []uint64{}
 			}
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			countVal := tableInfo.Count
 			for i := value; i <= countVal; i++ {
 				progressIds = append(progressIds, i)
 			}
@@ -51,7 +56,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			if err != nil {
 				return []uint64{}
 			}
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			countVal := tableInfo.Count
 			if countVal < value {
 				value = countVal
 			}
@@ -64,7 +69,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				return []uint64{}
 			}
 			value++
-			countVal := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table].Count
+			countVal := tableInfo.Count
 			for i := value; i <= countVal; i++ {
 				progressIds = append(progressIds, i)
 			}
@@ -77,10 +82,14 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			// case "regexp":
 			// 	return []uint64{}
 		}
+
+		// TODO: parsing and checking IDs
+		// slices.Sort(progressIds)
+		// progressIds = slices.Clip(progressIds)
+
 	}
 
 	if cond.Key == "_time" {
-		tableInfo := StorageInfo.DBs[additionalData.Db].Tables[additionalData.Table]
 		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
 		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
@@ -115,28 +124,17 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 							continue
 						}
 
-						switch cond.Operation {
-						case "<=":
-							if valueTimeBase <= valueCond {
-								progressIds = append(progressIds, value)
-							}
-						case ">=":
-							if valueTimeBase >= valueCond {
-								progressIds = append(progressIds, value)
-							}
-						case "<":
-							if valueTimeBase < valueCond {
-								progressIds = append(progressIds, value)
-							}
-						case ">":
-							if valueTimeBase > valueCond {
-								progressIds = append(progressIds, value)
-							}
-						case "=":
-							if valueTimeBase == valueCond {
-								progressIds = append(progressIds, value)
-							}
-
+						switch {
+						case cond.Operation == "<=" && valueTimeBase <= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">=" && valueTimeBase >= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "<" && valueTimeBase < valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">" && valueTimeBase > valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "=" && valueTimeBase == valueCond:
+							progressIds = append(progressIds, value)
 							// case "like":
 							// 	return []uint64{}
 							// case "regexp":
@@ -148,15 +146,124 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		}
 	}
 
-	// TODO: do it
-	// if cond.Key == "_status" {
-	// }
+	if cond.Key == "_status" {
+		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
-	// if cond.Key == "_shape" {
-	// }
+		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+		if err != nil {
+			return []uint64{}
+		}
+
+		files, err := os.ReadDir(folderPath)
+		if err != nil {
+			return []uint64{}
+		}
+
+		for _, file := range files {
+			if !file.IsDir() {
+				fileName := file.Name()
+				if strings.Contains(fileName, tableInfo.CurrentRev) {
+					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+					fileText, err := FileRead(fullNameFile)
+					if err != nil {
+						continue
+					}
+					fileData := strings.Split(fileText, "\n")
+					for _, line := range fileData {
+						lineData := strings.Split(line, "|")
+						valueId, valueStatus := lineData[0], lineData[2] // id, time, status, shape
+						value, err := strconv.ParseUint(valueId, 10, 64)
+						if err != nil {
+							continue
+						}
+						valueStatusBase, err := strconv.ParseUint(valueStatus, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						switch {
+						case cond.Operation == "<=" && valueStatusBase <= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">=" && valueStatusBase >= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "<" && valueStatusBase < valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">" && valueStatusBase > valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "=" && valueStatusBase == valueCond:
+							progressIds = append(progressIds, value)
+							// case "like":
+							// 	return []uint64{}
+							// case "regexp":
+							// 	return []uint64{}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if cond.Key == "_shape" {
+		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+		if err != nil {
+			return []uint64{}
+		}
+
+		files, err := os.ReadDir(folderPath)
+		if err != nil {
+			return []uint64{}
+		}
+
+		for _, file := range files {
+			if !file.IsDir() {
+				fileName := file.Name()
+				if strings.Contains(fileName, tableInfo.CurrentRev) {
+					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+					fileText, err := FileRead(fullNameFile)
+					if err != nil {
+						continue
+					}
+					fileData := strings.Split(fileText, "\n")
+					for _, line := range fileData {
+						lineData := strings.Split(line, "|")
+						valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
+						value, err := strconv.ParseUint(valueId, 10, 64)
+						if err != nil {
+							continue
+						}
+						valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						switch {
+						case cond.Operation == "<=" && valueShapeBase <= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">=" && valueShapeBase >= valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "<" && valueShapeBase < valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == ">" && valueShapeBase > valueCond:
+							progressIds = append(progressIds, value)
+						case cond.Operation == "=" && valueShapeBase == valueCond:
+							progressIds = append(progressIds, value)
+							// case "like":
+							// 	return []uint64{}
+							// case "regexp":
+							// 	return []uint64{}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	slices.Sort(progressIds)
 	progressIds = slices.Clip(progressIds)
+
+	// TODO: do it
 
 	// TODO: make a check of all IDs before returning values
 	resIds = append(resIds, progressIds...)
@@ -204,7 +311,7 @@ func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditiona
 	for _, elem := range where {
 		switch elem.Type {
 		case "operation":
-			progressIds = nil
+			// progressIds = nil
 			progressIds = findWhereIds(elem, additionalData) // TODO: do it
 			switch selector {
 			case "or":
