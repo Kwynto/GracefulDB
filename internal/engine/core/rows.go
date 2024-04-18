@@ -9,13 +9,14 @@ import (
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// -
 	var (
-		// resIds               = make([]uint64, 4)
-		progressIds []uint64 = make([]uint64, 4)
+		resIds = make([]uint64, 4)
+		// progressIds []uint64 = make([]uint64, 4)
 	)
 
 	if cond.Type != "operation" {
@@ -28,55 +29,244 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 	}
 	tableInfo := dbInfo.Tables[additionalData.Table]
 
-	if cond.Key == "_id" {
-		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+	if cond.Key == "_id" || cond.Key == "_time" || cond.Key == "_status" || cond.Key == "_shape" {
+		if cond.Key == "_id" {
+			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
-		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
-		if err != nil {
-			return []uint64{}
-		}
+			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
 
-		files, err := os.ReadDir(folderPath)
-		if err != nil {
-			return []uint64{}
-		}
+			files, err := os.ReadDir(folderPath)
+			if err != nil {
+				return []uint64{}
+			}
 
-		for _, file := range files {
-			if !file.IsDir() {
-				fileName := file.Name()
-				if strings.Contains(fileName, tableInfo.CurrentRev) {
-					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-					fileText, err := FileRead(fullNameFile)
-					if err != nil {
-						continue
-					}
-					fileData := strings.Split(fileText, "\n")
-					for _, line := range fileData {
-						lineData := strings.Split(line, "|")
-						valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
-
-						valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+			for _, file := range files {
+				if !file.IsDir() {
+					fileName := file.Name()
+					if strings.Contains(fileName, tableInfo.CurrentRev) {
+						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fileText, err := ecowriter.FileRead(fullNameFile)
 						if err != nil {
 							continue
 						}
+						fileData := strings.Split(fileText, "\n")
+						for _, line := range fileData {
+							lineData := strings.Split(line, "|")
+							valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
 
-						if valueShapeBase < 3 {
+							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							if err != nil {
+								continue
+							}
+
+							if valueShapeBase < 3 {
+								value, err := strconv.ParseUint(valueId, 10, 64)
+								if err != nil {
+									continue
+								}
+
+								switch {
+								case cond.Operation == "<=" && value <= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">=" && value >= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "<" && value < valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">" && value > valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "=" && value == valueCond:
+									resIds = append(resIds, value)
+									// case "like":
+									// 	return []uint64{}
+									// case "regexp":
+									// 	return []uint64{}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if cond.Key == "_time" {
+			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+
+			files, err := os.ReadDir(folderPath)
+			if err != nil {
+				return []uint64{}
+			}
+
+			for _, file := range files {
+				if !file.IsDir() {
+					fileName := file.Name()
+					if strings.Contains(fileName, tableInfo.CurrentRev) {
+						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fileText, err := ecowriter.FileRead(fullNameFile)
+						if err != nil {
+							continue
+						}
+						fileData := strings.Split(fileText, "\n")
+						for _, line := range fileData {
+							lineData := strings.Split(line, "|")
+							valueId, valueTime, valueShape := lineData[0], lineData[1], lineData[3] // id, time, status, shape
+
+							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							if err != nil {
+								continue
+							}
+
+							if valueShapeBase < 3 {
+								value, err := strconv.ParseUint(valueId, 10, 64)
+								if err != nil {
+									continue
+								}
+								valueTimeBase, err := strconv.ParseUint(valueTime, 10, 64)
+								if err != nil {
+									continue
+								}
+
+								switch {
+								case cond.Operation == "<=" && valueTimeBase <= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">=" && valueTimeBase >= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "<" && valueTimeBase < valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">" && valueTimeBase > valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "=" && valueTimeBase == valueCond:
+									resIds = append(resIds, value)
+									// case "like":
+									// 	return []uint64{}
+									// case "regexp":
+									// 	return []uint64{}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if cond.Key == "_status" {
+			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+
+			files, err := os.ReadDir(folderPath)
+			if err != nil {
+				return []uint64{}
+			}
+
+			for _, file := range files {
+				if !file.IsDir() {
+					fileName := file.Name()
+					if strings.Contains(fileName, tableInfo.CurrentRev) {
+						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fileText, err := ecowriter.FileRead(fullNameFile)
+						if err != nil {
+							continue
+						}
+						fileData := strings.Split(fileText, "\n")
+						for _, line := range fileData {
+							lineData := strings.Split(line, "|")
+							valueId, valueStatus, valueShape := lineData[0], lineData[2], lineData[3] // id, time, status, shape
+
+							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							if err != nil {
+								continue
+							}
+
+							if valueShapeBase < 3 {
+								value, err := strconv.ParseUint(valueId, 10, 64)
+								if err != nil {
+									continue
+								}
+								valueStatusBase, err := strconv.ParseUint(valueStatus, 10, 64)
+								if err != nil {
+									continue
+								}
+
+								switch {
+								case cond.Operation == "<=" && valueStatusBase <= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">=" && valueStatusBase >= valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "<" && valueStatusBase < valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == ">" && valueStatusBase > valueCond:
+									resIds = append(resIds, value)
+								case cond.Operation == "=" && valueStatusBase == valueCond:
+									resIds = append(resIds, value)
+									// case "like":
+									// 	return []uint64{}
+									// case "regexp":
+									// 	return []uint64{}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if cond.Key == "_shape" {
+			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			if err != nil {
+				return []uint64{}
+			}
+
+			files, err := os.ReadDir(folderPath)
+			if err != nil {
+				return []uint64{}
+			}
+
+			for _, file := range files {
+				if !file.IsDir() {
+					fileName := file.Name()
+					if strings.Contains(fileName, tableInfo.CurrentRev) {
+						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fileText, err := ecowriter.FileRead(fullNameFile)
+						if err != nil {
+							continue
+						}
+						fileData := strings.Split(fileText, "\n")
+						for _, line := range fileData {
+							lineData := strings.Split(line, "|")
+							valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
 							value, err := strconv.ParseUint(valueId, 10, 64)
+							if err != nil {
+								continue
+							}
+							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
 							if err != nil {
 								continue
 							}
 
 							switch {
-							case cond.Operation == "<=" && value <= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">=" && value >= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "<" && value < valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">" && value > valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "=" && value == valueCond:
-								progressIds = append(progressIds, value)
+							case cond.Operation == "<=" && valueShapeBase <= valueCond:
+								resIds = append(resIds, value)
+							case cond.Operation == ">=" && valueShapeBase >= valueCond:
+								resIds = append(resIds, value)
+							case cond.Operation == "<" && valueShapeBase < valueCond:
+								resIds = append(resIds, value)
+							case cond.Operation == ">" && valueShapeBase > valueCond:
+								resIds = append(resIds, value)
+							case cond.Operation == "=" && valueShapeBase == valueCond:
+								resIds = append(resIds, value)
 								// case "like":
 								// 	return []uint64{}
 								// case "regexp":
@@ -87,16 +277,15 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				}
 			}
 		}
-	}
+	} else {
+		valueCond := Encode64(cond.Value)
 
-	if cond.Key == "_time" {
-		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-
-		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
-		if err != nil {
+		columnInfo, ok := tableInfo.Columns[cond.Key]
+		if !ok {
 			return []uint64{}
 		}
 
+		folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 		files, err := os.ReadDir(folderPath)
 		if err != nil {
 			return []uint64{}
@@ -107,164 +296,30 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				fileName := file.Name()
 				if strings.Contains(fileName, tableInfo.CurrentRev) {
 					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-					fileText, err := FileRead(fullNameFile)
+					fileText, err := ecowriter.FileRead(fullNameFile)
 					if err != nil {
 						continue
 					}
 					fileData := strings.Split(fileText, "\n")
 					for _, line := range fileData {
 						lineData := strings.Split(line, "|")
-						valueId, valueTime, valueShape := lineData[0], lineData[1], lineData[3] // id, time, status, shape
-
-						valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
-						if err != nil {
-							continue
-						}
-
-						if valueShapeBase < 3 {
-							value, err := strconv.ParseUint(valueId, 10, 64)
-							if err != nil {
-								continue
-							}
-							valueTimeBase, err := strconv.ParseUint(valueTime, 10, 64)
-							if err != nil {
-								continue
-							}
-
-							switch {
-							case cond.Operation == "<=" && valueTimeBase <= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">=" && valueTimeBase >= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "<" && valueTimeBase < valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">" && valueTimeBase > valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "=" && valueTimeBase == valueCond:
-								progressIds = append(progressIds, value)
-								// case "like":
-								// 	return []uint64{}
-								// case "regexp":
-								// 	return []uint64{}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if cond.Key == "_status" {
-		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-
-		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
-		if err != nil {
-			return []uint64{}
-		}
-
-		files, err := os.ReadDir(folderPath)
-		if err != nil {
-			return []uint64{}
-		}
-
-		for _, file := range files {
-			if !file.IsDir() {
-				fileName := file.Name()
-				if strings.Contains(fileName, tableInfo.CurrentRev) {
-					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-					fileText, err := FileRead(fullNameFile)
-					if err != nil {
-						continue
-					}
-					fileData := strings.Split(fileText, "\n")
-					for _, line := range fileData {
-						lineData := strings.Split(line, "|")
-						valueId, valueStatus, valueShape := lineData[0], lineData[2], lineData[3] // id, time, status, shape
-
-						valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
-						if err != nil {
-							continue
-						}
-
-						if valueShapeBase < 3 {
-							value, err := strconv.ParseUint(valueId, 10, 64)
-							if err != nil {
-								continue
-							}
-							valueStatusBase, err := strconv.ParseUint(valueStatus, 10, 64)
-							if err != nil {
-								continue
-							}
-
-							switch {
-							case cond.Operation == "<=" && valueStatusBase <= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">=" && valueStatusBase >= valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "<" && valueStatusBase < valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == ">" && valueStatusBase > valueCond:
-								progressIds = append(progressIds, value)
-							case cond.Operation == "=" && valueStatusBase == valueCond:
-								progressIds = append(progressIds, value)
-								// case "like":
-								// 	return []uint64{}
-								// case "regexp":
-								// 	return []uint64{}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if cond.Key == "_shape" {
-		folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-
-		valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
-		if err != nil {
-			return []uint64{}
-		}
-
-		files, err := os.ReadDir(folderPath)
-		if err != nil {
-			return []uint64{}
-		}
-
-		for _, file := range files {
-			if !file.IsDir() {
-				fileName := file.Name()
-				if strings.Contains(fileName, tableInfo.CurrentRev) {
-					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-					fileText, err := FileRead(fullNameFile)
-					if err != nil {
-						continue
-					}
-					fileData := strings.Split(fileText, "\n")
-					for _, line := range fileData {
-						lineData := strings.Split(line, "|")
-						valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
+						valueId, valueData := lineData[0], lineData[1] // id, [data]
 						value, err := strconv.ParseUint(valueId, 10, 64)
-						if err != nil {
-							continue
-						}
-						valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
 						if err != nil {
 							continue
 						}
 
 						switch {
-						case cond.Operation == "<=" && valueShapeBase <= valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == ">=" && valueShapeBase >= valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == "<" && valueShapeBase < valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == ">" && valueShapeBase > valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == "=" && valueShapeBase == valueCond:
-							progressIds = append(progressIds, value)
+						case cond.Operation == "<=" && valueData <= valueCond:
+							resIds = append(resIds, value)
+						case cond.Operation == ">=" && valueData >= valueCond:
+							resIds = append(resIds, value)
+						case cond.Operation == "<" && valueData < valueCond:
+							resIds = append(resIds, value)
+						case cond.Operation == ">" && valueData > valueCond:
+							resIds = append(resIds, value)
+						case cond.Operation == "=" && valueData == valueCond:
+							resIds = append(resIds, value)
 							// case "like":
 							// 	return []uint64{}
 							// case "regexp":
@@ -274,18 +329,19 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				}
 			}
 		}
+
+		// TODO: do it
+		// make a check on system records
 	}
 
-	// TODO: do it
-
-	slices.Sort(progressIds)
-	progressIds = slices.Compact(progressIds)
-	progressIds = slices.Clip(progressIds)
+	slices.Sort(resIds)
+	resIds = slices.Compact(resIds)
+	resIds = slices.Clip(resIds)
 
 	// resIds = append(resIds, progressIds...)
 
 	// resIds = slices.Clip(resIds)
-	return progressIds
+	return resIds
 }
 
 func mergeOr(first, second []uint64) []uint64 {

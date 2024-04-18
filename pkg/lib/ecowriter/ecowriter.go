@@ -1,6 +1,7 @@
 package ecowriter
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"os"
@@ -87,4 +88,29 @@ func DecodeJSON(str string) any {
 	}
 
 	return data
+}
+
+func FileRead(name string) (string, error) {
+	// This function is complete
+
+	// bRead, err := os.ReadFile(name)
+	// if err != nil {
+	// 	return "", err
+	// }
+	// return string(bRead), nil
+
+	f, err := os.Open(name)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	buf := bytes.Buffer{}
+	sc := bufio.NewScanner(f)
+	// FIXME: The string length limit is 65536 bytes
+	for sc.Scan() {
+		buf.WriteString(sc.Text())
+	}
+
+	return buf.String(), nil
 }
