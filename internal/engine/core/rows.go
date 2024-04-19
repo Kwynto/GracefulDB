@@ -15,8 +15,9 @@ import (
 func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
 	// -
 	var (
-		resIds = make([]uint64, 4)
-		// progressIds []uint64 = make([]uint64, 4)
+		resIds               = make([]uint64, 4)
+		progressIds []uint64 = make([]uint64, 4)
+		isDelete    bool     = false
 	)
 
 	if cond.Type != "operation" {
@@ -311,15 +312,15 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 
 						switch {
 						case cond.Operation == "<=" && valueData <= valueCond:
-							resIds = append(resIds, value)
+							progressIds = append(progressIds, value)
 						case cond.Operation == ">=" && valueData >= valueCond:
-							resIds = append(resIds, value)
+							progressIds = append(progressIds, value)
 						case cond.Operation == "<" && valueData < valueCond:
-							resIds = append(resIds, value)
+							progressIds = append(progressIds, value)
 						case cond.Operation == ">" && valueData > valueCond:
-							resIds = append(resIds, value)
+							progressIds = append(progressIds, value)
 						case cond.Operation == "=" && valueData == valueCond:
-							resIds = append(resIds, value)
+							progressIds = append(progressIds, value)
 							// case "like":
 							// 	return []uint64{}
 							// case "regexp":
@@ -330,17 +331,58 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 
-		// TODO: do it
 		// make a check on system records
+		slices.Sort(progressIds)
+		progressIds = slices.Compact(progressIds)
+		progressIds = slices.Clip(progressIds)
+
+		folderSysPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+
+		for _, id := range progressIds {
+			maxBucket := Pow(2, tableInfo.BucketLog)
+			hashid := id % maxBucket
+			if hashid == 0 {
+				hashid = maxBucket
+			}
+
+			fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
+			fileText, err := ecowriter.FileRead(fullNameFile)
+			if err != nil {
+				continue
+			}
+
+			fileData := strings.Split(fileText, "\n")
+
+			isDelete = false
+
+			for _, line := range fileData {
+				lineData := strings.Split(line, "|")
+				valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
+
+				value, err := strconv.ParseUint(valueId, 10, 64)
+				if err != nil {
+					continue
+				}
+				valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+				if err != nil {
+					continue
+				}
+
+				if value == id && valueShapeBase == 3 {
+					isDelete = true
+				}
+			}
+
+			if !isDelete {
+				resIds = append(resIds, id)
+			}
+		}
 	}
 
 	slices.Sort(resIds)
 	resIds = slices.Compact(resIds)
 	resIds = slices.Clip(resIds)
 
-	// resIds = append(resIds, progressIds...)
-
-	// resIds = slices.Clip(resIds)
 	return resIds
 }
 
