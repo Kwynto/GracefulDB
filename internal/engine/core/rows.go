@@ -13,7 +13,7 @@ import (
 )
 
 func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
-	// -
+	// This function is complete
 	var (
 		resIds               = make([]uint64, 4)
 		progressIds []uint64 = make([]uint64, 4)
@@ -331,7 +331,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 
-		// make a check on system records
+		// checking on system records
 		slices.Sort(progressIds)
 		progressIds = slices.Compact(progressIds)
 		progressIds = slices.Clip(progressIds)
@@ -411,7 +411,7 @@ func mergeAnd(first, second []uint64) []uint64 {
 }
 
 func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
-	// - It's almost done
+	// This function is complete
 	var (
 		acc         []uint64 // = make([]uint64, 4)
 		progressIds []uint64 // = make([]uint64, 4)
@@ -426,7 +426,7 @@ func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditiona
 		switch elem.Type {
 		case "operation":
 			// progressIds = nil
-			progressIds = findWhereIds(elem, additionalData) // TODO: do it
+			progressIds = findWhereIds(elem, additionalData)
 			switch selector {
 			case "or":
 				acc = mergeOr(acc, progressIds)
