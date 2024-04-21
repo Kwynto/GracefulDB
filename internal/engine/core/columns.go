@@ -162,22 +162,23 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite
 	return dbInfo.Save()
 }
 
-func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
-	// This function is complete
-	dbInfo, _ := GetDBInfo(db)
-	col := dbInfo.Tables[table].Columns[column]
+// func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
+// 	// This function is complete
+// 	dbInfo, _ := GetDBInfo(db)
+// 	tableInfo := dbInfo.Tables[table]
+// 	col := tableInfo.Columns[column]
 
-	return gtypes.TDescColumn{
-		DB:         db,
-		Table:      table,
-		Column:     column,
-		Path:       fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder),
-		Spec:       col.Specification,
-		CurrentRev: col.CurrentRev,
-		BucketSize: col.BucketSize,
-		BucketLog:  col.BucketLog,
-	}
-}
+// 	return gtypes.TDescColumn{
+// 		DB:         db,
+// 		Table:      table,
+// 		Column:     column,
+// 		Path:       fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, col.Parents, col.Folder),
+// 		Spec:       col.Specification,
+// 		CurrentRev: tableInfo.CurrentRev,
+// 		BucketSize: tableInfo.BucketSize,
+// 		BucketLog:  tableInfo.BucketLog,
+// 	}
+// }
 
 // Creating a new column
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification gtypes.TColumnSpecification) bool {
@@ -227,14 +228,14 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 	tNow := time.Now()
 
 	columnInfo := TColumnInfo{
-		Name:          nameColumn,
-		OldName:       "",
-		Folder:        folderName,
-		Parents:       fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
-		BucketLog:     2,
-		BucketSize:    LocalCoreSettings.BucketSize,
-		OldRev:        "",
-		CurrentRev:    GenerateRev(),
+		Name:    nameColumn,
+		OldName: "",
+		Folder:  folderName,
+		Parents: fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
+		// BucketLog:     2,
+		// BucketSize:    LocalCoreSettings.BucketSize,
+		// OldRev:        "",
+		// CurrentRev:    GenerateRev(),
 		Specification: specification,
 		LastUpdate:    tNow,
 		Deleted:       false,

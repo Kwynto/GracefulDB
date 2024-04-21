@@ -52,16 +52,16 @@ type TCollectBuffers struct {
 	Switch    uint8
 }
 
-type TDescColumn struct {
-	DB         string
-	Table      string
-	Column     string
-	Path       string
-	Spec       TColumnSpecification
-	CurrentRev string
-	BucketSize int64
-	BucketLog  uint8
-}
+// type TDescColumn struct {
+// 	DB         string
+// 	Table      string
+// 	Column     string
+// 	Path       string
+// 	Spec       TColumnSpecification
+// 	CurrentRev string
+// 	BucketSize int64
+// 	BucketLog  uint8
+// }
 
 type Response struct {
 	State  string `json:"state,omitempty"`
@@ -126,6 +126,11 @@ type TSelectStruct struct {
 type TDeleteStruct struct {
 	Where   []TConditions
 	IsWhere bool
+}
+
+type TAdditionalData struct {
+	Db    string
+	Table string
 }
 
 type Secret struct {

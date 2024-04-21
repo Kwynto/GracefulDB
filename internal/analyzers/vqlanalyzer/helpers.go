@@ -185,7 +185,7 @@ func preChecker(ticket string) (login string, db string, access gauth.TProfile, 
 	return login, db, access, newticket, nil
 }
 
-func angryPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
+func dourPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
 	dbInfo, okDB := core.GetDBInfo(db)
 	if okDB {
 		var okFlags bool = false

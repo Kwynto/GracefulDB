@@ -122,18 +122,6 @@ func TruncateTable(nameDB, nameTable string) bool {
 	}
 	deleteIn.IsWhere = true
 
-	// chacking keys
-	for _, whereElem := range deleteIn.Where {
-		if whereElem.Type == "operation" {
-			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
-				_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
-				if !ok {
-					return false
-				}
-			}
-		}
-	}
-
 	dbInfo, okDB := GetDBInfo(nameDB)
 	if !okDB {
 		return false
@@ -146,7 +134,12 @@ func TruncateTable(nameDB, nameTable string) bool {
 		cols = append(cols, col.Name)
 	}
 
-	whereIds = whereSelection(deleteIn.Where)
+	additionalData := gtypes.TAdditionalData{
+		Db:    nameDB,
+		Table: nameTable,
+	}
+
+	whereIds = whereSelection(deleteIn.Where, additionalData)
 
 	tNow := time.Now().Unix()
 
@@ -203,8 +196,14 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 	}
 
 	fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
-	err := os.Mkdir(fullTableName, 0666)
-	if err != nil {
+	err1 := os.Mkdir(fullTableName, 0666)
+	if err1 != nil {
+		return false
+	}
+
+	serviceName := fmt.Sprintf("%s/service", fullTableName)
+	err2 := os.Mkdir(serviceName, 0666)
+	if err2 != nil {
 		return false
 	}
 
@@ -216,6 +215,10 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		Columns:    make(map[string]TColumnInfo),
 		Removed:    make([]TColumnInfo, 0),
 		Order:      make([]string, 0),
+		BucketLog:  2,
+		BucketSize: LocalCoreSettings.BucketSize,
+		OldRev:     "",
+		CurrentRev: GenerateRev(),
 		Count:      0,
 		LastUpdate: time.Now(),
 		Deleted:    false,
@@ -226,4 +229,14 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 	StorageInfo.DBs[nameDB] = dbInfo
 
 	return dbInfo.Save()
+}
+
+func IfExistTable(db, table string) bool {
+	dbInfo, okDb := GetDBInfo(db)
+	if !okDb {
+		return false
+	}
+	_, okTab := dbInfo.Tables[table]
+
+	return okTab
 }

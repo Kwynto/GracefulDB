@@ -144,6 +144,10 @@ type TTableInfo struct {
 	Columns    map[string]TColumnInfo `json:"columns"`
 	Removed    []TColumnInfo          `json:"removed"` // Removed columns
 	Order      []string               `json:"order"`
+	BucketLog  uint8                  `json:"blog"`
+	BucketSize int64                  `json:"bsize"`
+	OldRev     string                 `json:"oldrev"`
+	CurrentRev string                 `json:"currentrev"`
 	Count      uint64                 `json:"count"`
 	LastUpdate time.Time              `json:"lastupdate"`
 	Deleted    bool                   `json:"deleted"`
@@ -154,10 +158,6 @@ type TColumnInfo struct {
 	OldName       string                      `json:"oldname"` // only for core
 	Folder        string                      `json:"folder"`
 	Parents       string                      `json:"parents"`
-	BucketLog     uint8                       `json:"blog"`
-	BucketSize    int64                       `json:"bsize"`
-	OldRev        string                      `json:"oldrev"`
-	CurrentRev    string                      `json:"currentrev"`
 	Specification gtypes.TColumnSpecification `json:"specification"`
 	LastUpdate    time.Time                   `json:"lastupdate"`
 	Deleted       bool                        `json:"deleted"`

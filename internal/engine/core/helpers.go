@@ -49,12 +49,12 @@ func BinaryToUint64(b []byte) uint64 {
 	return i
 }
 
-func Encode64(inStr string) string {
-	return base64.StdEncoding.EncodeToString([]byte(inStr))
+func Encode64(input string) string { // input - ordinary string
+	return base64.StdEncoding.EncodeToString([]byte(input))
 }
 
-func Decode64(inB64 string) string {
-	decodeData, err := base64.StdEncoding.DecodeString(inB64)
+func Decode64(input string) string { // input - base64 string
+	decodeData, err := base64.StdEncoding.DecodeString(input)
 	if err != nil {
 		return ""
 	}
@@ -62,6 +62,7 @@ func Decode64(inB64 string) string {
 }
 
 func intPow(acc, base uint64, exponent uint8) uint64 {
+	// This function is complete
 	if exponent == 1 {
 		return acc
 	}
@@ -69,6 +70,7 @@ func intPow(acc, base uint64, exponent uint8) uint64 {
 }
 
 func Pow(base uint64, exponent uint8) uint64 {
+	// This function is complete
 	if exponent == 0 {
 		return 1
 	}

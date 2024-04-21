@@ -454,7 +454,7 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, tableName, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -531,7 +531,7 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, tableName, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -667,7 +667,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, tableName, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, tableName, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -736,7 +736,7 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, oldTableName, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, oldTableName, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()
@@ -908,7 +908,7 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := angryPostChecker(db, table, login, access)
+	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
 	if err != nil {
 		res.State = "error"
 		res.Result = err.Error()

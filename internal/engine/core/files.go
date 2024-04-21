@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"sync"
 
@@ -41,19 +42,36 @@ func writeBufferToDisk() bool {
 	defer fileSystemBlock.Unlock()
 
 	for _, row := range *rows {
-		head := fmt.Sprintf("%d|%d|1|%d|", row.Id, row.Time, row.Shape)
+		dbInfo, _ := GetDBInfo(row.DB)
+		tableInfo := dbInfo.Tables[row.Table]
+
+		serviceCol := fmt.Sprintf("%d|%d|1|%d\n", row.Id, row.Time, row.Shape)
+
+		maxBucket := Pow(2, tableInfo.BucketLog)
+		hashid := row.Id % maxBucket
+		if hashid == 0 {
+			hashid = maxBucket
+		}
+
+		sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
+		srwFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		if err != nil {
+			return false
+		}
+		if _, err := srwFile.WriteString(serviceCol); err != nil {
+			srwFile.Close()
+			return false
+		}
+		srwFile.Close()
+
+		head := fmt.Sprintf("%d|", row.Id)
 		for _, col := range row.Row {
 			fullValue := fmt.Sprintf("%s%s\n", head, col.Value)
 
-			dc := GetDescriptionColumn(row.DB, row.Table, col.Field)
+			colInfo := tableInfo.Columns[col.Field]
+			path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
 
-			maxBucket := Pow(2, dc.BucketLog)
-			hashid := row.Id % maxBucket
-			if hashid == 0 {
-				hashid = maxBucket
-			}
-
-			fileName := fmt.Sprintf("%s%s_%d", dc.Path, dc.CurrentRev, hashid)
+			fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
 
 			rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 			if err != nil {
@@ -70,9 +88,17 @@ func writeBufferToDisk() bool {
 
 	switch workBuff {
 	case 1:
-		clear(WriteBuffer.FirstBox.Area)
+		if rand.Intn(100) == 0 {
+			WriteBuffer.FirstBox.Area = nil
+		} else {
+			WriteBuffer.FirstBox.Area = WriteBuffer.FirstBox.Area[:0]
+		}
 	case 2:
-		clear(WriteBuffer.SecondBox.Area)
+		if rand.Intn(100) == 0 {
+			WriteBuffer.SecondBox.Area = nil
+		} else {
+			WriteBuffer.SecondBox.Area = WriteBuffer.SecondBox.Area[:0]
+		}
 	}
 
 	return true
