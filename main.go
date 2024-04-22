@@ -2,17 +2,18 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"log/slog"
+	_ "embed"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
-	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/internal/server"
+
+	_ "github.com/Kwynto/GracefulDB/assets"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
@@ -21,20 +22,11 @@ import (
 var (
 	//go:embed LICENSE
 	license string
-
-	//go:embed ui/html
-	uiHtmlDir embed.FS
-
-	//go:embed ui/static
-	uiStaticDir embed.FS
 )
 
 func main() {
 	// Greeting
 	fmt.Println(colorterm.StringYellowH(license))
-
-	// Set UI
-	webmanage.SetUiDirs(&uiHtmlDir, &uiStaticDir)
 
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
