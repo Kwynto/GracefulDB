@@ -35,7 +35,7 @@ type TRowForStore struct {
 	Id     uint64
 	Time   int64
 	Status int64 // memoried = 0  -  saved = 1  -  stored = 2
-	Shape  int64 // primary = 0  -  required = 1  -  updated = 2  -  deleted = 3
+	Shape  int64 // primary = 0  -  required = 10  -  updated = 20  -  deleted = 30
 	DB     string
 	Table  string
 }

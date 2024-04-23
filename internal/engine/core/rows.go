@@ -63,7 +63,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 								continue
 							}
 
-							if valueShapeBase < 3 {
+							if valueShapeBase < 30 {
 								value, err := strconv.ParseUint(valueId, 10, 64)
 								if err != nil {
 									continue
@@ -124,7 +124,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 								continue
 							}
 
-							if valueShapeBase < 3 {
+							if valueShapeBase < 30 {
 								value, err := strconv.ParseUint(valueId, 10, 64)
 								if err != nil {
 									continue
@@ -189,7 +189,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 								continue
 							}
 
-							if valueShapeBase < 3 {
+							if valueShapeBase < 30 {
 								value, err := strconv.ParseUint(valueId, 10, 64)
 								if err != nil {
 									continue
@@ -368,7 +368,7 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 					continue
 				}
 
-				if value == id && valueShapeBase == 3 {
+				if value == id && valueShapeBase == 30 {
 					isDelete = true
 				}
 			}
@@ -462,18 +462,6 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		deleteIn.IsWhere = true
 	}
 
-	// chacking keys
-	for _, whereElem := range deleteIn.Where {
-		if whereElem.Type == "operation" {
-			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
-				_, ok := StorageInfo.DBs[nameDB].Tables[nameTable].Columns[whereElem.Key]
-				if !ok {
-					return []uint64{}, false
-				}
-			}
-		}
-	}
-
 	dbInfo, okDB := GetDBInfo(nameDB)
 	if !okDB {
 		return []uint64{}, false
@@ -482,6 +470,19 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 	if !ok {
 		return []uint64{}, false
 	}
+
+	// chacking keys
+	for _, whereElem := range deleteIn.Where {
+		if whereElem.Type == "operation" {
+			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
+				_, ok := tableInfo.Columns[whereElem.Key]
+				if !ok {
+					return []uint64{}, false
+				}
+			}
+		}
+	}
+
 	for _, col := range tableInfo.Columns {
 		cols = append(cols, col.Name)
 	}
@@ -501,7 +502,7 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 		rowStore.Id = id
 		rowStore.Time = tNow
 		rowStore.Status = 0
-		rowStore.Shape = 3 // this is code of delete
+		rowStore.Shape = 30 // this is code of delete
 		rowStore.DB = nameDB
 		rowStore.Table = nameTable
 		for _, col := range cols {
@@ -527,8 +528,70 @@ func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint
 }
 
 func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
-	// -
-	return []uint64{}, true
+	// - ! It's almost done
+	var whereIds []uint64 = []uint64{}
+	var rowsForStore []gtypes.TRowForStore
+	var cols []string = []string{}
+
+	dbInfo, okDB := GetDBInfo(nameDB)
+	if !okDB {
+		return []uint64{}, false
+	}
+	tableInfo, ok := dbInfo.Tables[nameTable]
+	if !ok {
+		return []uint64{}, false
+	}
+
+	// chacking keys
+	for _, whereElem := range updateIn.Where {
+		if whereElem.Type == "operation" {
+			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
+				_, ok := tableInfo.Columns[whereElem.Key]
+				if !ok {
+					return []uint64{}, false
+				}
+			}
+		}
+	}
+
+	for _, col := range tableInfo.Columns {
+		cols = append(cols, col.Name)
+	}
+
+	additionalData := gtypes.TAdditionalData{
+		Db:    nameDB,
+		Table: nameTable,
+	}
+
+	whereIds = whereSelection(updateIn.Where, additionalData)
+
+	tNow := time.Now().Unix()
+
+	// Updating by changing the status of records and setting new values
+	for _, id := range whereIds {
+		var rowStore = gtypes.TRowForStore{}
+		rowStore.Id = id
+		rowStore.Time = tNow
+		rowStore.Status = 0
+		rowStore.Shape = 20 // this is code of update
+		rowStore.DB = nameDB
+		rowStore.Table = nameTable
+		for _, col := range cols {
+			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
+				Field: col,
+			})
+			// TODO: do it
+
+		}
+
+		rowsForStore = append(rowsForStore, rowStore)
+	}
+
+	if len(whereIds) > 0 {
+		go InsertIntoBuffer(rowsForStore)
+	}
+
+	return whereIds, true
 }
 
 func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) ([]uint64, bool) {
