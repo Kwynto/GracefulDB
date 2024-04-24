@@ -528,10 +528,12 @@ func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint
 }
 
 func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
-	// - ! It's almost done
+	// This function is complete
 	var whereIds []uint64 = []uint64{}
+	// var resIds []uint64 = []uint64{}
 	var rowsForStore []gtypes.TRowForStore
 	var cols []string = []string{}
+	var value string = ""
 
 	dbInfo, okDB := GetDBInfo(nameDB)
 	if !okDB {
@@ -577,11 +579,20 @@ func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uin
 		rowStore.DB = nameDB
 		rowStore.Table = nameTable
 		for _, col := range cols {
+			newValue, ok := updateIn.Couples[col]
+			if ok {
+				value = newValue
+			} else {
+				okCol := false
+				value, okCol = GetColumnById(nameDB, nameTable, col, id)
+				if !okCol {
+					value = ""
+				}
+			}
 			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
 				Field: col,
+				Value: value,
 			})
-			// TODO: do it
-
 		}
 
 		rowsForStore = append(rowsForStore, rowStore)

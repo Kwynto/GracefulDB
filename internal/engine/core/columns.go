@@ -180,6 +180,27 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite
 // 	}
 // }
 
+// Get up-to-date cell data
+func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, bool) {
+	// -
+	dbInfo, okDB := GetDBInfo(nameDB)
+	if !okDB {
+		return "", false
+	}
+	tableInfo, ok := dbInfo.Tables[nameTable]
+	if !ok {
+		return "", false
+	}
+	columnInfo, ok := tableInfo.Columns[nameColumn]
+	if !ok {
+		return "", false
+	}
+
+	// TODO: do it
+
+	return "", false
+}
+
 // Creating a new column
 func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification gtypes.TColumnSpecification) bool {
 	// This function is complete
