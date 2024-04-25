@@ -583,11 +583,12 @@ func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uin
 			if ok {
 				value = newValue
 			} else {
-				okCol := false
-				value, okCol = GetColumnById(nameDB, nameTable, col, id)
-				if !okCol {
-					value = ""
-				}
+				value, _ = GetColumnById(nameDB, nameTable, col, id)
+				// okCol := false
+				// value, okCol = GetColumnById(nameDB, nameTable, col, id)
+				// if !okCol {
+				// 	value = ""
+				// }
 			}
 			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
 				Field: col,

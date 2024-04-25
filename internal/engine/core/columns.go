@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 // Marks the column as deleted, but does not delete files.
@@ -182,7 +185,9 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite
 
 // Get up-to-date cell data
 func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, bool) {
-	// -
+	// This function is complete
+	var resValue string
+
 	dbInfo, okDB := GetDBInfo(nameDB)
 	if !okDB {
 		return "", false
@@ -196,9 +201,35 @@ func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, 
 		return "", false
 	}
 
-	// TODO: do it
+	folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 
-	return "", false
+	maxBucket := Pow(2, tableInfo.BucketLog)
+	hashid := idRow % maxBucket
+	if hashid == 0 {
+		hashid = maxBucket
+	}
+
+	fullNameFile := fmt.Sprintf("%s/%s_%d", folderPath, tableInfo.CurrentRev, hashid)
+	fileText, err := ecowriter.FileRead(fullNameFile)
+	if err != nil {
+		return "", false
+	}
+
+	fileData := strings.Split(fileText, "\n")
+
+	for _, line := range fileData {
+		lineData := strings.Split(line, "|")
+		valueId, valueData := lineData[0], lineData[1] // id, [data]
+		id, err := strconv.ParseUint(valueId, 10, 64)
+		if err != nil {
+			continue
+		}
+		if id == idRow {
+			resValue = valueData
+		}
+	}
+
+	return resValue, true
 }
 
 // Creating a new column
