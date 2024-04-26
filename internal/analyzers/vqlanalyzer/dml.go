@@ -305,6 +305,9 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	expression, err := parseWhere(whereStr)
 	if err != nil {
+		return `{"state":"error", "result":"condition error"}`, err
+	}
+	if len(expression) == 0 {
 		return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 	}
 	updateIn.Where = append(updateIn.Where, expression...)
@@ -374,7 +377,7 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 }
 
 func (q tQuery) DMLDelete() (result string, err error) {
-	// -
+	// This function is complete
 	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
 	defer func() { e.Wrapper(op, err) }()
 
