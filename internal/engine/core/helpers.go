@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // Name generation
@@ -27,9 +28,10 @@ func GenerateRev() string {
 }
 
 // Checking the folder name
-func CheckFolder(patch, name string) bool {
+func CheckFolder(path, name string) bool {
 	// This function is complete
-	fullPath := fmt.Sprintf("%s%s", patch, name)
+	// fullPath := fmt.Sprintf("%s%s", patch, name)
+	fullPath := filepath.Join(path, name)
 	dir, err := os.Stat(fullPath)
 	if err != nil {
 		return false

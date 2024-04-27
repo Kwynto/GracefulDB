@@ -1,9 +1,9 @@
 env: "dev" #dev, prod
-log_path: "./logs/"
+log_path: "./logs"
 shutdown_timeout: 5s
 
 core_settings:
-  storage: "./data/"
+  storage: "./data"
   bucket_size: 800
   friendly: true
 

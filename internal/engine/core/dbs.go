@@ -1,8 +1,8 @@
 package core
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"time"
 
@@ -40,7 +40,8 @@ func StrongRemoveDB(nameDB string) bool {
 
 	for indRange, dbInfo := range StorageInfo.Removed {
 		if dbInfo.Name == nameDB {
-			dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
+			// dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
+			dbPath := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder)
 			err := os.RemoveAll(dbPath)
 			if err != nil {
 				return false
@@ -109,7 +110,8 @@ func CreateDB(nameDB string, owner string, secure bool) bool {
 		}
 	}
 
-	fullNameFolderDB := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderDB)
+	// fullNameFolderDB := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderDB)
+	fullNameFolderDB := filepath.Join(LocalCoreSettings.Storage, folderDB)
 	err := os.Mkdir(fullNameFolderDB, 0666)
 	if err != nil {
 		return false

@@ -81,6 +81,14 @@ type ResponseUints struct {
 	Ticket string   `json:"ticket,omitempty"`
 }
 
+type TResponseRow map[string]string
+
+type TResponseSelect struct {
+	Result []TResponseRow `json:"result,omitempty"`
+	State  string         `json:"state,omitempty"`
+	Ticket string         `json:"ticket,omitempty"`
+}
+
 type ResultColumn struct {
 	Field      string    `json:"field"`
 	Default    string    `json:"default"`

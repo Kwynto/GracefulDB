@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -32,7 +33,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 
 	if cond.Key == "_id" || cond.Key == "_time" || cond.Key == "_status" || cond.Key == "_shape" {
 		if cond.Key == "_id" {
-			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
 
 			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
 			if err != nil {
@@ -48,7 +50,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				if !file.IsDir() {
 					fileName := file.Name()
 					if strings.Contains(fileName, tableInfo.CurrentRev) {
-						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fullNameFile := filepath.Join(folderPath, fileName)
 						fileText, err := ecowriter.FileRead(fullNameFile)
 						if err != nil {
 							continue
@@ -93,7 +96,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		}
 
 		if cond.Key == "_time" {
-			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
 
 			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
 			if err != nil {
@@ -109,7 +113,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				if !file.IsDir() {
 					fileName := file.Name()
 					if strings.Contains(fileName, tableInfo.CurrentRev) {
-						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fullNameFile := filepath.Join(folderPath, fileName)
 						fileText, err := ecowriter.FileRead(fullNameFile)
 						if err != nil {
 							continue
@@ -158,7 +163,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		}
 
 		if cond.Key == "_status" {
-			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
 
 			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
 			if err != nil {
@@ -174,7 +180,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				if !file.IsDir() {
 					fileName := file.Name()
 					if strings.Contains(fileName, tableInfo.CurrentRev) {
-						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fullNameFile := filepath.Join(folderPath, fileName)
 						fileText, err := ecowriter.FileRead(fullNameFile)
 						if err != nil {
 							continue
@@ -223,7 +230,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		}
 
 		if cond.Key == "_shape" {
-			folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
 
 			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
 			if err != nil {
@@ -239,7 +247,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				if !file.IsDir() {
 					fileName := file.Name()
 					if strings.Contains(fileName, tableInfo.CurrentRev) {
-						fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+						fullNameFile := filepath.Join(folderPath, fileName)
 						fileText, err := ecowriter.FileRead(fullNameFile)
 						if err != nil {
 							continue
@@ -286,7 +295,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			return []uint64{}
 		}
 
-		folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+		// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+		folderPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 		files, err := os.ReadDir(folderPath)
 		if err != nil {
 			return []uint64{}
@@ -296,7 +306,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			if !file.IsDir() {
 				fileName := file.Name()
 				if strings.Contains(fileName, tableInfo.CurrentRev) {
-					fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+					// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
+					fullNameFile := filepath.Join(folderPath, fileName)
 					fileText, err := ecowriter.FileRead(fullNameFile)
 					if err != nil {
 						continue
@@ -336,7 +347,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		progressIds = slices.Compact(progressIds)
 		progressIds = slices.Clip(progressIds)
 
-		folderSysPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+		// folderSysPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+		folderSysPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
 
 		for _, id := range progressIds {
 			maxBucket := Pow(2, tableInfo.BucketLog)
@@ -345,7 +357,8 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 				hashid = maxBucket
 			}
 
-			fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
+			// fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
+			fullNameFile := filepath.Join(folderSysPath, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
 			fileText, err := ecowriter.FileRead(fullNameFile)
 			if err != nil {
 				continue
@@ -522,15 +535,17 @@ func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint
 	return whereIds, true
 }
 
-func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]uint64, bool) {
-	// -
-	return []uint64{}, true
+func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
+	// - It's almost done
+
+	// TODO: do it
+
+	return []gtypes.TResponseRow{}, true
 }
 
 func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
 	// This function is complete
 	var whereIds []uint64 = []uint64{}
-	// var resIds []uint64 = []uint64{}
 	var rowsForStore []gtypes.TRowForStore
 	var cols []string = []string{}
 	var value string = ""

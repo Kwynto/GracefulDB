@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -73,7 +74,8 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 
 	for indRange, columnInfo := range tableInfo.Removed {
 		if columnInfo.Name == nameColumn {
-			columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+			// columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+			columnPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 			err := os.RemoveAll(columnPath)
 			if err != nil {
 				return false
@@ -201,7 +203,8 @@ func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, 
 		return "", false
 	}
 
-	folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+	// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+	folderPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 
 	maxBucket := Pow(2, tableInfo.BucketLog)
 	hashid := idRow % maxBucket
@@ -209,7 +212,7 @@ func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, 
 		hashid = maxBucket
 	}
 
-	fullNameFile := fmt.Sprintf("%s/%s_%d", folderPath, tableInfo.CurrentRev, hashid)
+	fullNameFile := filepath.Join(folderPath, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
 	fileText, err := ecowriter.FileRead(fullNameFile)
 	if err != nil {
 		return "", false
@@ -262,7 +265,8 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 		return false
 	}
 
-	pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+	// pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+	pathTable := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 
 	for {
 		folderName = GenerateName()
@@ -271,7 +275,8 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 		}
 	}
 
-	fullColumnName := fmt.Sprintf("%s%s", pathTable, folderName)
+	// fullColumnName := fmt.Sprintf("%s%s", pathTable, folderName)
+	fullColumnName := filepath.Join(pathTable, folderName)
 	err := os.Mkdir(fullColumnName, 0666)
 	if err != nil {
 		return false
@@ -283,7 +288,8 @@ func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specificati
 		Name:    nameColumn,
 		OldName: "",
 		Folder:  folderName,
-		Parents: fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
+		// Parents: fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
+		Parents: filepath.Join(tableInfo.Parent, tableInfo.Folder),
 		// BucketLog:     2,
 		// BucketSize:    LocalCoreSettings.BucketSize,
 		// OldRev:        "",

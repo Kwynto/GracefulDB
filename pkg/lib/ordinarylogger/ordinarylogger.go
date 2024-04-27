@@ -8,6 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 )
@@ -122,7 +123,7 @@ func openLogFile(name string) *os.File {
 func setupLogger(logPath, logEnv string) *slog.Logger {
 	var nlog *slog.Logger
 
-	IoFile := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
+	IoFile := openLogFile(filepath.Join(logPath, fmt.Sprintf("%s%s", logEnv, ".log")))
 
 	LogHandler = newOrdinaryHandler(os.Stdout, IoFile, logEnv)
 	nlog = slog.New(LogHandler)
