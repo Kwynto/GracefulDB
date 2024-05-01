@@ -93,7 +93,7 @@ func Start(cfg *config.Config) {
 	}
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// This function is complete
 	if err := srvWeb.Shutdown(ctx); err != nil {
 		msg := fmt.Sprintf("There was a problem with stopping the Web manager: %s", err.Error())

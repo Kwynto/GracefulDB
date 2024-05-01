@@ -16,7 +16,7 @@ const (
 
 func Test_New(t *testing.T) {
 	res := New()
-	if reflect.TypeOf(res) != reflect.TypeOf(&Closer{}) {
+	if reflect.TypeOf(res) != reflect.TypeOf(&TCloser{}) {
 		t.Error("New() error = The function returns the wrong type")
 	}
 }
@@ -84,7 +84,7 @@ func Test_Done(t *testing.T) {
 func Test_AddHandler(t *testing.T) {
 	res := New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 	}
 
@@ -96,7 +96,7 @@ func Test_AddHandler(t *testing.T) {
 				t.Error("AddHandler() error: the counter is not working.")
 			}
 
-			res.funcs[fmt.Sprint(Handler(hand))](context.Background(), res)
+			res.funcs[fmt.Sprint(TFnHandler(hand))](context.Background(), res)
 			if res.Msgs[i] != "[!] true" {
 				t.Error("AddHandler() error: incorrect handler execution.")
 			}
@@ -107,7 +107,7 @@ func Test_AddHandler(t *testing.T) {
 func Test_DelHandler(t *testing.T) {
 	res := New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 	}
 
@@ -121,7 +121,7 @@ func Test_DelHandler(t *testing.T) {
 				t.Error("DelHandler() error: the counter has not been reduced.")
 			}
 
-			if _, ok := res.funcs[fmt.Sprint(Handler(hand))]; ok {
+			if _, ok := res.funcs[fmt.Sprint(TFnHandler(hand))]; ok {
 				t.Error("DelHandler() error: the handler has not been deleted.")
 			}
 		})
@@ -131,7 +131,7 @@ func Test_DelHandler(t *testing.T) {
 func Test_RunAndDelHandler(t *testing.T) {
 	res := New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 		c.Done()
 	}
@@ -148,7 +148,7 @@ func Test_RunAndDelHandler(t *testing.T) {
 				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", res.Counter, c)
 			}
 
-			if _, ok := res.funcs[fmt.Sprint(Handler(hand))]; ok {
+			if _, ok := res.funcs[fmt.Sprint(TFnHandler(hand))]; ok {
 				t.Error("RunAndDelHandler() error: the handler has not been deleted.")
 			}
 		})
@@ -160,16 +160,16 @@ func Test_Close(t *testing.T) {
 	res_without_msg := New()
 	res_with_timout := New()
 
-	hand_with_msg := func(ctx context.Context, c *Closer) {
+	hand_with_msg := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 		c.Done()
 	}
 
-	hand_without_msg := func(ctx context.Context, c *Closer) {
+	hand_without_msg := func(ctx context.Context, c *TCloser) {
 		c.Done()
 	}
 
-	hand_with_timeout := func(ctx context.Context, c *Closer) {
+	hand_with_timeout := func(ctx context.Context, c *TCloser) {
 		time.Sleep(2 * time.Second)
 		c.Done()
 	}
@@ -221,22 +221,22 @@ func Test_Close(t *testing.T) {
 }
 
 func Test_AddHandler_Default(t *testing.T) {
-	CloseProcs = New()
+	StCloseProcs = New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 	}
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("AddHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.Counter
+			c := StCloseProcs.Counter
 			AddHandler(hand)
-			if CloseProcs.Counter == c {
+			if StCloseProcs.Counter == c {
 				t.Error("AddHandler() error: the counter is not working.")
 			}
 
-			CloseProcs.funcs[fmt.Sprint(Handler(hand))](context.Background(), CloseProcs)
-			if CloseProcs.Msgs[i] != "[!] true" {
+			StCloseProcs.funcs[fmt.Sprint(TFnHandler(hand))](context.Background(), StCloseProcs)
+			if StCloseProcs.Msgs[i] != "[!] true" {
 				t.Error("AddHandler() error: incorrect handler execution.")
 			}
 		})
@@ -244,23 +244,23 @@ func Test_AddHandler_Default(t *testing.T) {
 }
 
 func Test_DelHandler_Default(t *testing.T) {
-	CloseProcs = New()
+	StCloseProcs = New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 	}
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("DelHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.Counter
+			c := StCloseProcs.Counter
 			AddHandler(hand)
 			DelHandler(hand)
 
-			if CloseProcs.Counter != c {
+			if StCloseProcs.Counter != c {
 				t.Error("DelHandler() error: the counter has not been reduced.")
 			}
 
-			if _, ok := CloseProcs.funcs[fmt.Sprint(Handler(hand))]; ok {
+			if _, ok := StCloseProcs.funcs[fmt.Sprint(TFnHandler(hand))]; ok {
 				t.Error("DelHandler() error: the handler has not been deleted.")
 			}
 		})
@@ -268,26 +268,26 @@ func Test_DelHandler_Default(t *testing.T) {
 }
 
 func Test_RunAndDelHandler_Default(t *testing.T) {
-	CloseProcs = New()
+	StCloseProcs = New()
 
-	hand := func(ctx context.Context, c *Closer) {
+	hand := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 		c.Done()
 	}
 
 	for i := 0; i < CLOSER_TESTING_ITER_MIN; i++ {
 		t.Run("RunAndDelHandler() function testing (default)", func(t *testing.T) {
-			c := CloseProcs.Counter
+			c := StCloseProcs.Counter
 			AddHandler(hand)
 			RunAndDelHandler(hand)
 
 			time.Sleep(50 * time.Millisecond)
 
-			if CloseProcs.Counter != c {
-				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", CloseProcs.Counter, c)
+			if StCloseProcs.Counter != c {
+				t.Errorf("RunAndDelHandler() error: the counter has not been reduced. %v != %v", StCloseProcs.Counter, c)
 			}
 
-			if _, ok := CloseProcs.funcs[fmt.Sprint(Handler(hand))]; ok {
+			if _, ok := StCloseProcs.funcs[fmt.Sprint(TFnHandler(hand))]; ok {
 				t.Error("RunAndDelHandler() error: the handler has not been deleted.")
 			}
 		})
@@ -295,21 +295,21 @@ func Test_RunAndDelHandler_Default(t *testing.T) {
 }
 
 func Test_Close_Default(t *testing.T) {
-	hand_with_msg := func(ctx context.Context, c *Closer) {
+	hand_with_msg := func(ctx context.Context, c *TCloser) {
 		c.AddMsg("true")
 		c.Done()
 	}
 
-	hand_without_msg := func(ctx context.Context, c *Closer) {
+	hand_without_msg := func(ctx context.Context, c *TCloser) {
 		c.Done()
 	}
 
-	hand_with_timeout := func(ctx context.Context, c *Closer) {
+	hand_with_timeout := func(ctx context.Context, c *TCloser) {
 		time.Sleep(2 * time.Second)
 		c.Done()
 	}
 
-	CloseProcs = New()
+	StCloseProcs = New()
 	AddHandler(hand_with_msg)
 
 	t.Run("Close() function testing with errors (default)", func(t *testing.T) {
@@ -322,12 +322,12 @@ func Test_Close_Default(t *testing.T) {
 			t.Error("Close() error: the error messages were not returned")
 		}
 
-		if CloseProcs.Counter != 0 {
+		if StCloseProcs.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})
 
-	CloseProcs = New()
+	StCloseProcs = New()
 	AddHandler(hand_without_msg)
 	// res_with_timout.AddHandler(hand_with_timeout)
 
@@ -341,12 +341,12 @@ func Test_Close_Default(t *testing.T) {
 			t.Error("Close() error: the error messages were returned")
 		}
 
-		if CloseProcs.Counter != 0 {
+		if StCloseProcs.Counter != 0 {
 			t.Error("Close() error: the counter has not been reduced.")
 		}
 	})
 
-	CloseProcs = New()
+	StCloseProcs = New()
 	AddHandler(hand_with_timeout)
 
 	t.Run("Close() function testing with timeout error (default)", func(t *testing.T) {

@@ -152,7 +152,7 @@ func Test_Start_and_Shutdown(t *testing.T) {
 		closer.AddHandler(Shutdown)
 		time.Sleep(2 * time.Second)
 		// srvRest.Shutdown(context.Background())
-		Shutdown(context.Background(), closer.CloseProcs)
+		Shutdown(context.Background(), closer.StCloseProcs)
 
 		if reflect.TypeOf(muxWS) != reflect.TypeOf(&http.ServeMux{}) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
@@ -162,15 +162,15 @@ func Test_Start_and_Shutdown(t *testing.T) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
 		}
 
-		if closer.CloseProcs.Counter != 0 {
-			t.Errorf("Shutdown() error: %v.", closer.CloseProcs.Counter)
+		if closer.StCloseProcs.Counter != 0 {
+			t.Errorf("Shutdown() error: %v.", closer.StCloseProcs.Counter)
 		}
 	})
 
 	t.Run("Shutdown() function testing - positive", func(t *testing.T) {
-		Shutdown(context.Background(), closer.CloseProcs)
+		Shutdown(context.Background(), closer.StCloseProcs)
 
-		if len(closer.CloseProcs.Msgs) > 0 {
+		if len(closer.StCloseProcs.Msgs) > 0 {
 			t.Errorf("Shutdown() error.")
 		}
 	})

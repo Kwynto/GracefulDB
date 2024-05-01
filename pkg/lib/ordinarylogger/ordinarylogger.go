@@ -8,16 +8,17 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
 )
 
 const (
-	EnvDev  = "dev"
-	EnvProd = "prod"
+	SEnvDev  = "dev"
+	SEnvProd = "prod"
 )
 
-type OrdinaryHandler struct {
+type TStOrdinaryHandler struct {
 	slog.Handler
 	lScreen *log.Logger
 	lFile   *log.Logger
@@ -28,82 +29,82 @@ var IoFile *os.File // io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
 
-func (h *OrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
-	var strFileOut string
+func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
+	var sFileOut string
 
-	level := r.Level.String() + ":"
+	sLevel := r.Level.String() + ":"
 
 	switch r.Level {
 	case slog.LevelDebug:
-		level = colorterm.StringMagenta(level)
+		sLevel = colorterm.StringMagenta(sLevel)
 	case slog.LevelInfo:
-		level = colorterm.StringGreen(level)
+		sLevel = colorterm.StringGreen(sLevel)
 	case slog.LevelWarn:
-		level = colorterm.StringYellow(level)
+		sLevel = colorterm.StringYellow(sLevel)
 	case slog.LevelError:
-		level = colorterm.StringRed(level)
+		sLevel = colorterm.StringRed(sLevel)
 	}
 
-	fields := make(map[string]interface{}, r.NumAttrs())
+	mFields := make(map[string]interface{}, r.NumAttrs())
 	r.Attrs(func(a slog.Attr) bool {
-		fields[a.Key] = a.Value.Any()
+		mFields[a.Key] = a.Value.Any()
 
 		return true
 	})
 
-	byteAttrs, _ := json.MarshalIndent(fields, "", "  ")
+	bSlAttrs, _ := json.MarshalIndent(mFields, "", "  ")
 	// if err != nil {
 	// 	return err
 	// }
 
-	strAttrsScreenOut := string(byteAttrs)
-	if strAttrsScreenOut == "{}" {
-		strAttrsScreenOut = ""
+	sAttrsScreenOut := string(bSlAttrs)
+	if sAttrsScreenOut == "{}" {
+		sAttrsScreenOut = ""
 	}
 
-	strAttrsFileOut := ""
+	sAttrsFileOut := ""
 	switch h.env {
-	case EnvDev:
-		for k, v := range fields {
-			strAttrsFileOut = fmt.Sprintf("%s %s=\"%s\"", strAttrsFileOut, k, v.(string))
+	case SEnvDev:
+		for k, v := range mFields {
+			sAttrsFileOut = fmt.Sprintf("%s %s=\"%s\"", sAttrsFileOut, k, v.(string))
 		}
-	case EnvProd:
-		for k, v := range fields {
-			strAttrsFileOut = fmt.Sprintf("%s, \"%s\":\"%s\"", strAttrsFileOut, k, v.(string))
+	case SEnvProd:
+		for k, v := range mFields {
+			sAttrsFileOut = fmt.Sprintf("%s, \"%s\":\"%s\"", sAttrsFileOut, k, v.(string))
 		}
 	}
 
-	timeStrScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
+	sTimeStrScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
 
 	switch h.env {
-	case EnvDev:
-		timeStrFile := r.Time.Format("2006-01-02 15:04:05.000 -0700")
-		strFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\"%s", timeStrFile, r.Level, r.Message, strAttrsFileOut)
-	case EnvProd:
-		timeStrFile := r.Time.Format("2006-01-02T15:04:05.000000000-0700")
-		strFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", timeStrFile, r.Level, r.Message, strAttrsFileOut)
+	case SEnvDev:
+		sTimeStrFile := r.Time.Format("2006-01-02 15:04:05.000 -0700")
+		sFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\"%s", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
+	case SEnvProd:
+		sTimeStrFile := r.Time.Format("2006-01-02T15:04:05.000000000-0700")
+		sFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
 	}
 
-	msg := colorterm.StringCyan(r.Message)
+	sMsg := colorterm.StringCyan(r.Message)
 
-	h.lScreen.Println(timeStrScreen, level, msg, colorterm.StringWhite(strAttrsScreenOut))
-	h.lFile.Println(strFileOut)
+	h.lScreen.Println(sTimeStrScreen, sLevel, sMsg, colorterm.StringWhite(sAttrsScreenOut))
+	h.lFile.Println(sFileOut)
 
 	return nil
 }
 
-func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *OrdinaryHandler {
-	var gbdlevel slog.Level
+func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *TStOrdinaryHandler {
+	var level slog.Level
 	switch env {
-	case EnvDev:
-		gbdlevel = slog.LevelDebug
-	case EnvProd:
-		gbdlevel = slog.LevelInfo
+	case SEnvDev:
+		level = slog.LevelDebug
+	case SEnvProd:
+		level = slog.LevelInfo
 	}
 
-	h := &OrdinaryHandler{
+	h := &TStOrdinaryHandler{
 		Handler: slog.NewJSONHandler(outScreen, &slog.HandlerOptions{
-			Level: gbdlevel,
+			Level: level,
 		}),
 		lScreen: log.New(outScreen, "", 0),
 		lFile:   log.New(outFile, "", 0),
@@ -114,20 +115,20 @@ func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *Ord
 }
 
 func openLogFile(name string) *os.File {
-	fo, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	f, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 
-	return fo
+	return f
 }
 
 func setupLogger(logPath, logEnv string) *slog.Logger {
-	var nlog *slog.Logger
+	var newLog *slog.Logger
 
-	IoFile := openLogFile(fmt.Sprintf("%s%s%s", logPath, logEnv, ".log"))
+	ioFile := openLogFile(filepath.Join(logPath, fmt.Sprintf("%s%s", logEnv, ".log")))
 
-	LogHandler = newOrdinaryHandler(os.Stdout, IoFile, logEnv)
-	nlog = slog.New(LogHandler)
+	LogHandler = newOrdinaryHandler(os.Stdout, ioFile, logEnv)
+	newLog = slog.New(LogHandler)
 
-	return nlog
+	return newLog
 }
 
 func Err(err error) slog.Attr {
@@ -138,7 +139,7 @@ func Err(err error) slog.Attr {
 }
 
 func Init(logPath, logEnv string) {
-	inlog := setupLogger(logPath, logEnv)
-	slog.SetDefault(inlog)
+	newLog := setupLogger(logPath, logEnv)
+	slog.SetDefault(newLog)
 	LogServerError = slog.NewLogLogger(LogHandler, slog.LevelError)
 }

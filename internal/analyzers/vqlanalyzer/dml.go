@@ -14,15 +14,15 @@ import (
 // DML — язык изменения данных (Data Manipulation Language)
 
 func (q tQuery) DMLSelect() (result string, err error) {
-	// -
+	// - It's almost done
 	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
 	defer func() { e.Wrapper(op, err) }()
 
 	var (
-		resultIds []uint64
+		resultRow []gtypes.TResponseRow
 		okSelect  bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resSelect gtypes.TResponseSelect
 		selectIn  = gtypes.TSelectStruct{
 			Orderby: gtypes.TOrderBy{
 				Cols: make([]string, 0, 4),
@@ -48,7 +48,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	}
 
 	if newticket != "" {
-		resArr.Ticket = newticket
+		resSelect.Ticket = newticket
 		res.Ticket = newticket
 	}
 
@@ -155,14 +155,14 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	// Request execution
 
 	// TODO: Make an implementation in the kernel
-	resultIds, okSelect = core.SelectRows(db, table, selectIn)
+	resultRow, okSelect = core.SelectRows(db, table, selectIn)
 	if !okSelect {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 	}
 
-	resArr.State = "ok"
-	resArr.Result = resultIds
-	return ecowriter.EncodeJSON(resArr), nil
+	resSelect.State = "ok"
+	resSelect.Result = resultRow
+	return ecowriter.EncodeJSON(resSelect), nil
 }
 
 func (q tQuery) DMLInsert() (result string, err error) {
@@ -173,8 +173,8 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	var (
 		resultIds []uint64
 		okInsert  bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		columnsIn = make([]string, 0)
 	)
 
@@ -267,15 +267,15 @@ func (q tQuery) DMLInsert() (result string, err error) {
 }
 
 func (q tQuery) DMLUpdate() (result string, err error) {
-	// -
+	// This function is complete
 	op := "internal -> analyzers -> sql -> DML -> DMLUpdate"
 	defer func() { e.Wrapper(op, err) }()
 
 	var (
 		resultIds []uint64
 		okUpdate  bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		updateIn  = gtypes.TUpdaateStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			Couples: make(map[string]string),
@@ -365,7 +365,6 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	// Request execution
 
-	// TODO: Make an implementation in the kernel
 	resultIds, okUpdate = core.UpdateRows(db, table, updateIn)
 	if !okUpdate {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
@@ -384,8 +383,8 @@ func (q tQuery) DMLDelete() (result string, err error) {
 	var (
 		resultIds []uint64
 		okDel     bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		deleteIn  = gtypes.TDeleteStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			IsWhere: false,
@@ -449,7 +448,6 @@ func (q tQuery) DMLDelete() (result string, err error) {
 
 	// Request execution
 
-	// TODO: Make an implementation in the kernel
 	resultIds, okDel = core.DeleteRows(db, table, deleteIn)
 	if !okDel {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
@@ -481,7 +479,7 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -523,7 +521,6 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 
 	// Request execution
 
-	// TODO: Make an implementation in the kernel
 	if !core.TruncateTable(db, table) {
 		return `{"state":"error", "result":"the table cannot be truncated"}`, errors.New("the table cannot be truncated")
 	}

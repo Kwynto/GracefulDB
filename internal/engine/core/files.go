@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
@@ -53,7 +54,8 @@ func writeBufferToDisk() bool {
 			hashid = maxBucket
 		}
 
-		sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
+		// sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
+		sFileName := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, fmt.Sprintf("service/%s_%d", tableInfo.CurrentRev, hashid))
 		srwFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if err != nil {
 			return false
@@ -69,9 +71,11 @@ func writeBufferToDisk() bool {
 			fullValue := fmt.Sprintf("%s%s\n", head, col.Value)
 
 			colInfo := tableInfo.Columns[col.Field]
-			path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
+			// path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
+			path := filepath.Join(LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
 
-			fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
+			// fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
+			fileName := filepath.Join(path, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
 
 			rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 			if err != nil {

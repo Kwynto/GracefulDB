@@ -9,31 +9,31 @@ import (
 )
 
 var (
-	fEncoder *json.Encoder
-	fDecoder *json.Decoder
-	fBlock   sync.RWMutex
+	jeEncoder *json.Encoder
+	jdDecoder *json.Decoder
+	mxBlock   sync.RWMutex
 )
 
 // Saving the structure to a JSON-file.
 func WriteJSON(name string, data any) (err error) {
 	// This function is complete
-	fBlock.Lock()
-	defer fBlock.Unlock()
+	mxBlock.Lock()
+	defer mxBlock.Unlock()
 
-	if _, err := os.Stat(name); !os.IsNotExist(err) {
-		if err2 := os.Remove(name); err2 != nil {
-			return err2
+	if _, errStat := os.Stat(name); !os.IsNotExist(errStat) {
+		if errRemove := os.Remove(name); errRemove != nil {
+			return errRemove
 		}
 	}
 
-	wFile, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return err
 	}
-	defer wFile.Close()
+	defer f.Close()
 
-	fEncoder = json.NewEncoder(wFile)
-	if err := fEncoder.Encode(data); err != nil {
+	jeEncoder = json.NewEncoder(f)
+	if err := jeEncoder.Encode(data); err != nil {
 		return err
 	}
 
@@ -43,21 +43,21 @@ func WriteJSON(name string, data any) (err error) {
 // Loading a structure from a JSON-file.
 func ReadJSON(name string, data any) (err error) {
 	// This function is complete
-	fBlock.RLock()
-	defer fBlock.RUnlock()
+	mxBlock.RLock()
+	defer mxBlock.RUnlock()
 
-	if _, err := os.Stat(name); os.IsNotExist(err) {
-		return err
+	if _, errStat := os.Stat(name); os.IsNotExist(errStat) {
+		return errStat
 	}
 
-	rFile, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	f, err := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		return err
 	}
-	defer rFile.Close()
+	defer f.Close()
 
-	fDecoder = json.NewDecoder(rFile)
-	if err := fDecoder.Decode(data); err != nil {
+	jdDecoder = json.NewDecoder(f)
+	if err := jdDecoder.Decode(data); err != nil {
 		return err
 	}
 
@@ -65,11 +65,11 @@ func ReadJSON(name string, data any) (err error) {
 }
 
 // Packing data in JSON-string
-func EncodeJSON(data any) string {
+func EncodeJSON(inData any) string {
 	var buf bytes.Buffer
 
-	encoder := json.NewEncoder(&buf)
-	if err := encoder.Encode(data); err != nil {
+	je := json.NewEncoder(&buf)
+	if err := je.Encode(inData); err != nil {
 		return ""
 	}
 
@@ -78,15 +78,15 @@ func EncodeJSON(data any) string {
 
 // Getting data from JSON-string
 func DecodeJSON(str string) any {
-	var data any
+	var inData any
 	reader := strings.NewReader(str)
 
-	decoder := json.NewDecoder(reader)
-	if err := decoder.Decode(&data); err != nil {
+	jd := json.NewDecoder(reader)
+	if err := jd.Decode(&inData); err != nil {
 		return nil
 	}
 
-	return data
+	return inData
 }
 
 func FileRead(name string) (string, error) {

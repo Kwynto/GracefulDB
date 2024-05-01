@@ -69,10 +69,10 @@ type Config struct {
 func defaultConfig() Config {
 	return Config{
 		Env:             "test",
-		LogPath:         "./logs/",
+		LogPath:         "./logs",
 		ShutdownTimeOut: 5 * time.Second,
 		CoreSettings: CoreSettings{
-			Storage:      "./data/",
+			Storage:      "./data",
 			BucketSize:   800,
 			FriendlyMode: true,
 		},

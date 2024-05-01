@@ -11,10 +11,10 @@ func TestWrapper(t *testing.T) {
 		err error
 	}
 
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+	stTests := []struct {
+		name      string
+		args      args
+		isWantErr bool
 	}{
 		{
 			name: "Error wrapping test, if error is not nil.",
@@ -22,7 +22,7 @@ func TestWrapper(t *testing.T) {
 				msg: "Msg",
 				err: fmt.Errorf("%s", "error msg"),
 			},
-			wantErr: true,
+			isWantErr: true,
 		},
 		{
 			name: "Error wrapping test, if error is nil.",
@@ -30,7 +30,7 @@ func TestWrapper(t *testing.T) {
 				msg: "Msg",
 				err: nil,
 			},
-			wantErr: false,
+			isWantErr: false,
 		},
 		{
 			name: "Error logging.",
@@ -38,22 +38,22 @@ func TestWrapper(t *testing.T) {
 				msg: "This is not an error, this diagnostic message is part of a test",
 				err: fmt.Errorf("%s", "test msg"),
 			},
-			wantErr: true,
+			isWantErr: true,
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range stTests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Wrapper(tt.args.msg, tt.args.err); (err != nil) != tt.wantErr {
-				t.Errorf("WrapIfErr() error = %v, wantErr %v", err, tt.wantErr)
+			if err := Wrapper(tt.args.msg, tt.args.err); (err != nil) != tt.isWantErr {
+				t.Errorf("WrapIfErr() error = %v, wantErr %v", err, tt.isWantErr)
 			}
 		})
 	}
 }
 
 func Benchmark_Wrapper(b *testing.B) {
-	errb := fmt.Errorf("%s", "error msg")
+	errB := fmt.Errorf("%s", "error msg")
 	for i := 0; i < b.N; i++ {
-		_ = Wrapper("Msg", errb) // calling the tested function
+		_ = Wrapper("Msg", errB) // calling the tested function
 	}
 }

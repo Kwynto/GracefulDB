@@ -1,8 +1,8 @@
 package core
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"slices"
 	"time"
 
@@ -53,7 +53,8 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 
 	for indRange, tableInfo := range dbInfo.Removed {
 		if tableInfo.Name == nameTable {
-			tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			// tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			tablePath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			err := os.RemoveAll(tablePath)
 			if err != nil {
 				return false
@@ -149,7 +150,7 @@ func TruncateTable(nameDB, nameTable string) bool {
 		rowStore.Id = id
 		rowStore.Time = tNow
 		rowStore.Status = 0
-		rowStore.Shape = 3 // this is code of delete
+		rowStore.Shape = 30 // this is code of delete
 		rowStore.DB = nameDB
 		rowStore.Table = nameTable
 		for _, col := range cols {
@@ -186,7 +187,8 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		return false
 	}
 
-	pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
+	// pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
+	pathDB := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder)
 
 	for {
 		folderName = GenerateName()
@@ -195,13 +197,15 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		}
 	}
 
-	fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
+	// fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
+	fullTableName := filepath.Join(pathDB, folderName)
 	err1 := os.Mkdir(fullTableName, 0666)
 	if err1 != nil {
 		return false
 	}
 
-	serviceName := fmt.Sprintf("%s/service", fullTableName)
+	// serviceName := fmt.Sprintf("%s/service", fullTableName)
+	serviceName := filepath.Join(fullTableName, "service")
 	err2 := os.Mkdir(serviceName, 0666)
 	if err2 != nil {
 		return false

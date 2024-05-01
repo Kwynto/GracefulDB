@@ -2,9 +2,9 @@ package core
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -87,7 +87,8 @@ func (s *tStorageInfo) Load() bool {
 	for _, file := range files {
 		if file.IsDir() {
 			nameDir := file.Name()
-			dbInfoFile := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
+			// dbInfoFile := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
+			dbInfoFile := filepath.Join(LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
 			err := ecowriter.ReadJSON(dbInfoFile, &dbInfo)
 			if err == nil {
 				if dbInfo.Deleted {
@@ -99,7 +100,7 @@ func (s *tStorageInfo) Load() bool {
 		}
 	}
 
-	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	infoStorageFile := filepath.Join(LocalCoreSettings.Storage, INFOFILE_STORAGE)
 	errR := ecowriter.ReadJSON(infoStorageFile, &s.Access)
 	if errR != nil {
 		s.Access = make(map[string]gtypes.TAccess)
@@ -115,7 +116,8 @@ func (s *tStorageInfo) Load() bool {
 func (s *tStorageInfo) Save() bool {
 	// This method is complete
 	// Don't use mutex
-	infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	// infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
+	infoStorageFile := filepath.Join(LocalCoreSettings.Storage, INFOFILE_STORAGE)
 	return ecowriter.WriteJSON(infoStorageFile, s.Access) == nil
 }
 
@@ -132,7 +134,8 @@ type TDBInfo struct {
 func (d TDBInfo) Save() bool {
 	// This method is complete
 	// Don't use mutex
-	path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
+	// path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
+	path := filepath.Join(LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
 	return ecowriter.WriteJSON(path, d) == nil
 }
 
@@ -168,7 +171,7 @@ type TState struct {
 }
 
 var LocalCoreSettings tCoreSettings = tCoreSettings{
-	Storage:      "./data/",
+	Storage:      "./data",
 	BucketSize:   800,
 	FriendlyMode: true,
 }
@@ -205,7 +208,7 @@ func Start(cfg *config.Config) {
 	slog.Info("The core of the DBMS was started.")
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// -
 	if !StorageInfo.Save() {
 		c.AddMsg("Failure to save access rights !!!")

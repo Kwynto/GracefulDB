@@ -16,7 +16,7 @@ import (
 
 func (q tQuery) DDLCreateDB() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -103,7 +103,7 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 
 func (q tQuery) DDLCreateTable() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -287,7 +287,7 @@ func (q tQuery) DDLCreate() (result string, err error) {
 
 func (q tQuery) DDLAlterDB() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -378,7 +378,7 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 
 func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -483,7 +483,7 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 
 func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -559,7 +559,7 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 
 func (q tQuery) DDLAlterTableModify() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -696,7 +696,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 
 func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -800,7 +800,7 @@ func (q tQuery) DDLAlter() (result string, err error) {
 
 func (q tQuery) DDLDropDB() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -878,7 +878,7 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 
 func (q tQuery) DDLDropTable() (result string, err error) {
 	// This method is complete
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
