@@ -14,40 +14,40 @@ const (
 	MICRO_DEFAULT_DELAY = 50
 )
 
-type Handler func(ctx context.Context, c *Closer)
+type TFnHandler func(ctx context.Context, c *TCloser)
 
-type Closer struct {
+type TCloser struct {
 	mu      sync.RWMutex
-	funcs   map[string]Handler
+	funcs   map[string]TFnHandler
 	Msgs    []string
 	Counter int
 }
 
-var CloseProcs = &Closer{
-	funcs: make(map[string]Handler, MIN_SIZE_MAP),
+var StCloseProcs = &TCloser{
+	funcs: make(map[string]TFnHandler, MIN_SIZE_MAP),
 }
 
-func New() *Closer {
-	return &Closer{
-		funcs: make(map[string]Handler, MIN_SIZE_MAP),
+func New() *TCloser {
+	return &TCloser{
+		funcs: make(map[string]TFnHandler, MIN_SIZE_MAP),
 	}
 }
 
-func (c *Closer) AddMsg(msg string) {
+func (c *TCloser) AddMsg(msg string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.Msgs = append(c.Msgs, fmt.Sprintf("[!] %v", msg))
 }
 
-func (c *Closer) Done() {
+func (c *TCloser) Done() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.Counter--
 }
 
-func (c *Closer) AddHandler(f Handler) {
+func (c *TCloser) AddHandler(f TFnHandler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -55,7 +55,7 @@ func (c *Closer) AddHandler(f Handler) {
 	c.Counter++
 }
 
-func (c *Closer) DelHandler(f Handler) {
+func (c *TCloser) DelHandler(f TFnHandler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -66,7 +66,7 @@ func (c *Closer) DelHandler(f Handler) {
 	}
 }
 
-func (c *Closer) RunAndDelHandler(f Handler) {
+func (c *TCloser) RunAndDelHandler(f TFnHandler) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -79,7 +79,7 @@ func (c *Closer) RunAndDelHandler(f Handler) {
 	delete(c.funcs, key)
 }
 
-func (c *Closer) Close(ctx context.Context) error {
+func (c *TCloser) Close(ctx context.Context) error {
 	var complete = make(chan struct{}, MIN_SIZE_MAP)
 
 	for _, f := range c.funcs {
@@ -114,18 +114,18 @@ func (c *Closer) Close(ctx context.Context) error {
 	return nil
 }
 
-func AddHandler(f Handler) {
-	CloseProcs.AddHandler(f)
+func AddHandler(f TFnHandler) {
+	StCloseProcs.AddHandler(f)
 }
 
-func DelHandler(f Handler) {
-	CloseProcs.DelHandler(f)
+func DelHandler(f TFnHandler) {
+	StCloseProcs.DelHandler(f)
 }
 
-func RunAndDelHandler(f Handler) {
-	CloseProcs.RunAndDelHandler(f)
+func RunAndDelHandler(f TFnHandler) {
+	StCloseProcs.RunAndDelHandler(f)
 }
 
 func Close(ctx context.Context) error {
-	return CloseProcs.Close(ctx)
+	return StCloseProcs.Close(ctx)
 }

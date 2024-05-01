@@ -21,7 +21,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	var (
 		resultRow []gtypes.TResponseRow
 		okSelect  bool
-		res       gtypes.Response
+		res       gtypes.TResponse
 		resSelect gtypes.TResponseSelect
 		selectIn  = gtypes.TSelectStruct{
 			Orderby: gtypes.TOrderBy{
@@ -173,8 +173,8 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	var (
 		resultIds []uint64
 		okInsert  bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		columnsIn = make([]string, 0)
 	)
 
@@ -274,8 +274,8 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	var (
 		resultIds []uint64
 		okUpdate  bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		updateIn  = gtypes.TUpdaateStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			Couples: make(map[string]string),
@@ -383,8 +383,8 @@ func (q tQuery) DMLDelete() (result string, err error) {
 	var (
 		resultIds []uint64
 		okDel     bool
-		res       gtypes.Response
-		resArr    gtypes.ResponseUints
+		res       gtypes.TResponse
+		resArr    gtypes.TResponseUints
 		deleteIn  = gtypes.TDeleteStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			IsWhere: false,
@@ -479,7 +479,7 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 

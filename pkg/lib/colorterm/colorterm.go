@@ -13,17 +13,17 @@ import (
 )
 
 var (
-	withoutColor = colorIsntSet() || os.Getenv("TERM") == "dumb" ||
+	isWithoutColor = colorIsntSet() || os.Getenv("TERM") == "dumb" ||
 		(!isatty.IsTerminal(os.Stdout.Fd()) && !isatty.IsCygwinTerminal(os.Stdout.Fd()))
 
-	Output = colorable.NewColorableStdout()
-	Error  = colorable.NewColorableStderr()
+	IoOutput = colorable.NewColorableStdout()
+	IoError  = colorable.NewColorableStderr()
 
-	cache = make(map[Attribute]*ColorTerm)
-	block sync.Mutex
+	mCache  = make(map[TAttribute]*TStColorTerm)
+	mxBlock sync.Mutex
 )
 
-var mapResetAttributes = map[Attribute]Attribute{
+var mapResetAttributes = map[TAttribute]TAttribute{
 	Bold:         ResetBold,
 	Faint:        ResetBold,
 	Italic:       ResetItalic,
@@ -43,41 +43,41 @@ func boolLink(v bool) *bool {
 	return &v
 }
 
-func (ct *ColorTerm) seq() string {
-	format := make([]string, len(ct.characteristics))
+func (ct *TStColorTerm) seq() string {
+	slFormat := make([]string, len(ct.characteristics))
 	for i, v := range ct.characteristics {
-		format[i] = strconv.Itoa(int(v))
+		slFormat[i] = strconv.Itoa(int(v))
 	}
 
-	return strings.Join(format, ";")
+	return strings.Join(slFormat, ";")
 }
 
-func (c *ColorTerm) formating() string {
+func (c *TStColorTerm) formating() string {
 	return fmt.Sprintf("%s[%sm", escSimbol, c.seq())
 }
 
-func (c *ColorTerm) unformating() string {
-	format := make([]string, len(c.characteristics))
+func (c *TStColorTerm) unformating() string {
+	slFormat := make([]string, len(c.characteristics))
 	for i, v := range c.characteristics {
-		format[i] = strconv.Itoa(int(Reset))
+		slFormat[i] = strconv.Itoa(int(Reset))
 		ra, ok := mapResetAttributes[v]
 		if ok {
-			format[i] = strconv.Itoa(int(ra))
+			slFormat[i] = strconv.Itoa(int(ra))
 		}
 	}
 
-	return fmt.Sprintf("%s[%sm", escSimbol, strings.Join(format, ";"))
+	return fmt.Sprintf("%s[%sm", escSimbol, strings.Join(slFormat, ";"))
 }
 
-func (c *ColorTerm) dontSetColor() bool {
+func (c *TStColorTerm) dontSetColor() bool {
 	if c.notColor != nil {
 		return *c.notColor
 	}
 
-	return withoutColor
+	return isWithoutColor
 }
 
-func (ct *ColorTerm) roll(str string) string {
+func (ct *TStColorTerm) roll(str string) string {
 	if ct.dontSetColor() {
 		return str
 	}
@@ -85,26 +85,26 @@ func (ct *ColorTerm) roll(str string) string {
 	return ct.formating() + str + ct.unformating()
 }
 
-func (ct *ColorTerm) FSprint() func(a ...interface{}) string {
+func (ct *TStColorTerm) FSprint() func(a ...interface{}) string {
 	return func(a ...interface{}) string {
 		return ct.roll(fmt.Sprint(a...))
 	}
 }
 
-func (ct *ColorTerm) FSprintf() func(format string, a ...interface{}) string {
+func (ct *TStColorTerm) FSprintf() func(format string, a ...interface{}) string {
 	return func(format string, a ...interface{}) string {
 		return ct.roll(fmt.Sprintf(format, a...))
 	}
 }
 
-func (ct *ColorTerm) AddAttr(value ...Attribute) *ColorTerm {
+func (ct *TStColorTerm) AddAttr(value ...TAttribute) *TStColorTerm {
 	ct.characteristics = append(ct.characteristics, value...)
 	return ct
 }
 
-func NewCT(value ...Attribute) *ColorTerm {
-	ct := &ColorTerm{
-		characteristics: make([]Attribute, 0),
+func NewCT(value ...TAttribute) *TStColorTerm {
+	ct := &TStColorTerm{
+		characteristics: make([]TAttribute, 0),
 	}
 
 	if colorIsntSet() {
@@ -115,14 +115,14 @@ func NewCT(value ...Attribute) *ColorTerm {
 	return ct
 }
 
-func colorStr(format string, p Attribute, a ...interface{}) string {
-	block.Lock()
-	defer block.Unlock()
+func colorStr(format string, p TAttribute, a ...interface{}) string {
+	mxBlock.Lock()
+	defer mxBlock.Unlock()
 
-	c, ok := cache[p]
+	c, ok := mCache[p]
 	if !ok {
 		c = NewCT(p)
-		cache[p] = c
+		mCache[p] = c
 	}
 
 	if len(a) == 0 {
@@ -198,11 +198,11 @@ func StringWhiteH(format string, a ...interface{}) string {
 
 func init() {
 	// https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#output-sequences
-	var outMode uint32
+	var uOutMode uint32
 	out := windows.Handle(os.Stdout.Fd())
-	if err := windows.GetConsoleMode(out, &outMode); err != nil {
+	if err := windows.GetConsoleMode(out, &uOutMode); err != nil {
 		return
 	}
-	outMode |= windows.ENABLE_PROCESSED_OUTPUT | windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	_ = windows.SetConsoleMode(out, outMode)
+	uOutMode |= windows.ENABLE_PROCESSED_OUTPUT | windows.ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	_ = windows.SetConsoleMode(out, uOutMode)
 }

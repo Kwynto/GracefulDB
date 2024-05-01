@@ -8,13 +8,13 @@ import (
 
 var (
 	//go:embed ui/html
-	uiHtmlDir embed.FS
+	emUiHtmlDir embed.FS
 
 	//go:embed ui/static
-	uiStaticDir embed.FS
+	emUiStaticDir embed.FS
 )
 
 func init() {
 	// Set UI
-	webmanage.SetUiDirs(&uiHtmlDir, &uiStaticDir)
+	webmanage.SetUiDirs(&emUiHtmlDir, &emUiStaticDir)
 }

@@ -44,8 +44,8 @@ func Test_Start(t *testing.T) {
 		time.Sleep(1 * time.Second)
 
 		config.MustLoad(tf)
-		if closer.CloseProcs.Counter != 0 {
-			t.Errorf("Start() error: %v.", closer.CloseProcs.Counter)
+		if closer.StCloseProcs.Counter != 0 {
+			t.Errorf("Start() error: %v.", closer.StCloseProcs.Counter)
 		}
 	})
 }
@@ -59,10 +59,10 @@ func Test_Shutdown(t *testing.T) {
 		closer.AddHandler(Shutdown)
 		time.Sleep(1 * time.Second)
 
-		Shutdown(context.Background(), closer.CloseProcs)
+		Shutdown(context.Background(), closer.StCloseProcs)
 
-		if closer.CloseProcs.Counter != 0 {
-			t.Errorf("Shutdown() error: %v.", closer.CloseProcs.Counter)
+		if closer.StCloseProcs.Counter != 0 {
+			t.Errorf("Shutdown() error: %v.", closer.StCloseProcs.Counter)
 		}
 	})
 }

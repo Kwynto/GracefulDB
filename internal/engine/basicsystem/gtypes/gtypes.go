@@ -18,15 +18,10 @@ type TColumnForWrite struct {
 
 	// Flags of changes
 	IsChName bool
-	// IsChDefault bool
-	// IsChNotNull bool
-	// IsChUniqut  bool
 }
 
 type TColumnForStore struct {
 	Field string
-	// Id    uint64 // FIXME: Need delete
-	// Time  int64  // FIXME: Need delete
 	Value string
 }
 
@@ -52,36 +47,25 @@ type TCollectBuffers struct {
 	Switch    uint8
 }
 
-// type TDescColumn struct {
-// 	DB         string
-// 	Table      string
-// 	Column     string
-// 	Path       string
-// 	Spec       TColumnSpecification
-// 	CurrentRev string
-// 	BucketSize int64
-// 	BucketLog  uint8
-// }
-
-type Response struct {
+type TResponse struct {
 	State  string `json:"state,omitempty"`
 	Ticket string `json:"ticket,omitempty"`
 	Result string `json:"result,omitempty"`
 }
 
-type ResponseStrings struct {
+type TResponseStrings struct {
 	Result []string `json:"result,omitempty"`
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
 }
 
-type ResponseUints struct {
+type TResponseUints struct {
 	Result []uint64 `json:"result,omitempty"`
 	State  string   `json:"state,omitempty"`
 	Ticket string   `json:"ticket,omitempty"`
 }
 
-type TResponseRow map[string]string
+type TResponseRow map[string]string // name column and value
 
 type TResponseSelect struct {
 	Result []TResponseRow `json:"result,omitempty"`
@@ -89,7 +73,7 @@ type TResponseSelect struct {
 	Ticket string         `json:"ticket,omitempty"`
 }
 
-type ResultColumn struct {
+type TResultColumn struct {
 	Field      string    `json:"field"`
 	Default    string    `json:"default"`
 	NotNull    bool      `json:"notnull"`
@@ -97,10 +81,10 @@ type ResultColumn struct {
 	LastUpdate time.Time `json:"lastupdate"`
 }
 
-type ResponseColumns struct {
-	State  string         `json:"state,omitempty"`
-	Ticket string         `json:"ticket,omitempty"`
-	Result []ResultColumn `json:"result,omitempty"`
+type TResponseColumns struct {
+	State  string          `json:"state,omitempty"`
+	Ticket string          `json:"ticket,omitempty"`
+	Result []TResultColumn `json:"result,omitempty"`
 }
 
 type TConditions struct {
@@ -141,7 +125,7 @@ type TAdditionalData struct {
 	Table string
 }
 
-type Secret struct {
+type TSecret struct {
 	Ticket   string `json:"ticket,omitempty"`
 	Login    string `json:"login,omitempty"`
 	Password string `json:"password,omitempty"`
@@ -167,6 +151,6 @@ type TAccess struct {
 	Flags map[string]TAccessFlags `json:"flags,omitempty"` // login - TAccessFlags
 }
 
-func DefaultSecret() Secret {
-	return Secret{}
+func DefaultSecret() TSecret {
+	return TSecret{}
 }

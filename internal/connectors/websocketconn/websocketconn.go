@@ -103,7 +103,7 @@ func Start(cfg *config.Config) {
 	}
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	if err := srvWS.Shutdown(ctx); err != nil {
 		msg := fmt.Sprintf("There was a problem with stopping the WebSocket-server: %s", err.Error())
 		c.AddMsg(msg)

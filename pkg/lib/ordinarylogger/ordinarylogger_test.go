@@ -158,7 +158,7 @@ func Test_newOrdinaryHandler(t *testing.T) {
 	logHandler1 := newOrdinaryHandler(os.Stdout, iof, "dev")
 
 	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
-		if r1 := reflect.TypeOf(logHandler1); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+		if r1 := reflect.TypeOf(logHandler1); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
 			t.Errorf("newOrdinaryHandler() error: type mismatch: %v", r1)
 		}
 	})
@@ -166,7 +166,7 @@ func Test_newOrdinaryHandler(t *testing.T) {
 	logHandler2 := newOrdinaryHandler(os.Stdout, iof, "prod")
 
 	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
-		if r1 := reflect.TypeOf(logHandler2); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+		if r1 := reflect.TypeOf(logHandler2); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
 			t.Errorf("newOrdinaryHandler() error: type mismatch: %v", r1)
 		}
 	})
@@ -190,7 +190,7 @@ func Test_setupLogger(t *testing.T) {
 			t.Errorf("setupLogger() error: type mismatch: %v", r1)
 		}
 
-		if r1 := reflect.TypeOf(inlog.Handler()); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+		if r1 := reflect.TypeOf(inlog.Handler()); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
 			t.Errorf("setupLogger() error: type of handler mismatch: %v", r1)
 		}
 	})
@@ -219,7 +219,7 @@ func Test_Init(t *testing.T) {
 			t.Errorf("Init() error: type mismatch: %v", r1)
 		}
 
-		if r1 := reflect.TypeOf(slog.Default().Handler()); r1 != reflect.TypeOf(&OrdinaryHandler{}) {
+		if r1 := reflect.TypeOf(slog.Default().Handler()); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
 			t.Errorf("Init() error: type of handler mismatch in slog.Default: %v", r1)
 		}
 	})

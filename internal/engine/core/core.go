@@ -208,7 +208,7 @@ func Start(cfg *config.Config) {
 	slog.Info("The core of the DBMS was started.")
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// -
 	if !StorageInfo.Save() {
 		c.AddMsg("Failure to save access rights !!!")

@@ -2,12 +2,12 @@ package colorterm
 
 // Types
 
-type ColorTerm struct {
-	characteristics []Attribute
+type TStColorTerm struct {
+	characteristics []TAttribute
 	notColor        *bool
 }
 
-type Attribute int
+type TAttribute int
 
 // Constants
 
@@ -15,7 +15,7 @@ const escSimbol = "\x1b"
 
 // Attributes
 const (
-	Reset Attribute = iota
+	Reset TAttribute = iota
 	Bold
 	Faint
 	Italic
@@ -28,7 +28,7 @@ const (
 )
 
 const (
-	ResetBold Attribute = iota + 22
+	ResetBold TAttribute = iota + 22
 	ResetItalic
 	ResetUnderline
 	ResetBlinking
@@ -40,7 +40,7 @@ const (
 
 // Text colors
 const (
-	Black Attribute = iota + 30
+	Black TAttribute = iota + 30
 	Red
 	Green
 	Yellow
@@ -52,7 +52,7 @@ const (
 
 // Hi-Intensity text colors
 const (
-	BlackH Attribute = iota + 90
+	BlackH TAttribute = iota + 90
 	RedH
 	GreenH
 	YellowH
@@ -64,7 +64,7 @@ const (
 
 // // Background colors
 // const (
-// 	BlackBack Attribute = iota + 40
+// 	BlackBack TAttribute = iota + 40
 // 	RedBack
 // 	GreenBack
 // 	YellowBack
@@ -76,7 +76,7 @@ const (
 
 // // Background Hi-Intensity colors
 // const (
-// 	BlackHBack Attribute = iota + 100
+// 	BlackHBack TAttribute = iota + 100
 // 	RedHBack
 // 	GreenHBack
 // 	YellowHBack

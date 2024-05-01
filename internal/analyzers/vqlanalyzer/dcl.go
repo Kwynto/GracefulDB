@@ -19,7 +19,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
+	var res gtypes.TResponse
 	var (
 		dbs   []string
 		users []string
@@ -140,7 +140,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
+	var res gtypes.TResponse
 	var (
 		dbs   []string
 		users []string
@@ -262,7 +262,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var ticket string
-	var res gtypes.Response
+	var res gtypes.TResponse
 
 	// Pre checking
 
@@ -346,8 +346,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var (
-		res    gtypes.Response
-		resArr gtypes.ResponseStrings
+		res    gtypes.TResponse
+		resArr gtypes.TResponseStrings
 	)
 
 	// Pre checking
@@ -431,8 +431,8 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLDesc"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.Response
-	var resArr gtypes.ResponseColumns
+	var res gtypes.TResponse
+	var resArr gtypes.TResponseColumns
 
 	var table string
 
@@ -503,7 +503,7 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	for _, colName := range tableInfo.Order {
 		column, okCol := tableInfo.Columns[colName]
 		if okCol {
-			var resColumn gtypes.ResultColumn
+			var resColumn gtypes.TResultColumn
 
 			resColumn.Field = column.Name
 			resColumn.Default = column.Specification.Default
@@ -577,7 +577,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	// Request execution
 
 	if isNew || isChange || isRemove {
-		var res gtypes.Response
+		var res gtypes.TResponse
 
 		if q.Ticket == "" {
 			return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
@@ -624,7 +624,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 			err := gauth.AddUser(login, password, access)
 			if err != nil {
-				return ecowriter.EncodeJSON(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -634,7 +634,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		if isChange {
 			access, err := gauth.GetProfile(login)
 			if err != nil {
-				return ecowriter.EncodeJSON(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -646,7 +646,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 			err = gauth.UpdateUser(login, password, access)
 			if err != nil {
-				return ecowriter.EncodeJSON(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -656,7 +656,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		if isRemove {
 			err := gauth.DeleteUser(login)
 			if err != nil {
-				return ecowriter.EncodeJSON(gtypes.Response{
+				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
 					Result: err.Error(),
 				}), err
@@ -676,7 +676,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	secret := gtypes.Secret{
+	secret := gtypes.TSecret{
 		Login:    login,
 		Password: password,
 		Hash:     hash,
@@ -686,7 +686,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	return ecowriter.EncodeJSON(gtypes.Response{
+	return ecowriter.EncodeJSON(gtypes.TResponse{
 		State:  "ok",
 		Ticket: ticket,
 	}), nil

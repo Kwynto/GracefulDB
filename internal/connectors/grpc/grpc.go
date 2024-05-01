@@ -56,7 +56,7 @@ func Start(cfg *config.Config) {
 	grpcServer.Serve(listen)
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	grpcServer.Stop()
 	slog.Info("gRPC server stopped")
 	c.Done()

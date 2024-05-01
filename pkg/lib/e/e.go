@@ -13,9 +13,9 @@ func Wrapper(msg string, err error) error {
 	if err == nil {
 		return nil
 	}
-	newErr := fmt.Errorf("%s: %w", msg, err)
+	errNew := fmt.Errorf("%s: %w", msg, err)
 
 	slog.Error(msg, slog.String("err", err.Error()))
 
-	return newErr
+	return errNew
 }

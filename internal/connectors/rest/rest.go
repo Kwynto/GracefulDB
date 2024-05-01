@@ -73,7 +73,7 @@ func Start(cfg *config.Config) {
 	}
 }
 
-func Shutdown(ctx context.Context, c *closer.Closer) {
+func Shutdown(ctx context.Context, c *closer.TCloser) {
 	if err := srvRest.Shutdown(ctx); err != nil {
 		msg := fmt.Sprintf("There was a problem with stopping the REST-server: %s", err.Error())
 		c.AddMsg(msg)

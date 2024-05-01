@@ -29,8 +29,8 @@ func main() {
 	fmt.Println(colorterm.StringYellowH(license))
 
 	// Init config
-	configPath := os.Getenv("CONFIG_PATH")
-	config.MustLoad(configPath)
+	sConfigPath := os.Getenv("CONFIG_PATH")
+	config.MustLoad(sConfigPath)
 
 	if config.DefaultConfig.Env == "test" {
 		fmt.Println("You should set up the configuration file correctly.")
@@ -44,11 +44,10 @@ func main() {
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking
-	startCtx := context.Background()
-	ctx, stop := signal.NotifyContext(startCtx, syscall.SIGINT, syscall.SIGTERM)
+	ctxSignal, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	if err := server.Run(ctx, &config.DefaultConfig); err != nil {
+	if err := server.Run(ctxSignal, &config.DefaultConfig); err != nil {
 		slog.Error("An unexpected error occurred while the server was running.", slog.String("err", err.Error()))
 	}
 

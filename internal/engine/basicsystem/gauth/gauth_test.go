@@ -348,7 +348,7 @@ func Test_deleteUser(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -570,7 +570,7 @@ func Test_DeleteUser(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -774,7 +774,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -795,7 +795,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -818,7 +818,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -840,7 +840,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -863,7 +863,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -886,7 +886,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -905,7 +905,7 @@ func Test_NewAuth(t *testing.T) {
 	Start()
 
 	t.Run("NewAuth() function testing", func(t *testing.T) {
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    "",
 			Password: "",
 		}
@@ -919,7 +919,7 @@ func Test_NewAuth(t *testing.T) {
 	t.Run("NewAuth() function testing", func(t *testing.T) {
 		h := sha256.Sum256([]byte("abracadabra"))
 		pass := fmt.Sprintf("%x", h)
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    "abracadabra",
 			Password: "abracadabra",
 			Hash:     pass,
@@ -940,7 +940,7 @@ func Test_NewAuth(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: "abracadabra",
 		}
@@ -960,7 +960,7 @@ func Test_NewAuth(t *testing.T) {
 		}
 		addUser(randStr, randStr, prof)
 
-		secret := gtypes.Secret{
+		secret := gtypes.TSecret{
 			Login:    randStr,
 			Password: randStr,
 		}
@@ -1079,8 +1079,8 @@ func Test_Shutdown(t *testing.T) {
 	closer.AddHandler(Shutdown)
 
 	t.Run("Shutdown() function testing", func(t *testing.T) {
-		Shutdown(context.Background(), closer.CloseProcs)
-		if closer.CloseProcs.Counter != 0 {
+		Shutdown(context.Background(), closer.StCloseProcs)
+		if closer.StCloseProcs.Counter != 0 {
 			t.Error("Shutdown() error.")
 		}
 	})
