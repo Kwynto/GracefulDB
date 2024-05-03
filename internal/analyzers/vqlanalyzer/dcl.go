@@ -19,10 +19,10 @@ func (q tQuery) DCLGrant() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.TResponse
+	var stRes gtypes.TResponse
 	var (
-		dbs   []string
-		users []string
+		slDBs   []string
+		slUsers []string
 	)
 
 	// Pre checking
@@ -31,56 +31,56 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
-	if access.Status.IsBad() {
+	if stAccess.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewticket != "" {
+		stRes.Ticket = sNewticket
 	}
 
 	// Parsing an expression - Begin
 
-	privilegesStr := vqlexp.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
-	privilegesStr = vqlexp.RegExpCollection["GrantWord"].ReplaceAllLiteralString(privilegesStr, "")
-	privilegesStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
-	privileges := vqlexp.RegExpCollection["GrantPrivilegesList"].FindAllString(privilegesStr, -1)
+	sPrivileges := vqlexp.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
+	sPrivileges = vqlexp.RegExpCollection["GrantWord"].ReplaceAllLiteralString(sPrivileges, "")
+	sPrivileges = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
+	slPrivileges := vqlexp.RegExpCollection["GrantPrivilegesList"].FindAllString(sPrivileges, -1)
 
-	if len(privileges) == 0 {
+	if len(slPrivileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	dbsStr := vqlexp.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
-	dbsStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = trimQuotationMarks(dbsStr)
-	dbsIn := vqlexp.RegExpCollection["Comma"].Split(dbsStr, -1)
-	for _, db := range dbsIn {
-		if _, ok := core.GetDBInfo(db); ok {
-			dbs = append(dbs, db)
+	sDBs := vqlexp.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
+	sDBs = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = trimQuotationMarks(sDBs)
+	slDBsIn := vqlexp.RegExpCollection["Comma"].Split(sDBs, -1)
+	for _, sDB := range slDBsIn {
+		if _, ok := core.GetDBInfo(sDB); ok {
+			slDBs = append(slDBs, sDB)
 		}
 	}
-	if len(dbs) == 0 {
+	if len(slDBs) == 0 {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	usersStr := vqlexp.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
-	usersStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = trimQuotationMarks(usersStr)
-	usersIn := vqlexp.RegExpCollection["Comma"].Split(usersStr, -1)
-	for _, user := range usersIn {
-		if _, err := gauth.GetProfile(user); err == nil {
-			users = append(users, user)
+	sUsers := vqlexp.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
+	sUsers = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = trimQuotationMarks(sUsers)
+	slUsersIn := vqlexp.RegExpCollection["Comma"].Split(sUsers, -1)
+	for _, sUser := range slUsersIn {
+		if _, err := gauth.GetProfile(sUser); err == nil {
+			slUsers = append(slUsers, sUser)
 		}
 	}
-	if len(users) == 0 {
+	if len(slUsers) == 0 {
 		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
 
@@ -88,51 +88,51 @@ func (q tQuery) DCLGrant() (result string, err error) {
 
 	// Post checking and execution
 
-	for _, db := range dbs {
-		dbAccess, ok := core.GetDBAccess(db)
-		if ok {
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
+	for _, sDB := range slDBs {
+		stDBAccess, isOk := core.GetDBAccess(sDB)
+		if isOk {
+			if stDBAccess.Owner != sLogin {
+				var isLuxUser bool = false
+				for role := range stAccess.Roles {
 					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
+				if !isLuxUser {
 					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
-			for _, user := range users {
-				var aFlags gtypes.TAccessFlags
-				aFlags, ok := dbAccess.Flags[user]
-				if !ok {
-					aFlags = gtypes.TAccessFlags{}
+			for _, sUser := range slUsers {
+				// var stAccessFlags gtypes.TAccessFlags
+				stAccessFlags, isOk := stDBAccess.Flags[sUser]
+				if !isOk {
+					stAccessFlags = gtypes.TAccessFlags{}
 				}
 
-				for _, privilege := range privileges {
-					switch strings.ToLower(privilege) {
+				for _, sPrivilege := range slPrivileges {
+					switch strings.ToLower(sPrivilege) {
 					case "create":
-						aFlags.Create = true
+						stAccessFlags.Create = true
 					case "select":
-						aFlags.Select = true
+						stAccessFlags.Select = true
 					case "insert":
-						aFlags.Insert = true
+						stAccessFlags.Insert = true
 					case "update":
-						aFlags.Update = true
+						stAccessFlags.Update = true
 					case "delete":
-						aFlags.Delete = true
+						stAccessFlags.Delete = true
 					}
 				}
 
 				// core.StorageInfo.Access[db].Flags[user] = aFlags
-				core.SetAccessFlags(db, user, aFlags)
+				core.SetAccessFlags(sDB, sUser, stAccessFlags)
 			}
 		}
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DCLRevoke() (result string, err error) {
@@ -140,10 +140,10 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.TResponse
+	var stRes gtypes.TResponse
 	var (
-		dbs   []string
-		users []string
+		slDBs   []string
+		slUsers []string
 	)
 
 	// Pre checking
@@ -152,56 +152,56 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
-	if access.Status.IsBad() {
+	if stAccess.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewticket != "" {
+		stRes.Ticket = sNewticket
 	}
 
 	// Parsing an expression - Begin
 
-	privilegesStr := vqlexp.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
-	privilegesStr = vqlexp.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(privilegesStr, "")
-	privilegesStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(privilegesStr, "")
-	privileges := vqlexp.RegExpCollection["RevokePrivilegesList"].FindAllString(privilegesStr, -1)
+	sPrivileges := vqlexp.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
+	sPrivileges = vqlexp.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(sPrivileges, "")
+	sPrivileges = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
+	slPrivileges := vqlexp.RegExpCollection["RevokePrivilegesList"].FindAllString(sPrivileges, -1)
 
-	if len(privileges) == 0 {
+	if len(slPrivileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	dbsStr := vqlexp.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
-	dbsStr = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(dbsStr, "")
-	dbsStr = trimQuotationMarks(dbsStr)
-	dbsIn := vqlexp.RegExpCollection["Comma"].Split(dbsStr, -1)
-	for _, db := range dbsIn {
-		if _, ok := core.GetDBInfo(db); ok {
-			dbs = append(dbs, db)
+	sDBs := vqlexp.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
+	sDBs = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = trimQuotationMarks(sDBs)
+	slDBsIn := vqlexp.RegExpCollection["Comma"].Split(sDBs, -1)
+	for _, sDB := range slDBsIn {
+		if _, isOk := core.GetDBInfo(sDB); isOk {
+			slDBs = append(slDBs, sDB)
 		}
 	}
-	if len(dbs) == 0 {
+	if len(slDBs) == 0 {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	usersStr := vqlexp.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
-	usersStr = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(usersStr, "")
-	usersStr = trimQuotationMarks(usersStr)
-	usersIn := vqlexp.RegExpCollection["Comma"].Split(usersStr, -1)
-	for _, user := range usersIn {
-		if _, err := gauth.GetProfile(user); err == nil {
-			users = append(users, user)
+	sUsers := vqlexp.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
+	sUsers = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = trimQuotationMarks(sUsers)
+	slUsersIn := vqlexp.RegExpCollection["Comma"].Split(sUsers, -1)
+	for _, sUser := range slUsersIn {
+		if _, err := gauth.GetProfile(sUser); err == nil {
+			slUsers = append(slUsers, sUser)
 		}
 	}
-	if len(users) == 0 {
+	if len(slUsers) == 0 {
 		return `{"state":"error", "result":"users are not specified"}`, errors.New("users are not specified")
 	}
 
@@ -209,51 +209,51 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 
 	// Post checking and execution
 
-	for _, db := range dbs {
-		dbAccess, ok := core.GetDBAccess(db)
-		if ok {
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+	for _, sDB := range slDBs {
+		stDBAccess, isOk := core.GetDBAccess(sDB)
+		if isOk {
+			if stDBAccess.Owner != sLogin {
+				var isLuxUser bool = false
+				for iRole := range stAccess.Roles {
+					if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
+				if !isLuxUser {
 					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
-			for _, user := range users {
-				var aFlags gtypes.TAccessFlags
-				aFlags, ok := dbAccess.Flags[user]
-				if !ok {
-					aFlags = gtypes.TAccessFlags{}
+			for _, sUser := range slUsers {
+				// var aFlags gtypes.TAccessFlags
+				stAccessFlags, isOk := stDBAccess.Flags[sUser]
+				if !isOk {
+					stAccessFlags = gtypes.TAccessFlags{}
 				}
 
-				for _, privilege := range privileges {
-					switch strings.ToLower(privilege) {
+				for _, sPrivilege := range slPrivileges {
+					switch strings.ToLower(sPrivilege) {
 					case "create":
-						aFlags.Create = false
+						stAccessFlags.Create = false
 					case "select":
-						aFlags.Select = false
+						stAccessFlags.Select = false
 					case "insert":
-						aFlags.Insert = false
+						stAccessFlags.Insert = false
 					case "update":
-						aFlags.Update = false
+						stAccessFlags.Update = false
 					case "delete":
-						aFlags.Delete = false
+						stAccessFlags.Delete = false
 					}
 				}
 
 				// core.StorageInfo.Access[db].Flags[user] = aFlags
-				core.SetAccessFlags(db, user, aFlags)
+				core.SetAccessFlags(sDB, sUser, stAccessFlags)
 			}
 		}
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DCLUse() (result string, err error) {
@@ -261,8 +261,8 @@ func (q tQuery) DCLUse() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLUse"
 	defer func() { e.Wrapper(op, err) }()
 
-	var ticket string
-	var res gtypes.TResponse
+	var sTicket string
+	var stRes gtypes.TResponse
 
 	// Pre checking
 
@@ -270,34 +270,34 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
-	if access.Status.IsBad() {
+	if stAccess.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if newticket != "" {
-		ticket = newticket
-		res.Ticket = newticket
+	if sNewticket != "" {
+		sTicket = sNewticket
+		stRes.Ticket = sNewticket
 	} else {
-		ticket = q.Ticket
+		sTicket = q.Ticket
 	}
 
 	// Parsing an expression - Begin
 
-	db := vqlexp.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
-	db = strings.TrimSpace(db)
-	db = trimQuotationMarks(db)
+	sDB := vqlexp.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sDB = strings.TrimSpace(sDB)
+	sDB = trimQuotationMarks(sDB)
 
-	if !vqlexp.RegExpCollection["EntityName"].MatchString(db) {
+	if !vqlexp.RegExpCollection["EntityName"].MatchString(sDB) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
 	if !core.LocalCoreSettings.FriendlyMode {
-		if _, ok := core.GetDBInfo(db); !ok {
+		if _, isOk := core.GetDBInfo(sDB); !isOk {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
 	}
@@ -306,23 +306,23 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	// Post checking
 
-	dbAccess, ok := core.GetDBAccess(db)
-	if ok {
-		if dbAccess.Owner != login {
-			var luxUser bool = false
-			for role := range access.Roles {
-				if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-					luxUser = true
+	stDBAccess, isOk := core.GetDBAccess(sDB)
+	if isOk {
+		if stDBAccess.Owner != sLogin {
+			var isLuxUser bool = false
+			for iRole := range stAccess.Roles {
+				if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+					isLuxUser = true
 					break
 				}
 			}
 
-			if !luxUser {
-				flags, ok := dbAccess.Flags[login]
-				if !ok {
+			if !isLuxUser {
+				stAccessFlags, isOk := stDBAccess.Flags[sLogin]
+				if !isOk {
 					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
-				if !flags.AnyTrue() {
+				if !stAccessFlags.AnyTrue() {
 					return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 				}
 			}
@@ -331,13 +331,13 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	// Request execution
 
-	core.States[ticket] = core.TState{
-		CurrentDB: db,
+	core.States[sTicket] = core.TState{
+		CurrentDB: sDB,
 	}
 
-	res.State = "ok"
-	res.Result = db
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	stRes.Result = sDB
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DCLShow() (result string, err error) {
@@ -346,8 +346,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 	defer func() { e.Wrapper(op, err) }()
 
 	var (
-		res    gtypes.TResponse
-		resArr gtypes.TResponseStrings
+		stRes      gtypes.TResponse
+		stResArray gtypes.TResponseStrings
 	)
 
 	// Pre checking
@@ -356,17 +356,17 @@ func (q tQuery) DCLShow() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	_, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	_, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
-	if access.Status.IsBad() {
+	if stAccess.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewticket != "" {
+		stRes.Ticket = sNewticket
 	}
 
 	// Parsing an expression - Begin
@@ -379,51 +379,51 @@ func (q tQuery) DCLShow() (result string, err error) {
 	// Post checking and execution
 
 	if isDBs {
-		var namesDBs []string = []string{}
-		for nameDB := range core.StorageInfo.DBs {
-			namesDBs = append(namesDBs, nameDB)
+		var slNamesDBs []string = []string{}
+		for sNameDB := range core.StorageInfo.DBs {
+			slNamesDBs = append(slNamesDBs, sNameDB)
 		}
 
-		resArr.State = "ok"
-		resArr.Ticket = res.Ticket
-		resArr.Result = namesDBs
-		return ecowriter.EncodeJSON(resArr), nil
+		stResArray.State = "ok"
+		stResArray.Ticket = stRes.Ticket
+		stResArray.Result = slNamesDBs
+		return ecowriter.EncodeJSON(stResArray), nil
 	} else if isTables {
-		var namesTables []string = []string{}
+		var slNamesTables []string = []string{}
 
-		state, ok := core.States[q.Ticket]
-		if !ok {
-			res.State = "error"
-			res.Result = "unknown database"
-			return ecowriter.EncodeJSON(res), errors.New("unknown database")
+		stState, isOk := core.States[q.Ticket]
+		if !isOk {
+			stRes.State = "error"
+			stRes.Result = "unknown database"
+			return ecowriter.EncodeJSON(stRes), errors.New("unknown database")
 		}
-		db := state.CurrentDB
-		if db == "" {
-			res.State = "error"
-			res.Result = "no database selected"
-			return ecowriter.EncodeJSON(res), errors.New("no database selected")
-		}
-
-		dbInfo, ok := core.GetDBInfo(db)
-		if !ok {
-			res.State = "error"
-			res.Result = "incorrect database"
-			return ecowriter.EncodeJSON(res), errors.New("incorrect database")
+		sDB := stState.CurrentDB
+		if sDB == "" {
+			stRes.State = "error"
+			stRes.Result = "no database selected"
+			return ecowriter.EncodeJSON(stRes), errors.New("no database selected")
 		}
 
-		for nameTable := range dbInfo.Tables {
-			namesTables = append(namesTables, nameTable)
+		stDBInfo, isOk := core.GetDBInfo(sDB)
+		if !isOk {
+			stRes.State = "error"
+			stRes.Result = "incorrect database"
+			return ecowriter.EncodeJSON(stRes), errors.New("incorrect database")
 		}
 
-		resArr.State = "ok"
-		resArr.Ticket = res.Ticket
-		resArr.Result = namesTables
-		return ecowriter.EncodeJSON(resArr), nil
+		for sNameTable := range stDBInfo.Tables {
+			slNamesTables = append(slNamesTables, sNameTable)
+		}
+
+		stResArray.State = "ok"
+		stResArray.Ticket = stRes.Ticket
+		stResArray.Result = slNamesTables
+		return ecowriter.EncodeJSON(stResArray), nil
 	}
 
-	res.State = "error"
-	res.Result = "unknown command"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "error"
+	stRes.Result = "unknown command"
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DCLDesc() (result string, err error) {
@@ -431,91 +431,91 @@ func (q tQuery) DCLDesc() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLDesc"
 	defer func() { e.Wrapper(op, err) }()
 
-	var res gtypes.TResponse
-	var resArr gtypes.TResponseColumns
+	var stRes gtypes.TResponse
+	var stResArray gtypes.TResponseColumns
 
-	var table string
+	var sTable string
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewticket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		resArr.Ticket = newticket
-		res.Ticket = newticket
+	if sNewticket != "" {
+		stResArray.Ticket = sNewticket
+		stRes.Ticket = sNewticket
 	}
 
 	// Parsing an expression - Begin
 
 	if vqlexp.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
-		table = vqlexp.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
+		sTable = vqlexp.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
 	} else if vqlexp.RegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
-		table = vqlexp.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
+		sTable = vqlexp.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
 	} else if vqlexp.RegExpCollection["SearchDesc"].MatchString(q.Instruction) {
-		table = vqlexp.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
+		sTable = vqlexp.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
 	}
 
-	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = trimQuotationMarks(table)
+	sTable = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable = trimQuotationMarks(sTable)
 
 	// Parsing an expression - End
 
 	// Post checking
 
-	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
+	isLuxUser, stAccessFlags, err := dourPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Select {
+	if !isLuxUser && !stAccessFlags.Select {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
-	dbInfo, okDB := core.GetDBInfo(db)
-	if !okDB {
-		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+	stDBInfo, isOkDB := core.GetDBInfo(sDB)
+	if !isOkDB {
+		stRes.State = "error"
+		stRes.Result = "invalid database name"
+		return ecowriter.EncodeJSON(stRes), errors.New("invalid database name")
 	}
 
-	tableInfo, ok := dbInfo.Tables[table]
-	if !ok {
-		res.State = "error"
-		res.Result = "unknown table"
-		return ecowriter.EncodeJSON(res), errors.New("unknown table")
+	stTableInfo, isOk := stDBInfo.Tables[sTable]
+	if !isOk {
+		stRes.State = "error"
+		stRes.Result = "unknown table"
+		return ecowriter.EncodeJSON(stRes), errors.New("unknown table")
 	}
 
-	if len(tableInfo.Order) < 1 {
-		res.State = "error"
-		res.Result = "there are no columns"
-		return ecowriter.EncodeJSON(res), errors.New("there are no columns")
+	if len(stTableInfo.Order) < 1 {
+		stRes.State = "error"
+		stRes.Result = "there are no columns"
+		return ecowriter.EncodeJSON(stRes), errors.New("there are no columns")
 	}
 
-	for _, colName := range tableInfo.Order {
-		column, okCol := tableInfo.Columns[colName]
-		if okCol {
-			var resColumn gtypes.TResultColumn
+	for _, sColName := range stTableInfo.Order {
+		stColumn, isOkCol := stTableInfo.Columns[sColName]
+		if isOkCol {
+			var stResColumn gtypes.TResultColumn
 
-			resColumn.Field = column.Name
-			resColumn.Default = column.Specification.Default
-			resColumn.NotNull = column.Specification.NotNull
-			resColumn.Unique = column.Specification.Unique
-			resColumn.LastUpdate = column.LastUpdate
+			stResColumn.Field = stColumn.Name
+			stResColumn.Default = stColumn.Specification.Default
+			stResColumn.NotNull = stColumn.Specification.NotNull
+			stResColumn.Unique = stColumn.Specification.Unique
+			stResColumn.LastUpdate = stColumn.LastUpdate
 
-			resArr.Result = append(resArr.Result, resColumn)
+			stResArray.Result = append(stResArray.Result, stResColumn)
 		}
 	}
-	resArr.State = "ok"
-	return ecowriter.EncodeJSON(resArr), nil
+	stResArray.State = "ok"
+	return ecowriter.EncodeJSON(stResArray), nil
 }
 
 func (q tQuery) DCLAuth() (result string, err error) {
