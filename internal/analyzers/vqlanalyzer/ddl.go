@@ -12,11 +12,11 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
-// DDL — язык определения данных (Data Definition Language)
+// DDL — Data Definition Language (язык определения данных)
 
 func (q tQuery) DDLCreateDB() (result string, err error) {
 	// This method is complete
-	var res gtypes.TResponse
+	var stRes gtypes.TResponse
 
 	// Pre checking
 
@@ -24,191 +24,191 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	login, access, newticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
 
-	if access.Status.IsBad() {
+	if stAccess.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
 	isINE := vqlexp.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
-	db := vqlexp.RegExpCollection["CreateDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sDB := vqlexp.RegExpCollection["CreateDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isINE {
-		db = vqlexp.RegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(db, "")
+		sDB = vqlexp.RegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sDB, "")
 	}
-	db = strings.TrimSpace(db)
-	db = trimQuotationMarks(db)
+	sDB = strings.TrimSpace(sDB)
+	sDB = trimQuotationMarks(sDB)
 
 	// Parsing an expression - End
 
 	// Post checking
 
-	_, ok := core.GetDBInfo(db)
-	if ok {
+	_, isOk := core.GetDBInfo(sDB)
+	if isOk {
 		if isINE {
-			res.State = "error"
-			res.Result = "the database exists"
-			return ecowriter.EncodeJSON(res), errors.New("the database exists")
+			stRes.State = "error"
+			stRes.Result = "the database exists"
+			return ecowriter.EncodeJSON(stRes), errors.New("the database exists")
 		}
 
 		if !core.LocalCoreSettings.FriendlyMode {
-			res.State = "error"
-			res.Result = "the database exists"
-			return ecowriter.EncodeJSON(res), errors.New("the database exists")
+			stRes.State = "error"
+			stRes.Result = "the database exists"
+			return ecowriter.EncodeJSON(stRes), errors.New("the database exists")
 		}
 
-		dbAccess, ok := core.GetDBAccess(db)
-		if ok {
-			if dbAccess.Owner != login {
-				var luxUser bool = false
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+		stDBAccess, isOk := core.GetDBAccess(sDB)
+		if isOk {
+			if stDBAccess.Owner != sLogin {
+				var isLuxUser bool = false
+				for iRole := range stAccess.Roles {
+					if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
+				if !isLuxUser {
 					return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 				}
 			}
 		}
 
-		if !core.RemoveDB(db) {
-			res.State = "error"
-			res.Result = "the database cannot be deleted"
-			return ecowriter.EncodeJSON(res), errors.New("the database cannot be deleted")
+		if !core.RemoveDB(sDB) {
+			stRes.State = "error"
+			stRes.Result = "the database cannot be deleted"
+			return ecowriter.EncodeJSON(stRes), errors.New("the database cannot be deleted")
 		}
 	}
 
 	// Execution
 
-	if !core.CreateDB(db, login, true) {
-		res.State = "error"
-		res.Result = "invalid database name"
-		return ecowriter.EncodeJSON(res), errors.New("invalid database name")
+	if !core.CreateDB(sDB, sLogin, true) {
+		stRes.State = "error"
+		stRes.Result = "invalid database name"
+		return ecowriter.EncodeJSON(stRes), errors.New("invalid database name")
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DDLCreateTable() (result string, err error) {
 	// This method is complete
-	var res gtypes.TResponse
+	var stRes gtypes.TResponse
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
 	isINE := vqlexp.RegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
-	table := vqlexp.RegExpCollection["CreateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sTable := vqlexp.RegExpCollection["CreateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isINE {
-		table = vqlexp.RegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(table, "")
+		sTable = vqlexp.RegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sTable, "")
 	}
 
-	columnsStr := vqlexp.RegExpCollection["TableColumns"].FindString(table)
-	columnsStr = vqlexp.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(columnsStr, "")
-	columnsIn := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
+	sColumns := vqlexp.RegExpCollection["TableColumns"].FindString(sTable)
+	sColumns = vqlexp.RegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	slColumnsIn := vqlexp.RegExpCollection["Comma"].Split(sColumns, -1)
 
-	table = vqlexp.RegExpCollection["TableColumns"].ReplaceAllLiteralString(table, "")
-	table = strings.TrimSpace(table)
-	table = trimQuotationMarks(table)
+	sTable = vqlexp.RegExpCollection["TableColumns"].ReplaceAllLiteralString(sTable, "")
+	sTable = strings.TrimSpace(sTable)
+	sTable = trimQuotationMarks(sTable)
 
 	// Parsing an expression - End
 
 	// Post checking, post parsing and execution
 
-	dbInfo, okDB := core.GetDBInfo(db)
-	if okDB {
-		var flagsAcs gtypes.TAccessFlags
-		var okFlags bool = false
-		var luxUser bool = false
+	stDBInfo, isOkDB := core.GetDBInfo(sDB)
+	if isOkDB {
+		var stFlagsAcs gtypes.TAccessFlags
+		var isOkFlags bool = false
+		var isLuxUser bool = false
 
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags = dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+		stDBAccess, isOkAccess := core.GetDBAccess(sDB)
+		if isOkAccess {
+			stFlagsAcs, isOkFlags = stDBAccess.Flags[sLogin]
+			if stDBAccess.Owner != sLogin {
+				for iRole := range stAccess.Roles {
+					if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
-					if !okFlags {
+				if !isLuxUser {
+					if !isOkFlags {
 						return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 					}
 				}
 			} else {
-				luxUser = true
+				isLuxUser = true
 			}
 		} else {
-			res.State = "error"
-			res.Result = "internal error"
-			return ecowriter.EncodeJSON(res), errors.New("internal error")
+			stRes.State = "error"
+			stRes.Result = "internal error"
+			return ecowriter.EncodeJSON(stRes), errors.New("internal error")
 		}
 
-		_, okTable := dbInfo.Tables[table]
-		if okTable {
+		_, isOkTable := stDBInfo.Tables[sTable]
+		if isOkTable {
 			if isINE {
-				res.State = "error"
-				res.Result = "the table exists"
-				return ecowriter.EncodeJSON(res), errors.New("the table exists")
+				stRes.State = "error"
+				stRes.Result = "the table exists"
+				return ecowriter.EncodeJSON(stRes), errors.New("the table exists")
 			}
 
 			if !core.LocalCoreSettings.FriendlyMode {
-				res.State = "error"
-				res.Result = "the table exists"
-				return ecowriter.EncodeJSON(res), errors.New("the table exists")
+				stRes.State = "error"
+				stRes.Result = "the table exists"
+				return ecowriter.EncodeJSON(stRes), errors.New("the table exists")
 			}
 
-			if !luxUser && !(flagsAcs.Delete && flagsAcs.Create) {
+			if !isLuxUser && !(stFlagsAcs.Delete && stFlagsAcs.Create) {
 				return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 			}
 
-			if !core.RemoveTable(db, table) {
+			if !core.RemoveTable(sDB, sTable) {
 				return `{"state":"error", "result":"not enough rights"}`, errors.New("the table cannot be deleted")
 			}
 		}
 
-		if !luxUser && !flagsAcs.Create {
+		if !isLuxUser && !stFlagsAcs.Create {
 			return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 		}
 
-		if !core.CreateTable(db, table, true) {
-			res.State = "error"
-			res.Result = "invalid database name or table name"
-			return ecowriter.EncodeJSON(res), errors.New("invalid database name or table name")
+		if !core.CreateTable(sDB, sTable, true) {
+			stRes.State = "error"
+			stRes.Result = "invalid database name or table name"
+			return ecowriter.EncodeJSON(stRes), errors.New("invalid database name or table name")
 		}
 
-		dbInfo, _ = core.GetDBInfo(db)
-		tableInfo := dbInfo.Tables[table]
+		stDBInfo, _ = core.GetDBInfo(sDB)
+		stTableInfo := stDBInfo.Tables[sTable]
 
-		var columns = []gtypes.TColumnForWrite{}
+		var slColumns = []gtypes.TColumnForWrite{}
 
-		for _, column := range columnsIn {
-			col := gtypes.TColumnForWrite{
+		for _, sColumn := range slColumnsIn {
+			stCol := gtypes.TColumnForWrite{
 				Name: "",
 				Spec: gtypes.TColumnSpecification{
 					Default: "",
@@ -216,56 +216,56 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 					Unique:  false,
 				},
 			}
-			if vqlexp.RegExpCollection["ColumnUnique"].MatchString(column) {
-				column = vqlexp.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(column, "")
-				col.Spec.Unique = true
+			if vqlexp.RegExpCollection["ColumnUnique"].MatchString(sColumn) {
+				sColumn = vqlexp.RegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
+				stCol.Spec.Unique = true
 			}
-			if vqlexp.RegExpCollection["ColumnNotNull"].MatchString(column) {
-				column = vqlexp.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(column, "")
-				col.Spec.NotNull = true
+			if vqlexp.RegExpCollection["ColumnNotNull"].MatchString(sColumn) {
+				sColumn = vqlexp.RegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
+				stCol.Spec.NotNull = true
 			}
-			if vqlexp.RegExpCollection["ColumnDefault"].MatchString(column) {
-				ColDef := vqlexp.RegExpCollection["ColumnDefault"].FindString(column)
-				column = vqlexp.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(column, "")
+			if vqlexp.RegExpCollection["ColumnDefault"].MatchString(sColumn) {
+				sColDef := vqlexp.RegExpCollection["ColumnDefault"].FindString(sColumn)
+				sColumn = vqlexp.RegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
 
-				ColDef = vqlexp.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(ColDef, "")
-				ColDef = strings.TrimSpace(ColDef)
-				ColDef = trimQuotationMarks(ColDef)
+				sColDef = vqlexp.RegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
+				sColDef = strings.TrimSpace(sColDef)
+				sColDef = trimQuotationMarks(sColDef)
 
-				if col.Spec.Unique {
-					col.Spec.Default = ""
+				if stCol.Spec.Unique {
+					stCol.Spec.Default = ""
 				} else {
-					col.Spec.Default = ColDef
+					stCol.Spec.Default = sColDef
 				}
 			}
 
-			column = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(column, "")
-			column = trimQuotationMarks(column)
-			col.Name = column
+			sColumn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
+			sColumn = trimQuotationMarks(sColumn)
+			stCol.Name = sColumn
 
-			columns = append(columns, col)
+			slColumns = append(slColumns, stCol)
 		}
 
-		for _, column := range columns {
-			if _, okCol := tableInfo.Columns[column.Name]; okCol {
+		for _, stColumn := range slColumns {
+			if _, isOkCol := stTableInfo.Columns[stColumn.Name]; isOkCol {
 				if !core.LocalCoreSettings.FriendlyMode {
-					res.State = "error"
-					res.Result = "the column exists"
-					return ecowriter.EncodeJSON(res), errors.New("the column exists")
+					stRes.State = "error"
+					stRes.Result = "the column exists"
+					return ecowriter.EncodeJSON(stRes), errors.New("the column exists")
 				}
-				core.RemoveColumn(db, table, column.Name)
+				core.RemoveColumn(sDB, sTable, stColumn.Name)
 			}
 
-			core.CreateColumn(db, table, column.Name, true, column.Spec)
+			core.CreateColumn(sDB, sTable, stColumn.Name, true, stColumn.Spec)
 		}
 	} else {
-		res.State = "error"
-		res.Result = "internal error"
-		return ecowriter.EncodeJSON(res), errors.New("internal error")
+		stRes.State = "error"
+		stRes.Result = "internal error"
+		return ecowriter.EncodeJSON(stRes), errors.New("internal error")
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	return ecowriter.EncodeJSON(stRes), nil
 }
 
 func (q tQuery) DDLCreate() (result string, err error) {

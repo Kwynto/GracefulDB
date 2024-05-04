@@ -12,7 +12,7 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
-// DCL — язык управления данными (Data Control Language)
+// DCL — Data Control Language (язык управления данными)
 
 func (q tQuery) DCLGrant() (result string, err error) {
 	// This method is complete
@@ -31,7 +31,7 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
@@ -40,8 +40,8 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if sNewticket != "" {
-		stRes.Ticket = sNewticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
@@ -152,7 +152,7 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
@@ -161,8 +161,8 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if sNewticket != "" {
-		stRes.Ticket = sNewticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
@@ -270,7 +270,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	sLogin, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
+	sLogin, stAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
@@ -279,9 +279,9 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if sNewticket != "" {
-		sTicket = sNewticket
-		stRes.Ticket = sNewticket
+	if sNewTicket != "" {
+		sTicket = sNewTicket
+		stRes.Ticket = sNewTicket
 	} else {
 		sTicket = q.Ticket
 	}
@@ -356,7 +356,7 @@ func (q tQuery) DCLShow() (result string, err error) {
 		return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 	}
 
-	_, stAccess, sNewticket, err := gauth.CheckTicket(q.Ticket)
+	_, stAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 	if err != nil {
 		return `{"state":"error", "result":"authorization failed"}`, err
 	}
@@ -365,8 +365,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if sNewticket != "" {
-		stRes.Ticket = sNewticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
@@ -438,16 +438,16 @@ func (q tQuery) DCLDesc() (result string, err error) {
 
 	// Pre checking
 
-	sLogin, sDB, stAccess, sNewticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
 		stRes.State = "error"
 		stRes.Result = err.Error()
 		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if sNewticket != "" {
-		stResArray.Ticket = sNewticket
-		stRes.Ticket = sNewticket
+	if sNewTicket != "" {
+		stResArray.Ticket = sNewTicket
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
@@ -523,7 +523,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
 	defer func() { e.Wrapper(op, err) }()
 
-	var roles []gauth.TRole
+	var slRoles []gauth.TRole
 
 	// Parsing an expression - Begin
 
@@ -531,43 +531,43 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	isChange := vqlexp.RegExpCollection["AuthChange"].MatchString(q.Instruction)
 	isRemove := vqlexp.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
 
-	login := vqlexp.RegExpCollection["Login"].FindString(q.Instruction)
-	login = vqlexp.RegExpCollection["LoginWord"].ReplaceAllLiteralString(login, " ")
-	login = strings.TrimSpace(login)
-	login = trimQuotationMarks(login)
+	sLogin := vqlexp.RegExpCollection["Login"].FindString(q.Instruction)
+	sLogin = vqlexp.RegExpCollection["LoginWord"].ReplaceAllLiteralString(sLogin, " ")
+	sLogin = strings.TrimSpace(sLogin)
+	sLogin = trimQuotationMarks(sLogin)
 
-	password := vqlexp.RegExpCollection["Password"].FindString(q.Instruction)
-	password = vqlexp.RegExpCollection["PasswordWord"].ReplaceAllLiteralString(password, " ")
-	password = strings.TrimSpace(password)
-	password = trimQuotationMarks(password)
+	sPassword := vqlexp.RegExpCollection["Password"].FindString(q.Instruction)
+	sPassword = vqlexp.RegExpCollection["PasswordWord"].ReplaceAllLiteralString(sPassword, " ")
+	sPassword = strings.TrimSpace(sPassword)
+	sPassword = trimQuotationMarks(sPassword)
 
-	hash := vqlexp.RegExpCollection["Hash"].FindString(q.Instruction)
-	hash = vqlexp.RegExpCollection["HashWord"].ReplaceAllLiteralString(hash, " ")
-	hash = strings.TrimSpace(hash)
-	hash = trimQuotationMarks(hash)
+	sHash := vqlexp.RegExpCollection["Hash"].FindString(q.Instruction)
+	sHash = vqlexp.RegExpCollection["HashWord"].ReplaceAllLiteralString(sHash, " ")
+	sHash = strings.TrimSpace(sHash)
+	sHash = trimQuotationMarks(sHash)
 
 	isRole := vqlexp.RegExpCollection["Role"].MatchString(q.Instruction)
 	if isRole {
-		roleStr := vqlexp.RegExpCollection["Role"].FindString(q.Instruction)
-		roleStr = vqlexp.RegExpCollection["RoleWord"].ReplaceAllLiteralString(roleStr, "")
-		roleStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(roleStr, "")
-		roleStr = trimQuotationMarks(roleStr)
-		roleIn := vqlexp.RegExpCollection["Comma"].Split(roleStr, -1)
-		if len(roleIn) == 0 {
+		sRole := vqlexp.RegExpCollection["Role"].FindString(q.Instruction)
+		sRole = vqlexp.RegExpCollection["RoleWord"].ReplaceAllLiteralString(sRole, "")
+		sRole = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sRole, "")
+		sRole = trimQuotationMarks(sRole)
+		slRoleIn := vqlexp.RegExpCollection["Comma"].Split(sRole, -1)
+		if len(slRoleIn) == 0 {
 			return `{"state":"error", "result":"incorrect roles"}`, errors.New("incorrect roles")
 		}
-		for _, role := range roleIn {
-			switch strings.ToUpper(role) {
+		for _, sRoleIt := range slRoleIn {
+			switch strings.ToUpper(sRoleIt) {
 			case "SYSTEM":
-				roles = append(roles, gauth.SYSTEM)
+				slRoles = append(slRoles, gauth.SYSTEM)
 			case "ADMIN":
-				roles = append(roles, gauth.ADMIN)
+				slRoles = append(slRoles, gauth.ADMIN)
 			case "MANAGER":
-				roles = append(roles, gauth.MANAGER)
+				slRoles = append(slRoles, gauth.MANAGER)
 			case "ENGINEER":
-				roles = append(roles, gauth.ENGINEER)
+				slRoles = append(slRoles, gauth.ENGINEER)
 			case "USER":
-				roles = append(roles, gauth.USER)
+				slRoles = append(slRoles, gauth.USER)
 			}
 		}
 	}
@@ -577,52 +577,52 @@ func (q tQuery) DCLAuth() (result string, err error) {
 	// Request execution
 
 	if isNew || isChange || isRemove {
-		var res gtypes.TResponse
+		var stRes gtypes.TResponse
 
 		if q.Ticket == "" {
 			return `{"state":"error", "result":"an empty ticket"}`, errors.New("an empty ticket")
 		}
 
-		_, curaccess, newticket, err := gauth.CheckTicket(q.Ticket)
+		_, stCurentAccess, sNewTicket, err := gauth.CheckTicket(q.Ticket)
 		if err != nil {
 			return `{"state":"error", "result":"authorization failed"}`, err
 		}
 
-		if curaccess.Status.IsBad() {
+		if stCurentAccess.Status.IsBad() {
 			return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 		}
 
-		if newticket != "" {
-			res.Ticket = newticket
+		if sNewTicket != "" {
+			stRes.Ticket = sNewTicket
 		}
 
-		var luxUser bool = false
-		for role := range curaccess.Roles {
-			if role == int(gauth.ADMIN) || role == int(gauth.MANAGER) {
-				luxUser = true
+		var isLuxUser bool = false
+		for iRole := range stCurentAccess.Roles {
+			if iRole == int(gauth.ADMIN) || iRole == int(gauth.MANAGER) {
+				isLuxUser = true
 				break
 			}
 		}
 
-		if !luxUser {
-			res.State = "error"
-			res.Result = "auth error"
-			return ecowriter.EncodeJSON(res), errors.New("auth error")
+		if !isLuxUser {
+			stRes.State = "error"
+			stRes.Result = "auth error"
+			return ecowriter.EncodeJSON(stRes), errors.New("auth error")
 		}
 
 		if isNew {
-			access := gauth.TProfile{
+			stAccess := gauth.TProfile{
 				Description: "",
 				Status:      gauth.NEW,
 			}
 
 			if isRole {
-				access.Roles = roles
+				stAccess.Roles = slRoles
 			} else {
-				access.Roles = []gauth.TRole{gauth.USER}
+				stAccess.Roles = []gauth.TRole{gauth.USER}
 			}
 
-			err := gauth.AddUser(login, password, access)
+			err := gauth.AddUser(sLogin, sPassword, stAccess)
 			if err != nil {
 				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
@@ -632,7 +632,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		}
 
 		if isChange {
-			access, err := gauth.GetProfile(login)
+			stAccess, err := gauth.GetProfile(sLogin)
 			if err != nil {
 				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
@@ -641,10 +641,10 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}
 
 			if isRole {
-				access.Roles = roles
+				stAccess.Roles = slRoles
 			}
 
-			err = gauth.UpdateUser(login, password, access)
+			err = gauth.UpdateUser(sLogin, sPassword, stAccess)
 			if err != nil {
 				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
@@ -654,7 +654,7 @@ func (q tQuery) DCLAuth() (result string, err error) {
 		}
 
 		if isRemove {
-			err := gauth.DeleteUser(login)
+			err := gauth.DeleteUser(sLogin)
 			if err != nil {
 				return ecowriter.EncodeJSON(gtypes.TResponse{
 					State:  "error",
@@ -663,31 +663,31 @@ func (q tQuery) DCLAuth() (result string, err error) {
 			}
 		}
 
-		res.State = "ok"
-		return ecowriter.EncodeJSON(res), nil
+		stRes.State = "ok"
+		return ecowriter.EncodeJSON(stRes), nil
 	}
 
-	profile, err := gauth.GetProfile(login)
+	stProfile, err := gauth.GetProfile(sLogin)
 	if err != nil {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	if profile.Status.IsBad() {
+	if stProfile.Status.IsBad() {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
-	secret := gtypes.TSecret{
-		Login:    login,
-		Password: password,
-		Hash:     hash,
+	stSecret := gtypes.TSecret{
+		Login:    sLogin,
+		Password: sPassword,
+		Hash:     sHash,
 	}
-	ticket, err := gauth.NewAuth(&secret)
+	sTicket, err := gauth.NewAuth(&stSecret)
 	if err != nil {
 		return `{"state":"error", "result":"auth error"}`, errors.New("auth error")
 	}
 
 	return ecowriter.EncodeJSON(gtypes.TResponse{
 		State:  "ok",
-		Ticket: ticket,
+		Ticket: sTicket,
 	}), nil
 }
