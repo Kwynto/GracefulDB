@@ -16,8 +16,8 @@ import (
 
 func (q tQuery) DCLGrant() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLGrant"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLGrant"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var stRes gtypes.TResponse
 	var (
@@ -137,8 +137,8 @@ func (q tQuery) DCLGrant() (result string, err error) {
 
 func (q tQuery) DCLRevoke() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLRevoke"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var stRes gtypes.TResponse
 	var (
@@ -258,8 +258,8 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 
 func (q tQuery) DCLUse() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLUse"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLUse"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var sTicket string
 	var stRes gtypes.TResponse
@@ -342,8 +342,8 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 func (q tQuery) DCLShow() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLShow"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLShow"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
 		stRes      gtypes.TResponse
@@ -428,8 +428,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 
 func (q tQuery) DCLDesc() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLDesc"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLDesc"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var stRes gtypes.TResponse
 	var stResArray gtypes.TResponseColumns
@@ -520,8 +520,8 @@ func (q tQuery) DCLDesc() (result string, err error) {
 
 func (q tQuery) DCLAuth() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DCL -> DCLAuth"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DCL -> DCLAuth"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var slRoles []gauth.TRole
 
