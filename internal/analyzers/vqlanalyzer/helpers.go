@@ -13,136 +13,136 @@ import (
 
 // Helpers for VQLAnalyzer
 
-func parseOrderBy(orderbyStr string, columns []string) (gtypes.TOrderBy, error) {
-	var obCols = gtypes.TOrderBy{
+func parseOrderBy(sOrderBy string, slColumns []string) (gtypes.TOrderBy, error) {
+	var stOBCols = gtypes.TOrderBy{
 		Cols: make([]string, 0, 2),
 		Sort: make([]uint8, 0, 2),
 	}
 
-	orderbyArr := vqlexp.RegExpCollection["Comma"].Split(orderbyStr, -1)
-	for _, obCol := range orderbyArr {
+	slOrderBy := vqlexp.RegExpCollection["Comma"].Split(sOrderBy, -1)
+	for _, sOBCol := range slOrderBy {
 		// разобрать ...
-		col := ""
-		uad := uint8(0)
+		sCol := ""
+		uAD := uint8(0)
 
-		if vqlexp.RegExpCollection["ASC"].MatchString(obCol) {
-			col = vqlexp.RegExpCollection["ASC"].ReplaceAllLiteralString(obCol, "")
-			uad = 1
-		} else if vqlexp.RegExpCollection["DESC"].MatchString(obCol) {
-			col = vqlexp.RegExpCollection["DESC"].ReplaceAllLiteralString(obCol, "")
-			uad = 2
+		if vqlexp.RegExpCollection["ASC"].MatchString(sOBCol) {
+			sCol = vqlexp.RegExpCollection["ASC"].ReplaceAllLiteralString(sOBCol, "")
+			uAD = 1
+		} else if vqlexp.RegExpCollection["DESC"].MatchString(sOBCol) {
+			sCol = vqlexp.RegExpCollection["DESC"].ReplaceAllLiteralString(sOBCol, "")
+			uAD = 2
 		} else {
-			col = obCol
-			uad = 0
+			sCol = sOBCol
+			uAD = 0
 		}
 
-		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = trimQuotationMarks(col)
-		if col != "" {
-			obCols.Cols = append(obCols.Cols, col)
-			obCols.Sort = append(obCols.Sort, uad)
-		}
-	}
-
-	if len(obCols.Cols) < 1 {
-		return obCols, errors.New("group-by error")
-	}
-
-	for _, obCol := range obCols.Cols {
-		if !slices.Contains(columns, obCol) {
-			return obCols, errors.New("group-by error")
+		sCol = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = trimQuotationMarks(sCol)
+		if sCol != "" {
+			stOBCols.Cols = append(stOBCols.Cols, sCol)
+			stOBCols.Sort = append(stOBCols.Sort, uAD)
 		}
 	}
 
-	return obCols, nil
+	if len(stOBCols.Cols) < 1 {
+		return stOBCols, errors.New("group-by error")
+	}
+
+	for _, obCol := range stOBCols.Cols {
+		if !slices.Contains(slColumns, obCol) {
+			return stOBCols, errors.New("group-by error")
+		}
+	}
+
+	return stOBCols, nil
 }
 
-func parseGroupBy(groupbyStr string, columns []string) ([]string, error) {
-	var gbCols = make([]string, 0, 4)
-	groupbyArr := vqlexp.RegExpCollection["Comma"].Split(groupbyStr, -1)
-	for _, gbCol := range groupbyArr {
-		gbCol = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(gbCol, "")
-		gbCol = trimQuotationMarks(gbCol)
-		if gbCol != "" {
-			gbCols = append(gbCols, gbCol)
+func parseGroupBy(sGroupBy string, slColumns []string) ([]string, error) {
+	var slGBCols = make([]string, 0, 4)
+	slGroupBy := vqlexp.RegExpCollection["Comma"].Split(sGroupBy, -1)
+	for _, sGBCol := range slGroupBy {
+		sGBCol = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sGBCol, "")
+		sGBCol = trimQuotationMarks(sGBCol)
+		if sGBCol != "" {
+			slGBCols = append(slGBCols, sGBCol)
 		}
 	}
-	if len(gbCols) < 1 {
-		return gbCols, errors.New("group-by error")
+	if len(slGBCols) < 1 {
+		return slGBCols, errors.New("group-by error")
 	}
-	for _, gbCol := range gbCols {
-		if !slices.Contains(columns, gbCol) {
-			return gbCols, errors.New("group-by error")
+	for _, sGBCol := range slGBCols {
+		if !slices.Contains(slColumns, sGBCol) {
+			return slGBCols, errors.New("group-by error")
 		}
 	}
-	return gbCols, nil
+	return slGBCols, nil
 }
 
-func parseWhere(whereStr string) ([]gtypes.TConditions, error) {
-	var expression = make([]gtypes.TConditions, 0, 4)
+func parseWhere(sWhere string) ([]gtypes.TConditions, error) {
+	var slExpression = make([]gtypes.TConditions, 0, 4)
 	for {
-		headCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(whereStr, "")
-		condition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(headCond, -1)
-		keyIn := condition[0]
-		valueIn := condition[1]
+		sHeadCond := vqlexp.RegExpCollection["WhereExpression"].ReplaceAllLiteralString(sWhere, "")
+		slCondition := vqlexp.RegExpCollection["WhereOperationConditions"].Split(sHeadCond, -1)
+		sKeyIn := slCondition[0]
+		sValueIn := slCondition[1]
 
-		keyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(keyIn, "")
-		keyIn = trimQuotationMarks(keyIn)
+		sKeyIn = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sKeyIn, "")
+		sKeyIn = trimQuotationMarks(sKeyIn)
 
-		valueIn = strings.TrimSpace(valueIn)
-		valueIn = trimQuotationMarks(valueIn)
+		sValueIn = strings.TrimSpace(sValueIn)
+		sValueIn = trimQuotationMarks(sValueIn)
 
-		if keyIn == "" {
+		if sKeyIn == "" {
 			return []gtypes.TConditions{}, errors.New("condition error")
 		}
-		if valueIn == "" {
+		if sValueIn == "" {
 			return []gtypes.TConditions{}, errors.New("condition error")
 		} // null value, maybe delete a condition
 
-		exp := gtypes.TConditions{
+		stExp := gtypes.TConditions{
 			Type:  "operation",
-			Key:   keyIn,
-			Value: valueIn,
+			Key:   sKeyIn,
+			Value: sValueIn,
 		}
 
-		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(headCond) {
-			exp.Operation = "<="
-		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(headCond) {
-			exp.Operation = ">="
-		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(headCond) {
-			exp.Operation = "<"
-		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(headCond) {
-			exp.Operation = ">"
-		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(headCond) {
-			exp.Operation = "="
-		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(headCond) {
-			exp.Operation = "like"
-		} else if vqlexp.RegExpCollection["WhereOperation_REGEXP"].MatchString(headCond) {
-			exp.Operation = "regexp"
+		if vqlexp.RegExpCollection["WhereOperation_<="].MatchString(sHeadCond) {
+			stExp.Operation = "<="
+		} else if vqlexp.RegExpCollection["WhereOperation_>="].MatchString(sHeadCond) {
+			stExp.Operation = ">="
+		} else if vqlexp.RegExpCollection["WhereOperation_<"].MatchString(sHeadCond) {
+			stExp.Operation = "<"
+		} else if vqlexp.RegExpCollection["WhereOperation_>"].MatchString(sHeadCond) {
+			stExp.Operation = ">"
+		} else if vqlexp.RegExpCollection["WhereOperation_="].MatchString(sHeadCond) {
+			stExp.Operation = "="
+		} else if vqlexp.RegExpCollection["WhereOperation_LIKE"].MatchString(sHeadCond) {
+			stExp.Operation = "like"
+		} else if vqlexp.RegExpCollection["WhereOperation_REGEXP"].MatchString(sHeadCond) {
+			stExp.Operation = "regexp"
 		} else {
 			return []gtypes.TConditions{}, errors.New("condition error")
 		}
-		expression = append(expression, exp)
+		slExpression = append(slExpression, stExp)
 
-		whereStr = vqlexp.RegExpCollection["WhereExpression"].FindString(whereStr)
-		logicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(whereStr)
+		sWhere = vqlexp.RegExpCollection["WhereExpression"].FindString(sWhere)
+		sLogicOper := vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].FindString(sWhere)
 		// logicOper = strings.TrimSpace(logicOper)
 
-		if vqlexp.RegExpCollection["OR"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
+		if vqlexp.RegExpCollection["OR"].MatchString(sLogicOper) {
+			slExpression = append(slExpression, gtypes.TConditions{
 				Type: "or",
 			})
-		} else if vqlexp.RegExpCollection["AND"].MatchString(logicOper) {
-			expression = append(expression, gtypes.TConditions{
+		} else if vqlexp.RegExpCollection["AND"].MatchString(sLogicOper) {
+			slExpression = append(slExpression, gtypes.TConditions{
 				Type: "and",
 			})
 		} else {
 			break
 		}
 
-		whereStr = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(whereStr, "")
+		sWhere = vqlexp.RegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(sWhere, "")
 	}
-	return expression, nil
+	return slExpression, nil
 }
 
 func trimQuotationMarks(input string) string {
@@ -159,123 +159,123 @@ func trimQuotationMarks(input string) string {
 	return input
 }
 
-func preChecker(ticket string) (login string, db string, access gauth.TProfile, newticket string, err error) {
-	if ticket == "" {
-		return login, db, access, newticket, errors.New("an empty ticket")
+func preChecker(sTicket string) (sLogin string, sDB string, stAccess gauth.TProfile, sNewTicket string, err error) {
+	if sTicket == "" {
+		return sLogin, sDB, stAccess, sNewTicket, errors.New("an empty ticket")
 	}
 
-	login, access, newticket, err = gauth.CheckTicket(ticket)
+	sLogin, stAccess, sNewTicket, err = gauth.CheckTicket(sTicket)
 	if err != nil {
-		return login, db, access, newticket, err
+		return sLogin, sDB, stAccess, sNewTicket, err
 	}
 
-	if access.Status.IsBad() {
-		return login, db, access, newticket, errors.New("auth error")
+	if stAccess.Status.IsBad() {
+		return sLogin, sDB, stAccess, sNewTicket, errors.New("auth error")
 	}
 
-	state, ok := core.States[ticket]
-	if !ok {
-		return login, db, access, newticket, errors.New("unknown database")
+	stState, isOk := core.States[sTicket]
+	if !isOk {
+		return sLogin, sDB, stAccess, sNewTicket, errors.New("unknown database")
 	}
-	db = state.CurrentDB
-	if db == "" {
-		return login, db, access, newticket, errors.New("no database selected")
+	sDB = stState.CurrentDB
+	if sDB == "" {
+		return sLogin, sDB, stAccess, sNewTicket, errors.New("no database selected")
 	}
 
-	return login, db, access, newticket, nil
+	return sLogin, sDB, stAccess, sNewTicket, nil
 }
 
-func dourPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
-	dbInfo, okDB := core.GetDBInfo(db)
-	if okDB {
-		var okFlags bool = false
-		flagsAcs = gtypes.TAccessFlags{}
-		luxUser = false
+func dourPostChecker(sDB, sTable, sLogin string, stAccess gauth.TProfile) (isLuxUser bool, stFlagsAcs gtypes.TAccessFlags, err error) {
+	stDBInfo, isOkDB := core.GetDBInfo(sDB)
+	if isOkDB {
+		var isOkFlags bool = false
+		stFlagsAcs = gtypes.TAccessFlags{}
+		isLuxUser = false
 
-		_, okTable := dbInfo.Tables[table]
-		if !okTable {
-			return luxUser, flagsAcs, errors.New("invalid table name")
+		_, isOkTable := stDBInfo.Tables[sTable]
+		if !isOkTable {
+			return isLuxUser, stFlagsAcs, errors.New("invalid table name")
 		}
 
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags = dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+		stDBAccess, isOkAccess := core.GetDBAccess(sDB)
+		if isOkAccess {
+			stFlagsAcs, isOkFlags = stDBAccess.Flags[sLogin]
+			if stDBAccess.Owner != sLogin {
+				for iRole := range stAccess.Roles {
+					if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
-					if !okFlags {
-						return luxUser, flagsAcs, errors.New("not enough rights")
+				if !isLuxUser {
+					if !isOkFlags {
+						return isLuxUser, stFlagsAcs, errors.New("not enough rights")
 					}
 				}
 			} else {
-				luxUser = true
+				isLuxUser = true
 			}
 		} else {
-			return luxUser, flagsAcs, errors.New("internal error")
+			return isLuxUser, stFlagsAcs, errors.New("internal error")
 		}
 
-		return luxUser, flagsAcs, nil
+		return isLuxUser, stFlagsAcs, nil
 
 	} else {
-		return luxUser, flagsAcs, errors.New("invalid database name")
+		return isLuxUser, stFlagsAcs, errors.New("invalid database name")
 	}
 }
 
-func friendlyPostChecker(db, table, login string, access gauth.TProfile) (luxUser bool, flagsAcs gtypes.TAccessFlags, err error) {
-LabelCheck:
-	dbInfo, okDB := core.GetDBInfo(db)
-	if okDB {
-		var okFlags bool = false
-		flagsAcs = gtypes.TAccessFlags{}
-		luxUser = false
+func friendlyPostChecker(sDB, sTable, sLogin string, stAccess gauth.TProfile) (isLuxUser bool, stFlagsAcs gtypes.TAccessFlags, err error) {
+labelCheck:
+	stDBInfo, isOkDB := core.GetDBInfo(sDB)
+	if isOkDB {
+		var isOkFlags bool = false
+		stFlagsAcs = gtypes.TAccessFlags{}
+		isLuxUser = false
 
-		_, okTable := dbInfo.Tables[table]
-		if !okTable {
+		_, isOkTable := stDBInfo.Tables[sTable]
+		if !isOkTable {
 			if core.LocalCoreSettings.FriendlyMode {
-				if !core.CreateTable(db, table, true) {
-					return luxUser, flagsAcs, errors.New("invalid table name")
+				if !core.CreateTable(sDB, sTable, true) {
+					return isLuxUser, stFlagsAcs, errors.New("invalid table name")
 				}
-				goto LabelCheck
+				goto labelCheck
 			}
-			return luxUser, flagsAcs, errors.New("invalid table name")
+			return isLuxUser, stFlagsAcs, errors.New("invalid table name")
 		}
 
-		dbAccess, okAccess := core.GetDBAccess(db)
-		if okAccess {
-			flagsAcs, okFlags = dbAccess.Flags[login]
-			if dbAccess.Owner != login {
-				for role := range access.Roles {
-					if role == int(gauth.ADMIN) || role == int(gauth.ENGINEER) {
-						luxUser = true
+		stDBAccess, isOkAccess := core.GetDBAccess(sDB)
+		if isOkAccess {
+			stFlagsAcs, isOkFlags = stDBAccess.Flags[sLogin]
+			if stDBAccess.Owner != sLogin {
+				for iRole := range stAccess.Roles {
+					if iRole == int(gauth.ADMIN) || iRole == int(gauth.ENGINEER) {
+						isLuxUser = true
 						break
 					}
 				}
-				if !luxUser {
-					if !okFlags {
-						return luxUser, flagsAcs, errors.New("not enough rights")
+				if !isLuxUser {
+					if !isOkFlags {
+						return isLuxUser, stFlagsAcs, errors.New("not enough rights")
 					}
 				}
 			} else {
-				luxUser = true
+				isLuxUser = true
 			}
 		} else {
-			return luxUser, flagsAcs, errors.New("internal error")
+			return isLuxUser, stFlagsAcs, errors.New("internal error")
 		}
 
-		return luxUser, flagsAcs, nil
+		return isLuxUser, stFlagsAcs, nil
 
 	} else {
 		if core.LocalCoreSettings.FriendlyMode {
-			if !core.CreateDB(db, login, true) {
-				return luxUser, flagsAcs, errors.New("invalid database name")
+			if !core.CreateDB(sDB, sLogin, true) {
+				return isLuxUser, stFlagsAcs, errors.New("invalid database name")
 			}
-			goto LabelCheck
+			goto labelCheck
 		}
-		return luxUser, flagsAcs, errors.New("internal error")
+		return isLuxUser, stFlagsAcs, errors.New("internal error")
 	}
 }
