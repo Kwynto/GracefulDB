@@ -11,12 +11,12 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
-// DML — язык изменения данных (Data Manipulation Language)
+// DML — Data Manipulation Language (язык изменения данных)
 
 func (q tQuery) DMLSelect() (result string, err error) {
 	// - It's almost done
-	op := "internal -> analyzers -> sql -> DML -> DMLSelect"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLSelect"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
 		resultRow []gtypes.TResponseRow
@@ -167,8 +167,8 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 func (q tQuery) DMLInsert() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DML -> DMLInsert"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLInsert"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
 		resultIds []uint64
@@ -268,8 +268,8 @@ func (q tQuery) DMLInsert() (result string, err error) {
 
 func (q tQuery) DMLUpdate() (result string, err error) {
 	// This function is complete
-	op := "internal -> analyzers -> sql -> DML -> DMLUpdate"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLUpdate"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
 		resultIds []uint64
@@ -377,8 +377,8 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 func (q tQuery) DMLDelete() (result string, err error) {
 	// This function is complete
-	op := "internal -> analyzers -> sql -> DML -> DMLDelete"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLDelete"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
 		resultIds []uint64
@@ -460,24 +460,24 @@ func (q tQuery) DMLDelete() (result string, err error) {
 
 func (q tQuery) DMLCommit() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLCommit"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLCommit"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	return "DMLCommit", nil
 }
 
 func (q tQuery) DMLRollback() (result string, err error) {
 	// -
-	op := "internal -> analyzers -> sql -> DML -> DMLRollback"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLRollback"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	return "DMLRollback", nil
 }
 
 func (q tQuery) DMLTruncateTable() (result string, err error) {
 	// This method is complete
-	op := "internal -> analyzers -> sql -> DML -> DMLTruncate"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> analyzers -> sql -> DML -> DMLTruncate"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	var res gtypes.TResponse
 
