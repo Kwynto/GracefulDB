@@ -13,10 +13,10 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
 )
 
-var address string
-var muxRest *http.ServeMux
+var sAddress string
+var stMuxRest *http.ServeMux
 
-var srvRest *http.Server
+var stSrvRest *http.Server
 
 func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
@@ -31,52 +31,52 @@ func query(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	var placeholder []string
-	ticket := r.PostForm.Get("ticket")
-	instruction := r.PostForm.Get("instruction")
-	placeholderJSONArray := r.PostForm.Get("placeholder")
-	if err := json.Unmarshal([]byte(placeholderJSONArray), &placeholder); err != nil {
+	var slPlaceholder []string
+	sTicket := r.PostForm.Get("ticket")
+	sInstruction := r.PostForm.Get("instruction")
+	jPlaceholderJSONArray := r.PostForm.Get("placeholder")
+	if err := json.Unmarshal([]byte(jPlaceholderJSONArray), &slPlaceholder); err != nil {
 		slog.Debug("Placeholder error", slog.String("err", err.Error()))
 		http.Error(w, "Bad request - placeholder error (The placeholder must be in JSON format, in the form of an array of strings).", http.StatusBadRequest)
 		return
 	}
 
-	response := vqlanalyzer.Request(ticket, instruction, placeholder)
+	sResponse := vqlanalyzer.Request(sTicket, sInstruction, slPlaceholder)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
+	w.Write([]byte(sResponse))
 }
 
 func routes() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/query", query)
+	stMux := http.NewServeMux()
+	stMux.HandleFunc("/", home)
+	stMux.HandleFunc("/query", query)
 
-	return mux
+	return stMux
 }
 
-func Start(cfg *config.Config) {
-	address = fmt.Sprintf("%s:%s", cfg.RestConnector.Address, cfg.RestConnector.Port)
-	muxRest = routes()
+func Start(cfg *config.TConfig) {
+	sAddress = fmt.Sprintf("%s:%s", cfg.RestConnector.Address, cfg.RestConnector.Port)
+	stMuxRest = routes()
 
-	srvRest = &http.Server{
-		Addr:     address,
+	stSrvRest = &http.Server{
+		Addr:     sAddress,
 		ErrorLog: ordinarylogger.LogServerError,
-		Handler:  muxRest,
+		Handler:  stMuxRest,
 	}
 
-	slog.Info("REST server is running", slog.String("address", address))
-	if err := srvRest.ListenAndServe(); err != nil {
+	slog.Info("REST server is running", slog.String("address", sAddress))
+	if err := stSrvRest.ListenAndServe(); err != nil {
 		slog.Debug(err.Error())
 		return
 	}
 }
 
 func Shutdown(ctx context.Context, c *closer.TCloser) {
-	if err := srvRest.Shutdown(ctx); err != nil {
-		msg := fmt.Sprintf("There was a problem with stopping the REST-server: %s", err.Error())
-		c.AddMsg(msg)
+	if err := stSrvRest.Shutdown(ctx); err != nil {
+		sMsg := fmt.Sprintf("There was a problem with stopping the REST-server: %s", err.Error())
+		c.AddMsg(sMsg)
 	}
 	slog.Info("REST server stopped")
 	c.Done()

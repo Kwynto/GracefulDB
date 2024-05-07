@@ -183,7 +183,7 @@ var StorageInfo tStorageInfo = tStorageInfo{
 
 var States map[string]TState // ticket -> tState
 
-func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
+func LoadLocalCoreSettings(cfg *config.TConfig) tCoreSettings {
 	// This function is complete
 	return tCoreSettings{
 		Storage:      cfg.CoreSettings.Storage,
@@ -192,7 +192,7 @@ func LoadLocalCoreSettings(cfg *config.Config) tCoreSettings {
 	}
 }
 
-func Start(cfg *config.Config) {
+func Start(cfg *config.TConfig) {
 	// -
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
 	// RegExpCollection = CompileRegExpCollection()

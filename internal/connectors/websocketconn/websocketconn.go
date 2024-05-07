@@ -21,26 +21,26 @@ type tVQuery struct {
 	Placeholder []string `json:"placeholder"`
 }
 
-var address string
-var muxWS *http.ServeMux
+var sAddress string
+var stMuxWS *http.ServeMux
 
-var srvWS *http.Server
+var stSrvWS *http.Server
 
-var conf config.WebSocketConnector
+var stConf config.TWebSocketConnector
 
 func home(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
 func query(w http.ResponseWriter, r *http.Request) {
-	var msgSQuery *tVQuery
+	var stMsgSQuery *tVQuery
 
-	var upgrader = websocket.Upgrader{
-		ReadBufferSize:  conf.BufferSize.Read,
-		WriteBufferSize: conf.BufferSize.Write,
+	var stUpgrader = websocket.Upgrader{
+		ReadBufferSize:  stConf.BufferSize.Read,
+		WriteBufferSize: stConf.BufferSize.Write,
 	}
 
-	websocket, err := upgrader.Upgrade(w, r, nil)
+	stWebSocket, err := stUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		slog.Error("Failed to create connection", slog.String("err", err.Error()))
 		return
@@ -49,64 +49,63 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		// read a message
-		messageType, messageContent, err := websocket.ReadMessage()
+		iMessageType, slBMessageContent, err := stWebSocket.ReadMessage()
 		if err != nil {
 			slog.Debug("Error reading the message", slog.String("err", err.Error()))
 			return
 		}
 
 		// Data processing
-		// slog.Debug(string(messageContent))
 
-		if err := json.Unmarshal(messageContent, &msgSQuery); err != nil {
+		if err := json.Unmarshal(slBMessageContent, &stMsgSQuery); err != nil {
 			slog.Debug("Query error", slog.String("err", err.Error()))
-			websocket.WriteMessage(messageType, []byte("Bad request - query error."))
-			websocket.Close()
+			stWebSocket.WriteMessage(iMessageType, []byte("Bad request - query error."))
+			stWebSocket.Close()
 			return
 		}
 
 		// reponse message
-		messageResponse := vqlanalyzer.Request(msgSQuery.Ticket, msgSQuery.Instruction, msgSQuery.Placeholder)
+		sMessageResponse := vqlanalyzer.Request(stMsgSQuery.Ticket, stMsgSQuery.Instruction, stMsgSQuery.Placeholder)
 
-		if err := websocket.WriteMessage(messageType, []byte(messageResponse)); err != nil {
+		if err := stWebSocket.WriteMessage(iMessageType, []byte(sMessageResponse)); err != nil {
 			slog.Debug("Error sending response", slog.String("err", err.Error()))
-			websocket.Close()
+			stWebSocket.Close()
 			return
 		}
 	}
 }
 
 func routes() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/query", query)
+	stMux := http.NewServeMux()
+	stMux.HandleFunc("/", home)
+	stMux.HandleFunc("/query", query)
 
-	return mux
+	return stMux
 }
 
-func Start(cfg *config.Config) {
-	conf = cfg.WebSocketConnector
+func Start(cfg *config.TConfig) {
+	stConf = cfg.WebSocketConnector
 
-	address = fmt.Sprintf("%s:%s", conf.Address, conf.Port)
-	muxWS = routes()
+	sAddress = fmt.Sprintf("%s:%s", stConf.Address, stConf.Port)
+	stMuxWS = routes()
 
-	srvWS = &http.Server{
-		Addr:     address,
+	stSrvWS = &http.Server{
+		Addr:     sAddress,
 		ErrorLog: ordinarylogger.LogServerError,
-		Handler:  muxWS,
+		Handler:  stMuxWS,
 	}
 
-	slog.Info("WebSocket server is running", slog.String("address", address))
-	if err := srvWS.ListenAndServe(); err != nil {
+	slog.Info("WebSocket server is running", slog.String("address", sAddress))
+	if err := stSrvWS.ListenAndServe(); err != nil {
 		slog.Debug(err.Error())
 		return
 	}
 }
 
 func Shutdown(ctx context.Context, c *closer.TCloser) {
-	if err := srvWS.Shutdown(ctx); err != nil {
-		msg := fmt.Sprintf("There was a problem with stopping the WebSocket-server: %s", err.Error())
-		c.AddMsg(msg)
+	if err := stSrvWS.Shutdown(ctx); err != nil {
+		sMsg := fmt.Sprintf("There was a problem with stopping the WebSocket-server: %s", err.Error())
+		c.AddMsg(sMsg)
 	}
 	slog.Info("WebSocket server stopped")
 	c.Done()

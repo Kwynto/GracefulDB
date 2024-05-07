@@ -148,17 +148,17 @@ func Test_Start_and_Shutdown(t *testing.T) {
 	t.Run("Start() and Shutdown() function testing", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
 		config.MustLoad(tf)
-		go Start(&config.DefaultConfig) // calling the tested function
+		go Start(&config.StDefaultConfig) // calling the tested function
 		closer.AddHandler(Shutdown)
 		time.Sleep(2 * time.Second)
 		// srvRest.Shutdown(context.Background())
 		Shutdown(context.Background(), closer.StCloseProcs)
 
-		if reflect.TypeOf(muxWS) != reflect.TypeOf(&http.ServeMux{}) {
+		if reflect.TypeOf(stMuxWS) != reflect.TypeOf(&http.ServeMux{}) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
 		}
 
-		if reflect.TypeOf(srvWS) != reflect.TypeOf(&http.Server{}) {
+		if reflect.TypeOf(stSrvWS) != reflect.TypeOf(&http.Server{}) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
 		}
 

@@ -19,45 +19,42 @@ type tMessageServer struct {
 	gs.UnimplementedGracefulServiceServer
 }
 
-var address string
+var sAddress string
 
-var messageServer tMessageServer
-var grpcServer *grpc.Server
+var stMessageServer tMessageServer
+var stGrpcServer *grpc.Server
 
-func (tMessageServer) Query(ctx context.Context, r *gs.Request) (response *gs.Response, err error) {
-	op := "internal -> connectors -> gRPC -> SQuery"
-	defer func() { e.Wrapper(op, err) }()
+func (tMessageServer) Query(ctx context.Context, r *gs.Request) (stResponse *gs.Response, err error) {
+	sOperation := "internal -> connectors -> gRPC -> SQuery"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	slog.Debug("Request received", slog.String("instruction", r.Instruction), slog.String("placeholder", fmt.Sprint(r.Placeholder)))
 
-	// instructionB := []byte(r.Instruction)
-	// placeholderB := []byte(r.Placeholder)
-
-	response = &gs.Response{
+	stResponse = &gs.Response{
 		Message: vqlanalyzer.Request(r.Ticket, r.Instruction, r.Placeholder),
 	}
-	slog.Debug("Response sent", slog.String("response", response.Message))
+	slog.Debug("Response sent", slog.String("response", stResponse.Message))
 
-	return response, nil
+	return stResponse, nil
 }
 
-func Start(cfg *config.Config) {
-	address = fmt.Sprintf("%s:%s", cfg.GrpcConnector.Address, cfg.GrpcConnector.Port)
-	listen, err := net.Listen("tcp", address)
+func Start(cfg *config.TConfig) {
+	sAddress = fmt.Sprintf("%s:%s", cfg.GrpcConnector.Address, cfg.GrpcConnector.Port)
+	inListen, err := net.Listen("tcp", sAddress)
 	if err != nil {
 		slog.Error("Failed to start gRPC-listener", slog.String("err", err.Error()))
 		return
 	}
 
-	grpcServer = grpc.NewServer()
-	gs.RegisterGracefulServiceServer(grpcServer, messageServer)
+	stGrpcServer = grpc.NewServer()
+	gs.RegisterGracefulServiceServer(stGrpcServer, stMessageServer)
 
-	slog.Info("gRPC server is running", slog.String("address", address))
-	grpcServer.Serve(listen)
+	slog.Info("gRPC server is running", slog.String("address", sAddress))
+	stGrpcServer.Serve(inListen)
 }
 
 func Shutdown(ctx context.Context, c *closer.TCloser) {
-	grpcServer.Stop()
+	stGrpcServer.Stop()
 	slog.Info("gRPC server stopped")
 	c.Done()
 }

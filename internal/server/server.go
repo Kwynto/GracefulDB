@@ -18,7 +18,7 @@ import (
 
 var stopSignal = make(chan struct{}, 1)
 
-func Run(ctx context.Context, cfg *config.Config) (err error) {
+func Run(ctx context.Context, cfg *config.TConfig) (err error) {
 	op := "internal -> server-> Run"
 	defer func() { e.Wrapper(op, err) }()
 
@@ -64,10 +64,10 @@ func Run(ctx context.Context, cfg *config.Config) (err error) {
 	}
 	slog.Warn("The shutdown process has started.")
 
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
-	defer cancel()
+	ctxShutdown, fnCancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
+	defer fnCancel()
 
-	if err := closer.Close(shutdownCtx); err != nil {
+	if err := closer.Close(ctxShutdown); err != nil {
 		return fmt.Errorf("server shutdown: %v", err)
 	}
 
@@ -76,8 +76,8 @@ func Run(ctx context.Context, cfg *config.Config) (err error) {
 	return nil
 }
 
-func Stop(login string) {
-	msg := fmt.Sprintf("A stop signal was received from the control interface from the %s user", login)
-	slog.Warn(msg, slog.String("user", login))
+func Stop(sLogin string) {
+	sMsg := fmt.Sprintf("A stop signal was received from the control interface from the %s user", sLogin)
+	slog.Warn(sMsg, slog.String("user", sLogin))
 	stopSignal <- struct{}{}
 }

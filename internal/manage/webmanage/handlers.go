@@ -761,7 +761,7 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := config.DefaultConfig
+	data := config.StDefaultConfig
 	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }
 
@@ -771,12 +771,12 @@ func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.CoreSettings.FriendlyMode {
-		config.DefaultConfig.CoreSettings.FriendlyMode = false
+	if config.StDefaultConfig.CoreSettings.FriendlyMode {
+		config.StDefaultConfig.CoreSettings.FriendlyMode = false
 	} else {
-		config.DefaultConfig.CoreSettings.FriendlyMode = true
+		config.StDefaultConfig.CoreSettings.FriendlyMode = true
 	}
-	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.DefaultConfig)
+	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.StDefaultConfig)
 	msg := "The friendly mode has been switched."
 	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.LocalCoreSettings.FriendlyMode)))
 
@@ -789,12 +789,12 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.WebSocketConnector.Enable {
-		config.DefaultConfig.WebSocketConnector.Enable = false
+	if config.StDefaultConfig.WebSocketConnector.Enable {
+		config.StDefaultConfig.WebSocketConnector.Enable = false
 		closer.RunAndDelHandler(websocketconn.Shutdown)
 	} else {
-		config.DefaultConfig.WebSocketConnector.Enable = true
-		go websocketconn.Start(&config.DefaultConfig)
+		config.StDefaultConfig.WebSocketConnector.Enable = true
+		go websocketconn.Start(&config.StDefaultConfig)
 		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "WebSocketConnector"))
@@ -808,12 +808,12 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.RestConnector.Enable {
-		config.DefaultConfig.RestConnector.Enable = false
+	if config.StDefaultConfig.RestConnector.Enable {
+		config.StDefaultConfig.RestConnector.Enable = false
 		closer.RunAndDelHandler(rest.Shutdown)
 	} else {
-		config.DefaultConfig.RestConnector.Enable = true
-		go rest.Start(&config.DefaultConfig)
+		config.StDefaultConfig.RestConnector.Enable = true
+		go rest.Start(&config.StDefaultConfig)
 		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "RestConnector"))
@@ -827,12 +827,12 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.GrpcConnector.Enable {
-		config.DefaultConfig.GrpcConnector.Enable = false
+	if config.StDefaultConfig.GrpcConnector.Enable {
+		config.StDefaultConfig.GrpcConnector.Enable = false
 		closer.RunAndDelHandler(grpc.Shutdown)
 	} else {
-		config.DefaultConfig.GrpcConnector.Enable = true
-		go grpc.Start(&config.DefaultConfig)
+		config.StDefaultConfig.GrpcConnector.Enable = true
+		go grpc.Start(&config.StDefaultConfig)
 		closer.AddHandler(grpc.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "GrpcConnector"))

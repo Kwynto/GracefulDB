@@ -2378,7 +2378,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_core_friendly_change_sw() function testing - off", func(t *testing.T) {
-		config.DefaultConfig.CoreSettings.FriendlyMode = true
+		config.StDefaultConfig.CoreSettings.FriendlyMode = true
 
 		w := httptest.NewRecorder()
 		form := url.Values{}
@@ -2408,7 +2408,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_core_friendly_change_sw() function testing - on", func(t *testing.T) {
-		config.DefaultConfig.CoreSettings.FriendlyMode = false
+		config.StDefaultConfig.CoreSettings.FriendlyMode = false
 
 		w := httptest.NewRecorder()
 		form := url.Values{}
@@ -2454,8 +2454,8 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_wsc_change_sw() function testing - shutdown", func(t *testing.T) {
-		config.DefaultConfig.WebSocketConnector.Enable = true
-		go websocketconn.Start(&config.DefaultConfig)
+		config.StDefaultConfig.WebSocketConnector.Enable = true
+		go websocketconn.Start(&config.StDefaultConfig)
 		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
 
 		w := httptest.NewRecorder()
@@ -2486,7 +2486,7 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_wsc_change_sw() function testing - start", func(t *testing.T) {
-		config.DefaultConfig.WebSocketConnector.Enable = false
+		config.StDefaultConfig.WebSocketConnector.Enable = false
 		closer.RunAndDelHandler(websocketconn.Shutdown)
 
 		w := httptest.NewRecorder()
@@ -2533,8 +2533,8 @@ func Test_settings_rest_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_rest_change_sw() function testing - shutdown", func(t *testing.T) {
-		config.DefaultConfig.RestConnector.Enable = true
-		go rest.Start(&config.DefaultConfig)
+		config.StDefaultConfig.RestConnector.Enable = true
+		go rest.Start(&config.StDefaultConfig)
 		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
 
 		w := httptest.NewRecorder()
@@ -2565,7 +2565,7 @@ func Test_settings_rest_change_sw(t *testing.T) {
 	})
 
 	t.Run("settings_rest_change_sw() function testing - start", func(t *testing.T) {
-		config.DefaultConfig.RestConnector.Enable = false
+		config.StDefaultConfig.RestConnector.Enable = false
 		closer.RunAndDelHandler(rest.Shutdown)
 
 		w := httptest.NewRecorder()
