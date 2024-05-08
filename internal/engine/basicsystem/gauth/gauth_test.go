@@ -392,7 +392,7 @@ func Test_blockUser(t *testing.T) {
 			Roles:       []TRole{USER},
 		}
 		addUser(randStr, randStr, prof)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		if err := blockUser(randStr); err == nil {
 			t.Error("blockUser() error.")
@@ -431,7 +431,7 @@ func Test_unblockUser(t *testing.T) {
 			Roles:       []TRole{USER},
 		}
 		addUser(randStr, randStr, prof)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		if err := unblockUser(randStr); err == nil {
 			t.Error("unblockUser() error.")
@@ -621,7 +621,7 @@ func Test_BlockUser(t *testing.T) {
 			Roles:       []TRole{USER},
 		}
 		addUser(randStr, randStr, prof)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		if err := BlockUser(randStr); err == nil {
 			t.Error("BlockUser() error.")
@@ -666,7 +666,7 @@ func Test_UnblockUser(t *testing.T) {
 			Roles:       []TRole{USER},
 		}
 		addUser(randStr, randStr, prof)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		if err := UnblockUser(randStr); err == nil {
 			t.Error("UnblockUser() error.")
@@ -800,7 +800,7 @@ func Test_CheckTicket(t *testing.T) {
 			Password: randStr,
 		}
 		ticket, _ := NewAuth(&secret)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		// login, access, newticket, err := CheckTicket("fakeuser")
 		_, _, _, err := CheckTicket(ticket)
@@ -846,7 +846,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		ticket, _ := NewAuth(&secret)
 		NewAuth(&secret)
-		delete(ticketMap, randStr)
+		delete(mTicket, randStr)
 
 		_, _, _, err := CheckTicket(ticket)
 		if err == nil {
@@ -869,7 +869,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		ticket, _ := NewAuth(&secret)
 		NewAuth(&secret)
-		delete(AccessMap, randStr)
+		delete(MAccess, randStr)
 
 		_, _, _, err := CheckTicket(ticket)
 		if err == nil {
@@ -892,7 +892,7 @@ func Test_CheckTicket(t *testing.T) {
 		}
 		ticket, _ := NewAuth(&secret)
 		NewAuth(&secret)
-		delete(reversOldTicketMap, ticket)
+		delete(mReversOldTicket, ticket)
 
 		_, _, _, err := CheckTicket(ticket)
 		if err == nil {
@@ -977,7 +977,7 @@ func Test_NewAuth(t *testing.T) {
 func Test_hashLoad(t *testing.T) {
 	t.Run("hashLoad() function testing - positive", func(t *testing.T) {
 		hashLoad()
-		_, ok := HashMap["root"]
+		_, ok := MHash["root"]
 
 		if !ok {
 			t.Error("hashLoad() error.")
@@ -986,10 +986,10 @@ func Test_hashLoad(t *testing.T) {
 
 	t.Run("hashLoad() function testing - negative", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
-		AuthFile = tf
+		SAuthFile = tf
 
 		hashLoad()
-		_, ok := HashMap["root"]
+		_, ok := MHash["root"]
 		if !ok {
 			t.Error("hashLoad() error.")
 		}
@@ -999,13 +999,13 @@ func Test_hashLoad(t *testing.T) {
 func Test_hashSave(t *testing.T) {
 	t.Run("hashSave() function testing", func(t *testing.T) {
 		tf := "./test.json"
-		AuthFile = tf
-		tempFile, _ := os.OpenFile(AuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
-		defer os.Remove(AuthFile)
+		SAuthFile = tf
+		tempFile, _ := os.OpenFile(SAuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+		defer os.Remove(SAuthFile)
 		defer tempFile.Close()
 
 		hashSave()
-		if _, err := os.Stat(AuthFile); os.IsNotExist(err) {
+		if _, err := os.Stat(SAuthFile); os.IsNotExist(err) {
 			t.Error("hashSave() error.")
 		}
 	})
@@ -1014,7 +1014,7 @@ func Test_hashSave(t *testing.T) {
 func Test_accessLoad(t *testing.T) {
 	t.Run("accessLoad() function testing - positive", func(t *testing.T) {
 		accessLoad()
-		_, ok := AccessMap["root"]
+		_, ok := MAccess["root"]
 		if !ok {
 			t.Error("accessLoad() error.")
 		}
@@ -1022,10 +1022,10 @@ func Test_accessLoad(t *testing.T) {
 
 	t.Run("accessLoad() function testing - negative", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
-		AccessFile = tf
+		SAccessFile = tf
 
 		accessLoad()
-		_, ok := AccessMap["root"]
+		_, ok := MAccess["root"]
 		if !ok {
 			t.Error("accessLoad() error.")
 		}
@@ -1035,13 +1035,13 @@ func Test_accessLoad(t *testing.T) {
 func Test_accessSave(t *testing.T) {
 	t.Run("accessSave() function testing", func(t *testing.T) {
 		tf := "./test.json"
-		AccessFile = tf
-		tempFile, _ := os.OpenFile(AccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
-		defer os.Remove(AccessFile)
+		SAccessFile = tf
+		tempFile, _ := os.OpenFile(SAccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+		defer os.Remove(SAccessFile)
 		defer tempFile.Close()
 
 		accessSave()
-		if _, err := os.Stat(AccessFile); os.IsNotExist(err) {
+		if _, err := os.Stat(SAccessFile); os.IsNotExist(err) {
 			t.Error("accessSave() error.")
 		}
 	})
@@ -1051,7 +1051,7 @@ func Test_checkingTheDefaultPassword(t *testing.T) {
 	t.Run("checkingTheDefaultPassword() function testing", func(t *testing.T) {
 		dh := sha256.Sum256([]byte(DEFAULT_PASSWORD))
 		dpass := fmt.Sprintf("%x", dh)
-		cpass := HashMap["root"]
+		cpass := MHash["root"]
 
 		res := checkingTheDefaultPassword()
 		if (!res && (dpass == cpass)) || (res && (dpass != cpass)) {
@@ -1061,12 +1061,12 @@ func Test_checkingTheDefaultPassword(t *testing.T) {
 }
 
 func Test_Start(t *testing.T) {
-	AuthFile = AUTH_FILE
-	AccessFile = ACCESS_FILE
+	SAuthFile = AUTH_FILE
+	SAccessFile = ACCESS_FILE
 
 	t.Run("Start() function testing", func(t *testing.T) {
 		Start()
-		_, ok := HashMap["root"]
+		_, ok := MHash["root"]
 		if !ok {
 			t.Error("Start() error.")
 		}
@@ -1074,8 +1074,8 @@ func Test_Start(t *testing.T) {
 }
 
 func Test_Shutdown(t *testing.T) {
-	AuthFile = AUTH_FILE
-	AccessFile = ACCESS_FILE
+	SAuthFile = AUTH_FILE
+	SAccessFile = ACCESS_FILE
 	closer.AddHandler(Shutdown)
 
 	t.Run("Shutdown() function testing", func(t *testing.T) {

@@ -343,18 +343,18 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var table = make([]TViewAccountsTable, 0, 10)
-	for key := range gauth.HashMap {
+	for key := range gauth.MHash {
 		element := TViewAccountsTable{
 			System:      false,
 			Superuser:   false,
 			Baned:       false,
 			Login:       key,
-			Status:      gauth.AccessMap[key].Status.String(),
+			Status:      gauth.MAccess[key].Status.String(),
 			Roles:       "",
-			Description: gauth.AccessMap[key].Description,
+			Description: gauth.MAccess[key].Description,
 		}
 
-		for _, role := range gauth.AccessMap[key].Roles {
+		for _, role := range gauth.MAccess[key].Roles {
 			if role == gauth.SYSTEM {
 				element.System = true
 			}
@@ -364,7 +364,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 		if key == "root" {
 			element.Superuser = true
 		}
-		if gauth.AccessMap[key].Status == gauth.BANED {
+		if gauth.MAccess[key].Status == gauth.BANED {
 			element.Baned = true
 		}
 

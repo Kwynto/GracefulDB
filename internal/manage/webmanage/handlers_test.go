@@ -79,7 +79,7 @@ func Test_homeDefault(t *testing.T) {
 		homeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
-		delete(gauth.AccessMap, randStr)
+		delete(gauth.MAccess, randStr)
 
 		w1 := httptest.NewRecorder()
 		r1 := httptest.NewRequest("GET", "/", nil)
@@ -322,7 +322,7 @@ func Test_selfedit_load_form(t *testing.T) {
 		homeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
-		delete(gauth.AccessMap, randStr)
+		delete(gauth.MAccess, randStr)
 
 		w1 := httptest.NewRecorder()
 		r1 := httptest.NewRequest("GET", "/", nil)

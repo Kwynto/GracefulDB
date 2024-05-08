@@ -25,8 +25,8 @@ const (
 )
 
 var (
-	AuthFile   = AUTH_FILE
-	AccessFile = ACCESS_FILE
+	SAuthFile   = AUTH_FILE
+	SAccessFile = ACCESS_FILE
 )
 
 type TRole int
@@ -100,12 +100,12 @@ func (t TProfile) IsAllowed(rules []TRole) bool {
 		return false
 	}
 
-	for _, role := range t.Roles {
-		if role == ADMIN {
+	for _, iRole := range t.Roles {
+		if iRole == ADMIN {
 			return true
 		}
-		for _, rule := range rules {
-			if role == rule && role != 0 {
+		for _, iRule := range rules {
+			if iRole == iRule && iRole != 0 {
 				return true
 			}
 		}
@@ -122,116 +122,116 @@ type tReversTicket map[string]string // ticket - login
 type tAccess map[string]TProfile // map[tLogin]TProfile
 
 var (
-	HashMap   tAuth = make(tAuth, 0)
-	AccessMap       = make(tAccess, 0)
+	MHash   tAuth   = make(tAuth, 0)
+	MAccess tAccess = make(tAccess, 0)
 
-	ticketMap    tTicket = make(tTicket, 0)
-	oldTicketMap tTicket = make(tTicket, 0)
+	mTicket    tTicket = make(tTicket, 0)
+	mOldTicket tTicket = make(tTicket, 0)
 
-	reversTicketMap    tReversTicket = make(tReversTicket, 0)
-	reversOldTicketMap tReversTicket = make(tReversTicket, 0)
+	mReversTicket    tReversTicket = make(tReversTicket, 0)
+	mReversOldTicket tReversTicket = make(tReversTicket, 0)
 )
 
-var block sync.RWMutex
+var mxAuth sync.RWMutex
 
 // Internal functions
 
 // Ticket generation
 func GenerateTicket() string {
 	// This function is complete
-	b := make([]byte, 32)
-	rand.Read(b)
+	slB := make([]byte, 32)
+	rand.Read(slB)
 	// if err != nil {
 	// 	return ""
 	// }
-	return fmt.Sprintf("%x", b)
+	return fmt.Sprintf("%x", slB)
 }
 
 // Getting a ticket - internal
-func getTicket(login string) (ticket string, err error) {
-	ticket, ok := ticketMap[login]
-	if ok {
-		return ticket, nil
+func getTicket(sLogin string) (string, error) {
+	sTicket, isOk := mTicket[sLogin]
+	if isOk {
+		return sTicket, nil
 	}
 	return "", errors.New("invalid ticket")
 }
 
 // Adding a user - internal
-func addUser(login string, password string, access TProfile) error {
+func addUser(sLogin string, sPassword string, stAccess TProfile) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if ok {
+	if isOk {
 		return errors.New("unable to create a user")
 	}
 
-	block.Lock()
-	h := sha256.Sum256([]byte(password))
-	HashMap[login] = fmt.Sprintf("%x", h)
+	mxAuth.Lock()
+	arBH := sha256.Sum256([]byte(sPassword))
+	MHash[sLogin] = fmt.Sprintf("%x", arBH)
 
-	AccessMap[login] = access
+	MAccess[sLogin] = stAccess
 
 	hashSave()
 	accessSave()
-	block.Unlock()
+	mxAuth.Unlock()
 
 	return nil
 }
 
 // Updating a user - internal
-func updateUser(login string, password string, access TProfile) error {
+func updateUser(sLogin string, sPassword string, stAccess TProfile) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if !ok {
+	if !isOk {
 		return errors.New("unable to update user")
 	}
 
-	block.Lock()
-	h := sha256.Sum256([]byte(password))
-	HashMap[login] = fmt.Sprintf("%x", h)
+	mxAuth.Lock()
+	arBH := sha256.Sum256([]byte(sPassword))
+	MHash[sLogin] = fmt.Sprintf("%x", arBH)
 
-	if login != "root" {
-		AccessMap[login] = access
+	if sLogin != "root" {
+		MAccess[sLogin] = stAccess
 	}
 
 	hashSave()
 	accessSave()
-	block.Unlock()
+	mxAuth.Unlock()
 
 	return nil
 }
 
 // Deleting a user - internal
-func deleteUser(login string) error {
+func deleteUser(sLogin string) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if !ok {
+	if !isOk {
 		return errors.New("it is not possible to delete a user")
 	}
 
-	block.Lock()
-	defer block.Unlock()
+	mxAuth.Lock()
+	defer mxAuth.Unlock()
 
-	if ticket, ok := oldTicketMap[login]; ok {
-		delete(reversOldTicketMap, ticket)
-		delete(oldTicketMap, login)
+	if sTicket, isOk := mOldTicket[sLogin]; isOk {
+		delete(mReversOldTicket, sTicket)
+		delete(mOldTicket, sLogin)
 	}
 
-	if ticket, ok := ticketMap[login]; ok {
-		delete(reversTicketMap, ticket)
-		delete(ticketMap, login)
+	if sTicket, isOk := mTicket[sLogin]; isOk {
+		delete(mReversTicket, sTicket)
+		delete(mTicket, sLogin)
 	}
 
-	delete(AccessMap, login)
-	delete(HashMap, login)
+	delete(MAccess, sLogin)
+	delete(MHash, sLogin)
 
 	hashSave()
 	accessSave()
@@ -240,26 +240,26 @@ func deleteUser(login string) error {
 }
 
 // Blocking the user - internal
-func blockUser(login string) error {
+func blockUser(sLogin string) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if !ok {
+	if !isOk {
 		return errors.New("it is not possible to block a user")
 	}
 
-	block.Lock()
-	defer block.Unlock()
+	mxAuth.Lock()
+	defer mxAuth.Unlock()
 
-	access, ok := AccessMap[login]
-	if !ok {
+	stAccess, isOk := MAccess[sLogin]
+	if !isOk {
 		return errors.New("it is not possible to block a user")
 	}
 
-	access.Status = BANED
-	AccessMap[login] = access
+	stAccess.Status = BANED
+	MAccess[sLogin] = stAccess
 
 	hashSave()
 	accessSave()
@@ -268,26 +268,26 @@ func blockUser(login string) error {
 }
 
 // UnBlocking the user - internal
-func unblockUser(login string) error {
+func unblockUser(sLogin string) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if !ok {
+	if !isOk {
 		return errors.New("it is not possible to unblock a user")
 	}
 
-	block.Lock()
-	defer block.Unlock()
+	mxAuth.Lock()
+	defer mxAuth.Unlock()
 
-	access, ok := AccessMap[login]
-	if !ok {
+	stAccess, isOk := MAccess[sLogin]
+	if !isOk {
 		return errors.New("it is not possible to unblock a user")
 	}
 
-	access.Status = ACTIVE
-	AccessMap[login] = access
+	stAccess.Status = ACTIVE
+	MAccess[sLogin] = stAccess
 
 	hashSave()
 	accessSave()
@@ -296,24 +296,24 @@ func unblockUser(login string) error {
 }
 
 // Updating a profile of a user - internal
-func updateProfile(login string, access TProfile) error {
+func updateProfile(sLogin string, stAccess TProfile) error {
 	// This function is complete
-	block.RLock()
-	_, ok := HashMap[login]
-	block.RUnlock()
+	mxAuth.RLock()
+	_, isOk := MHash[sLogin]
+	mxAuth.RUnlock()
 
-	if !ok {
+	if !isOk {
 		return errors.New("unable to update user")
 	}
 
-	block.Lock()
+	mxAuth.Lock()
 
-	if login != "root" {
-		AccessMap[login] = access
+	if sLogin != "root" {
+		MAccess[sLogin] = stAccess
 	}
 
 	accessSave()
-	block.Unlock()
+	mxAuth.Unlock()
 
 	return nil
 }
@@ -323,130 +323,130 @@ func updateProfile(login string, access TProfile) error {
 // Getting a ticket
 func GetTicket(login string) (ticket string, err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> GetTicket"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> GetTicket"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	return getTicket(login)
 }
 
 // Adding a user
-func AddUser(login string, password string, access TProfile) (err error) {
+func AddUser(sLogin string, sPassword string, stAccess TProfile) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> AddUser"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> AddUser"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	if login != "root" {
-		return addUser(login, password, access)
+	if sLogin != "root" {
+		return addUser(sLogin, sPassword, stAccess)
 	}
 	return errors.New("unable to create a user")
 }
 
 // Updating a user
-func UpdateUser(login string, password string, access TProfile) (err error) {
+func UpdateUser(sLogin string, sPassword string, stAccess TProfile) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> UpdateUser"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> UpdateUser"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	return updateUser(login, password, access)
+	return updateUser(sLogin, sPassword, stAccess)
 }
 
 // Deleting a user
-func DeleteUser(login string) (err error) {
+func DeleteUser(sLogin string) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> DeleteUser"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> DeleteUser"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	if login != "root" {
-		return deleteUser(login)
+	if sLogin != "root" {
+		return deleteUser(sLogin)
 	}
 	return errors.New("it is not possible to delete a user")
 }
 
 // Blocking the user
-func BlockUser(login string) (err error) {
+func BlockUser(sLogin string) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> BlockUser"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> BlockUser"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	if login != "root" {
-		return blockUser(login)
+	if sLogin != "root" {
+		return blockUser(sLogin)
 	}
 	return errors.New("it is not possible to delete a user")
 }
 
 // Unblocking the user
-func UnblockUser(login string) (err error) {
+func UnblockUser(sLogin string) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> UnblockUser"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> UnblockUser"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	if login != "root" {
-		return unblockUser(login)
+	if sLogin != "root" {
+		return unblockUser(sLogin)
 	}
 	return errors.New("it is not possible to delete a user")
 }
 
 // Updating a profile of a user
-func UpdateProfile(login string, access TProfile) (err error) {
+func UpdateProfile(sLogin string, stAccess TProfile) (err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> UpdateProfile"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> UpdateProfile"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	return updateProfile(login, access)
+	return updateProfile(sLogin, stAccess)
 }
 
 // User verification
-func CheckUser(user string, password string) bool {
+func CheckUser(sUser string, sPassword string) bool {
 	// This function is complete
-	dbPass, ok := HashMap[user]
-	if !ok {
+	sDBPass, isOk := MHash[sUser]
+	if !isOk {
 		return false
 	}
 
-	h := sha256.Sum256([]byte(password))
-	pass := fmt.Sprintf("%x", h)
+	arBH := sha256.Sum256([]byte(sPassword))
+	sPass := fmt.Sprintf("%x", arBH)
 
-	return dbPass == pass
+	return sDBPass == sPass
 }
 
 // Get user's profile and access rights
-func GetProfile(user string) (prof TProfile, err error) {
+func GetProfile(sUser string) (stProf TProfile, err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> GetProfile"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> GetProfile"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	access, ok := AccessMap[user]
-	if ok {
-		return access, nil
+	stAccess, isOk := MAccess[sUser]
+	if isOk {
+		return stAccess, nil
 	}
-	return TProfile{}, errors.New("profile error")
+	return stProf, errors.New("profile error")
 }
 
 // Verifying the authenticity of the ticket and obtaining access rights.
-func CheckTicket(ticket string) (login string, access TProfile, newticket string, err error) {
+func CheckTicket(sTicket string) (sLogin string, stAccess TProfile, sNewTicket string, err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> CheckTicket"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> CheckTicket"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	block.RLock()
-	defer block.RUnlock()
+	mxAuth.RLock()
+	defer mxAuth.RUnlock()
 
-	login, ok1 := reversTicketMap[ticket]
-	if ok1 {
-		access, ok2 := AccessMap[login]
-		if ok2 {
-			return login, access, newticket, nil
+	sLogin, isOk1 := mReversTicket[sTicket]
+	if isOk1 {
+		stAccess, isOk2 := MAccess[sLogin]
+		if isOk2 {
+			return sLogin, stAccess, sNewTicket, nil
 		}
 		return "", TProfile{}, "", errors.New("authorization failed")
 	}
 
-	login, ok4 := reversOldTicketMap[ticket]
-	if ok4 {
-		access, ok5 := AccessMap[login]
-		if ok5 {
-			newticket, ok6 := ticketMap[login]
-			if ok6 {
-				return login, access, newticket, nil
+	sLogin, isOk4 := mReversOldTicket[sTicket]
+	if isOk4 {
+		stAccess, isOk5 := MAccess[sLogin]
+		if isOk5 {
+			sNewTicket, isOk6 := mTicket[sLogin]
+			if isOk6 {
+				return sLogin, stAccess, sNewTicket, nil
 			}
 			return "", TProfile{}, "", errors.New("authorization failed")
 		}
@@ -457,85 +457,85 @@ func CheckTicket(ticket string) (login string, access TProfile, newticket string
 }
 
 // Authorization verification and ticket issuance
-func NewAuth(secret *gtypes.TSecret) (ticket string, err error) {
+func NewAuth(stSecret *gtypes.TSecret) (sTicket string, err error) {
 	// This function is complete
-	op := "internal -> engine -> gAuth -> NewAuth"
-	defer func() { e.Wrapper(op, err) }()
+	sOperation := "internal -> engine -> gAuth -> NewAuth"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	var pass string
+	var sPass string
 
-	if secret.Login == "" {
-		slog.Debug("Authentication error", slog.String("login", secret.Login))
+	if stSecret.Login == "" {
+		slog.Debug("Authentication error", slog.String("login", stSecret.Login))
 		return "", errors.New("authentication error")
 	}
 
-	if len(secret.Hash) == 64 {
-		pass = secret.Hash
+	if len(stSecret.Hash) == 64 {
+		sPass = stSecret.Hash
 	} else {
-		h := sha256.Sum256([]byte(secret.Password))
-		pass = fmt.Sprintf("%x", h)
+		arBH := sha256.Sum256([]byte(stSecret.Password))
+		sPass = fmt.Sprintf("%x", arBH)
 	}
 
-	block.Lock()
-	defer block.Unlock()
+	mxAuth.Lock()
+	defer mxAuth.Unlock()
 
-	dbPass, ok := HashMap[secret.Login]
-	if !ok {
-		slog.Debug("Authentication error", slog.String("login", secret.Login))
+	sDBPass, isOk := MHash[stSecret.Login]
+	if !isOk {
+		slog.Debug("Authentication error", slog.String("login", stSecret.Login))
 		return "", errors.New("authentication error")
 	}
 
-	if pass == dbPass {
-		newTicket := GenerateTicket()
+	if sPass == sDBPass {
+		sNewTicket := GenerateTicket()
 
 		// don't change this construction
-		oldTicket, ok := ticketMap[secret.Login]
-		if ok {
-			secondOT, ok := oldTicketMap[secret.Login]
-			if ok {
-				delete(reversOldTicketMap, secondOT)
+		sOldTicket, isOk := mTicket[stSecret.Login]
+		if isOk {
+			sSecondOldTicket, isOk := mOldTicket[stSecret.Login]
+			if isOk {
+				delete(mReversOldTicket, sSecondOldTicket)
 			}
-			reversOldTicketMap[oldTicket] = secret.Login
-			oldTicketMap[secret.Login] = oldTicket
-			delete(reversTicketMap, oldTicket)
+			mReversOldTicket[sOldTicket] = stSecret.Login
+			mOldTicket[stSecret.Login] = sOldTicket
+			delete(mReversTicket, sOldTicket)
 		}
-		ticketMap[secret.Login] = newTicket
-		reversTicketMap[newTicket] = secret.Login
+		mTicket[stSecret.Login] = sNewTicket
+		mReversTicket[sNewTicket] = stSecret.Login
 		// end construction
 
-		return newTicket, nil
+		return sNewTicket, nil
 	}
 
-	slog.Debug("Authentication error", slog.String("login", secret.Login))
+	slog.Debug("Authentication error", slog.String("login", stSecret.Login))
 	return "", errors.New("authentication error")
 }
 
 // Loading hashs of users from a file
 func hashLoad() {
 	// This function is complete
-	_, err := os.Stat(AuthFile)
+	_, err := os.Stat(SAuthFile)
 	isFNotEx := os.IsNotExist(err)
 
-	tempFile, err := os.OpenFile(AuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	fAuthFile, err := os.OpenFile(SAuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AuthFile), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", SAuthFile), slog.String("err", err.Error()))
 	}
-	defer tempFile.Close()
+	defer fAuthFile.Close()
 
 	if isFNotEx {
-		h := sha256.Sum256([]byte(DEFAULT_PASSWORD))
-		pass := fmt.Sprintf("%x", h)
+		arBH := sha256.Sum256([]byte(DEFAULT_PASSWORD))
+		sPass := fmt.Sprintf("%x", arBH)
 
-		HashMap[DEFAULT_USER] = pass
+		MHash[DEFAULT_USER] = sPass
 
-		encoder := json.NewEncoder(tempFile)
-		if err := encoder.Encode(HashMap); err != nil {
-			slog.Debug("Error writing authentication data", slog.String("file", AuthFile))
+		jeAuthFile := json.NewEncoder(fAuthFile)
+		if err := jeAuthFile.Encode(MHash); err != nil {
+			slog.Debug("Error writing authentication data", slog.String("file", SAuthFile))
 		}
 	} else {
-		decoder := json.NewDecoder(tempFile)
-		if err := decoder.Decode(&HashMap); err != nil {
-			slog.Debug("Error loading the configuration file", slog.String("file", AuthFile))
+		jdAuthFile := json.NewDecoder(fAuthFile)
+		if err := jdAuthFile.Decode(&MHash); err != nil {
+			slog.Debug("Error loading the configuration file", slog.String("file", SAuthFile))
 		}
 	}
 }
@@ -543,51 +543,51 @@ func hashLoad() {
 // Saving hashs of users in a file
 func hashSave() {
 	// This function is complete
-	if _, err := os.Stat(AuthFile); !os.IsNotExist(err) {
-		if err2 := os.Remove(AuthFile); err2 != nil {
-			slog.Warn("Unable to delete file", slog.String("file", AuthFile), slog.String("err", err2.Error()))
+	if _, err := os.Stat(SAuthFile); !os.IsNotExist(err) {
+		if err2 := os.Remove(SAuthFile); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", SAuthFile), slog.String("err", err2.Error()))
 		}
 	}
 
-	tempFile, err := os.OpenFile(AuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	fAuthFile, err := os.OpenFile(SAuthFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AuthFile), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", SAuthFile), slog.String("err", err.Error()))
 	}
-	defer tempFile.Close()
+	defer fAuthFile.Close()
 
-	encoder := json.NewEncoder(tempFile)
-	if err := encoder.Encode(HashMap); err != nil {
-		slog.Warn("Error writing authentication data", slog.String("file", AuthFile), slog.String("err", err.Error()))
+	jeAuthFile := json.NewEncoder(fAuthFile)
+	if err := jeAuthFile.Encode(MHash); err != nil {
+		slog.Warn("Error writing authentication data", slog.String("file", SAuthFile), slog.String("err", err.Error()))
 	}
 }
 
 // Loading access of users from a file
 func accessLoad() {
 	// This function is complete
-	_, err := os.Stat(AccessFile)
+	_, err := os.Stat(SAccessFile)
 	isFNotEx := os.IsNotExist(err)
 
-	tempFile, err := os.OpenFile(AccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	fAccessFile, err := os.OpenFile(SAccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AccessFile), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", SAccessFile), slog.String("err", err.Error()))
 	}
-	defer tempFile.Close()
+	defer fAccessFile.Close()
 
 	if isFNotEx {
-		AccessMap[DEFAULT_USER] = TProfile{
+		MAccess[DEFAULT_USER] = TProfile{
 			Description: "This is the main user.",
 			Status:      ACTIVE,
 			Roles:       []TRole{ADMIN},
 		}
 
-		encoder := json.NewEncoder(tempFile)
-		if err := encoder.Encode(AccessMap); err != nil {
-			slog.Debug("Error writing authentication data", slog.String("file", AccessFile))
+		jeAccessFile := json.NewEncoder(fAccessFile)
+		if err := jeAccessFile.Encode(MAccess); err != nil {
+			slog.Debug("Error writing authentication data", slog.String("file", SAccessFile))
 		}
 	} else {
-		decoder := json.NewDecoder(tempFile)
-		if err := decoder.Decode(&AccessMap); err != nil {
-			slog.Debug("Error loading the configuration file", slog.String("file", AccessFile))
+		jdAccessFile := json.NewDecoder(fAccessFile)
+		if err := jdAccessFile.Decode(&MAccess); err != nil {
+			slog.Debug("Error loading the configuration file", slog.String("file", SAccessFile))
 		}
 	}
 }
@@ -595,55 +595,55 @@ func accessLoad() {
 // Saving access of users in a file
 func accessSave() {
 	// This function is complete
-	if _, err := os.Stat(AccessFile); !os.IsNotExist(err) {
-		if err2 := os.Remove(AccessFile); err2 != nil {
-			slog.Warn("Unable to delete file", slog.String("file", AccessFile), slog.String("err", err2.Error()))
+	if _, err := os.Stat(SAccessFile); !os.IsNotExist(err) {
+		if err2 := os.Remove(SAccessFile); err2 != nil {
+			slog.Warn("Unable to delete file", slog.String("file", SAccessFile), slog.String("err", err2.Error()))
 		}
 	}
 
-	tempFile, err := os.OpenFile(AccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
+	fAccessFile, err := os.OpenFile(SAccessFile, os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
-		slog.Error("The authentication file cannot be opened", slog.String("file", AccessFile), slog.String("err", err.Error()))
+		slog.Error("The authentication file cannot be opened", slog.String("file", SAccessFile), slog.String("err", err.Error()))
 	}
-	defer tempFile.Close()
+	defer fAccessFile.Close()
 
-	encoder := json.NewEncoder(tempFile)
-	if err := encoder.Encode(AccessMap); err != nil {
-		slog.Warn("Error writing authentication data", slog.String("file", AccessFile), slog.String("err", err.Error()))
+	jeAccessFile := json.NewEncoder(fAccessFile)
+	if err := jeAccessFile.Encode(MAccess); err != nil {
+		slog.Warn("Error writing authentication data", slog.String("file", SAccessFile), slog.String("err", err.Error()))
 	}
 }
 
 // Checking the root user's password for the default value.
 func checkingTheDefaultPassword() bool {
-	dh := sha256.Sum256([]byte(DEFAULT_PASSWORD))
-	dpass := fmt.Sprintf("%x", dh)
+	arBDefH := sha256.Sum256([]byte(DEFAULT_PASSWORD))
+	sDefPass := fmt.Sprintf("%x", arBDefH)
 
-	cpass := HashMap["root"]
+	sPass := MHash["root"]
 
-	return dpass == cpass
+	return sDefPass == sPass
 }
 
 // Package initialization
 func Start() {
 	// This function is complete
-	block.Lock()
+	mxAuth.Lock()
 	hashLoad()
 	accessLoad()
-	block.Unlock()
+	mxAuth.Unlock()
 	slog.Info("The authentication system is running.")
 	if checkingTheDefaultPassword() {
-		warnMsg := fmt.Sprintf("The 'root' user has a default password of '%s'. Please change your password!", DEFAULT_PASSWORD)
-		slog.Warn(warnMsg)
+		sWarnMsg := fmt.Sprintf("The 'root' user has a default password of '%s'. Please change your password!", DEFAULT_PASSWORD)
+		slog.Warn(sWarnMsg)
 	}
 }
 
 // Shutting down the service
 func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// This function is complete
-	block.Lock()
+	mxAuth.Lock()
 	hashSave()
 	accessSave()
-	block.Unlock()
+	mxAuth.Unlock()
 	slog.Info("The authentication system is stopped.")
 	c.Done()
 }
