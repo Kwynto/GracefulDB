@@ -18,25 +18,25 @@ func writeBufferToDisk() bool {
 	// This function is complete
 	var rows *[]gtypes.TRowForStore
 
-	WriteBuffer.Block.Lock()
-	workBuff := WriteBuffer.Switch
+	StWriteBuffer.Block.Lock()
+	workBuff := StWriteBuffer.Switch
 	switch workBuff {
 	case 1:
-		WriteBuffer.Switch = 2
+		StWriteBuffer.Switch = 2
 	case 2:
-		WriteBuffer.Switch = 1
+		StWriteBuffer.Switch = 1
 	}
-	WriteBuffer.Block.Unlock()
+	StWriteBuffer.Block.Unlock()
 
 	switch workBuff {
 	case 1:
-		WriteBuffer.FirstBox.BlockBuf.Lock()
-		defer WriteBuffer.FirstBox.BlockBuf.Unlock()
-		rows = &WriteBuffer.FirstBox.Area
+		StWriteBuffer.FirstBox.BlockBuf.Lock()
+		defer StWriteBuffer.FirstBox.BlockBuf.Unlock()
+		rows = &StWriteBuffer.FirstBox.Area
 	case 2:
-		WriteBuffer.SecondBox.BlockBuf.Lock()
-		defer WriteBuffer.SecondBox.BlockBuf.Unlock()
-		rows = &WriteBuffer.SecondBox.Area
+		StWriteBuffer.SecondBox.BlockBuf.Lock()
+		defer StWriteBuffer.SecondBox.BlockBuf.Unlock()
+		rows = &StWriteBuffer.SecondBox.Area
 	}
 
 	fileSystemBlock.Lock()
@@ -93,15 +93,15 @@ func writeBufferToDisk() bool {
 	switch workBuff {
 	case 1:
 		if rand.Intn(100) == 0 {
-			WriteBuffer.FirstBox.Area = nil
+			StWriteBuffer.FirstBox.Area = nil
 		} else {
-			WriteBuffer.FirstBox.Area = WriteBuffer.FirstBox.Area[:0]
+			StWriteBuffer.FirstBox.Area = StWriteBuffer.FirstBox.Area[:0]
 		}
 	case 2:
 		if rand.Intn(100) == 0 {
-			WriteBuffer.SecondBox.Area = nil
+			StWriteBuffer.SecondBox.Area = nil
 		} else {
-			WriteBuffer.SecondBox.Area = WriteBuffer.SecondBox.Area[:0]
+			StWriteBuffer.SecondBox.Area = StWriteBuffer.SecondBox.Area[:0]
 		}
 	}
 

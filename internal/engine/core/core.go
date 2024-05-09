@@ -20,7 +20,7 @@ const (
 	POSTFIX_ID       = "_id"
 )
 
-var storageBlock sync.RWMutex
+var mxStorageBlock sync.RWMutex
 
 type tCoreSettings struct {
 	Storage      string
@@ -36,10 +36,10 @@ type tStorageInfo struct {
 
 func GetDBInfo(nameDB string) (TDBInfo, bool) {
 	// This function is complete
-	storageBlock.RLock()
-	defer storageBlock.RUnlock()
+	mxStorageBlock.RLock()
+	defer mxStorageBlock.RUnlock()
 
-	info, ok := StorageInfo.DBs[nameDB]
+	info, ok := StStorageInfo.DBs[nameDB]
 	if !ok {
 		return TDBInfo{}, false
 	}
@@ -49,10 +49,10 @@ func GetDBInfo(nameDB string) (TDBInfo, bool) {
 
 func GetDBAccess(nameDB string) (gtypes.TAccess, bool) {
 	// This function is complete
-	storageBlock.RLock()
-	defer storageBlock.RUnlock()
+	mxStorageBlock.RLock()
+	defer mxStorageBlock.RUnlock()
 
-	access, ok := StorageInfo.Access[nameDB]
+	access, ok := StStorageInfo.Access[nameDB]
 	if !ok {
 		return gtypes.TAccess{}, false
 	}
@@ -62,16 +62,16 @@ func GetDBAccess(nameDB string) (gtypes.TAccess, bool) {
 
 func SetAccessFlags(db, user string, flags gtypes.TAccessFlags) {
 	// This procedure is complete
-	storageBlock.Lock()
-	StorageInfo.Access[db].Flags[user] = flags
-	StorageInfo.Save()
-	storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	StStorageInfo.Access[db].Flags[user] = flags
+	StStorageInfo.Save()
+	mxStorageBlock.Unlock()
 }
 
 func (s *tStorageInfo) Load() bool {
 	// This method is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
 	var dbInfo TDBInfo
 
@@ -176,7 +176,7 @@ var LocalCoreSettings tCoreSettings = tCoreSettings{
 	FriendlyMode: true,
 }
 
-var StorageInfo tStorageInfo = tStorageInfo{
+var StStorageInfo tStorageInfo = tStorageInfo{
 	// DBs:     make(map[string]tDBInfo),
 	// Removed: make([]tDBInfo, 0),
 }
@@ -197,7 +197,7 @@ func Start(cfg *config.TConfig) {
 	LocalCoreSettings = LoadLocalCoreSettings(cfg)
 	// RegExpCollection = CompileRegExpCollection()
 
-	if !StorageInfo.Load() {
+	if !StStorageInfo.Load() {
 		slog.Error("Storage activation error !!!")
 	}
 
@@ -210,9 +210,9 @@ func Start(cfg *config.TConfig) {
 
 func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// -
-	if !StorageInfo.Save() {
+	if !StStorageInfo.Save() {
 		c.AddMsg("Failure to save access rights !!!")
 	}
-	signalSD <- struct{}{}
+	chSignalShutdown <- struct{}{}
 	c.Done()
 }

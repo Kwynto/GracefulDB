@@ -6,47 +6,47 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 )
 
-var WriteBuffer = gtypes.TCollectBuffers{
+var StWriteBuffer = gtypes.TCollectBuffers{
 	Switch: 1,
 }
 
 var (
-	signalWrite = make(chan struct{}, 1024)
-	signalSD    = make(chan struct{}, 1)
+	chSignalWrite    = make(chan struct{}, 1024)
+	chSignalShutdown = make(chan struct{}, 1)
 )
 
-func InsertIntoBuffer(rowsForStore []gtypes.TRowForStore) {
+func InsertIntoBuffer(stRowsForStore []gtypes.TRowForStore) {
 	// -
-	WriteBuffer.Block.Lock()
-	defer WriteBuffer.Block.Unlock()
+	StWriteBuffer.Block.Lock()
+	defer StWriteBuffer.Block.Unlock()
 
-	switch WriteBuffer.Switch {
+	switch StWriteBuffer.Switch {
 	case 1:
-		WriteBuffer.FirstBox.Area = append(WriteBuffer.FirstBox.Area, rowsForStore...)
+		StWriteBuffer.FirstBox.Area = append(StWriteBuffer.FirstBox.Area, stRowsForStore...)
 	case 2:
-		WriteBuffer.SecondBox.Area = append(WriteBuffer.SecondBox.Area, rowsForStore...)
+		StWriteBuffer.SecondBox.Area = append(StWriteBuffer.SecondBox.Area, stRowsForStore...)
 	}
-	signalWrite <- struct{}{}
+	chSignalWrite <- struct{}{}
 }
 
 func WriteBufferService() {
-loop:
+labelLoop:
 	select {
-	case <-signalWrite:
+	case <-chSignalWrite:
 		if !writeBufferToDisk() {
 			time.Sleep(1 * time.Second)
-			signalWrite <- struct{}{}
+			chSignalWrite <- struct{}{}
 		}
-		goto loop
-	case <-signalSD:
-		WriteBuffer.Block.Lock()
-		fLen := len(WriteBuffer.FirstBox.Area) != 0
-		sLen := len(WriteBuffer.SecondBox.Area) != 0
-		WriteBuffer.Block.Unlock()
+		goto labelLoop
+	case <-chSignalShutdown:
+		StWriteBuffer.Block.Lock()
+		fLen := len(StWriteBuffer.FirstBox.Area) != 0
+		sLen := len(StWriteBuffer.SecondBox.Area) != 0
+		StWriteBuffer.Block.Unlock()
 		if fLen || sLen {
 			writeBufferToDisk()
-			signalSD <- struct{}{}
-			goto loop
+			chSignalShutdown <- struct{}{}
+			goto labelLoop
 		}
 	}
 }

@@ -17,7 +17,7 @@ func Request(sTicket string, sInstruction string, slPlaceholder []string) string
 	// -
 	// Prep
 	// instruction = strings.TrimSpace(instruction)
-	sInstruction = vqlexp.RegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
+	sInstruction = vqlexp.MRegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
 	sInstruction = strings.TrimRight(sInstruction, "; ")
 	sInstruction = strings.TrimLeft(sInstruction, " ")
 
@@ -27,8 +27,8 @@ func Request(sTicket string, sInstruction string, slPlaceholder []string) string
 		Placeholder: slPlaceholder,
 	}
 
-	for _, sExpName := range vqlexp.ParsingOrder {
-		if vqlexp.RegExpCollection[sExpName].MatchString(query.Instruction) {
+	for _, sExpName := range vqlexp.ArParsingOrder {
+		if vqlexp.MRegExpCollection[sExpName].MatchString(query.Instruction) {
 			switch sExpName {
 			case "SearchCreate":
 				sResult, _ := query.DDLCreate()

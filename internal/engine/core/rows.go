@@ -631,10 +631,10 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 		}
 	}
 
-	storageBlock.Lock() // заменить на другой блок
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock() // заменить на другой блок
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StorageInfo.DBs[nameDB]
+	dbInfo, okDB := StStorageInfo.DBs[nameDB]
 	if !okDB {
 		return nil, false
 	}
@@ -718,7 +718,7 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 	go InsertIntoBuffer(rowsForStore)
 
 	dbInfo.Tables[nameTable] = tableInfo
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[nameDB] = dbInfo
 
 	return result, dbInfo.Save()
 }

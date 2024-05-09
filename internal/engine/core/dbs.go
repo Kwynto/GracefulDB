@@ -13,18 +13,18 @@ import (
 // Marks the database as deleted, but does not delete files.
 func RemoveDB(nameDB string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StStorageInfo.DBs[nameDB]
 	if ok {
 		dbInfo.LastUpdate = time.Now()
 		dbInfo.Deleted = true
 
-		StorageInfo.Removed = append(StorageInfo.Removed, dbInfo)
-		delete(StorageInfo.DBs, nameDB)
-		delete(StorageInfo.Access, nameDB)
-		StorageInfo.Save()
+		StStorageInfo.Removed = append(StStorageInfo.Removed, dbInfo)
+		delete(StStorageInfo.DBs, nameDB)
+		delete(StStorageInfo.Access, nameDB)
+		StStorageInfo.Save()
 
 		return dbInfo.Save()
 	}
@@ -35,10 +35,10 @@ func RemoveDB(nameDB string) bool {
 // Deletes the folder and database files, if DB was mark as 'removed'
 func StrongRemoveDB(nameDB string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	for indRange, dbInfo := range StorageInfo.Removed {
+	for indRange, dbInfo := range StStorageInfo.Removed {
 		if dbInfo.Name == nameDB {
 			// dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
 			dbPath := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder)
@@ -47,7 +47,7 @@ func StrongRemoveDB(nameDB string) bool {
 				return false
 			}
 
-			StorageInfo.Removed = slices.Delete(StorageInfo.Removed, indRange, indRange+1)
+			StStorageInfo.Removed = slices.Delete(StStorageInfo.Removed, indRange, indRange+1)
 
 			return true
 		}
@@ -59,26 +59,26 @@ func StrongRemoveDB(nameDB string) bool {
 // Rename a database.
 func RenameDB(oldName, newName string, secure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newName) {
+	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(newName) {
 		return false
 	}
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StorageInfo.DBs[oldName]
-	dbAccess, okAccess := StorageInfo.Access[oldName]
+	dbInfo, okDB := StStorageInfo.DBs[oldName]
+	dbAccess, okAccess := StStorageInfo.Access[oldName]
 
 	if okDB && okAccess {
 		dbInfo.Name = newName
 		dbInfo.LastUpdate = time.Now()
 
-		delete(StorageInfo.DBs, oldName)
-		delete(StorageInfo.Access, oldName)
+		delete(StStorageInfo.DBs, oldName)
+		delete(StStorageInfo.Access, oldName)
 
-		StorageInfo.DBs[newName] = dbInfo
-		StorageInfo.Access[newName] = dbAccess
-		StorageInfo.Save()
+		StStorageInfo.DBs[newName] = dbInfo
+		StStorageInfo.Access[newName] = dbAccess
+		StStorageInfo.Save()
 
 		return dbInfo.Save()
 	}
@@ -89,16 +89,16 @@ func RenameDB(oldName, newName string, secure bool) bool {
 // Creating a new database.
 func CreateDB(nameDB string, owner string, secure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameDB) {
+	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(nameDB) {
 		return false
 	}
 
 	var folderDB string
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	_, ok := StorageInfo.DBs[nameDB]
+	_, ok := StStorageInfo.DBs[nameDB]
 	if ok {
 		return false
 	}
@@ -131,9 +131,9 @@ func CreateDB(nameDB string, owner string, secure bool) bool {
 		Flags: make(map[string]gtypes.TAccessFlags),
 	}
 
-	StorageInfo.DBs[nameDB] = dbInfo
-	StorageInfo.Access[nameDB] = dbAccess
-	StorageInfo.Save()
+	StStorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.Access[nameDB] = dbAccess
+	StStorageInfo.Save()
 
 	return dbInfo.Save()
 }

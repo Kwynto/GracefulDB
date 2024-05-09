@@ -13,10 +13,10 @@ import (
 // Marks the table as deleted, but does not delete files.
 func RemoveTable(nameDB, nameTable string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StStorageInfo.DBs[nameDB]
 	if !ok {
 		return false
 	}
@@ -35,7 +35,7 @@ func RemoveTable(nameDB, nameTable string) bool {
 	delete(dbInfo.Tables, nameTable)
 	dbInfo.LastUpdate = tNow
 
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[nameDB] = dbInfo
 
 	return dbInfo.Save()
 }
@@ -43,10 +43,10 @@ func RemoveTable(nameDB, nameTable string) bool {
 // Deletes the folder and table files, if table was mark as 'removed'
 func StrongRemoveTable(nameDB, nameTable string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StStorageInfo.DBs[nameDB]
 	if !ok {
 		return false
 	}
@@ -62,7 +62,7 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 
 			dbInfo.Removed = slices.Delete(dbInfo.Removed, indRange, indRange+1)
 			dbInfo.LastUpdate = time.Now()
-			StorageInfo.DBs[nameDB] = dbInfo
+			StStorageInfo.DBs[nameDB] = dbInfo
 
 			return dbInfo.Save()
 		}
@@ -74,14 +74,14 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 // Rename a table.
 func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newNameTable) {
+	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(newNameTable) {
 		return false
 	}
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StorageInfo.DBs[nameDB]
+	dbInfo, okDB := StStorageInfo.DBs[nameDB]
 	if okDB {
 		tableInfo, okTable := dbInfo.Tables[oldNameTable]
 		if !okTable {
@@ -97,7 +97,7 @@ func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
 		dbInfo.Tables[newNameTable] = tableInfo
 		dbInfo.LastUpdate = tNow
 
-		StorageInfo.DBs[nameDB] = dbInfo
+		StStorageInfo.DBs[nameDB] = dbInfo
 
 		return dbInfo.Save()
 	}
@@ -173,16 +173,16 @@ func TruncateTable(nameDB, nameTable string) bool {
 // Creating a new table.
 func CreateTable(nameDB, nameTable string, secure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameTable) {
+	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(nameTable) {
 		return false
 	}
 
 	var folderName string
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
+	dbInfo, ok := StStorageInfo.DBs[nameDB]
 	if !ok {
 		return false
 	}
@@ -230,7 +230,7 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 
 	dbInfo.Tables[nameTable] = tableInfo
 	dbInfo.LastUpdate = time.Now()
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[nameDB] = dbInfo
 
 	return dbInfo.Save()
 }
