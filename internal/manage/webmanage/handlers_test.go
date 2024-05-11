@@ -2402,7 +2402,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 
 		settings_core_friendly_change_sw(w1, r1) // calling the tested function
 		status := w1.Code
-		if status != http.StatusOK || !core.LocalCoreSettings.FriendlyMode {
+		if status != http.StatusOK || !core.StLocalCoreSettings.FriendlyMode {
 			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
 		}
 	})
@@ -2432,7 +2432,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 
 		settings_core_friendly_change_sw(w1, r1) // calling the tested function
 		status := w1.Code
-		if status != http.StatusOK || core.LocalCoreSettings.FriendlyMode {
+		if status != http.StatusOK || core.StLocalCoreSettings.FriendlyMode {
 			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
 		}
 	})

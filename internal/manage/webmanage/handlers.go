@@ -97,7 +97,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			}
 			ticket, err2 := gauth.NewAuth(&secret)
 			if err2 == nil {
-				core.States[ticket] = core.TState{
+				core.MStates[ticket] = core.TState{
 					CurrentDB: "",
 				}
 			}
@@ -776,9 +776,9 @@ func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 	} else {
 		config.StDefaultConfig.CoreSettings.FriendlyMode = true
 	}
-	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.StDefaultConfig)
+	core.StLocalCoreSettings = core.LoadLocalCoreSettings(&config.StDefaultConfig)
 	msg := "The friendly mode has been switched."
-	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.LocalCoreSettings.FriendlyMode)))
+	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.StLocalCoreSettings.FriendlyMode)))
 
 	nav_settings(w, r)
 }

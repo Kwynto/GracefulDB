@@ -75,7 +75,7 @@ func StrongRemoveColumn(sNameDB, sNameTable, sNameColumn string) bool {
 	for iColumnInd, stColumnVal := range stTableInfo.Removed {
 		if stColumnVal.Name == sNameColumn {
 			// columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-			sColumnPath := filepath.Join(LocalCoreSettings.Storage, stColumnVal.Parents, stColumnVal.Folder)
+			sColumnPath := filepath.Join(StLocalCoreSettings.Storage, stColumnVal.Parents, stColumnVal.Folder)
 			err := os.RemoveAll(sColumnPath)
 			if err != nil {
 				return false
@@ -204,7 +204,7 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 	}
 
 	// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-	sFolderPath := filepath.Join(LocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
+	sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
 
 	uMaxBucket := Pow(2, stTableInfo.BucketLog)
 	uHashId := uIdRow % uMaxBucket
@@ -266,7 +266,7 @@ func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpec
 	}
 
 	// pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-	sPathTable := filepath.Join(LocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
+	sPathTable := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
 
 	for {
 		sFolderName = GenerateName()

@@ -54,7 +54,7 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 	for indRange, tableInfo := range dbInfo.Removed {
 		if tableInfo.Name == nameTable {
 			// tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			tablePath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+			tablePath := filepath.Join(StLocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			err := os.RemoveAll(tablePath)
 			if err != nil {
 				return false
@@ -188,7 +188,7 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 	}
 
 	// pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
-	pathDB := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder)
+	pathDB := filepath.Join(StLocalCoreSettings.Storage, dbInfo.Folder)
 
 	for {
 		folderName = GenerateName()
@@ -220,7 +220,7 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		Removed:    make([]TColumnInfo, 0),
 		Order:      make([]string, 0),
 		BucketLog:  2,
-		BucketSize: LocalCoreSettings.BucketSize,
+		BucketSize: StLocalCoreSettings.BucketSize,
 		OldRev:     "",
 		CurrentRev: GenerateRev(),
 		Count:      0,

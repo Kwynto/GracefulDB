@@ -296,7 +296,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
-	if !core.LocalCoreSettings.FriendlyMode {
+	if !core.StLocalCoreSettings.FriendlyMode {
 		if _, isOk := core.GetDBInfo(sDB); !isOk {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
@@ -331,7 +331,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	// Request execution
 
-	core.States[sTicket] = core.TState{
+	core.MStates[sTicket] = core.TState{
 		CurrentDB: sDB,
 	}
 
@@ -391,7 +391,7 @@ func (q tQuery) DCLShow() (result string, err error) {
 	} else if isTables {
 		var slNamesTables []string = []string{}
 
-		stState, isOk := core.States[q.Ticket]
+		stState, isOk := core.MStates[q.Ticket]
 		if !isOk {
 			stRes.State = "error"
 			stRes.Result = "unknown database"

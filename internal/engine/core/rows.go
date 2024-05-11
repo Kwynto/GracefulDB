@@ -13,76 +13,76 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
-func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
+func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
-		resIds               = make([]uint64, 4)
-		progressIds []uint64 = make([]uint64, 4)
-		isDelete    bool     = false
+		slUResIds           = make([]uint64, 4)
+		slUProgressIds      = make([]uint64, 4)
+		isDelete       bool = false
 	)
 
-	if cond.Type != "operation" {
+	if stCond.Type != "operation" {
 		return []uint64{}
 	}
 
-	dbInfo, ok := GetDBInfo(additionalData.Db)
-	if !ok {
+	stDBInfo, isOk := GetDBInfo(stAdditionalData.Db)
+	if !isOk {
 		return []uint64{}
 	}
-	tableInfo := dbInfo.Tables[additionalData.Table]
+	stTableInfo := stDBInfo.Tables[stAdditionalData.Table]
 
-	if cond.Key == "_id" || cond.Key == "_time" || cond.Key == "_status" || cond.Key == "_shape" {
-		if cond.Key == "_id" {
+	if stCond.Key == "_id" || stCond.Key == "_time" || stCond.Key == "_status" || stCond.Key == "_shape" {
+		if stCond.Key == "_id" {
 			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
+			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
 			if err != nil {
 				return []uint64{}
 			}
 
-			files, err := os.ReadDir(folderPath)
+			slFiles, err := os.ReadDir(sFolderPath)
 			if err != nil {
 				return []uint64{}
 			}
 
-			for _, file := range files {
-				if !file.IsDir() {
-					fileName := file.Name()
-					if strings.Contains(fileName, tableInfo.CurrentRev) {
+			for _, fVal := range slFiles {
+				if !fVal.IsDir() {
+					sFileName := fVal.Name()
+					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-						fullNameFile := filepath.Join(folderPath, fileName)
-						fileText, err := ecowriter.FileRead(fullNameFile)
+						sFullNameFile := filepath.Join(sFolderPath, sFileName)
+						sFileText, err := ecowriter.FileRead(sFullNameFile)
 						if err != nil {
 							continue
 						}
-						fileData := strings.Split(fileText, "\n")
-						for _, line := range fileData {
-							lineData := strings.Split(line, "|")
-							valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
+						slSFileData := strings.Split(sFileText, "\n")
+						for _, sLine := range slSFileData {
+							slLineData := strings.Split(sLine, "|")
+							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 
-							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
 								continue
 							}
 
-							if valueShapeBase < 30 {
-								value, err := strconv.ParseUint(valueId, 10, 64)
+							if uValueShape < 30 {
+								uID, err := strconv.ParseUint(sValueId, 10, 64)
 								if err != nil {
 									continue
 								}
 
 								switch {
-								case cond.Operation == "<=" && value <= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">=" && value >= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "<" && value < valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">" && value > valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "=" && value == valueCond:
-									resIds = append(resIds, value)
+								case stCond.Operation == "<=" && uID <= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">=" && uID >= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "<" && uID < uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">" && uID > uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "=" && uID == uValueCond:
+									slUResIds = append(slUResIds, uID)
 									// case "like":
 									// 	return []uint64{}
 									// case "regexp":
@@ -95,61 +95,61 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 
-		if cond.Key == "_time" {
+		if stCond.Key == "_time" {
 			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
+			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
 			if err != nil {
 				return []uint64{}
 			}
 
-			files, err := os.ReadDir(folderPath)
+			slFiles, err := os.ReadDir(sFolderPath)
 			if err != nil {
 				return []uint64{}
 			}
 
-			for _, file := range files {
-				if !file.IsDir() {
-					fileName := file.Name()
-					if strings.Contains(fileName, tableInfo.CurrentRev) {
+			for _, fVal := range slFiles {
+				if !fVal.IsDir() {
+					sFileName := fVal.Name()
+					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-						fullNameFile := filepath.Join(folderPath, fileName)
-						fileText, err := ecowriter.FileRead(fullNameFile)
+						sFullNameFile := filepath.Join(sFolderPath, sFileName)
+						sFileText, err := ecowriter.FileRead(sFullNameFile)
 						if err != nil {
 							continue
 						}
-						fileData := strings.Split(fileText, "\n")
-						for _, line := range fileData {
-							lineData := strings.Split(line, "|")
-							valueId, valueTime, valueShape := lineData[0], lineData[1], lineData[3] // id, time, status, shape
+						slFileData := strings.Split(sFileText, "\n")
+						for _, sLine := range slFileData {
+							slLineData := strings.Split(sLine, "|")
+							sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
 
-							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
 								continue
 							}
 
-							if valueShapeBase < 30 {
-								value, err := strconv.ParseUint(valueId, 10, 64)
+							if uValueShape < 30 {
+								uID, err := strconv.ParseUint(sValueId, 10, 64)
 								if err != nil {
 									continue
 								}
-								valueTimeBase, err := strconv.ParseUint(valueTime, 10, 64)
+								uValueTime, err := strconv.ParseUint(sValueTime, 10, 64)
 								if err != nil {
 									continue
 								}
 
 								switch {
-								case cond.Operation == "<=" && valueTimeBase <= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">=" && valueTimeBase >= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "<" && valueTimeBase < valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">" && valueTimeBase > valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "=" && valueTimeBase == valueCond:
-									resIds = append(resIds, value)
+								case stCond.Operation == "<=" && uValueTime <= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">=" && uValueTime >= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "<" && uValueTime < uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">" && uValueTime > uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "=" && uValueTime == uValueCond:
+									slUResIds = append(slUResIds, uID)
 									// case "like":
 									// 	return []uint64{}
 									// case "regexp":
@@ -162,61 +162,61 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 
-		if cond.Key == "_status" {
+		if stCond.Key == "_status" {
 			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
+			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
 			if err != nil {
 				return []uint64{}
 			}
 
-			files, err := os.ReadDir(folderPath)
+			slFiles, err := os.ReadDir(sFolderPath)
 			if err != nil {
 				return []uint64{}
 			}
 
-			for _, file := range files {
-				if !file.IsDir() {
-					fileName := file.Name()
-					if strings.Contains(fileName, tableInfo.CurrentRev) {
+			for _, fVal := range slFiles {
+				if !fVal.IsDir() {
+					sFileName := fVal.Name()
+					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-						fullNameFile := filepath.Join(folderPath, fileName)
-						fileText, err := ecowriter.FileRead(fullNameFile)
+						sFullNameFile := filepath.Join(sFolderPath, sFileName)
+						sFileText, err := ecowriter.FileRead(sFullNameFile)
 						if err != nil {
 							continue
 						}
-						fileData := strings.Split(fileText, "\n")
-						for _, line := range fileData {
-							lineData := strings.Split(line, "|")
-							valueId, valueStatus, valueShape := lineData[0], lineData[2], lineData[3] // id, time, status, shape
+						slFileData := strings.Split(sFileText, "\n")
+						for _, sVal := range slFileData {
+							slLineData := strings.Split(sVal, "|")
+							sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
 
-							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
 								continue
 							}
 
-							if valueShapeBase < 30 {
-								value, err := strconv.ParseUint(valueId, 10, 64)
+							if uValueShape < 30 {
+								uID, err := strconv.ParseUint(sValueId, 10, 64)
 								if err != nil {
 									continue
 								}
-								valueStatusBase, err := strconv.ParseUint(valueStatus, 10, 64)
+								uValueStatus, err := strconv.ParseUint(sValueStatus, 10, 64)
 								if err != nil {
 									continue
 								}
 
 								switch {
-								case cond.Operation == "<=" && valueStatusBase <= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">=" && valueStatusBase >= valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "<" && valueStatusBase < valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == ">" && valueStatusBase > valueCond:
-									resIds = append(resIds, value)
-								case cond.Operation == "=" && valueStatusBase == valueCond:
-									resIds = append(resIds, value)
+								case stCond.Operation == "<=" && uValueStatus <= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">=" && uValueStatus >= uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "<" && uValueStatus < uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == ">" && uValueStatus > uValueCond:
+									slUResIds = append(slUResIds, uID)
+								case stCond.Operation == "=" && uValueStatus == uValueCond:
+									slUResIds = append(slUResIds, uID)
 									// case "like":
 									// 	return []uint64{}
 									// case "regexp":
@@ -229,54 +229,54 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 
-		if cond.Key == "_shape" {
+		if stCond.Key == "_shape" {
 			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			folderPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
+			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-			valueCond, err := strconv.ParseUint(cond.Value, 10, 64)
+			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
 			if err != nil {
 				return []uint64{}
 			}
 
-			files, err := os.ReadDir(folderPath)
+			slFiles, err := os.ReadDir(sFolderPath)
 			if err != nil {
 				return []uint64{}
 			}
 
-			for _, file := range files {
-				if !file.IsDir() {
-					fileName := file.Name()
-					if strings.Contains(fileName, tableInfo.CurrentRev) {
+			for _, fVal := range slFiles {
+				if !fVal.IsDir() {
+					sFileName := fVal.Name()
+					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-						fullNameFile := filepath.Join(folderPath, fileName)
-						fileText, err := ecowriter.FileRead(fullNameFile)
+						sFullNameFile := filepath.Join(sFolderPath, sFileName)
+						sFileText, err := ecowriter.FileRead(sFullNameFile)
 						if err != nil {
 							continue
 						}
-						fileData := strings.Split(fileText, "\n")
-						for _, line := range fileData {
-							lineData := strings.Split(line, "|")
-							valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
-							value, err := strconv.ParseUint(valueId, 10, 64)
+						slFileData := strings.Split(sFileText, "\n")
+						for _, sLine := range slFileData {
+							slLineData := strings.Split(sLine, "|")
+							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+							uID, err := strconv.ParseUint(sValueId, 10, 64)
 							if err != nil {
 								continue
 							}
-							valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
 								continue
 							}
 
 							switch {
-							case cond.Operation == "<=" && valueShapeBase <= valueCond:
-								resIds = append(resIds, value)
-							case cond.Operation == ">=" && valueShapeBase >= valueCond:
-								resIds = append(resIds, value)
-							case cond.Operation == "<" && valueShapeBase < valueCond:
-								resIds = append(resIds, value)
-							case cond.Operation == ">" && valueShapeBase > valueCond:
-								resIds = append(resIds, value)
-							case cond.Operation == "=" && valueShapeBase == valueCond:
-								resIds = append(resIds, value)
+							case stCond.Operation == "<=" && uValueShape <= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">=" && uValueShape >= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "<" && uValueShape < uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">" && uValueShape > uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "=" && uValueShape == uValueCond:
+								slUResIds = append(slUResIds, uID)
 								// case "like":
 								// 	return []uint64{}
 								// case "regexp":
@@ -288,50 +288,50 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 			}
 		}
 	} else {
-		valueCond := Encode64(cond.Value)
+		sValueCond := Encode64(stCond.Value)
 
-		columnInfo, ok := tableInfo.Columns[cond.Key]
-		if !ok {
+		stColumnInfo, isOk := stTableInfo.Columns[stCond.Key]
+		if !isOk {
 			return []uint64{}
 		}
 
 		// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-		folderPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-		files, err := os.ReadDir(folderPath)
+		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
+		slFiles, err := os.ReadDir(sFolderPath)
 		if err != nil {
 			return []uint64{}
 		}
 
-		for _, file := range files {
-			if !file.IsDir() {
-				fileName := file.Name()
-				if strings.Contains(fileName, tableInfo.CurrentRev) {
+		for _, fVal := range slFiles {
+			if !fVal.IsDir() {
+				sFileName := fVal.Name()
+				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 					// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
-					fullNameFile := filepath.Join(folderPath, fileName)
-					fileText, err := ecowriter.FileRead(fullNameFile)
+					sFullNameFile := filepath.Join(sFolderPath, sFileName)
+					sFileText, err := ecowriter.FileRead(sFullNameFile)
 					if err != nil {
 						continue
 					}
-					fileData := strings.Split(fileText, "\n")
-					for _, line := range fileData {
-						lineData := strings.Split(line, "|")
-						valueId, valueData := lineData[0], lineData[1] // id, [data]
-						value, err := strconv.ParseUint(valueId, 10, 64)
+					slFileData := strings.Split(sFileText, "\n")
+					for _, sLine := range slFileData {
+						slLineData := strings.Split(sLine, "|")
+						sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
+						uID, err := strconv.ParseUint(sValueId, 10, 64)
 						if err != nil {
 							continue
 						}
 
 						switch {
-						case cond.Operation == "<=" && valueData <= valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == ">=" && valueData >= valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == "<" && valueData < valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == ">" && valueData > valueCond:
-							progressIds = append(progressIds, value)
-						case cond.Operation == "=" && valueData == valueCond:
-							progressIds = append(progressIds, value)
+						case stCond.Operation == "<=" && sValueData <= sValueCond:
+							slUProgressIds = append(slUProgressIds, uID)
+						case stCond.Operation == ">=" && sValueData >= sValueCond:
+							slUProgressIds = append(slUProgressIds, uID)
+						case stCond.Operation == "<" && sValueData < sValueCond:
+							slUProgressIds = append(slUProgressIds, uID)
+						case stCond.Operation == ">" && sValueData > sValueCond:
+							slUProgressIds = append(slUProgressIds, uID)
+						case stCond.Operation == "=" && sValueData == sValueCond:
+							slUProgressIds = append(slUProgressIds, uID)
 							// case "like":
 							// 	return []uint64{}
 							// case "regexp":
@@ -343,84 +343,84 @@ func findWhereIds(cond gtypes.TConditions, additionalData gtypes.TAdditionalData
 		}
 
 		// checking on system records
-		slices.Sort(progressIds)
-		progressIds = slices.Compact(progressIds)
-		progressIds = slices.Clip(progressIds)
+		slices.Sort(slUProgressIds)
+		slUProgressIds = slices.Compact(slUProgressIds)
+		slUProgressIds = slices.Clip(slUProgressIds)
 
 		// folderSysPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-		folderSysPath := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder, "service")
+		sFolderSysPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-		for _, id := range progressIds {
-			maxBucket := Pow(2, tableInfo.BucketLog)
-			hashid := id % maxBucket
-			if hashid == 0 {
-				hashid = maxBucket
+		for _, uIDVal := range slUProgressIds {
+			uMaxBucket := Pow(2, stTableInfo.BucketLog)
+			uHashID := uIDVal % uMaxBucket
+			if uHashID == 0 {
+				uHashID = uMaxBucket
 			}
 
 			// fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
-			fullNameFile := filepath.Join(folderSysPath, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
-			fileText, err := ecowriter.FileRead(fullNameFile)
+			sFullNameFile := filepath.Join(sFolderSysPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashID))
+			sFileText, err := ecowriter.FileRead(sFullNameFile)
 			if err != nil {
 				continue
 			}
 
-			fileData := strings.Split(fileText, "\n")
+			slFileData := strings.Split(sFileText, "\n")
 
 			isDelete = false
 
-			for _, line := range fileData {
-				lineData := strings.Split(line, "|")
-				valueId, valueShape := lineData[0], lineData[3] // id, time, status, shape
+			for _, sLine := range slFileData {
+				slLineData := strings.Split(sLine, "|")
+				sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 
-				value, err := strconv.ParseUint(valueId, 10, 64)
+				uValue, err := strconv.ParseUint(sValueId, 10, 64)
 				if err != nil {
 					continue
 				}
-				valueShapeBase, err := strconv.ParseUint(valueShape, 10, 64)
+				uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 				if err != nil {
 					continue
 				}
 
-				if value == id && valueShapeBase == 30 {
+				if uValue == uIDVal && uValueShape == 30 {
 					isDelete = true
 				}
 			}
 
 			if !isDelete {
-				resIds = append(resIds, id)
+				slUResIds = append(slUResIds, uIDVal)
 			}
 		}
 	}
 
-	slices.Sort(resIds)
-	resIds = slices.Compact(resIds)
-	resIds = slices.Clip(resIds)
+	slices.Sort(slUResIds)
+	slUResIds = slices.Compact(slUResIds)
+	slUResIds = slices.Clip(slUResIds)
 
-	return resIds
+	return slUResIds
 }
 
-func mergeOr(first, second []uint64) []uint64 {
+func mergeOr(slUFirst, slUSecond []uint64) []uint64 {
 	// This function is complete
-	resIds := append(first, second...)
-	slices.Sort(resIds)
-	resIds = slices.Compact(resIds)
+	slUResIds := append(slUFirst, slUSecond...)
+	slices.Sort(slUResIds)
+	slUResIds = slices.Compact(slUResIds)
 
-	resIds = slices.Clip(resIds)
-	return resIds
+	slUResIds = slices.Clip(slUResIds)
+	return slUResIds
 }
 
-func mergeAnd(first, second []uint64) []uint64 {
+func mergeAnd(slUFirst, slUSecond []uint64) []uint64 {
 	// This function is complete
-	var resIds = make([]uint64, 4)
+	var slUResIds = make([]uint64, 4)
 
-	for _, sElem := range second {
-		if slices.Contains(first, sElem) {
-			resIds = append(resIds, sElem)
+	for _, uElem := range slUSecond {
+		if slices.Contains(slUFirst, uElem) {
+			slUResIds = append(slUResIds, uElem)
 		}
 	}
 
-	resIds = slices.Clip(resIds)
-	return resIds
+	slUResIds = slices.Clip(slUResIds)
+	return slUResIds
 }
 
 func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {

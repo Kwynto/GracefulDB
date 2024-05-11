@@ -34,36 +34,36 @@ type tStorageInfo struct {
 	Access  map[string]gtypes.TAccess `json:"access"`  // [name db] - TAccess
 }
 
-func GetDBInfo(nameDB string) (TDBInfo, bool) {
+func GetDBInfo(sNameDB string) (TDBInfo, bool) {
 	// This function is complete
 	mxStorageBlock.RLock()
 	defer mxStorageBlock.RUnlock()
 
-	info, ok := StStorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return TDBInfo{}, false
 	}
 
-	return info, true
+	return stDBInfo, true
 }
 
-func GetDBAccess(nameDB string) (gtypes.TAccess, bool) {
+func GetDBAccess(sNameDB string) (gtypes.TAccess, bool) {
 	// This function is complete
 	mxStorageBlock.RLock()
 	defer mxStorageBlock.RUnlock()
 
-	access, ok := StStorageInfo.Access[nameDB]
-	if !ok {
+	stAccess, isOk := StStorageInfo.Access[sNameDB]
+	if !isOk {
 		return gtypes.TAccess{}, false
 	}
 
-	return access, true
+	return stAccess, true
 }
 
-func SetAccessFlags(db, user string, flags gtypes.TAccessFlags) {
+func SetAccessFlags(sDB, sUser string, stFlags gtypes.TAccessFlags) {
 	// This procedure is complete
 	mxStorageBlock.Lock()
-	StStorageInfo.Access[db].Flags[user] = flags
+	StStorageInfo.Access[sDB].Flags[sUser] = stFlags
 	StStorageInfo.Save()
 	mxStorageBlock.Unlock()
 }
@@ -73,38 +73,38 @@ func (s *tStorageInfo) Load() bool {
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
-	var dbInfo TDBInfo
+	var stDBInfo TDBInfo
 
 	s.DBs = make(map[string]TDBInfo)
 	s.Removed = make([]TDBInfo, 0)
 	s.Access = make(map[string]gtypes.TAccess)
 
-	files, err := os.ReadDir(LocalCoreSettings.Storage)
+	slFiles, err := os.ReadDir(StLocalCoreSettings.Storage)
 	if err != nil {
 		return false
 	}
 
-	for _, file := range files {
+	for _, file := range slFiles {
 		if file.IsDir() {
-			nameDir := file.Name()
+			sNameDir := file.Name()
 			// dbInfoFile := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
-			dbInfoFile := filepath.Join(LocalCoreSettings.Storage, nameDir, INFOFILE_DB)
-			err := ecowriter.ReadJSON(dbInfoFile, &dbInfo)
+			sDBInfoFile := filepath.Join(StLocalCoreSettings.Storage, sNameDir, INFOFILE_DB)
+			err := ecowriter.ReadJSON(sDBInfoFile, &stDBInfo)
 			if err == nil {
-				if dbInfo.Deleted {
-					s.Removed = append(s.Removed, dbInfo)
+				if stDBInfo.Deleted {
+					s.Removed = append(s.Removed, stDBInfo)
 				} else {
-					s.DBs[dbInfo.Name] = dbInfo
+					s.DBs[stDBInfo.Name] = stDBInfo
 				}
 			}
 		}
 	}
 
-	infoStorageFile := filepath.Join(LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	errR := ecowriter.ReadJSON(infoStorageFile, &s.Access)
+	sInfoStorageFile := filepath.Join(StLocalCoreSettings.Storage, INFOFILE_STORAGE)
+	errR := ecowriter.ReadJSON(sInfoStorageFile, &s.Access)
 	if errR != nil {
 		s.Access = make(map[string]gtypes.TAccess)
-		err := ecowriter.WriteJSON(infoStorageFile, s.Access)
+		err := ecowriter.WriteJSON(sInfoStorageFile, s.Access)
 		if err != nil {
 			return false
 		}
@@ -117,8 +117,8 @@ func (s *tStorageInfo) Save() bool {
 	// This method is complete
 	// Don't use mutex
 	// infoStorageFile := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	infoStorageFile := filepath.Join(LocalCoreSettings.Storage, INFOFILE_STORAGE)
-	return ecowriter.WriteJSON(infoStorageFile, s.Access) == nil
+	sInfoStorageFile := filepath.Join(StLocalCoreSettings.Storage, INFOFILE_STORAGE)
+	return ecowriter.WriteJSON(sInfoStorageFile, s.Access) == nil
 }
 
 type TDBInfo struct {
@@ -135,8 +135,8 @@ func (d TDBInfo) Save() bool {
 	// This method is complete
 	// Don't use mutex
 	// path := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
-	path := filepath.Join(LocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
-	return ecowriter.WriteJSON(path, d) == nil
+	sPath := filepath.Join(StLocalCoreSettings.Storage, d.Folder, INFOFILE_DB)
+	return ecowriter.WriteJSON(sPath, d) == nil
 }
 
 type TTableInfo struct {
@@ -170,7 +170,7 @@ type TState struct {
 	CurrentDB string
 }
 
-var LocalCoreSettings tCoreSettings = tCoreSettings{
+var StLocalCoreSettings tCoreSettings = tCoreSettings{
 	Storage:      "./data",
 	BucketSize:   800,
 	FriendlyMode: true,
@@ -181,7 +181,7 @@ var StStorageInfo tStorageInfo = tStorageInfo{
 	// Removed: make([]tDBInfo, 0),
 }
 
-var States map[string]TState // ticket -> tState
+var MStates map[string]TState // ticket -> tState
 
 func LoadLocalCoreSettings(cfg *config.TConfig) tCoreSettings {
 	// This function is complete
@@ -194,14 +194,14 @@ func LoadLocalCoreSettings(cfg *config.TConfig) tCoreSettings {
 
 func Start(cfg *config.TConfig) {
 	// -
-	LocalCoreSettings = LoadLocalCoreSettings(cfg)
+	StLocalCoreSettings = LoadLocalCoreSettings(cfg)
 	// RegExpCollection = CompileRegExpCollection()
 
 	if !StStorageInfo.Load() {
 		slog.Error("Storage activation error !!!")
 	}
 
-	States = make(map[string]TState)
+	MStates = make(map[string]TState)
 
 	go WriteBufferService()
 

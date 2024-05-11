@@ -28,56 +28,56 @@ func GenerateRev() string {
 }
 
 // Checking the folder name
-func CheckFolder(path, name string) bool {
+func CheckFolder(sPath, sName string) bool {
 	// This function is complete
 	// fullPath := fmt.Sprintf("%s%s", patch, name)
-	fullPath := filepath.Join(path, name)
-	dir, err := os.Stat(fullPath)
+	sFullPath := filepath.Join(sPath, sName)
+	fDir, err := os.Stat(sFullPath)
 	if err != nil {
 		return false
 	}
 
-	return dir.IsDir()
+	return fDir.IsDir()
 }
 
-func Uint64ToBinary(i uint64) []byte {
-	bs := make([]byte, 8)
-	binary.BigEndian.PutUint64(bs, i)
-	return bs
+func Uint64ToBinary(u uint64) []byte {
+	slB := make([]byte, 8)
+	binary.BigEndian.PutUint64(slB, u)
+	return slB
 }
 
-func BinaryToUint64(b []byte) uint64 {
-	i := binary.BigEndian.Uint64(b)
-	return i
+func BinaryToUint64(slB []byte) uint64 {
+	u := binary.BigEndian.Uint64(slB)
+	return u
 }
 
-func Encode64(input string) string { // input - ordinary string
-	return base64.StdEncoding.EncodeToString([]byte(input))
+func Encode64(sInput string) string { // sInput - ordinary string
+	return base64.StdEncoding.EncodeToString([]byte(sInput))
 }
 
-func Decode64(input string) string { // input - base64 string
-	decodeData, err := base64.StdEncoding.DecodeString(input)
+func Decode64(sInput string) string { // sInput - base64 string
+	slBData, err := base64.StdEncoding.DecodeString(sInput)
 	if err != nil {
 		return ""
 	}
-	return string(decodeData)
+	return string(slBData)
 }
 
-func intPow(acc, base uint64, exponent uint8) uint64 {
+func intPow(uAcc, uBase uint64, uExponent uint8) uint64 {
 	// This function is complete
-	if exponent == 1 {
-		return acc
+	if uExponent == 1 {
+		return uAcc
 	}
-	return intPow(acc*base, base, exponent-1)
+	return intPow(uAcc*uBase, uBase, uExponent-1)
 }
 
-func Pow(base uint64, exponent uint8) uint64 {
+func Pow(uBase uint64, uExponent uint8) uint64 {
 	// This function is complete
-	if exponent == 0 {
+	if uExponent == 0 {
 		return 1
 	}
-	if exponent == 1 {
-		return base
+	if uExponent == 1 {
+		return uBase
 	}
-	return intPow(base*base, base, exponent-1)
+	return intPow(uBase*uBase, uBase, uExponent-1)
 }

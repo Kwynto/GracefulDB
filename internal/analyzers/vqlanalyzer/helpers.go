@@ -173,7 +173,7 @@ func preChecker(sTicket string) (sLogin string, sDB string, stAccess gauth.TProf
 		return sLogin, sDB, stAccess, sNewTicket, errors.New("auth error")
 	}
 
-	stState, isOk := core.States[sTicket]
+	stState, isOk := core.MStates[sTicket]
 	if !isOk {
 		return sLogin, sDB, stAccess, sNewTicket, errors.New("unknown database")
 	}
@@ -236,7 +236,7 @@ labelCheck:
 
 		_, isOkTable := stDBInfo.Tables[sTable]
 		if !isOkTable {
-			if core.LocalCoreSettings.FriendlyMode {
+			if core.StLocalCoreSettings.FriendlyMode {
 				if !core.CreateTable(sDB, sTable, true) {
 					return isLuxUser, stFlagsAcs, errors.New("invalid table name")
 				}
@@ -270,7 +270,7 @@ labelCheck:
 		return isLuxUser, stFlagsAcs, nil
 
 	} else {
-		if core.LocalCoreSettings.FriendlyMode {
+		if core.StLocalCoreSettings.FriendlyMode {
 			if !core.CreateDB(sDB, sLogin, true) {
 				return isLuxUser, stFlagsAcs, errors.New("invalid database name")
 			}

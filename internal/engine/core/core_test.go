@@ -19,7 +19,7 @@ func Test_LoadLocalCoreSettings(t *testing.T) {
 func Test_Start(t *testing.T) {
 	t.Run("Start() function testing", func(t *testing.T) {
 		Start(&config.StDefaultConfig)
-		if reflect.TypeOf(LocalCoreSettings) != reflect.TypeOf(tCoreSettings{}) {
+		if reflect.TypeOf(StLocalCoreSettings) != reflect.TypeOf(tCoreSettings{}) {
 			t.Error("Start() error = The function returns the wrong type")
 		}
 	})
