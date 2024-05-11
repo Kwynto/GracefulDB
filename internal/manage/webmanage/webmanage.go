@@ -73,7 +73,7 @@ func routes() *http.ServeMux {
 	return mux
 }
 
-func Start(cfg *config.Config) {
+func Start(cfg *config.TConfig) {
 	// This function is completes
 	parseTemplates()
 

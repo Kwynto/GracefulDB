@@ -38,9 +38,9 @@ func Test_Start(t *testing.T) {
 	t.Run("Start() function testing", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
 		config.MustLoad(tf)
-		config.DefaultConfig.GrpcConnector.Address = "256.256.256.256" // Creating an error
+		config.StDefaultConfig.GrpcConnector.Address = "256.256.256.256" // Creating an error
 
-		go Start(&config.DefaultConfig)
+		go Start(&config.StDefaultConfig)
 		time.Sleep(1 * time.Second)
 
 		config.MustLoad(tf)
@@ -55,7 +55,7 @@ func Test_Shutdown(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
 		config.MustLoad(tf)
 
-		go Start(&config.DefaultConfig)
+		go Start(&config.StDefaultConfig)
 		closer.AddHandler(Shutdown)
 		time.Sleep(1 * time.Second)
 

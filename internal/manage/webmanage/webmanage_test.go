@@ -25,7 +25,7 @@ func Test_Start_and_Shutdown(t *testing.T) {
 	t.Run("Start() and Shutdown() function testing", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
 		config.MustLoad(tf)
-		go Start(&config.DefaultConfig) // calling the tested function
+		go Start(&config.StDefaultConfig) // calling the tested function
 		closer.AddHandler(Shutdown)
 		time.Sleep(2 * time.Second)
 		// srvRest.Shutdown(context.Background())

@@ -11,97 +11,97 @@ import (
 )
 
 var (
-	fileSystemBlock sync.RWMutex
+	mxFileSystemBlock sync.RWMutex
 )
 
 func writeBufferToDisk() bool {
 	// This function is complete
-	var rows *[]gtypes.TRowForStore
+	var rSlRows *[]gtypes.TRowForStore
 
-	WriteBuffer.Block.Lock()
-	workBuff := WriteBuffer.Switch
-	switch workBuff {
+	StWriteBuffer.Block.Lock()
+	uWorkBuff := StWriteBuffer.Switch
+	switch uWorkBuff {
 	case 1:
-		WriteBuffer.Switch = 2
+		StWriteBuffer.Switch = 2
 	case 2:
-		WriteBuffer.Switch = 1
+		StWriteBuffer.Switch = 1
 	}
-	WriteBuffer.Block.Unlock()
+	StWriteBuffer.Block.Unlock()
 
-	switch workBuff {
+	switch uWorkBuff {
 	case 1:
-		WriteBuffer.FirstBox.BlockBuf.Lock()
-		defer WriteBuffer.FirstBox.BlockBuf.Unlock()
-		rows = &WriteBuffer.FirstBox.Area
+		StWriteBuffer.FirstBox.BlockBuf.Lock()
+		defer StWriteBuffer.FirstBox.BlockBuf.Unlock()
+		rSlRows = &StWriteBuffer.FirstBox.Area
 	case 2:
-		WriteBuffer.SecondBox.BlockBuf.Lock()
-		defer WriteBuffer.SecondBox.BlockBuf.Unlock()
-		rows = &WriteBuffer.SecondBox.Area
+		StWriteBuffer.SecondBox.BlockBuf.Lock()
+		defer StWriteBuffer.SecondBox.BlockBuf.Unlock()
+		rSlRows = &StWriteBuffer.SecondBox.Area
 	}
 
-	fileSystemBlock.Lock()
-	defer fileSystemBlock.Unlock()
+	mxFileSystemBlock.Lock()
+	defer mxFileSystemBlock.Unlock()
 
-	for _, row := range *rows {
-		dbInfo, _ := GetDBInfo(row.DB)
-		tableInfo := dbInfo.Tables[row.Table]
+	for _, stRow := range *rSlRows {
+		stDBInfo, _ := GetDBInfo(stRow.DB)
+		stTableInfo := stDBInfo.Tables[stRow.Table]
 
-		serviceCol := fmt.Sprintf("%d|%d|1|%d\n", row.Id, row.Time, row.Shape)
+		sServiceCol := fmt.Sprintf("%d|%d|1|%d\n", stRow.Id, stRow.Time, stRow.Shape)
 
-		maxBucket := Pow(2, tableInfo.BucketLog)
-		hashid := row.Id % maxBucket
-		if hashid == 0 {
-			hashid = maxBucket
+		uMaxBucket := Pow(2, stTableInfo.BucketLog)
+		uHashId := stRow.Id % uMaxBucket
+		if uHashId == 0 {
+			uHashId = uMaxBucket
 		}
 
 		// sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
-		sFileName := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, fmt.Sprintf("service/%s_%d", tableInfo.CurrentRev, hashid))
-		srwFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		sFileName := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder, stTableInfo.Folder, fmt.Sprintf("service/%s_%d", stTableInfo.CurrentRev, uHashId))
+		fFileName, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if err != nil {
 			return false
 		}
-		if _, err := srwFile.WriteString(serviceCol); err != nil {
-			srwFile.Close()
+		if _, err := fFileName.WriteString(sServiceCol); err != nil {
+			fFileName.Close()
 			return false
 		}
-		srwFile.Close()
+		fFileName.Close()
 
-		head := fmt.Sprintf("%d|", row.Id)
-		for _, col := range row.Row {
-			fullValue := fmt.Sprintf("%s%s\n", head, col.Value)
+		sHead := fmt.Sprintf("%d|", stRow.Id)
+		for _, stCol := range stRow.Row {
+			sFullValue := fmt.Sprintf("%s%s\n", sHead, stCol.Value)
 
-			colInfo := tableInfo.Columns[col.Field]
+			stColInfo := stTableInfo.Columns[stCol.Field]
 			// path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
-			path := filepath.Join(LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
+			sPath := filepath.Join(StLocalCoreSettings.Storage, stColInfo.Parents, stColInfo.Folder)
 
 			// fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
-			fileName := filepath.Join(path, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
+			sFileName := filepath.Join(sPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
 
-			rwFile, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+			fRWFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 			if err != nil {
 				return false
 			}
 
-			if _, err := rwFile.WriteString(fullValue); err != nil {
-				rwFile.Close()
+			if _, err := fRWFile.WriteString(sFullValue); err != nil {
+				fRWFile.Close()
 				return false
 			}
-			rwFile.Close()
+			fRWFile.Close()
 		}
 	}
 
-	switch workBuff {
+	switch uWorkBuff {
 	case 1:
 		if rand.Intn(100) == 0 {
-			WriteBuffer.FirstBox.Area = nil
+			StWriteBuffer.FirstBox.Area = nil
 		} else {
-			WriteBuffer.FirstBox.Area = WriteBuffer.FirstBox.Area[:0]
+			StWriteBuffer.FirstBox.Area = StWriteBuffer.FirstBox.Area[:0]
 		}
 	case 2:
 		if rand.Intn(100) == 0 {
-			WriteBuffer.SecondBox.Area = nil
+			StWriteBuffer.SecondBox.Area = nil
 		} else {
-			WriteBuffer.SecondBox.Area = WriteBuffer.SecondBox.Area[:0]
+			StWriteBuffer.SecondBox.Area = StWriteBuffer.SecondBox.Area[:0]
 		}
 	}
 

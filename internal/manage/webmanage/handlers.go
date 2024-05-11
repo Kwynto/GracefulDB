@@ -97,7 +97,7 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			}
 			ticket, err2 := gauth.NewAuth(&secret)
 			if err2 == nil {
-				core.States[ticket] = core.TState{
+				core.MStates[ticket] = core.TState{
 					CurrentDB: "",
 				}
 			}
@@ -343,18 +343,18 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var table = make([]TViewAccountsTable, 0, 10)
-	for key := range gauth.HashMap {
+	for key := range gauth.MHash {
 		element := TViewAccountsTable{
 			System:      false,
 			Superuser:   false,
 			Baned:       false,
 			Login:       key,
-			Status:      gauth.AccessMap[key].Status.String(),
+			Status:      gauth.MAccess[key].Status.String(),
 			Roles:       "",
-			Description: gauth.AccessMap[key].Description,
+			Description: gauth.MAccess[key].Description,
 		}
 
-		for _, role := range gauth.AccessMap[key].Roles {
+		for _, role := range gauth.MAccess[key].Roles {
 			if role == gauth.SYSTEM {
 				element.System = true
 			}
@@ -364,7 +364,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 		if key == "root" {
 			element.Superuser = true
 		}
-		if gauth.AccessMap[key].Status == gauth.BANED {
+		if gauth.MAccess[key].Status == gauth.BANED {
 			element.Baned = true
 		}
 
@@ -761,7 +761,7 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := config.DefaultConfig
+	data := config.StDefaultConfig
 	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
 }
 
@@ -771,14 +771,14 @@ func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.CoreSettings.FriendlyMode {
-		config.DefaultConfig.CoreSettings.FriendlyMode = false
+	if config.StDefaultConfig.CoreSettings.FriendlyMode {
+		config.StDefaultConfig.CoreSettings.FriendlyMode = false
 	} else {
-		config.DefaultConfig.CoreSettings.FriendlyMode = true
+		config.StDefaultConfig.CoreSettings.FriendlyMode = true
 	}
-	core.LocalCoreSettings = core.LoadLocalCoreSettings(&config.DefaultConfig)
+	core.StLocalCoreSettings = core.LoadLocalCoreSettings(&config.StDefaultConfig)
 	msg := "The friendly mode has been switched."
-	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.LocalCoreSettings.FriendlyMode)))
+	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.StLocalCoreSettings.FriendlyMode)))
 
 	nav_settings(w, r)
 }
@@ -789,12 +789,12 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.WebSocketConnector.Enable {
-		config.DefaultConfig.WebSocketConnector.Enable = false
+	if config.StDefaultConfig.WebSocketConnector.Enable {
+		config.StDefaultConfig.WebSocketConnector.Enable = false
 		closer.RunAndDelHandler(websocketconn.Shutdown)
 	} else {
-		config.DefaultConfig.WebSocketConnector.Enable = true
-		go websocketconn.Start(&config.DefaultConfig)
+		config.StDefaultConfig.WebSocketConnector.Enable = true
+		go websocketconn.Start(&config.StDefaultConfig)
 		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "WebSocketConnector"))
@@ -808,12 +808,12 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.RestConnector.Enable {
-		config.DefaultConfig.RestConnector.Enable = false
+	if config.StDefaultConfig.RestConnector.Enable {
+		config.StDefaultConfig.RestConnector.Enable = false
 		closer.RunAndDelHandler(rest.Shutdown)
 	} else {
-		config.DefaultConfig.RestConnector.Enable = true
-		go rest.Start(&config.DefaultConfig)
+		config.StDefaultConfig.RestConnector.Enable = true
+		go rest.Start(&config.StDefaultConfig)
 		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "RestConnector"))
@@ -827,12 +827,12 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if config.DefaultConfig.GrpcConnector.Enable {
-		config.DefaultConfig.GrpcConnector.Enable = false
+	if config.StDefaultConfig.GrpcConnector.Enable {
+		config.StDefaultConfig.GrpcConnector.Enable = false
 		closer.RunAndDelHandler(grpc.Shutdown)
 	} else {
-		config.DefaultConfig.GrpcConnector.Enable = true
-		go grpc.Start(&config.DefaultConfig)
+		config.StDefaultConfig.GrpcConnector.Enable = true
+		go grpc.Start(&config.StDefaultConfig)
 		closer.AddHandler(grpc.Shutdown) // Register a shutdown handler.
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "GrpcConnector"))

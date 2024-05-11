@@ -19,11 +19,11 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
-		resultRow []gtypes.TResponseRow
-		okSelect  bool
-		res       gtypes.TResponse
-		resSelect gtypes.TResponseSelect
-		selectIn  = gtypes.TSelectStruct{
+		stResultRow []gtypes.TResponseRow
+		isOkSelect  bool
+		stRes       gtypes.TResponse
+		stResSelect gtypes.TResponseSelect
+		stSelectIn  = gtypes.TSelectStruct{
 			Orderby: gtypes.TOrderBy{
 				Cols: make([]string, 0, 4),
 				Sort: make([]uint8, 0, 4),
@@ -40,129 +40,129 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		resSelect.Ticket = newticket
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stResSelect.Ticket = sNewTicket
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
-	instruction := vqlexp.RegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sInstruction := vqlexp.MRegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
 
-	orderbyStr := ""
-	groupbyStr := ""
+	sOrderBy := ""
+	sGroupBy := ""
 	isOrder := false
 	isGroup := false
 
-	if vqlexp.RegExpCollection["OrderbyToEnd"].MatchString(instruction) {
-		orderbyStr = vqlexp.RegExpCollection["OrderbyToEnd"].FindString(instruction)
-		instruction = vqlexp.RegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(instruction, "")
-		orderbyStr = vqlexp.RegExpCollection["Orderby"].ReplaceAllLiteralString(orderbyStr, "")
+	if vqlexp.MRegExpCollection["OrderbyToEnd"].MatchString(sInstruction) {
+		sOrderBy = vqlexp.MRegExpCollection["OrderbyToEnd"].FindString(sInstruction)
+		sInstruction = vqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sOrderBy = vqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
 		isOrder = true
 	}
 
-	if vqlexp.RegExpCollection["GroupbyToEnd"].MatchString(instruction) {
-		groupbyStr = vqlexp.RegExpCollection["GroupbyToEnd"].FindString(instruction)
-		instruction = vqlexp.RegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(instruction, "")
-		groupbyStr = vqlexp.RegExpCollection["Groupby"].ReplaceAllLiteralString(groupbyStr, "")
+	if vqlexp.MRegExpCollection["GroupbyToEnd"].MatchString(sInstruction) {
+		sGroupBy = vqlexp.MRegExpCollection["GroupbyToEnd"].FindString(sInstruction)
+		sInstruction = vqlexp.MRegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sGroupBy = vqlexp.MRegExpCollection["Groupby"].ReplaceAllLiteralString(sGroupBy, "")
 		isGroup = true
 	}
 
-	if vqlexp.RegExpCollection["WhereToEnd"].MatchString(instruction) {
-		whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
-		instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
-		whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
-		expression, err := parseWhere(whereStr)
+	if vqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
+		sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+		sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+		expression, err := parseWhere(sWhere)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 		}
-		selectIn.Where = append(selectIn.Where, expression...)
-		selectIn.IsWhere = true
+		stSelectIn.Where = append(stSelectIn.Where, expression...)
+		stSelectIn.IsWhere = true
 	}
 
-	table := vqlexp.RegExpCollection["SelectFromToEnd"].FindString(instruction)
-	instruction = vqlexp.RegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(instruction, "")
-	table = vqlexp.RegExpCollection["SelectFromWord"].ReplaceAllLiteralString(table, "")
-	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = trimQuotationMarks(table)
-	if table == "" {
+	sTable := vqlexp.MRegExpCollection["SelectFromToEnd"].FindString(sInstruction)
+	sInstruction = vqlexp.MRegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = vqlexp.MRegExpCollection["SelectFromWord"].ReplaceAllLiteralString(sTable, "")
+	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable = trimQuotationMarks(sTable)
+	if sTable == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
-	if !core.IfExistTable(db, table) {
+	if !core.IfExistTable(sDB, sTable) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
-	distinctBool := vqlexp.RegExpCollection["SelectDistinctWord"].MatchString(instruction)
-	if distinctBool {
-		instruction = vqlexp.RegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(instruction, "")
+	isDistinct := vqlexp.MRegExpCollection["SelectDistinctWord"].MatchString(sInstruction)
+	if isDistinct {
+		sInstruction = vqlexp.MRegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(sInstruction, "")
 	}
-	selectIn.Distinct = distinctBool
+	stSelectIn.Distinct = isDistinct
 
-	columnsStr := strings.TrimSpace(instruction)
-	columns := vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
-	for _, col := range columns {
-		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = trimQuotationMarks(col)
-		if col != "" {
-			selectIn.Columns = append(selectIn.Columns, col)
+	sColumns := strings.TrimSpace(sInstruction)
+	slColumns := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	for _, sCol := range slColumns {
+		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = trimQuotationMarks(sCol)
+		if sCol != "" {
+			stSelectIn.Columns = append(stSelectIn.Columns, sCol)
 		}
 	}
-	if len(selectIn.Columns) < 1 {
+	if len(stSelectIn.Columns) < 1 {
 		return `{"state":"error", "result":"no columns"}`, errors.New("no columns")
 	}
 
 	if isOrder {
-		orderbyExp, err := parseOrderBy(orderbyStr, selectIn.Columns)
+		stOrderByExp, err := parseOrderBy(sOrderBy, stSelectIn.Columns)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 		}
-		selectIn.Orderby = orderbyExp
-		selectIn.IsOrder = isOrder
+		stSelectIn.Orderby = stOrderByExp
+		stSelectIn.IsOrder = isOrder
 	}
 
 	if isGroup {
-		groupbyCols, err := parseGroupBy(groupbyStr, selectIn.Columns)
+		slSGroupByCols, err := parseGroupBy(sGroupBy, stSelectIn.Columns)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 		}
-		selectIn.Groupby = append(selectIn.Groupby, groupbyCols...)
-		selectIn.IsGroup = isGroup
+		stSelectIn.Groupby = append(stSelectIn.Groupby, slSGroupByCols...)
+		stSelectIn.IsGroup = isGroup
 	}
 
 	// Parsing an expression - End
 
 	// Post checking
 
-	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
+	isLuxUser, stFlagsAcs, err := dourPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Select {
+	if !isLuxUser && !stFlagsAcs.Select {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
 	// TODO: Make an implementation in the kernel
-	resultRow, okSelect = core.SelectRows(db, table, selectIn)
-	if !okSelect {
+	stResultRow, isOkSelect = core.SelectRows(sDB, sTable, stSelectIn)
+	if !isOkSelect {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 	}
 
-	resSelect.State = "ok"
-	resSelect.Result = resultRow
-	return ecowriter.EncodeJSON(resSelect), nil
+	stResSelect.State = "ok"
+	stResSelect.Result = stResultRow
+	return ecowriter.EncodeJSON(stResSelect), nil
 }
 
 func (q tQuery) DMLInsert() (result string, err error) {
@@ -171,69 +171,69 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
-		resultIds []uint64
-		okInsert  bool
-		res       gtypes.TResponse
-		resArr    gtypes.TResponseUints
-		columnsIn = make([]string, 0)
+		slResultIDs = make([]uint64, 0)
+		isOkInsert  bool
+		stRes       gtypes.TResponse
+		stResArr    gtypes.TResponseUints
+		slColumnsIn = make([]string, 0)
 	)
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		resArr.Ticket = newticket
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stResArr.Ticket = sNewTicket
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
-	instruction := vqlexp.RegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
-	valuesStr := vqlexp.RegExpCollection["InsertValuesToEnd"].FindString(instruction)
-	instruction = vqlexp.RegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(instruction, "")
+	sInstruction := vqlexp.MRegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sValues := vqlexp.MRegExpCollection["InsertValuesToEnd"].FindString(sInstruction)
+	sInstruction = vqlexp.MRegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(sInstruction, "")
 
-	columnsStr := vqlexp.RegExpCollection["InsertColParenthesis"].FindString(instruction)
-	columnsStr = vqlexp.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(columnsStr, "")
-	columnsStr = trimQuotationMarks(columnsStr)
-	columnsIn = vqlexp.RegExpCollection["Comma"].Split(columnsStr, -1)
+	sColumns := vqlexp.MRegExpCollection["InsertColParenthesis"].FindString(sInstruction)
+	sColumns = vqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	sColumns = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumns, "")
+	sColumns = trimQuotationMarks(sColumns)
+	slColumnsIn = vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
-	table := vqlexp.RegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(instruction, "")
-	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = trimQuotationMarks(table)
+	sTable := vqlexp.MRegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable = trimQuotationMarks(sTable)
 
-	if !core.IfExistTable(db, table) {
+	if !core.IfExistTable(sDB, sTable) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
-	var rowsIn [][]string
-	valuesStr = vqlexp.RegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(valuesStr, "")
-	valuesArr := vqlexp.RegExpCollection["InsertSplitParenthesis"].Split(valuesStr, -1)
-	for _, value := range valuesArr {
-		value = vqlexp.RegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(value, "")
-		valueIn := vqlexp.RegExpCollection["Comma"].Split(value, -1)
-		var rowIn []string
-		for _, val := range valueIn {
-			val = strings.TrimSpace(val)
-			val = strings.TrimRight(val, `"'`)
-			val = strings.TrimRight(val, "`")
-			val = strings.TrimLeft(val, `"'`)
-			val = strings.TrimLeft(val, "`")
-			rowIn = append(rowIn, val)
+	var slRowsIn [][]string
+	sValues = vqlexp.MRegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(sValues, "")
+	slValues := vqlexp.MRegExpCollection["InsertSplitParenthesis"].Split(sValues, -1)
+	for _, sValue := range slValues {
+		sValue = vqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sValue, "")
+		slValueIn := vqlexp.MRegExpCollection["Comma"].Split(sValue, -1)
+		var slRowIn []string
+		for _, sVal := range slValueIn {
+			sVal = strings.TrimSpace(sVal)
+			sVal = strings.TrimRight(sVal, `"'`)
+			sVal = strings.TrimRight(sVal, "`")
+			sVal = strings.TrimLeft(sVal, `"'`)
+			sVal = strings.TrimLeft(sVal, "`")
+			slRowIn = append(slRowIn, sVal)
 		}
-		rowsIn = append(rowsIn, rowIn)
+		slRowsIn = append(slRowsIn, slRowIn)
 	}
 
-	if len(columnsIn) == 0 || columnsIn[0] == "" {
-		dbInfo, okDB := core.GetDBInfo(db)
-		if okDB {
-			columnsIn = dbInfo.Tables[table].Order
+	if len(slColumnsIn) == 0 || slColumnsIn[0] == "" {
+		stDBInfo, isOkDB := core.GetDBInfo(sDB)
+		if isOkDB {
+			slColumnsIn = stDBInfo.Tables[sTable].Order
 		} else {
 			return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 		}
@@ -243,27 +243,27 @@ func (q tQuery) DMLInsert() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := friendlyPostChecker(db, table, login, access)
+	isLuxUser, stFlagsAcs, err := friendlyPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Insert {
+	if !isLuxUser && !stFlagsAcs.Insert {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
-	resultIds, okInsert = core.InsertRows(db, table, columnsIn, rowsIn)
-	if !okInsert {
+	slResultIDs, isOkInsert = core.InsertRows(sDB, sTable, slColumnsIn, slRowsIn)
+	if !isOkInsert {
 		return `{"state":"error", "result":"the record(s) cannot be inserted"}`, errors.New("the record cannot be inserted")
 	}
 
-	resArr.State = "ok"
-	resArr.Result = resultIds
-	return ecowriter.EncodeJSON(resArr), nil
+	stResArr.State = "ok"
+	stResArr.Result = slResultIDs
+	return ecowriter.EncodeJSON(stResArr), nil
 }
 
 func (q tQuery) DMLUpdate() (result string, err error) {
@@ -272,11 +272,11 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
-		resultIds []uint64
-		okUpdate  bool
-		res       gtypes.TResponse
-		resArr    gtypes.TResponseUints
-		updateIn  = gtypes.TUpdaateStruct{
+		slResultIDs = make([]uint64, 0)
+		isOkUpdate  bool
+		stRes       gtypes.TResponse
+		stResArr    gtypes.TResponseUints
+		stUpdateIn  = gtypes.TUpdaateStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			Couples: make(map[string]string),
 		}
@@ -284,67 +284,67 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		resArr.Ticket = newticket
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stResArr.Ticket = sNewTicket
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
-	instruction := vqlexp.RegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
-	whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
-	whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
-	// columnsValuesIn.Where = whereStr
+	sInstruction := vqlexp.MRegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+	sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+	// columnsValuesIn.Where = sWhere
 
-	expression, err := parseWhere(whereStr)
+	slExpression, err := parseWhere(sWhere)
 	if err != nil {
 		return `{"state":"error", "result":"condition error"}`, err
 	}
-	if len(expression) == 0 {
+	if len(slExpression) == 0 {
 		return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 	}
-	updateIn.Where = append(updateIn.Where, expression...)
+	stUpdateIn.Where = append(stUpdateIn.Where, slExpression...)
 
-	instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
+	sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
 
-	columnsValuesStr := vqlexp.RegExpCollection["UpdateSetToEnd"].FindString(instruction)
-	columnsValuesStr = vqlexp.RegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(columnsValuesStr, "")
-	columnsValuesArr := vqlexp.RegExpCollection["Comma"].Split(columnsValuesStr, -1)
+	sColumnsValues := vqlexp.MRegExpCollection["UpdateSetToEnd"].FindString(sInstruction)
+	sColumnsValues = vqlexp.MRegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(sColumnsValues, "")
+	slColumnsValues := vqlexp.MRegExpCollection["Comma"].Split(sColumnsValues, -1)
 
-	if len(columnsValuesArr) == 0 || columnsValuesArr[0] == "" {
+	if len(slColumnsValues) == 0 || slColumnsValues[0] == "" {
 		return `{"state":"error", "result":"incorrect command syntax"}`, errors.New("incorrect command syntax")
 	}
 
-	for _, colVal := range columnsValuesArr {
-		colValArr := vqlexp.RegExpCollection["SignEqual"].Split(colVal, -1)
-		col := colValArr[0]
-		val := colValArr[1]
+	for _, sColVal := range slColumnsValues {
+		slColVal := vqlexp.MRegExpCollection["SignEqual"].Split(sColVal, -1)
+		sCol := slColVal[0]
+		sVal := slColVal[1]
 
-		col = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(col, "")
-		col = trimQuotationMarks(col)
+		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = trimQuotationMarks(sCol)
 
-		if len(col) == 0 {
+		if len(sCol) == 0 {
 			return `{"state":"error", "result":"incorrect syntax"}`, errors.New("incorrect syntax")
 		}
 
-		val = strings.TrimSpace(val)
-		val = trimQuotationMarks(val)
+		sVal = strings.TrimSpace(sVal)
+		sVal = trimQuotationMarks(sVal)
 
-		updateIn.Couples[col] = val
+		stUpdateIn.Couples[sCol] = sVal
 	}
 
-	table := vqlexp.RegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(instruction, "")
-	table = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(table, "")
-	table = trimQuotationMarks(table)
+	sTable := vqlexp.MRegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable = trimQuotationMarks(sTable)
 
-	if !core.IfExistTable(db, table) {
+	if !core.IfExistTable(sDB, sTable) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
@@ -352,27 +352,27 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := friendlyPostChecker(db, table, login, access)
+	isLuxUser, stFlagsAcs, err := friendlyPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Update {
+	if !isLuxUser && !stFlagsAcs.Update {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
-	resultIds, okUpdate = core.UpdateRows(db, table, updateIn)
-	if !okUpdate {
+	slResultIDs, isOkUpdate = core.UpdateRows(sDB, sTable, stUpdateIn)
+	if !isOkUpdate {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 	}
 
-	resArr.State = "ok"
-	resArr.Result = resultIds
-	return ecowriter.EncodeJSON(resArr), nil
+	stResArr.State = "ok"
+	stResArr.Result = slResultIDs
+	return ecowriter.EncodeJSON(stResArr), nil
 }
 
 func (q tQuery) DMLDelete() (result string, err error) {
@@ -381,11 +381,11 @@ func (q tQuery) DMLDelete() (result string, err error) {
 	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
-		resultIds []uint64
-		okDel     bool
-		res       gtypes.TResponse
-		resArr    gtypes.TResponseUints
-		deleteIn  = gtypes.TDeleteStruct{
+		slResultIDs = make([]uint64, 0)
+		isOkDel     bool
+		stRes       gtypes.TResponse
+		stResArr    gtypes.TResponseUints
+		stDeleteIn  = gtypes.TDeleteStruct{
 			Where:   make([]gtypes.TConditions, 0, 4),
 			IsWhere: false,
 		}
@@ -393,41 +393,41 @@ func (q tQuery) DMLDelete() (result string, err error) {
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		resArr.Ticket = newticket
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stResArr.Ticket = sNewTicket
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
-	instruction := vqlexp.RegExpCollection["DeleteWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sInstruction := vqlexp.MRegExpCollection["DeleteWord"].ReplaceAllLiteralString(q.Instruction, "")
 
-	if vqlexp.RegExpCollection["WhereToEnd"].MatchString(instruction) {
-		whereStr := vqlexp.RegExpCollection["WhereToEnd"].FindString(instruction)
-		instruction = vqlexp.RegExpCollection["WhereToEnd"].ReplaceAllLiteralString(instruction, "")
-		whereStr = vqlexp.RegExpCollection["Where"].ReplaceAllLiteralString(whereStr, "")
-		expression, err := parseWhere(whereStr)
+	if vqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
+		sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+		sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+		slExpression, err := parseWhere(sWhere)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
 		}
-		deleteIn.Where = append(deleteIn.Where, expression...)
-		deleteIn.IsWhere = true
+		stDeleteIn.Where = append(stDeleteIn.Where, slExpression...)
+		stDeleteIn.IsWhere = true
 	}
 
-	table := vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(instruction, "")
-	table = trimQuotationMarks(table)
-	if table == "" {
+	sTable := vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = trimQuotationMarks(sTable)
+	if sTable == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
-	if !core.IfExistTable(db, table) {
+	if !core.IfExistTable(sDB, sTable) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
@@ -435,27 +435,27 @@ func (q tQuery) DMLDelete() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := dourPostChecker(db, table, login, access)
+	isLuxUser, stFlagsAcs, err := dourPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Delete {
+	if !isLuxUser && !stFlagsAcs.Delete {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
-	resultIds, okDel = core.DeleteRows(db, table, deleteIn)
-	if !okDel {
+	slResultIDs, isOkDel = core.DeleteRows(sDB, sTable, stDeleteIn)
+	if !isOkDel {
 		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
 	}
 
-	resArr.State = "ok"
-	resArr.Result = resultIds
-	return ecowriter.EncodeJSON(resArr), nil
+	stResArr.State = "ok"
+	stResArr.Result = slResultIDs
+	return ecowriter.EncodeJSON(stResArr), nil
 }
 
 func (q tQuery) DMLCommit() (result string, err error) {
@@ -479,28 +479,28 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 	sOperation := "internal -> analyzers -> sql -> DML -> DMLTruncate"
 	defer func() { e.Wrapper(sOperation, err) }()
 
-	var res gtypes.TResponse
+	var stRes gtypes.TResponse
 
 	// Pre checking
 
-	login, db, access, newticket, err := preChecker(q.Ticket)
+	sLogin, sDB, stAccess, sNewTicket, err := preChecker(q.Ticket)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if newticket != "" {
-		res.Ticket = newticket
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
 	}
 
 	// Parsing an expression - Begin
 
-	table := vqlexp.RegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
-	table = strings.TrimSpace(table)
-	table = trimQuotationMarks(table)
+	sTable := vqlexp.MRegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sTable = strings.TrimSpace(sTable)
+	sTable = trimQuotationMarks(sTable)
 
-	if !core.IfExistTable(db, table) {
+	if !core.IfExistTable(sDB, sTable) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
@@ -508,23 +508,23 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 
 	// Post checking
 
-	luxUser, flagsAcs, err := friendlyPostChecker(db, table, login, access)
+	isLuxUser, stFlagsAcs, err := friendlyPostChecker(sDB, sTable, sLogin, stAccess)
 	if err != nil {
-		res.State = "error"
-		res.Result = err.Error()
-		return ecowriter.EncodeJSON(res), err
+		stRes.State = "error"
+		stRes.Result = err.Error()
+		return ecowriter.EncodeJSON(stRes), err
 	}
 
-	if !luxUser && !flagsAcs.Delete {
+	if !isLuxUser && !stFlagsAcs.Delete {
 		return `{"state":"error", "result":"not enough rights"}`, errors.New("not enough rights")
 	}
 
 	// Request execution
 
-	if !core.TruncateTable(db, table) {
+	if !core.TruncateTable(sDB, sTable) {
 		return `{"state":"error", "result":"the table cannot be truncated"}`, errors.New("the table cannot be truncated")
 	}
 
-	res.State = "ok"
-	return ecowriter.EncodeJSON(res), nil
+	stRes.State = "ok"
+	return ecowriter.EncodeJSON(stRes), nil
 }

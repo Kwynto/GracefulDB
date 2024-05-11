@@ -13,75 +13,75 @@ type tQuery struct {
 }
 
 // TODO: Request
-func Request(ticket string, instruction string, placeholder []string) string {
+func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
 	// -
 	// Prep
 	// instruction = strings.TrimSpace(instruction)
-	instruction = vqlexp.RegExpCollection["LineBreak"].ReplaceAllLiteralString(instruction, " ")
-	instruction = strings.TrimRight(instruction, "; ")
-	instruction = strings.TrimLeft(instruction, " ")
+	sInstruction = vqlexp.MRegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
+	sInstruction = strings.TrimRight(sInstruction, "; ")
+	sInstruction = strings.TrimLeft(sInstruction, " ")
 
 	var query tQuery = tQuery{
-		Ticket:      ticket,
-		Instruction: instruction,
-		Placeholder: placeholder,
+		Ticket:      sTicket,
+		Instruction: sInstruction,
+		Placeholder: slPlaceholder,
 	}
 
-	for _, expName := range vqlexp.ParsingOrder {
-		if vqlexp.RegExpCollection[expName].MatchString(query.Instruction) {
-			switch expName {
+	for _, sExpName := range vqlexp.ArParsingOrder {
+		if vqlexp.MRegExpCollection[sExpName].MatchString(query.Instruction) {
+			switch sExpName {
 			case "SearchCreate":
-				res, _ := query.DDLCreate()
-				return res
+				sResult, _ := query.DDLCreate()
+				return sResult
 			case "SearchAlter":
-				res, _ := query.DDLAlter()
-				return res
+				sResult, _ := query.DDLAlter()
+				return sResult
 			case "SearchDrop":
-				res, _ := query.DDLDrop()
-				return res
+				sResult, _ := query.DDLDrop()
+				return sResult
 			case "SearchSelect":
-				res, _ := query.DMLSelect()
-				return res
+				sResult, _ := query.DMLSelect()
+				return sResult
 			case "SearchInsert":
-				res, _ := query.DMLInsert()
-				return res
+				sResult, _ := query.DMLInsert()
+				return sResult
 			case "SearchUpdate":
-				res, _ := query.DMLUpdate()
-				return res
+				sResult, _ := query.DMLUpdate()
+				return sResult
 			case "SearchDelete":
-				res, _ := query.DMLDelete()
-				return res
+				sResult, _ := query.DMLDelete()
+				return sResult
 			case "SearchTruncateTable":
-				res, _ := query.DMLTruncateTable()
-				return res
+				sResult, _ := query.DMLTruncateTable()
+				return sResult
 			case "SearchCommit":
-				res, _ := query.DMLCommit()
-				return res
+				sResult, _ := query.DMLCommit()
+				return sResult
 			case "SearchRollback":
-				res, _ := query.DMLRollback()
-				return res
+				sResult, _ := query.DMLRollback()
+				return sResult
 			case "SearchUse":
-				res, _ := query.DCLUse()
-				return res
+				sResult, _ := query.DCLUse()
+				return sResult
 			case "SearchShow":
-				res, _ := query.DCLShow()
-				return res
+				sResult, _ := query.DCLShow()
+				return sResult
 			case "SearchDesc", "SearchDescribe", "SearchExplain":
-				res, _ := query.DCLDesc()
-				return res
+				sResult, _ := query.DCLDesc()
+				return sResult
 			case "SearchGrant":
-				res, _ := query.DCLGrant()
-				return res
+				sResult, _ := query.DCLGrant()
+				return sResult
 			case "SearchRevoke":
-				res, _ := query.DCLRevoke()
-				return res
+				sResult, _ := query.DCLRevoke()
+				return sResult
 			case "SearchAuth":
-				res, _ := query.DCLAuth()
-				return res
+				sResult, _ := query.DCLAuth()
+				return sResult
 			}
 		}
 	}
 
-	res := "{\"state\":\"error\",\"result\":\"unknown command\"}"
-	return res
+	sResult := "{\"state\":\"error\",\"result\":\"unknown command\"}"
+	return sResult
 }

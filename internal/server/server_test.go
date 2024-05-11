@@ -28,7 +28,7 @@ func Test_Run(t *testing.T) {
 
 		time.Sleep(2 * time.Second)
 
-		if err := Run(ctx, &config.DefaultConfig); err == nil {
+		if err := Run(ctx, &config.StDefaultConfig); err == nil {
 			t.Error("Run() error = wrong result.")
 		}
 	})
@@ -37,7 +37,7 @@ func Test_Run(t *testing.T) {
 		ctx, stop := context.WithTimeout(context.Background(), 1*time.Second)
 		defer stop()
 
-		if err := Run(ctx, &config.DefaultConfig); err == nil {
+		if err := Run(ctx, &config.StDefaultConfig); err == nil {
 			t.Error("Run() error = wrong result.")
 		}
 	})
@@ -47,7 +47,7 @@ func Test_Run(t *testing.T) {
 		ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
 
-		if err := Run(ctx, &config.DefaultConfig); err != nil {
+		if err := Run(ctx, &config.StDefaultConfig); err != nil {
 			t.Errorf("Run() error = wrong result: %v", err)
 		}
 	})

@@ -15,83 +15,83 @@ import (
 )
 
 // Marks the column as deleted, but does not delete files.
-func RemoveColumn(nameDB, nameTable, nameColumn string) bool {
+func RemoveColumn(sNameDB, sNameTable, sNameColumn string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return false
 	}
 
-	columnInfo, ok := tableInfo.Columns[nameColumn]
-	if !ok {
+	stColumnInfo, isOk := stTableInfo.Columns[sNameColumn]
+	if !isOk {
 		return false
 	}
 
-	tNow := time.Now()
+	dtNow := time.Now()
 
-	columnInfo.LastUpdate = tNow
-	columnInfo.Deleted = true
+	stColumnInfo.LastUpdate = dtNow
+	stColumnInfo.Deleted = true
 
-	tableInfo.Removed = append(tableInfo.Removed, columnInfo)
-	delete(tableInfo.Columns, nameColumn)
-	ind := slices.Index(tableInfo.Order, nameColumn)
-	if ind != -1 {
-		tableInfo.Order = slices.Delete(tableInfo.Order, ind, ind+1)
+	stTableInfo.Removed = append(stTableInfo.Removed, stColumnInfo)
+	delete(stTableInfo.Columns, sNameColumn)
+	iInd := slices.Index(stTableInfo.Order, sNameColumn)
+	if iInd != -1 {
+		stTableInfo.Order = slices.Delete(stTableInfo.Order, iInd, iInd+1)
 	}
-	tableInfo.LastUpdate = tNow
+	stTableInfo.LastUpdate = dtNow
 
-	dbInfo.Tables[nameTable] = tableInfo
-	dbInfo.LastUpdate = tNow
+	stDBInfo.Tables[sNameTable] = stTableInfo
+	stDBInfo.LastUpdate = dtNow
 
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }
 
 // Deletes the folder and column files, if column was mark as 'removed'
-func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
+func StrongRemoveColumn(sNameDB, sNameTable, sNameColumn string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return false
 	}
 
-	for indRange, columnInfo := range tableInfo.Removed {
-		if columnInfo.Name == nameColumn {
+	for iColumnInd, stColumnVal := range stTableInfo.Removed {
+		if stColumnVal.Name == sNameColumn {
 			// columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-			columnPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-			err := os.RemoveAll(columnPath)
+			sColumnPath := filepath.Join(StLocalCoreSettings.Storage, stColumnVal.Parents, stColumnVal.Folder)
+			err := os.RemoveAll(sColumnPath)
 			if err != nil {
 				return false
 			}
 
-			tNow := time.Now()
+			dtNow := time.Now()
 
-			tableInfo.Removed = slices.Delete(tableInfo.Removed, indRange, indRange+1)
-			tableInfo.LastUpdate = tNow
+			stTableInfo.Removed = slices.Delete(stTableInfo.Removed, iColumnInd, iColumnInd+1)
+			stTableInfo.LastUpdate = dtNow
 
-			dbInfo.Tables[nameTable] = tableInfo
-			dbInfo.LastUpdate = tNow
+			stDBInfo.Tables[sNameTable] = stTableInfo
+			stDBInfo.LastUpdate = dtNow
 
-			StorageInfo.DBs[nameDB] = dbInfo
+			StStorageInfo.DBs[sNameDB] = stDBInfo
 
-			return dbInfo.Save()
+			return stDBInfo.Save()
 		}
 	}
 
@@ -99,72 +99,72 @@ func StrongRemoveColumn(nameDB, nameTable, nameColumn string) bool {
 }
 
 // Changing a column
-func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite, secure bool) bool {
+func ChangeColumn(sNameDB, sNameTable string, stNewDataColumn gtypes.TColumnForWrite, isSecure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newDataColumn.Name) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(stNewDataColumn.Name) {
 		return false
 	}
 
-	if newDataColumn.Spec.Default != "" {
-		newDataColumn.Spec.Default = Encode64(newDataColumn.Spec.Default)
+	if stNewDataColumn.Spec.Default != "" {
+		stNewDataColumn.Spec.Default = Encode64(stNewDataColumn.Spec.Default)
 	}
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StorageInfo.DBs[nameDB]
-	if !okDB {
+	stDBInfo, isOkDB := StStorageInfo.DBs[sNameDB]
+	if !isOkDB {
 		return false
 	}
 
-	tableInfo, okTable := dbInfo.Tables[nameTable]
-	if !okTable {
+	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	if !isOkTable {
 		return false
 	}
 
-	var name string
-	if newDataColumn.IsChName {
-		name = newDataColumn.OldName
+	var sName string
+	if stNewDataColumn.IsChName {
+		sName = stNewDataColumn.OldName
 	} else {
-		name = newDataColumn.Name
+		sName = stNewDataColumn.Name
 	}
-	columnInfo, okCol := tableInfo.Columns[name]
-	if !okCol {
+	stColumnInfo, isOkCol := stTableInfo.Columns[sName]
+	if !isOkCol {
 		return false
 	}
 
-	tNow := time.Now()
+	dtNow := time.Now()
 
-	if newDataColumn.IsChName {
-		columnInfo.OldName = columnInfo.Name
-		columnInfo.Name = newDataColumn.Name
+	if stNewDataColumn.IsChName {
+		stColumnInfo.OldName = stColumnInfo.Name
+		stColumnInfo.Name = stNewDataColumn.Name
 	}
 
-	columnInfo.Specification.Default = newDataColumn.Spec.Default
-	columnInfo.Specification.NotNull = newDataColumn.Spec.NotNull
-	columnInfo.Specification.Unique = newDataColumn.Spec.Unique
-	columnInfo.LastUpdate = tNow
+	stColumnInfo.Specification.Default = stNewDataColumn.Spec.Default
+	stColumnInfo.Specification.NotNull = stNewDataColumn.Spec.NotNull
+	stColumnInfo.Specification.Unique = stNewDataColumn.Spec.Unique
+	stColumnInfo.LastUpdate = dtNow
 
-	if newDataColumn.IsChName {
-		delete(tableInfo.Columns, newDataColumn.OldName)
-		tableInfo.Columns[newDataColumn.Name] = columnInfo
-		i := slices.Index(tableInfo.Order, newDataColumn.OldName)
+	if stNewDataColumn.IsChName {
+		delete(stTableInfo.Columns, stNewDataColumn.OldName)
+		stTableInfo.Columns[stNewDataColumn.Name] = stColumnInfo
+		i := slices.Index(stTableInfo.Order, stNewDataColumn.OldName)
 		if i > -1 {
-			tableInfo.Order[i] = newDataColumn.Name
+			stTableInfo.Order[i] = stNewDataColumn.Name
 		} else {
-			tableInfo.Order = append(tableInfo.Order, newDataColumn.Name)
+			stTableInfo.Order = append(stTableInfo.Order, stNewDataColumn.Name)
 		}
 	} else {
-		tableInfo.Columns[newDataColumn.Name] = columnInfo
+		stTableInfo.Columns[stNewDataColumn.Name] = stColumnInfo
 	}
-	tableInfo.LastUpdate = tNow
+	stTableInfo.LastUpdate = dtNow
 
-	dbInfo.Tables[nameTable] = tableInfo
-	dbInfo.LastUpdate = tNow
+	stDBInfo.Tables[sNameTable] = stTableInfo
+	stDBInfo.LastUpdate = dtNow
 
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }
 
 // func GetDescriptionColumn(db, table, column string) gtypes.TDescColumn {
@@ -186,127 +186,127 @@ func ChangeColumn(nameDB, nameTable string, newDataColumn gtypes.TColumnForWrite
 // }
 
 // Get up-to-date cell data
-func GetColumnById(nameDB, nameTable, nameColumn string, idRow uint64) (string, bool) {
+func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (string, bool) {
 	// This function is complete
-	var resValue string
+	var sResValue string
 
-	dbInfo, okDB := GetDBInfo(nameDB)
-	if !okDB {
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
 		return "", false
 	}
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return "", false
 	}
-	columnInfo, ok := tableInfo.Columns[nameColumn]
-	if !ok {
+	stColumnInfo, isOk := stTableInfo.Columns[sNameColumn]
+	if !isOk {
 		return "", false
 	}
 
 	// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
-	folderPath := filepath.Join(LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
+	sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
 
-	maxBucket := Pow(2, tableInfo.BucketLog)
-	hashid := idRow % maxBucket
-	if hashid == 0 {
-		hashid = maxBucket
+	uMaxBucket := Pow(2, stTableInfo.BucketLog)
+	uHashId := uIdRow % uMaxBucket
+	if uHashId == 0 {
+		uHashId = uMaxBucket
 	}
 
-	fullNameFile := filepath.Join(folderPath, fmt.Sprintf("%s_%d", tableInfo.CurrentRev, hashid))
-	fileText, err := ecowriter.FileRead(fullNameFile)
+	sFullNameFile := filepath.Join(sFolderPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
+	sFileText, err := ecowriter.FileRead(sFullNameFile)
 	if err != nil {
 		return "", false
 	}
 
-	fileData := strings.Split(fileText, "\n")
+	slSFileData := strings.Split(sFileText, "\n")
 
-	for _, line := range fileData {
-		lineData := strings.Split(line, "|")
-		valueId, valueData := lineData[0], lineData[1] // id, [data]
-		id, err := strconv.ParseUint(valueId, 10, 64)
+	for _, sLine := range slSFileData {
+		slSLineData := strings.Split(sLine, "|")
+		sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
+		uId, err := strconv.ParseUint(sValueId, 10, 64)
 		if err != nil {
 			continue
 		}
-		if id == idRow {
-			resValue = valueData
+		if uId == uIdRow {
+			sResValue = sValueData
 		}
 	}
 
-	return resValue, true
+	return sResValue, true
 }
 
 // Creating a new column
-func CreateColumn(nameDB, nameTable, nameColumn string, secure bool, specification gtypes.TColumnSpecification) bool {
+func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpecification gtypes.TColumnSpecification) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameColumn) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNameColumn) {
 		return false
 	}
 
-	var folderName string
+	var sFolderName string
 
-	if specification.Default != "" {
-		specification.Default = Encode64(specification.Default)
+	if stSpecification.Default != "" {
+		stSpecification.Default = Encode64(stSpecification.Default)
 	}
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return false
 	}
 
-	if _, ok := tableInfo.Columns[nameColumn]; ok {
+	if _, isOk := stTableInfo.Columns[sNameColumn]; isOk {
 		return false
 	}
 
 	// pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-	pathTable := filepath.Join(LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
+	sPathTable := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
 
 	for {
-		folderName = GenerateName()
-		if !CheckFolder(pathTable, folderName) {
+		sFolderName = GenerateName()
+		if !CheckFolder(sPathTable, sFolderName) {
 			break
 		}
 	}
 
 	// fullColumnName := fmt.Sprintf("%s%s", pathTable, folderName)
-	fullColumnName := filepath.Join(pathTable, folderName)
-	err := os.Mkdir(fullColumnName, 0666)
+	sFullColumnName := filepath.Join(sPathTable, sFolderName)
+	err := os.Mkdir(sFullColumnName, 0666)
 	if err != nil {
 		return false
 	}
 
-	tNow := time.Now()
+	dtNow := time.Now()
 
-	columnInfo := TColumnInfo{
-		Name:    nameColumn,
+	stColumnInfo := TColumnInfo{
+		Name:    sNameColumn,
 		OldName: "",
-		Folder:  folderName,
+		Folder:  sFolderName,
 		// Parents: fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
-		Parents: filepath.Join(tableInfo.Parent, tableInfo.Folder),
+		Parents: filepath.Join(stTableInfo.Parent, stTableInfo.Folder),
 		// BucketLog:     2,
 		// BucketSize:    LocalCoreSettings.BucketSize,
 		// OldRev:        "",
 		// CurrentRev:    GenerateRev(),
-		Specification: specification,
-		LastUpdate:    tNow,
+		Specification: stSpecification,
+		LastUpdate:    dtNow,
 		Deleted:       false,
 	}
 
-	tableInfo.Columns[nameColumn] = columnInfo
-	tableInfo.Order = append(tableInfo.Order, nameColumn)
-	tableInfo.LastUpdate = tNow
+	stTableInfo.Columns[sNameColumn] = stColumnInfo
+	stTableInfo.Order = append(stTableInfo.Order, sNameColumn)
+	stTableInfo.LastUpdate = dtNow
 
-	dbInfo.Tables[nameTable] = tableInfo
-	dbInfo.LastUpdate = tNow
+	stDBInfo.Tables[sNameTable] = stTableInfo
+	stDBInfo.LastUpdate = dtNow
 
-	StorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }

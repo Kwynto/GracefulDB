@@ -14,88 +14,88 @@ const (
 	CONFIG_DEFAULT = "./config/default.yaml"
 )
 
-var DisplayConfigPath string
-var DefaultConfig Config
+var SDisplayConfigPath string
+var StDefaultConfig TConfig
 
-type CoreSettings struct {
+type TCoreSettings struct {
 	Storage    string `yaml:"storage" env-default:"./data/"`
 	BucketSize int64  `yaml:"bucket_size" env-default:"800"`
 	// FreezeMode bool   `yaml:"freeze"`
 	FriendlyMode bool `yaml:"friendly"`
 }
 
-type BufferSize struct {
+type TBufferSize struct {
 	Read  int `yaml:"read" env-default:"1024"`
 	Write int `yaml:"write" env-default:"1024"`
 }
 
-type WebSocketConnector struct {
-	Enable     bool       `yaml:"enable"`
-	Address    string     `yaml:"address" env-default:"0.0.0.0"`
-	Port       string     `yaml:"port" env-default:"8080"`
-	BufferSize BufferSize `yaml:"buffer_size"`
+type TWebSocketConnector struct {
+	Enable     bool        `yaml:"enable"`
+	Address    string      `yaml:"address" env-default:"0.0.0.0"`
+	Port       string      `yaml:"port" env-default:"8080"`
+	BufferSize TBufferSize `yaml:"buffer_size"`
 }
 
-type RestConnector struct {
+type TRestConnector struct {
 	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"31337"`
 }
 
-type GrpcConnector struct {
+type TGrpcConnector struct {
 	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"3137"`
 }
 
-type WebServer struct {
+type TWebServer struct {
 	Enable  bool   `yaml:"enable"`
 	Address string `yaml:"address" env-default:"0.0.0.0"`
 	Port    string `yaml:"port" env-default:"80"`
 }
 
-type Config struct {
+type TConfig struct {
 	Env             string        `yaml:"env" env-default:"prod"`
 	LogPath         string        `yaml:"log_path" env-default:"./logs/"`
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
-	CoreSettings       `yaml:"core_settings"`
-	WebSocketConnector `yaml:"websocket_connector"`
-	RestConnector      `yaml:"rest_connector"`
-	GrpcConnector      `yaml:"grpc_connector"`
-	WebServer          `yaml:"web_server"`
+	CoreSettings       TCoreSettings       `yaml:"core_settings"`
+	WebSocketConnector TWebSocketConnector `yaml:"websocket_connector"`
+	RestConnector      TRestConnector      `yaml:"rest_connector"`
+	GrpcConnector      TGrpcConnector      `yaml:"grpc_connector"`
+	WebServer          TWebServer          `yaml:"web_server"`
 }
 
-func defaultConfig() Config {
-	return Config{
+func defaultConfig() TConfig {
+	return TConfig{
 		Env:             "test",
 		LogPath:         "./logs",
 		ShutdownTimeOut: 5 * time.Second,
-		CoreSettings: CoreSettings{
+		CoreSettings: TCoreSettings{
 			Storage:      "./data",
 			BucketSize:   800,
 			FriendlyMode: true,
 		},
-		WebSocketConnector: WebSocketConnector{
+		WebSocketConnector: TWebSocketConnector{
 			Enable:  true,
 			Address: "0.0.0.0",
 			Port:    "8080",
-			BufferSize: BufferSize{
+			BufferSize: TBufferSize{
 				Read:  1024,
 				Write: 1024,
 			},
 		},
-		RestConnector: RestConnector{
+		RestConnector: TRestConnector{
 			Enable:  true,
 			Address: "0.0.0.0",
 			Port:    "31337",
 		},
-		GrpcConnector: GrpcConnector{
+		GrpcConnector: TGrpcConnector{
 			Enable:  true,
 			Address: "0.0.0.0",
 			Port:    "3137",
 		},
-		WebServer: WebServer{
+		WebServer: TWebServer{
 			Enable:  true,
 			Address: "0.0.0.0",
 			Port:    "80",
@@ -103,22 +103,22 @@ func defaultConfig() Config {
 	}
 }
 
-func MustLoad(configPath string) *Config {
-	if configPath == "" {
-		configPath = CONFIG_DEFAULT
+func MustLoad(sConfigPath string) *TConfig {
+	if sConfigPath == "" {
+		sConfigPath = CONFIG_DEFAULT
 	}
 
-	var cfg Config
+	var stCfg TConfig
 
 	// check if file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		cfg = defaultConfig()
-	} else if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		cfg = defaultConfig()
+	if _, err := os.Stat(sConfigPath); os.IsNotExist(err) {
+		stCfg = defaultConfig()
+	} else if err := cleanenv.ReadConfig(sConfigPath, &stCfg); err != nil {
+		stCfg = defaultConfig()
 	}
 
-	DisplayConfigPath = configPath
-	DefaultConfig = cfg
+	SDisplayConfigPath = sConfigPath
+	StDefaultConfig = stCfg
 
-	return &cfg
+	return &stCfg
 }

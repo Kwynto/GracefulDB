@@ -11,43 +11,43 @@ import (
 )
 
 // Marks the database as deleted, but does not delete files.
-func RemoveDB(nameDB string) bool {
+func RemoveDB(sNameDB string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StorageInfo.DBs[nameDB]
-	if ok {
-		dbInfo.LastUpdate = time.Now()
-		dbInfo.Deleted = true
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if isOk {
+		stDBInfo.LastUpdate = time.Now()
+		stDBInfo.Deleted = true
 
-		StorageInfo.Removed = append(StorageInfo.Removed, dbInfo)
-		delete(StorageInfo.DBs, nameDB)
-		delete(StorageInfo.Access, nameDB)
-		StorageInfo.Save()
+		StStorageInfo.Removed = append(StStorageInfo.Removed, stDBInfo)
+		delete(StStorageInfo.DBs, sNameDB)
+		delete(StStorageInfo.Access, sNameDB)
+		StStorageInfo.Save()
 
-		return dbInfo.Save()
+		return stDBInfo.Save()
 	}
 
 	return false
 }
 
 // Deletes the folder and database files, if DB was mark as 'removed'
-func StrongRemoveDB(nameDB string) bool {
+func StrongRemoveDB(sNameDB string) bool {
 	// This function is complete
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	for indRange, dbInfo := range StorageInfo.Removed {
-		if dbInfo.Name == nameDB {
+	for iInd, stDBInfo := range StStorageInfo.Removed {
+		if stDBInfo.Name == sNameDB {
 			// dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
-			dbPath := filepath.Join(LocalCoreSettings.Storage, dbInfo.Folder)
-			err := os.RemoveAll(dbPath)
+			sDBPath := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder)
+			err := os.RemoveAll(sDBPath)
 			if err != nil {
 				return false
 			}
 
-			StorageInfo.Removed = slices.Delete(StorageInfo.Removed, indRange, indRange+1)
+			StStorageInfo.Removed = slices.Delete(StStorageInfo.Removed, iInd, iInd+1)
 
 			return true
 		}
@@ -57,83 +57,83 @@ func StrongRemoveDB(nameDB string) bool {
 }
 
 // Rename a database.
-func RenameDB(oldName, newName string, secure bool) bool {
+func RenameDB(sOldName, sNewName string, isSecure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(newName) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNewName) {
 		return false
 	}
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StorageInfo.DBs[oldName]
-	dbAccess, okAccess := StorageInfo.Access[oldName]
+	stDBInfo, isOkDB := StStorageInfo.DBs[sOldName]
+	stDBAccess, isOkAccess := StStorageInfo.Access[sOldName]
 
-	if okDB && okAccess {
-		dbInfo.Name = newName
-		dbInfo.LastUpdate = time.Now()
+	if isOkDB && isOkAccess {
+		stDBInfo.Name = sNewName
+		stDBInfo.LastUpdate = time.Now()
 
-		delete(StorageInfo.DBs, oldName)
-		delete(StorageInfo.Access, oldName)
+		delete(StStorageInfo.DBs, sOldName)
+		delete(StStorageInfo.Access, sOldName)
 
-		StorageInfo.DBs[newName] = dbInfo
-		StorageInfo.Access[newName] = dbAccess
-		StorageInfo.Save()
+		StStorageInfo.DBs[sNewName] = stDBInfo
+		StStorageInfo.Access[sNewName] = stDBAccess
+		StStorageInfo.Save()
 
-		return dbInfo.Save()
+		return stDBInfo.Save()
 	}
 
 	return false
 }
 
 // Creating a new database.
-func CreateDB(nameDB string, owner string, secure bool) bool {
+func CreateDB(sNameDB string, sOwner string, isSecure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.RegExpCollection["EntityName"].MatchString(nameDB) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNameDB) {
 		return false
 	}
 
-	var folderDB string
+	var sFolderDB string
 
-	storageBlock.Lock()
-	defer storageBlock.Unlock()
+	mxStorageBlock.Lock()
+	defer mxStorageBlock.Unlock()
 
-	_, ok := StorageInfo.DBs[nameDB]
-	if ok {
+	_, isOk := StStorageInfo.DBs[sNameDB]
+	if isOk {
 		return false
 	}
 
 	for {
-		folderDB = GenerateName()
-		if !CheckFolder(LocalCoreSettings.Storage, folderDB) {
+		sFolderDB = GenerateName()
+		if !CheckFolder(StLocalCoreSettings.Storage, sFolderDB) {
 			break
 		}
 	}
 
 	// fullNameFolderDB := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderDB)
-	fullNameFolderDB := filepath.Join(LocalCoreSettings.Storage, folderDB)
-	err := os.Mkdir(fullNameFolderDB, 0666)
+	sFullNameFolderDB := filepath.Join(StLocalCoreSettings.Storage, sFolderDB)
+	err := os.Mkdir(sFullNameFolderDB, 0666)
 	if err != nil {
 		return false
 	}
 
-	dbInfo := TDBInfo{
-		Name:       nameDB,
-		Folder:     folderDB,
+	stDBInfo := TDBInfo{
+		Name:       sNameDB,
+		Folder:     sFolderDB,
 		Tables:     make(map[string]TTableInfo),
 		Removed:    make([]TTableInfo, 0),
 		LastUpdate: time.Now(),
 		Deleted:    false,
 	}
 
-	dbAccess := gtypes.TAccess{
-		Owner: owner,
+	stDBAccess := gtypes.TAccess{
+		Owner: sOwner,
 		Flags: make(map[string]gtypes.TAccessFlags),
 	}
 
-	StorageInfo.DBs[nameDB] = dbInfo
-	StorageInfo.Access[nameDB] = dbAccess
-	StorageInfo.Save()
+	StStorageInfo.DBs[sNameDB] = stDBInfo
+	StStorageInfo.Access[sNameDB] = stDBAccess
+	StStorageInfo.Save()
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }

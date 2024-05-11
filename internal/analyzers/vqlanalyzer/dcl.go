@@ -46,21 +46,21 @@ func (q tQuery) DCLGrant() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sPrivileges := vqlexp.RegExpCollection["GrantPrivileges"].FindString(q.Instruction)
-	sPrivileges = vqlexp.RegExpCollection["GrantWord"].ReplaceAllLiteralString(sPrivileges, "")
-	sPrivileges = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
-	slPrivileges := vqlexp.RegExpCollection["GrantPrivilegesList"].FindAllString(sPrivileges, -1)
+	sPrivileges := vqlexp.MRegExpCollection["GrantPrivileges"].FindString(q.Instruction)
+	sPrivileges = vqlexp.MRegExpCollection["GrantWord"].ReplaceAllLiteralString(sPrivileges, "")
+	sPrivileges = vqlexp.MRegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
+	slPrivileges := vqlexp.MRegExpCollection["GrantPrivilegesList"].FindAllString(sPrivileges, -1)
 
 	if len(slPrivileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	sDBs := vqlexp.RegExpCollection["GrantOnTo"].FindString(q.Instruction)
-	sDBs = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
-	sDBs = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
-	sDBs = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
+	sDBs := vqlexp.MRegExpCollection["GrantOnTo"].FindString(q.Instruction)
+	sDBs = vqlexp.MRegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.MRegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
 	sDBs = trimQuotationMarks(sDBs)
-	slDBsIn := vqlexp.RegExpCollection["Comma"].Split(sDBs, -1)
+	slDBsIn := vqlexp.MRegExpCollection["Comma"].Split(sDBs, -1)
 	for _, sDB := range slDBsIn {
 		if _, ok := core.GetDBInfo(sDB); ok {
 			slDBs = append(slDBs, sDB)
@@ -70,11 +70,11 @@ func (q tQuery) DCLGrant() (result string, err error) {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	sUsers := vqlexp.RegExpCollection["GrantToEnd"].FindString(q.Instruction)
-	sUsers = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
-	sUsers = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
+	sUsers := vqlexp.MRegExpCollection["GrantToEnd"].FindString(q.Instruction)
+	sUsers = vqlexp.MRegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
 	sUsers = trimQuotationMarks(sUsers)
-	slUsersIn := vqlexp.RegExpCollection["Comma"].Split(sUsers, -1)
+	slUsersIn := vqlexp.MRegExpCollection["Comma"].Split(sUsers, -1)
 	for _, sUser := range slUsersIn {
 		if _, err := gauth.GetProfile(sUser); err == nil {
 			slUsers = append(slUsers, sUser)
@@ -167,21 +167,21 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sPrivileges := vqlexp.RegExpCollection["RevokePrivileges"].FindString(q.Instruction)
-	sPrivileges = vqlexp.RegExpCollection["RevokeWord"].ReplaceAllLiteralString(sPrivileges, "")
-	sPrivileges = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
-	slPrivileges := vqlexp.RegExpCollection["RevokePrivilegesList"].FindAllString(sPrivileges, -1)
+	sPrivileges := vqlexp.MRegExpCollection["RevokePrivileges"].FindString(q.Instruction)
+	sPrivileges = vqlexp.MRegExpCollection["RevokeWord"].ReplaceAllLiteralString(sPrivileges, "")
+	sPrivileges = vqlexp.MRegExpCollection["ON"].ReplaceAllLiteralString(sPrivileges, "")
+	slPrivileges := vqlexp.MRegExpCollection["RevokePrivilegesList"].FindAllString(sPrivileges, -1)
 
 	if len(slPrivileges) == 0 {
 		return `{"state":"error", "result":"privileges are not specified"}`, errors.New("privileges are not specified")
 	}
 
-	sDBs := vqlexp.RegExpCollection["RevokeOnTo"].FindString(q.Instruction)
-	sDBs = vqlexp.RegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
-	sDBs = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
-	sDBs = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
+	sDBs := vqlexp.MRegExpCollection["RevokeOnTo"].FindString(q.Instruction)
+	sDBs = vqlexp.MRegExpCollection["ON"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.MRegExpCollection["TO"].ReplaceAllLiteralString(sDBs, "")
+	sDBs = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sDBs, "")
 	sDBs = trimQuotationMarks(sDBs)
-	slDBsIn := vqlexp.RegExpCollection["Comma"].Split(sDBs, -1)
+	slDBsIn := vqlexp.MRegExpCollection["Comma"].Split(sDBs, -1)
 	for _, sDB := range slDBsIn {
 		if _, isOk := core.GetDBInfo(sDB); isOk {
 			slDBs = append(slDBs, sDB)
@@ -191,11 +191,11 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 		return `{"state":"error", "result":"databases are not specified"}`, errors.New("databases are not specified")
 	}
 
-	sUsers := vqlexp.RegExpCollection["RevokeToEnd"].FindString(q.Instruction)
-	sUsers = vqlexp.RegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
-	sUsers = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
+	sUsers := vqlexp.MRegExpCollection["RevokeToEnd"].FindString(q.Instruction)
+	sUsers = vqlexp.MRegExpCollection["TO"].ReplaceAllLiteralString(sUsers, "")
+	sUsers = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sUsers, "")
 	sUsers = trimQuotationMarks(sUsers)
-	slUsersIn := vqlexp.RegExpCollection["Comma"].Split(sUsers, -1)
+	slUsersIn := vqlexp.MRegExpCollection["Comma"].Split(sUsers, -1)
 	for _, sUser := range slUsersIn {
 		if _, err := gauth.GetProfile(sUser); err == nil {
 			slUsers = append(slUsers, sUser)
@@ -288,15 +288,15 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sDB := vqlexp.RegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sDB := vqlexp.MRegExpCollection["UseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	sDB = strings.TrimSpace(sDB)
 	sDB = trimQuotationMarks(sDB)
 
-	if !vqlexp.RegExpCollection["EntityName"].MatchString(sDB) {
+	if !vqlexp.MRegExpCollection["EntityName"].MatchString(sDB) {
 		return `{"state":"error", "result":"invalid database name"}`, errors.New("invalid database name")
 	}
 
-	if !core.LocalCoreSettings.FriendlyMode {
+	if !core.StLocalCoreSettings.FriendlyMode {
 		if _, isOk := core.GetDBInfo(sDB); !isOk {
 			return `{"state":"error", "result":"the database does not exist"}`, errors.New("the database does not exist")
 		}
@@ -331,7 +331,7 @@ func (q tQuery) DCLUse() (result string, err error) {
 
 	// Request execution
 
-	core.States[sTicket] = core.TState{
+	core.MStates[sTicket] = core.TState{
 		CurrentDB: sDB,
 	}
 
@@ -371,8 +371,8 @@ func (q tQuery) DCLShow() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isDBs := vqlexp.RegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
-	isTables := vqlexp.RegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
+	isDBs := vqlexp.MRegExpCollection["ShowDatabasesWord"].MatchString(q.Instruction)
+	isTables := vqlexp.MRegExpCollection["ShowTablesWord"].MatchString(q.Instruction)
 
 	// Parsing an expression - End
 
@@ -380,7 +380,7 @@ func (q tQuery) DCLShow() (result string, err error) {
 
 	if isDBs {
 		var slNamesDBs []string = []string{}
-		for sNameDB := range core.StorageInfo.DBs {
+		for sNameDB := range core.StStorageInfo.DBs {
 			slNamesDBs = append(slNamesDBs, sNameDB)
 		}
 
@@ -391,7 +391,7 @@ func (q tQuery) DCLShow() (result string, err error) {
 	} else if isTables {
 		var slNamesTables []string = []string{}
 
-		stState, isOk := core.States[q.Ticket]
+		stState, isOk := core.MStates[q.Ticket]
 		if !isOk {
 			stRes.State = "error"
 			stRes.Result = "unknown database"
@@ -452,15 +452,15 @@ func (q tQuery) DCLDesc() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	if vqlexp.RegExpCollection["SearchExplain"].MatchString(q.Instruction) {
-		sTable = vqlexp.RegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
-	} else if vqlexp.RegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
-		sTable = vqlexp.RegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
-	} else if vqlexp.RegExpCollection["SearchDesc"].MatchString(q.Instruction) {
-		sTable = vqlexp.RegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
+	if vqlexp.MRegExpCollection["SearchExplain"].MatchString(q.Instruction) {
+		sTable = vqlexp.MRegExpCollection["ExplainWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if vqlexp.MRegExpCollection["SearchDescribe"].MatchString(q.Instruction) {
+		sTable = vqlexp.MRegExpCollection["DescribeWord"].ReplaceAllLiteralString(q.Instruction, "")
+	} else if vqlexp.MRegExpCollection["SearchDesc"].MatchString(q.Instruction) {
+		sTable = vqlexp.MRegExpCollection["DescWord"].ReplaceAllLiteralString(q.Instruction, "")
 	}
 
-	sTable = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
 	sTable = trimQuotationMarks(sTable)
 
 	// Parsing an expression - End
@@ -527,32 +527,32 @@ func (q tQuery) DCLAuth() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isNew := vqlexp.RegExpCollection["AuthNew"].MatchString(q.Instruction)
-	isChange := vqlexp.RegExpCollection["AuthChange"].MatchString(q.Instruction)
-	isRemove := vqlexp.RegExpCollection["AuthRemove"].MatchString(q.Instruction)
+	isNew := vqlexp.MRegExpCollection["AuthNew"].MatchString(q.Instruction)
+	isChange := vqlexp.MRegExpCollection["AuthChange"].MatchString(q.Instruction)
+	isRemove := vqlexp.MRegExpCollection["AuthRemove"].MatchString(q.Instruction)
 
-	sLogin := vqlexp.RegExpCollection["Login"].FindString(q.Instruction)
-	sLogin = vqlexp.RegExpCollection["LoginWord"].ReplaceAllLiteralString(sLogin, " ")
+	sLogin := vqlexp.MRegExpCollection["Login"].FindString(q.Instruction)
+	sLogin = vqlexp.MRegExpCollection["LoginWord"].ReplaceAllLiteralString(sLogin, " ")
 	sLogin = strings.TrimSpace(sLogin)
 	sLogin = trimQuotationMarks(sLogin)
 
-	sPassword := vqlexp.RegExpCollection["Password"].FindString(q.Instruction)
-	sPassword = vqlexp.RegExpCollection["PasswordWord"].ReplaceAllLiteralString(sPassword, " ")
+	sPassword := vqlexp.MRegExpCollection["Password"].FindString(q.Instruction)
+	sPassword = vqlexp.MRegExpCollection["PasswordWord"].ReplaceAllLiteralString(sPassword, " ")
 	sPassword = strings.TrimSpace(sPassword)
 	sPassword = trimQuotationMarks(sPassword)
 
-	sHash := vqlexp.RegExpCollection["Hash"].FindString(q.Instruction)
-	sHash = vqlexp.RegExpCollection["HashWord"].ReplaceAllLiteralString(sHash, " ")
+	sHash := vqlexp.MRegExpCollection["Hash"].FindString(q.Instruction)
+	sHash = vqlexp.MRegExpCollection["HashWord"].ReplaceAllLiteralString(sHash, " ")
 	sHash = strings.TrimSpace(sHash)
 	sHash = trimQuotationMarks(sHash)
 
-	isRole := vqlexp.RegExpCollection["Role"].MatchString(q.Instruction)
+	isRole := vqlexp.MRegExpCollection["Role"].MatchString(q.Instruction)
 	if isRole {
-		sRole := vqlexp.RegExpCollection["Role"].FindString(q.Instruction)
-		sRole = vqlexp.RegExpCollection["RoleWord"].ReplaceAllLiteralString(sRole, "")
-		sRole = vqlexp.RegExpCollection["Spaces"].ReplaceAllLiteralString(sRole, "")
+		sRole := vqlexp.MRegExpCollection["Role"].FindString(q.Instruction)
+		sRole = vqlexp.MRegExpCollection["RoleWord"].ReplaceAllLiteralString(sRole, "")
+		sRole = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sRole, "")
 		sRole = trimQuotationMarks(sRole)
-		slRoleIn := vqlexp.RegExpCollection["Comma"].Split(sRole, -1)
+		slRoleIn := vqlexp.MRegExpCollection["Comma"].Split(sRole, -1)
 		if len(slRoleIn) == 0 {
 			return `{"state":"error", "result":"incorrect roles"}`, errors.New("incorrect roles")
 		}

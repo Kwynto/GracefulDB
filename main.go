@@ -21,33 +21,33 @@ import (
 
 var (
 	//go:embed LICENSE
-	license string
+	sLicense string
 )
 
 func main() {
 	// Greeting
-	fmt.Println(colorterm.StringYellowH(license))
+	fmt.Println(colorterm.StringYellowH(sLicense))
 
 	// Init config
 	sConfigPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(sConfigPath)
 
-	if config.DefaultConfig.Env == "test" {
+	if config.StDefaultConfig.Env == "test" {
 		fmt.Println("You should set up the configuration file correctly.")
 		os.Exit(0)
 	}
 
 	// Init logger: slog
-	ordinarylogger.Init(config.DefaultConfig.LogPath, config.DefaultConfig.Env)
-	slog.Info("Starting GracefulDB", slog.String("env", config.DefaultConfig.Env))
-	slog.Info("Configuration loaded", slog.String("file", config.DisplayConfigPath))
+	ordinarylogger.Init(config.StDefaultConfig.LogPath, config.StDefaultConfig.Env)
+	slog.Info("Starting GracefulDB", slog.String("env", config.StDefaultConfig.Env))
+	slog.Info("Configuration loaded", slog.String("file", config.SDisplayConfigPath))
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking
-	ctxSignal, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
+	ctxSignal, fnStopSignal := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer fnStopSignal()
 
-	if err := server.Run(ctxSignal, &config.DefaultConfig); err != nil {
+	if err := server.Run(ctxSignal, &config.StDefaultConfig); err != nil {
 		slog.Error("An unexpected error occurred while the server was running.", slog.String("err", err.Error()))
 	}
 
