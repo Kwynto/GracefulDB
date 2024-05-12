@@ -46,48 +46,48 @@ const (
 	BLOCK_TEMP_SETTINGS = "ui/html/settings.html"
 )
 
-var TemplatesMap = make(map[string]*template.Template)
+var MTemplates = make(map[string]*template.Template)
 
 var (
-	uiHtmlDir   *embed.FS
-	uiStaticDir *embed.FS
+	emHtmlDir   *embed.FS
+	emStaticDir *embed.FS
 )
 
-func SetUiDirs(uiHtmlFS *embed.FS, uiStaticFS *embed.FS) {
-	uiHtmlDir = uiHtmlFS
-	uiStaticDir = uiStaticFS
+func SetUiDirs(emHtmlFS *embed.FS, emStaticFS *embed.FS) {
+	emHtmlDir = emHtmlFS
+	emStaticDir = emStaticFS
 }
 
-func LoadTemplateFromString(name string, temp string) (err error) {
-	op := "internal -> WebManage -> isolated -> loadTemplateFromVar"
-	defer func() { e.Wrapper(op, err) }()
+func LoadTemplateFromString(sName string, sTemp string) (err error) {
+	sOperation := "internal -> WebManage -> isolated -> loadTemplateFromVar"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	ts, err := template.New(name).Parse(temp)
+	stTemp, err := template.New(sName).Parse(sTemp)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return err
 	}
-	TemplatesMap[name] = ts
+	MTemplates[sName] = stTemp
 	return nil
 }
 
-func LoadTemplateFromEmbed(name string) (err error) {
-	op := "internal -> WebManage -> isolated -> loadTemplateFromEmbed"
-	defer func() { e.Wrapper(op, err) }()
+func LoadTemplateFromEmbed(sName string) (err error) {
+	sOperation := "internal -> WebManage -> isolated -> loadTemplateFromEmbed"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	bytes, err := uiHtmlDir.ReadFile(name)
+	slBytes, err := emHtmlDir.ReadFile(sName)
 	if err != nil {
 		slog.Debug("Error reading the template from Embed", slog.String("err", err.Error()))
 		return err
 	}
-	str := string(bytes)
+	sText := string(slBytes)
 
-	ts, err := template.New(name).Parse(str)
+	stTemp, err := template.New(sName).Parse(sText)
 	if err != nil {
 		slog.Debug("Error reading the template", slog.String("err", err.Error()))
 		return err
 	}
-	TemplatesMap[name] = ts
+	MTemplates[sName] = stTemp
 	return nil
 }
 

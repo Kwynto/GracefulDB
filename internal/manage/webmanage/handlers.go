@@ -37,44 +37,38 @@ The main section
 */
 
 // Handler after authorization
-func homeDefault(w http.ResponseWriter, r *http.Request) {
+func fnHomeDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
-		logout(w, r)
+		fnLogout(w, r)
 		return
 	}
 
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
-	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
-	// profile, err := gauth.GetProfile(login)
-	// if err != nil {
-	// 	logout(w, r)
-	// 	return
-	// }
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	sLogin := fmt.Sprint(inAuth)
+	stProfile, _ := gauth.GetProfile(sLogin) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
 
-	var data = struct {
+	var stData = struct {
 		Login string
 		Roles string
 	}{
-		Login: login,
+		Login: sLogin,
 		Roles: "",
 	}
 
-	for _, role := range profile.Roles {
-		data.Roles = fmt.Sprintf("%s %s", data.Roles, role.String())
+	for _, iRole := range stProfile.Roles {
+		stData.Roles = fmt.Sprintf("%s %s", stData.Roles, iRole.String())
 	}
 
-	err := TemplatesMap[HOME_TEMP_NAME].Execute(w, data)
+	err := MTemplates[HOME_TEMP_NAME].Execute(w, stData)
 	if err != nil {
 		slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
 // Authorization Handler
-func homeAuth(w http.ResponseWriter, r *http.Request) {
+func fnHomeAuth(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	if r.Method == http.MethodPost {
 		err := r.ParseForm()
@@ -84,57 +78,52 @@ func homeAuth(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		username := r.PostForm.Get("username")
-		password := r.PostForm.Get("password")
-		isAuth := gauth.CheckUser(username, password)
+		sUsername := r.PostForm.Get("username")
+		sPassword := r.PostForm.Get("password")
+		isAuth := gauth.CheckUser(sUsername, sPassword)
 		if isAuth {
-			sesID := gosession.Start(&w, r)
-			sesID.Set("auth", username)
+			sSesID := gosession.Start(&w, r)
+			sSesID.Set("auth", sUsername)
 
-			secret := gtypes.TSecret{
-				Login:    username,
-				Password: password,
+			stSecret := gtypes.TSecret{
+				Login:    sUsername,
+				Password: sPassword,
 			}
-			ticket, err2 := gauth.NewAuth(&secret)
+			sTicket, err2 := gauth.NewAuth(&stSecret)
 			if err2 == nil {
-				core.MStates[ticket] = core.TState{
+				core.MStates[sTicket] = core.TState{
 					CurrentDB: "",
 				}
 			}
 		}
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
-		// err := TemplatesMap[AUTH_TEMP_NAME].Execute(w, nil)
-		// if err != nil {
-		// 	slog.Debug("Internal Server Error", slog.String("err", err.Error()))
-		// 	// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		// }
+		MTemplates[AUTH_TEMP_NAME].Execute(w, nil)
 	}
 }
 
 // Handler for the main route
-func home(w http.ResponseWriter, r *http.Request) {
+func fnHome(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	if r.URL.Path != "/" {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	if auth == nil {
-		homeAuth(w, r)
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	if inAuth == nil {
+		fnHomeAuth(w, r)
 	} else {
-		homeDefault(w, r)
+		fnHomeDefault(w, r)
 	}
 }
 
 // Exit handler
-func logout(w http.ResponseWriter, r *http.Request) {
+func fnLogout(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	sesID := gosession.Start(&w, r)
-	sesID.Remove("auth")
+	sSesID := gosession.Start(&w, r)
+	sSesID.Remove("auth")
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
@@ -142,9 +131,9 @@ func logout(w http.ResponseWriter, r *http.Request) {
 Nav Menu Handlers
 */
 
-func nav_default(w http.ResponseWriter, r *http.Request) {
+func fnNavDefault(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
-	TemplatesMap[BLOCK_TEMP_DEFAULT].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_DEFAULT].Execute(w, nil)
 }
 
 func nav_logout(w http.ResponseWriter, r *http.Request) {
@@ -158,87 +147,69 @@ Profile section
 
 func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
-	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
-	// profile, err := gauth.GetProfile(login)
-	// if err != nil {
-	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, nil)
-	// 	return
-	// }
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	sLogin := fmt.Sprint(inAuth)
+	stProfile, _ := gauth.GetProfile(sLogin) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
 
-	data := struct {
+	stData := struct {
 		Login string
 		Desc  string
 	}{
-		Login: login,
-		Desc:  profile.Description,
+		Login: sLogin,
+		Desc:  stProfile.Description,
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD].Execute(w, stData)
 }
 
 func selfedit_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	var data = struct {
+	var stData = struct {
 		MsgErr string
 	}{
 		MsgErr: "",
 	}
 
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
-	profile, _ := gauth.GetProfile(login) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
-	// profile, err := gauth.GetProfile(login)
-	// if err != nil {
-	// 	data.MsgErr = "Unknown user."
-	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
-	// 	return
-	// }
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	sLogin := fmt.Sprint(inAuth)
+	stProfile, _ := gauth.GetProfile(sLogin) // There is no point in checking the error, since erroneous data acquisition is eliminated at the isolation stage.
 
-	password := strings.TrimSpace(r.PostForm.Get("password"))
-	if password == "" {
+	sPassword := strings.TrimSpace(r.PostForm.Get("password"))
+	if sPassword == "" {
 		slog.Debug("Update user", slog.String("err", "an empty password"))
-		data.MsgErr = "The password cannot be empty."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
+		stData.MsgErr = "The password cannot be empty."
+		MTemplates[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, stData)
 		return
 	}
 
-	desc := strings.TrimSpace(r.PostForm.Get("desc"))
-	profile.Description = desc
+	sDesc := strings.TrimSpace(r.PostForm.Get("desc"))
+	stProfile.Description = sDesc
 
-	gauth.UpdateUser(login, password, profile) // An error is not possible, since all fields have already been checked.
-	// err = gauth.UpdateUser(login, password, profile)
-	// if err != nil {
-	// 	slog.Debug("Update user", slog.String("err", err.Error()))
-	// 	data.MsgErr = "The user could not be updated."
-	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_ERROR].Execute(w, data)
-	// 	return
-	// }
+	gauth.UpdateUser(sLogin, sPassword, stProfile) // An error is not possible, since all fields have already been checked.
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_ACCOUNT_SELFEDIT_OK].Execute(w, nil)
 }
 
 /*
@@ -247,11 +218,11 @@ Dashboard section
 
 func nav_dashboard(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_DASHBOARD].Execute(w, nil)
 }
 
 /*
@@ -260,11 +231,11 @@ Databases section
 
 func nav_databases(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_DATABASES].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_DATABASES].Execute(w, nil)
 }
 
 /*
@@ -273,63 +244,63 @@ Console section
 
 func nav_console(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_CONSOLE].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_CONSOLE].Execute(w, nil)
 }
 
 func console_request(w http.ResponseWriter, r *http.Request) {
-	timeR := time.Now().Format(CONSOLE_TIME_FORMAT)
+	sTimeR := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	request := strings.TrimSpace(r.PostForm.Get("request"))
+	sRequest := strings.TrimSpace(r.PostForm.Get("request"))
 
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	sLogin := fmt.Sprint(inAuth)
 
-	ticket, err := gauth.GetTicket(login)
+	sTicket, err := gauth.GetTicket(sLogin)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	answer := vqlanalyzer.Request(ticket, request, []string{})
+	sAnswer := vqlanalyzer.Request(sTicket, sRequest, []string{})
 
-	timeA := time.Now().Format(CONSOLE_TIME_FORMAT)
+	sTimeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 
-	data := struct {
+	stData := struct {
 		From    string
 		Request string
 		Answer  string
 		TimeR   string
 		TimeA   string
 	}{
-		From:    login,
-		Request: request,
-		Answer:  answer,
-		TimeR:   timeR,
-		TimeA:   timeA,
+		From:    sLogin,
+		Request: sRequest,
+		Answer:  sAnswer,
+		TimeR:   sTimeR,
+		TimeA:   sTimeA,
 	}
-	TemplatesMap[BLOCK_TEMP_CONSOLE_REQUEST_ANSWER].Execute(w, data)
+	MTemplates[BLOCK_TEMP_CONSOLE_REQUEST_ANSWER].Execute(w, stData)
 }
 
 /*
@@ -338,107 +309,107 @@ Accounts section
 
 func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	var table = make([]TViewAccountsTable, 0, 10)
-	for key := range gauth.MHash {
-		element := TViewAccountsTable{
+	var stTable = make([]TViewAccountsTable, 0, 10)
+	for sKey := range gauth.MHash {
+		stElement := TViewAccountsTable{
 			System:      false,
 			Superuser:   false,
 			Baned:       false,
-			Login:       key,
-			Status:      gauth.MAccess[key].Status.String(),
+			Login:       sKey,
+			Status:      gauth.MAccess[sKey].Status.String(),
 			Roles:       "",
-			Description: gauth.MAccess[key].Description,
+			Description: gauth.MAccess[sKey].Description,
 		}
 
-		for _, role := range gauth.MAccess[key].Roles {
-			if role == gauth.SYSTEM {
-				element.System = true
+		for _, iRole := range gauth.MAccess[sKey].Roles {
+			if iRole == gauth.SYSTEM {
+				stElement.System = true
 			}
-			element.Roles = fmt.Sprintf("%s %s", element.Roles, role.String())
+			stElement.Roles = fmt.Sprintf("%s %s", stElement.Roles, iRole.String())
 		}
 
-		if key == "root" {
-			element.Superuser = true
+		if sKey == "root" {
+			stElement.Superuser = true
 		}
-		if gauth.MAccess[key].Status == gauth.BANED {
-			element.Baned = true
+		if gauth.MAccess[sKey].Status == gauth.BANED {
+			stElement.Baned = true
 		}
 
-		table = append(table, element)
+		stTable = append(stTable, stElement)
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNTS].Execute(w, table)
+	MTemplates[BLOCK_TEMP_ACCOUNTS].Execute(w, stTable)
 }
 
 func account_create_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD].Execute(w, nil)
+	MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD].Execute(w, nil)
 }
 
 func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	Login := strings.TrimSpace(r.PostForm.Get("login"))
-	password := strings.TrimSpace(r.PostForm.Get("password"))
-	desc := strings.TrimSpace(r.PostForm.Get("desc"))
+	sLogin := strings.TrimSpace(r.PostForm.Get("login"))
+	sPassword := strings.TrimSpace(r.PostForm.Get("password"))
+	sDesc := strings.TrimSpace(r.PostForm.Get("desc"))
 
-	var data = struct {
+	var stData = struct {
 		Login string
 	}{
-		Login,
+		Login: sLogin,
 	}
 
-	if len(Login) == 0 || len(password) == 0 {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
+	if len(sLogin) == 0 || len(sPassword) == 0 {
+		MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	access := gauth.TProfile{
-		Description: desc,
+	stAccess := gauth.TProfile{
+		Description: sDesc,
 		Status:      gauth.NEW,
 		Roles:       []gauth.TRole{gauth.USER},
 	}
 
-	err = gauth.AddUser(Login, password, access)
+	err = gauth.AddUser(sLogin, sPassword, stAccess)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, data)
+		MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	slog.Info("The user has been created", slog.String("user", Login))
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, data)
+	slog.Info("The user has been created", slog.String("user", sLogin))
+	MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, stData)
 }
 
 func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	user := strings.TrimSpace(r.URL.Query().Get("user"))
-	data := struct {
+	sUser := strings.TrimSpace(r.URL.Query().Get("user"))
+	stData := struct {
 		System      bool
 		Login       string
 		Description string
@@ -446,46 +417,46 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 		Roles       []string
 	}{
 		System: false,
-		Login:  user,
+		Login:  sUser,
 	}
 
-	profile, err := gauth.GetProfile(user)
+	stProfile, err := gauth.GetProfile(sUser)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, stData)
 		return
 	}
-	data.Description = profile.Description
-	data.Status = profile.Status
+	stData.Description = stProfile.Description
+	stData.Status = stProfile.Status
 
-	for _, role := range profile.Roles {
-		if role == gauth.SYSTEM {
-			data.System = true
+	for _, iRole := range stProfile.Roles {
+		if iRole == gauth.SYSTEM {
+			stData.System = true
 		}
-		data.Roles = append(data.Roles, role.String())
+		stData.Roles = append(stData.Roles, iRole.String())
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, stData)
 }
 
 func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	data := struct {
+	stData := struct {
 		Login  string
 		MsgErr string
 	}{
@@ -493,262 +464,255 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 		MsgErr: "",
 	}
 
-	Login := strings.TrimSpace(r.PostForm.Get("login"))
-	if Login == "" {
+	sLogin := strings.TrimSpace(r.PostForm.Get("login"))
+	if sLogin == "" {
 		slog.Debug("Update user", slog.String("err", "invalid username"))
-		data.MsgErr = "Invalid username."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		stData.MsgErr = "Invalid username."
+		MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, stData)
 		return
 	}
-	data.Login = Login
+	stData.Login = sLogin
 
-	password := strings.TrimSpace(r.PostForm.Get("password"))
-	if password == "" {
+	sPassword := strings.TrimSpace(r.PostForm.Get("password"))
+	if sPassword == "" {
 		slog.Debug("Update user", slog.String("err", "an empty password"))
-		data.MsgErr = "The password cannot be empty."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		stData.MsgErr = "The password cannot be empty."
+		MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	desc := strings.TrimSpace(r.PostForm.Get("desc"))
+	sDesc := strings.TrimSpace(r.PostForm.Get("desc"))
 
-	status, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("status")))
-	if (err != nil || status < 1) && Login != "root" {
+	iStatus, err := strconv.Atoi(strings.TrimSpace(r.PostForm.Get("status")))
+	if (err != nil || iStatus < 1) && sLogin != "root" {
 		slog.Debug("Update user", slog.String("err", "incorrect status"))
-		data.MsgErr = "Incorrect status."
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
+		stData.MsgErr = "Incorrect status."
+		MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	var roles []gauth.TRole
-	if Login != "root" {
-		rolesIn := r.Form["role_names"]
-		for _, role := range rolesIn {
-			switch role {
+	var slIRoles []gauth.TRole
+	if sLogin != "root" {
+		slSRolesIn := r.Form["role_names"]
+		for _, sRole := range slSRolesIn {
+			switch sRole {
 			case "SYSTEM":
-				roles = append(roles, gauth.SYSTEM)
+				slIRoles = append(slIRoles, gauth.SYSTEM)
 			case "ADMIN":
-				roles = append(roles, gauth.ADMIN)
+				slIRoles = append(slIRoles, gauth.ADMIN)
 			case "MANAGER":
-				roles = append(roles, gauth.MANAGER)
+				slIRoles = append(slIRoles, gauth.MANAGER)
 			case "ENGINEER":
-				roles = append(roles, gauth.ENGINEER)
+				slIRoles = append(slIRoles, gauth.ENGINEER)
 			case "USER":
-				roles = append(roles, gauth.USER)
+				slIRoles = append(slIRoles, gauth.USER)
 			default:
-				roles = append(roles, gauth.USER)
+				slIRoles = append(slIRoles, gauth.USER)
 			}
 		}
 	}
 
-	if Login == "root" {
-		desc = ""
-		status = 2
-		roles = append(roles, gauth.ADMIN)
+	if sLogin == "root" {
+		sDesc = ""
+		iStatus = 2
+		slIRoles = append(slIRoles, gauth.ADMIN)
 	}
 
-	access := gauth.TProfile{
-		Description: desc,
-		Status:      gauth.TStatus(status),
-		Roles:       roles,
+	stAccess := gauth.TProfile{
+		Description: sDesc,
+		Status:      gauth.TStatus(iStatus),
+		Roles:       slIRoles,
 	}
 
-	gauth.UpdateUser(Login, password, access) // An error is not possible, since all fields have already been checked.
-	// err = gauth.UpdateUser(Login, password, access)
-	// if err != nil {
-	// 	slog.Debug("Update user", slog.String("err", err.Error()))
-	// 	data.MsgErr = "The user could not be updated."
-	// 	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_ERROR].Execute(w, data)
-	// 	return
-	// }
+	gauth.UpdateUser(sLogin, sPassword, stAccess) // An error is not possible, since all fields have already been checked.
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, stData)
 }
 
 func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	user := strings.TrimSpace(r.URL.Query().Get("user"))
-	data := struct {
+	sUser := strings.TrimSpace(r.URL.Query().Get("user"))
+	stData := struct {
 		Login string
 	}{
-		Login: user,
+		Login: sUser,
 	}
 
-	if user == "" || user == "root" {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+	if sUser == "" || sUser == "root" {
+		MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, stData)
 }
 
 func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	Login := strings.TrimSpace(r.PostForm.Get("login"))
+	sLogin := strings.TrimSpace(r.PostForm.Get("login"))
 
-	var data = struct {
+	var stData = struct {
 		Login string
 	}{
-		Login,
+		Login: sLogin,
 	}
 
-	if len(Login) == 0 {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+	if len(sLogin) == 0 {
+		MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	err = gauth.BlockUser(Login)
+	err = gauth.BlockUser(sLogin)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, data)
+		MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	slog.Info("The user has been blocked", slog.String("user", Login))
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, data)
+	slog.Info("The user has been blocked", slog.String("user", sLogin))
+	MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, stData)
 }
 
 func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	user := strings.TrimSpace(r.URL.Query().Get("user"))
-	data := struct {
+	sUser := strings.TrimSpace(r.URL.Query().Get("user"))
+	stData := struct {
 		Login string
 	}{
-		Login: user,
+		Login: sUser,
 	}
 
-	if user == "" || user == "root" {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+	if sUser == "" || sUser == "root" {
+		MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD].Execute(w, stData)
 }
 
 func account_unban_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	Login := strings.TrimSpace(r.PostForm.Get("login"))
+	sLogin := strings.TrimSpace(r.PostForm.Get("login"))
 
-	var data = struct {
+	var stData = struct {
 		Login string
 	}{
-		Login,
+		Login: sLogin,
 	}
 
-	if len(Login) == 0 {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+	if len(sLogin) == 0 {
+		MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	err = gauth.UnblockUser(Login)
+	err = gauth.UnblockUser(sLogin)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, data)
+		MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	slog.Info("The user has been unblocked", slog.String("user", Login))
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK].Execute(w, data)
+	slog.Info("The user has been unblocked", slog.String("user", sLogin))
+	MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK].Execute(w, stData)
 }
 
 func account_del_load_form(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	user := strings.TrimSpace(r.URL.Query().Get("user"))
-	data := struct {
+	sUser := strings.TrimSpace(r.URL.Query().Get("user"))
+	stData := struct {
 		Login string
 	}{
-		Login: user,
+		Login: sUser,
 	}
 
-	if user == "" || user == "root" {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+	if sUser == "" || sUser == "root" {
+		MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, data)
+	MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, stData)
 }
 
 func account_del_ok(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		slog.Debug("Bad request", slog.String("err", err.Error()))
-		nav_default(w, r)
+		fnNavDefault(w, r)
 		return
 	}
 
-	Login := strings.TrimSpace(r.PostForm.Get("login"))
+	sLogin := strings.TrimSpace(r.PostForm.Get("login"))
 
-	var data = struct {
+	var stData = struct {
 		Login string
 	}{
-		Login,
+		Login: sLogin,
 	}
 
-	if len(Login) == 0 {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+	if len(sLogin) == 0 {
+		MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	err = gauth.DeleteUser(Login)
+	err = gauth.DeleteUser(sLogin)
 	if err != nil {
-		TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, data)
+		MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_ERROR].Execute(w, stData)
 		return
 	}
 
-	slog.Info("The user has been removed", slog.String("user", Login))
-	TemplatesMap[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK].Execute(w, data)
+	slog.Info("The user has been removed", slog.String("user", sLogin))
+	MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_OK].Execute(w, stData)
 }
 
 /*
@@ -757,17 +721,17 @@ Settings section
 
 func nav_settings(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
-	data := config.StDefaultConfig
-	TemplatesMap[BLOCK_TEMP_SETTINGS].Execute(w, data)
+	stData := config.StDefaultConfig
+	MTemplates[BLOCK_TEMP_SETTINGS].Execute(w, stData)
 }
 
 func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
@@ -785,7 +749,7 @@ func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 
 func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
@@ -804,7 +768,7 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 
 func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
@@ -823,7 +787,7 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 
 func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 
@@ -842,7 +806,7 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 
 func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
-		TemplatesMap[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
+		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
 	}
 

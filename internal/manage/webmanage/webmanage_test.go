@@ -31,11 +31,11 @@ func Test_Start_and_Shutdown(t *testing.T) {
 		// srvRest.Shutdown(context.Background())
 		Shutdown(context.Background(), closer.StCloseProcs)
 
-		if reflect.TypeOf(muxWeb) != reflect.TypeOf(&http.ServeMux{}) {
+		if reflect.TypeOf(stMuxWeb) != reflect.TypeOf(&http.ServeMux{}) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
 		}
 
-		if reflect.TypeOf(srvWeb) != reflect.TypeOf(&http.Server{}) {
+		if reflect.TypeOf(stSrvWeb) != reflect.TypeOf(&http.Server{}) {
 			t.Error("Start() error = The function has created an incorrect dependency.")
 		}
 

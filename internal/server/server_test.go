@@ -12,7 +12,7 @@ import (
 func Test_Stop(t *testing.T) {
 	t.Run("Stop() function testing", func(t *testing.T) {
 		Stop("tester")
-		res := <-stopSignal
+		res := <-chStopSignal
 		if reflect.TypeOf(res) != reflect.TypeOf(struct{}{}) {
 			t.Error("Stop() error = wrong result.")
 		}
@@ -21,7 +21,7 @@ func Test_Stop(t *testing.T) {
 
 func Test_Run(t *testing.T) {
 	t.Run("Run() function testing - Signal", func(t *testing.T) {
-		stopSignal <- struct{}{}
+		chStopSignal <- struct{}{}
 
 		ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()

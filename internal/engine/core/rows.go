@@ -423,119 +423,119 @@ func mergeAnd(slUFirst, slUSecond []uint64) []uint64 {
 	return slUResIds
 }
 
-func whereSelection(where []gtypes.TConditions, additionalData gtypes.TAdditionalData) []uint64 {
+func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
-		acc         []uint64 // = make([]uint64, 4)
-		progressIds []uint64 // = make([]uint64, 4)
-		selector    string   = ""
+		slUAcc         []uint64 // = make([]uint64, 4)
+		slUProgressIds []uint64 // = make([]uint64, 4)
+		sSelector      string   = ""
 	)
 
-	if len(where) < 1 {
-		return acc
+	if len(slStWhere) < 1 {
+		return slUAcc
 	}
 
-	for _, elem := range where {
-		switch elem.Type {
+	for _, stElem := range slStWhere {
+		switch stElem.Type {
 		case "operation":
 			// progressIds = nil
-			progressIds = findWhereIds(elem, additionalData)
-			switch selector {
+			slUProgressIds = findWhereIds(stElem, stAdditionalData)
+			switch sSelector {
 			case "or":
-				acc = mergeOr(acc, progressIds)
+				slUAcc = mergeOr(slUAcc, slUProgressIds)
 			case "and":
-				acc = mergeAnd(acc, progressIds)
+				slUAcc = mergeAnd(slUAcc, slUProgressIds)
 			default:
-				acc = append(acc, progressIds...)
-				selector = ""
+				slUAcc = append(slUAcc, slUProgressIds...)
+				sSelector = ""
 			}
 		case "or":
-			selector = "or"
+			sSelector = "or"
 		case "and":
-			selector = "and"
+			sSelector = "and"
 		}
 	}
 
-	return acc
+	return slUAcc
 }
 
-func DeleteRows(nameDB, nameTable string, deleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
+func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
 	// This function is complete
-	var whereIds []uint64 = []uint64{}
-	var rowsForStore []gtypes.TRowForStore
-	var cols []string = []string{}
+	var slUWhereIds []uint64 = []uint64{}
+	var slStRowsForStore []gtypes.TRowForStore
+	var slSCols []string = []string{}
 
-	if !deleteIn.IsWhere {
-		deleteIn.Where[0] = gtypes.TConditions{
+	if !stDeleteIn.IsWhere {
+		stDeleteIn.Where[0] = gtypes.TConditions{
 			Type:      "operation",
 			Key:       "_id",
 			Operation: ">",
 			Value:     "0",
 		}
-		deleteIn.IsWhere = true
+		stDeleteIn.IsWhere = true
 	}
 
-	dbInfo, okDB := GetDBInfo(nameDB)
-	if !okDB {
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
 		return []uint64{}, false
 	}
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return []uint64{}, false
 	}
 
 	// chacking keys
-	for _, whereElem := range deleteIn.Where {
-		if whereElem.Type == "operation" {
-			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
-				_, ok := tableInfo.Columns[whereElem.Key]
-				if !ok {
+	for _, stWhereElem := range stDeleteIn.Where {
+		if stWhereElem.Type == "operation" {
+			if stWhereElem.Key != "_id" && stWhereElem.Key != "_time" && stWhereElem.Key != "_status" && stWhereElem.Key != "_shape" {
+				_, isOk := stTableInfo.Columns[stWhereElem.Key]
+				if !isOk {
 					return []uint64{}, false
 				}
 			}
 		}
 	}
 
-	for _, col := range tableInfo.Columns {
-		cols = append(cols, col.Name)
+	for _, stCol := range stTableInfo.Columns {
+		slSCols = append(slSCols, stCol.Name)
 	}
 
-	additionalData := gtypes.TAdditionalData{
-		Db:    nameDB,
-		Table: nameTable,
+	stAdditionalData := gtypes.TAdditionalData{
+		Db:    sNameDB,
+		Table: sNameTable,
 	}
 
-	whereIds = whereSelection(deleteIn.Where, additionalData)
+	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
 
-	tNow := time.Now().Unix()
+	dtNow := time.Now().Unix()
 
 	// Deleting by changing the status of records and setting zero values
-	for _, id := range whereIds {
-		var rowStore = gtypes.TRowForStore{}
-		rowStore.Id = id
-		rowStore.Time = tNow
-		rowStore.Status = 0
-		rowStore.Shape = 30 // this is code of delete
-		rowStore.DB = nameDB
-		rowStore.Table = nameTable
-		for _, col := range cols {
-			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
-				Field: col,
+	for _, uId := range slUWhereIds {
+		var stRowStore = gtypes.TRowForStore{}
+		stRowStore.Id = uId
+		stRowStore.Time = dtNow
+		stRowStore.Status = 0
+		stRowStore.Shape = 30 // this is code of delete
+		stRowStore.DB = sNameDB
+		stRowStore.Table = sNameTable
+		for _, sCol := range slSCols {
+			stRowStore.Row = append(stRowStore.Row, gtypes.TColumnForStore{
+				Field: sCol,
 				Value: "",
 			})
 		}
 
-		rowsForStore = append(rowsForStore, rowStore)
+		slStRowsForStore = append(slStRowsForStore, stRowStore)
 	}
 
-	if len(whereIds) > 0 {
-		go InsertIntoBuffer(rowsForStore)
+	if len(slUWhereIds) > 0 {
+		go InsertIntoBuffer(slStRowsForStore)
 	}
 
-	return whereIds, true
+	return slUWhereIds, true
 }
 
-func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
+func SelectRows(sNameDB, sNameTable string, stUpdateIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
 	// - It's almost done
 
 	// TODO: do it
@@ -543,90 +543,90 @@ func SelectRows(nameDB, nameTable string, updateIn gtypes.TSelectStruct) ([]gtyp
 	return []gtypes.TResponseRow{}, true
 }
 
-func UpdateRows(nameDB, nameTable string, updateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
+func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
 	// This function is complete
-	var whereIds []uint64 = []uint64{}
-	var rowsForStore []gtypes.TRowForStore
-	var cols []string = []string{}
-	var value string = ""
+	var slUWhereIds []uint64 = []uint64{}
+	var slURowsForStore []gtypes.TRowForStore
+	var slSCols []string = []string{}
+	var sValue string = ""
 
-	dbInfo, okDB := GetDBInfo(nameDB)
-	if !okDB {
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
 		return []uint64{}, false
 	}
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return []uint64{}, false
 	}
 
 	// chacking keys
-	for _, whereElem := range updateIn.Where {
-		if whereElem.Type == "operation" {
-			if whereElem.Key != "_id" && whereElem.Key != "_time" && whereElem.Key != "_status" && whereElem.Key != "_shape" {
-				_, ok := tableInfo.Columns[whereElem.Key]
-				if !ok {
+	for _, stWhereElem := range stUpdateIn.Where {
+		if stWhereElem.Type == "operation" {
+			if stWhereElem.Key != "_id" && stWhereElem.Key != "_time" && stWhereElem.Key != "_status" && stWhereElem.Key != "_shape" {
+				_, isOk := stTableInfo.Columns[stWhereElem.Key]
+				if !isOk {
 					return []uint64{}, false
 				}
 			}
 		}
 	}
 
-	for _, col := range tableInfo.Columns {
-		cols = append(cols, col.Name)
+	for _, stCol := range stTableInfo.Columns {
+		slSCols = append(slSCols, stCol.Name)
 	}
 
-	additionalData := gtypes.TAdditionalData{
-		Db:    nameDB,
-		Table: nameTable,
+	stAdditionalData := gtypes.TAdditionalData{
+		Db:    sNameDB,
+		Table: sNameTable,
 	}
 
-	whereIds = whereSelection(updateIn.Where, additionalData)
+	slUWhereIds = whereSelection(stUpdateIn.Where, stAdditionalData)
 
-	tNow := time.Now().Unix()
+	dtNow := time.Now().Unix()
 
 	// Updating by changing the status of records and setting new values
-	for _, id := range whereIds {
-		var rowStore = gtypes.TRowForStore{}
-		rowStore.Id = id
-		rowStore.Time = tNow
-		rowStore.Status = 0
-		rowStore.Shape = 20 // this is code of update
-		rowStore.DB = nameDB
-		rowStore.Table = nameTable
-		for _, col := range cols {
-			newValue, ok := updateIn.Couples[col]
-			if ok {
-				value = newValue
+	for _, uId := range slUWhereIds {
+		var stRowStore = gtypes.TRowForStore{}
+		stRowStore.Id = uId
+		stRowStore.Time = dtNow
+		stRowStore.Status = 0
+		stRowStore.Shape = 20 // this is code of update
+		stRowStore.DB = sNameDB
+		stRowStore.Table = sNameTable
+		for _, sCol := range slSCols {
+			sNewValue, isOk := stUpdateIn.Couples[sCol]
+			if isOk {
+				sValue = sNewValue
 			} else {
-				value, _ = GetColumnById(nameDB, nameTable, col, id)
+				sValue, _ = GetColumnById(sNameDB, sNameTable, sCol, uId)
 				// okCol := false
 				// value, okCol = GetColumnById(nameDB, nameTable, col, id)
 				// if !okCol {
 				// 	value = ""
 				// }
 			}
-			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
-				Field: col,
-				Value: value,
+			stRowStore.Row = append(stRowStore.Row, gtypes.TColumnForStore{
+				Field: sCol,
+				Value: sValue,
 			})
 		}
 
-		rowsForStore = append(rowsForStore, rowStore)
+		slURowsForStore = append(slURowsForStore, stRowStore)
 	}
 
-	if len(whereIds) > 0 {
-		go InsertIntoBuffer(rowsForStore)
+	if len(slUWhereIds) > 0 {
+		go InsertIntoBuffer(slURowsForStore)
 	}
 
-	return whereIds, true
+	return slUWhereIds, true
 }
 
-func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) ([]uint64, bool) {
+func InsertRows(sNameDB, sNameTable string, slSColumns []string, slSlSRowsIn [][]string) ([]uint64, bool) {
 	// This function is complete
-	var rows [][]string
+	var slSLSRows [][]string
 
-	for _, col := range columns {
-		if col == "_id" || col == "_time" || col == "_status" || col == "_shape" {
+	for _, sCol := range slSColumns {
+		if sCol == "_id" || sCol == "_time" || sCol == "_status" || sCol == "_shape" {
 			return nil, false
 		}
 	}
@@ -634,91 +634,91 @@ func InsertRows(nameDB, nameTable string, columns []string, rowsin [][]string) (
 	mxStorageBlock.Lock() // заменить на другой блок
 	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StStorageInfo.DBs[nameDB]
-	if !okDB {
+	stDBInfo, isOkDB := StStorageInfo.DBs[sNameDB]
+	if !isOkDB {
 		return nil, false
 	}
 
-	tableInfo, okTable := dbInfo.Tables[nameTable]
-	if !okTable {
+	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	if !isOkTable {
 		return nil, false
 	}
 
-	for _, col := range columns {
-		if !slices.Contains(tableInfo.Order, col) {
+	for _, sCol := range slSColumns {
+		if !slices.Contains(stTableInfo.Order, sCol) {
 			return nil, false
 		}
 	}
 
-	tNow := time.Now().Unix()
+	dtNow := time.Now().Unix()
 
-	var rowsForStore []gtypes.TRowForStore
+	var slStRowsForStore []gtypes.TRowForStore
 
-	for _, row := range rowsin {
-		var trow []string
+	for _, slSRow := range slSlSRowsIn {
+		var slSTRow []string
 
-		lCol := len(columns)
-		lRow := len(row)
+		iLCol := len(slSColumns)
+		iLRow := len(slSRow)
 
-		if lCol != lRow {
-			if lCol < lRow {
-				trow = row[:lCol]
+		if iLCol != iLRow {
+			if iLCol < iLRow {
+				slSTRow = slSRow[:iLCol]
 			}
-			if lCol > lRow {
-				trow = row
-				for i := lRow; i < lCol; i++ {
-					trow = append(trow, tableInfo.Columns[columns[i]].Specification.Default)
+			if iLCol > iLRow {
+				slSTRow = slSRow
+				for i := iLRow; i < iLCol; i++ {
+					slSTRow = append(slSTRow, stTableInfo.Columns[slSColumns[i]].Specification.Default)
 				}
 			}
 		} else {
-			trow = row
+			slSTRow = slSRow
 		}
-		rows = append(rows, trow)
+		slSLSRows = append(slSLSRows, slSTRow)
 	}
 
-	for _, row := range rows {
-		var rowStore = gtypes.TRowForStore{}
-		tableInfo.Count++
-		for _, column := range tableInfo.Columns {
-			var colStore = gtypes.TColumnForStore{}
+	for _, slSRow := range slSLSRows {
+		var stRowStore = gtypes.TRowForStore{}
+		stTableInfo.Count++
+		for _, stColumn := range stTableInfo.Columns {
+			var stColStore = gtypes.TColumnForStore{}
 
-			colStore.Field = column.Name
+			stColStore.Field = stColumn.Name
 
-			var vStore string
-			ind := slices.Index(columns, column.Name)
-			if ind != -1 {
-				vStore = Encode64(row[ind])
+			var sVStore string
+			iInd := slices.Index(slSColumns, stColumn.Name)
+			if iInd != -1 {
+				sVStore = Encode64(slSRow[iInd])
 			} else {
-				if column.Specification.NotNull {
+				if stColumn.Specification.NotNull {
 					fmt.Println("Point 4")
 					return nil, false
 				}
-				vStore = column.Specification.Default
+				sVStore = stColumn.Specification.Default
 			}
 			// colStore.Id = tableInfo.Count
 			// colStore.Time = tNow
-			colStore.Value = vStore
-			rowStore.Row = append(rowStore.Row, colStore)
+			stColStore.Value = sVStore
+			stRowStore.Row = append(stRowStore.Row, stColStore)
 		}
-		rowStore.Id = tableInfo.Count
-		rowStore.Time = tNow
-		rowStore.Status = 0
-		rowStore.Shape = 0
-		rowStore.DB = nameDB
-		rowStore.Table = nameTable
+		stRowStore.Id = stTableInfo.Count
+		stRowStore.Time = dtNow
+		stRowStore.Status = 0
+		stRowStore.Shape = 0
+		stRowStore.DB = sNameDB
+		stRowStore.Table = sNameTable
 
-		rowsForStore = append(rowsForStore, rowStore)
+		slStRowsForStore = append(slStRowsForStore, stRowStore)
 	}
 
-	var result []uint64
-	for _, row := range rowsForStore {
-		result = append(result, row.Id)
+	var slUResult []uint64
+	for _, stRow := range slStRowsForStore {
+		slUResult = append(slUResult, stRow.Id)
 	}
 
-	go InsertIntoBuffer(rowsForStore)
+	go InsertIntoBuffer(slStRowsForStore)
 
-	dbInfo.Tables[nameTable] = tableInfo
-	StStorageInfo.DBs[nameDB] = dbInfo
+	stDBInfo.Tables[sNameTable] = stTableInfo
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return result, dbInfo.Save()
+	return slUResult, stDBInfo.Save()
 }

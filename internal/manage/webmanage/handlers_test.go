@@ -25,7 +25,7 @@ func Test_homeDefault(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		homeDefault(w, r) // calling the tested function
+		fnHomeDefault(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusFound {
 			t.Errorf("homeDefault() error: %v", status)
@@ -40,7 +40,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -53,7 +53,7 @@ func Test_homeDefault(t *testing.T) {
 			})
 		}
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
 			t.Errorf("homeDefault() error: %v", status)
@@ -76,7 +76,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		delete(gauth.MAccess, randStr)
@@ -91,7 +91,7 @@ func Test_homeDefault(t *testing.T) {
 			})
 		}
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusFound {
 			t.Errorf("homeDefault() error: %v", status)
@@ -106,7 +106,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -126,7 +126,7 @@ func Test_homeDefault(t *testing.T) {
 		`
 		LoadTemplateFromString(HOME_TEMP_NAME, wrongStr)
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
 			t.Errorf("homeDefault() error: %v", status)
@@ -142,7 +142,7 @@ func Test_homeAuth(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		homeAuth(w, r) // calling the tested function
+		fnHomeAuth(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
 			t.Errorf("homeAuth() error: %v", status)
@@ -155,7 +155,7 @@ func Test_homeAuth(t *testing.T) {
 		r.PostForm = nil
 		r.Body = nil
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 
 		status := w.Code
 		if status != http.StatusBadRequest {
@@ -173,7 +173,7 @@ func Test_home(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/a", nil)
 
-		home(w, r) // calling the tested function
+		fnHome(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusFound {
 			t.Errorf("home() error: %v", status)
@@ -184,7 +184,7 @@ func Test_home(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		home(w, r) // calling the tested function
+		fnHome(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
 			t.Errorf("home() error: %v", status)
@@ -207,7 +207,7 @@ func Test_home(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -220,7 +220,7 @@ func Test_home(t *testing.T) {
 			})
 		}
 
-		home(w1, r1) // calling the tested function
+		fnHome(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
 			t.Errorf("home() error: %v", status)
@@ -236,7 +236,7 @@ func Test_nav_default(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_default(w, r) // calling the tested function
+		fnNavDefault(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
 			t.Errorf("nav_default() error: %v", status)
@@ -283,7 +283,7 @@ func Test_selfedit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -319,7 +319,7 @@ func Test_selfedit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		delete(gauth.MAccess, randStr)
@@ -365,7 +365,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -401,7 +401,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -439,7 +439,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -475,7 +475,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -523,7 +523,7 @@ func Test_nav_dashboard(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -567,7 +567,7 @@ func Test_nav_databases(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -611,7 +611,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -647,7 +647,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -685,7 +685,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -732,7 +732,7 @@ func Test_nav_accounts(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -776,7 +776,7 @@ func Test_nav_accounts(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -820,7 +820,7 @@ func Test_account_create_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -864,7 +864,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -900,7 +900,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -938,7 +938,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -980,7 +980,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1021,7 +1021,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1071,7 +1071,7 @@ func Test_account_edit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1099,7 +1099,7 @@ func Test_account_edit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1152,7 +1152,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1188,7 +1188,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1226,7 +1226,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1268,7 +1268,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1310,7 +1310,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1352,7 +1352,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1405,7 +1405,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1458,7 +1458,7 @@ func Test_account_ban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1495,7 +1495,7 @@ func Test_account_ban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1548,7 +1548,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1584,7 +1584,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1622,7 +1622,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1661,7 +1661,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1700,7 +1700,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1755,7 +1755,7 @@ func Test_account_unban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1792,7 +1792,7 @@ func Test_account_unban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1845,7 +1845,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1881,7 +1881,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1919,7 +1919,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1958,7 +1958,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1997,7 +1997,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -2052,7 +2052,7 @@ func Test_account_del_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2081,7 +2081,7 @@ func Test_account_del_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -2134,7 +2134,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2170,7 +2170,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2208,7 +2208,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2247,7 +2247,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2286,7 +2286,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -2341,7 +2341,7 @@ func Test_nav_settings(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2387,7 +2387,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2417,7 +2417,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2465,7 +2465,7 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2496,7 +2496,7 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2544,7 +2544,7 @@ func Test_settings_rest_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2575,7 +2575,7 @@ func Test_settings_rest_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2635,7 +2635,7 @@ func Test_settings_web_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2671,7 +2671,7 @@ func Test_settings_web_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
