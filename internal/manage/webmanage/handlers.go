@@ -136,7 +136,7 @@ func fnNavDefault(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_DEFAULT].Execute(w, nil)
 }
 
-func nav_logout(w http.ResponseWriter, r *http.Request) {
+func fnNavLogout(w http.ResponseWriter, r *http.Request) {
 	// This function is complete
 	w.Header().Set("HX-Redirect", "/log.out")
 }
@@ -145,7 +145,7 @@ func nav_logout(w http.ResponseWriter, r *http.Request) {
 Profile section
 */
 
-func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
+func fnSelfeditLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -167,7 +167,7 @@ func selfedit_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_SELFEDIT_LOAD].Execute(w, stData)
 }
 
-func selfedit_ok(w http.ResponseWriter, r *http.Request) {
+func fnSelfeditOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -216,7 +216,7 @@ func selfedit_ok(w http.ResponseWriter, r *http.Request) {
 Dashboard section
 */
 
-func nav_dashboard(w http.ResponseWriter, r *http.Request) {
+func fnNavDashboard(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER, gauth.ENGINEER, gauth.USER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -229,7 +229,7 @@ func nav_dashboard(w http.ResponseWriter, r *http.Request) {
 Databases section
 */
 
-func nav_databases(w http.ResponseWriter, r *http.Request) {
+func fnNavDatabases(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -242,7 +242,7 @@ func nav_databases(w http.ResponseWriter, r *http.Request) {
 Console section
 */
 
-func nav_console(w http.ResponseWriter, r *http.Request) {
+func fnNavConsole(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -251,7 +251,7 @@ func nav_console(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_CONSOLE].Execute(w, nil)
 }
 
-func console_request(w http.ResponseWriter, r *http.Request) {
+func fnConsoleRequest(w http.ResponseWriter, r *http.Request) {
 	sTimeR := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ENGINEER}) {
@@ -307,7 +307,7 @@ func console_request(w http.ResponseWriter, r *http.Request) {
 Accounts section
 */
 
-func nav_accounts(w http.ResponseWriter, r *http.Request) {
+func fnNavAccounts(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -345,7 +345,7 @@ func nav_accounts(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNTS].Execute(w, stTable)
 }
 
-func account_create_load_form(w http.ResponseWriter, r *http.Request) {
+func fnAccountCreateLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -353,7 +353,7 @@ func account_create_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_LOAD].Execute(w, nil)
 }
 
-func account_create_ok(w http.ResponseWriter, r *http.Request) {
+func fnAccountCreateOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -402,7 +402,7 @@ func account_create_ok(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_CREATE_FORM_OK].Execute(w, stData)
 }
 
-func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
+func fnAccountEditLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -438,7 +438,7 @@ func account_edit_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_LOAD].Execute(w, stData)
 }
 
-func account_edit_ok(w http.ResponseWriter, r *http.Request) {
+func fnAccountEditOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -529,7 +529,7 @@ func account_edit_ok(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_EDIT_FORM_OK].Execute(w, stData)
 }
 
-func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
+func fnAccountBanLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -550,7 +550,7 @@ func account_ban_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_LOAD].Execute(w, stData)
 }
 
-func account_ban_ok(w http.ResponseWriter, r *http.Request) {
+func fnAccountBanOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -591,7 +591,7 @@ func account_ban_ok(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_BAN_FORM_OK].Execute(w, stData)
 }
 
-func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
+func fnAccountUnbanLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -612,7 +612,7 @@ func account_unban_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_LOAD].Execute(w, stData)
 }
 
-func account_unban_ok(w http.ResponseWriter, r *http.Request) {
+func fnAccountUnbanOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -653,7 +653,7 @@ func account_unban_ok(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_UNBAN_FORM_OK].Execute(w, stData)
 }
 
-func account_del_load_form(w http.ResponseWriter, r *http.Request) {
+func fnAccountDelLoadForm(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -674,7 +674,7 @@ func account_del_load_form(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_ACCOUNT_DEL_FORM_LOAD].Execute(w, stData)
 }
 
-func account_del_ok(w http.ResponseWriter, r *http.Request) {
+func fnAccountDelOk(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.MANAGER}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -719,7 +719,7 @@ func account_del_ok(w http.ResponseWriter, r *http.Request) {
 Settings section
 */
 
-func nav_settings(w http.ResponseWriter, r *http.Request) {
+func fnNavSettings(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -729,7 +729,7 @@ func nav_settings(w http.ResponseWriter, r *http.Request) {
 	MTemplates[BLOCK_TEMP_SETTINGS].Execute(w, stData)
 }
 
-func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
+func fnSettingsCoreFriendlyChangeSw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -744,10 +744,10 @@ func settings_core_friendly_change_sw(w http.ResponseWriter, r *http.Request) {
 	msg := "The friendly mode has been switched."
 	slog.Warn(msg, slog.String("FriendlyMode", fmt.Sprintf("%v", core.StLocalCoreSettings.FriendlyMode)))
 
-	nav_settings(w, r)
+	fnNavSettings(w, r)
 }
 
-func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
+func fnSettingsWScChangeSw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -763,10 +763,10 @@ func settings_wsc_change_sw(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "WebSocketConnector"))
 
-	nav_settings(w, r)
+	fnNavSettings(w, r)
 }
 
-func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
+func fnSettingsRestChangeSw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -782,10 +782,10 @@ func settings_rest_change_sw(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "RestConnector"))
 
-	nav_settings(w, r)
+	fnNavSettings(w, r)
 }
 
-func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
+func fnSettingsGrpcChangeSw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -801,10 +801,10 @@ func settings_grpc_change_sw(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Warn("The service has been switched.", slog.String("service", "GrpcConnector"))
 
-	nav_settings(w, r)
+	fnNavSettings(w, r)
 }
 
-func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
+func fnSettingsWebChangeSw(w http.ResponseWriter, r *http.Request) {
 	if IsolatedAuth(w, r, []gauth.TRole{gauth.ADMIN}) {
 		MTemplates[BLOCK_TEMP_ACCESS_DENIED].Execute(w, nil)
 		return
@@ -812,5 +812,5 @@ func settings_web_change_sw(w http.ResponseWriter, r *http.Request) {
 
 	slog.Warn("This service cannot be disabled.", slog.String("service", "WebServer"))
 
-	nav_settings(w, r)
+	fnNavSettings(w, r)
 }
