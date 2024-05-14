@@ -12,29 +12,29 @@ import (
 
 // Isolation of statistical data for web access.
 
-type IsolatedFS struct {
+type TIsolatedFS struct {
 	fs http.FileSystem
 }
 
-func (ifs IsolatedFS) Open(path string) (f http.File, err error) {
-	op := "internal -> WebManage -> isolated -> Open"
-	defer func() { e.Wrapper(op, err) }()
+func (ifs TIsolatedFS) Open(sPath string) (f http.File, err error) {
+	sOperation := "internal -> WebManage -> isolated -> Open"
+	defer func() { e.Wrapper(sOperation, err) }()
 
-	f, err = ifs.fs.Open(path)
+	f, err = ifs.fs.Open(sPath)
 	if err != nil {
 		return nil, err
 	}
 
-	s, err := f.Stat()
+	inStat, err := f.Stat()
 	if err != nil {
 		return nil, err
 	}
-	if s.IsDir() {
-		index := filepath.Join(path, "index.html")
-		if _, err := ifs.fs.Open(index); err != nil {
-			closeErr := f.Close()
-			if closeErr != nil {
-				return nil, closeErr
+	if inStat.IsDir() {
+		sIndex := filepath.Join(sPath, "index.html")
+		if _, err := ifs.fs.Open(sIndex); err != nil {
+			errClose := f.Close()
+			if errClose != nil {
+				return nil, errClose
 			}
 			return nil, err
 		}
@@ -44,22 +44,22 @@ func (ifs IsolatedFS) Open(path string) (f http.File, err error) {
 }
 
 // Isolation of authorization.
-func IsolatedAuth(w http.ResponseWriter, r *http.Request, rules []gauth.TRole) bool {
-	sesID := gosession.Start(&w, r)
-	auth := sesID.Get("auth")
-	login := fmt.Sprint(auth)
-	profile, err := gauth.GetProfile(login)
+func IsolatedAuth(w http.ResponseWriter, r *http.Request, slIRules []gauth.TRole) bool {
+	sSesID := gosession.Start(&w, r)
+	inAuth := sSesID.Get("auth")
+	sLogin := fmt.Sprint(inAuth)
+	stProfile, err := gauth.GetProfile(sLogin)
 	if err != nil {
 		return true
 	}
 
-	if !profile.IsAllowed(rules) {
+	if !stProfile.IsAllowed(slIRules) {
 		return true
 	}
 
-	if profile.Status == gauth.NEW {
-		profile.Status = gauth.ACTIVE
-		gauth.UpdateProfile(login, profile)
+	if stProfile.Status == gauth.NEW {
+		stProfile.Status = gauth.ACTIVE
+		gauth.UpdateProfile(sLogin, stProfile)
 	}
 
 	return false

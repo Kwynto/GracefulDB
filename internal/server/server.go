@@ -16,14 +16,14 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 )
 
-var stopSignal = make(chan struct{}, 1)
+var chStopSignal = make(chan struct{}, 1)
 
-func Run(ctx context.Context, cfg *config.TConfig) (err error) {
-	op := "internal -> server-> Run"
-	defer func() { e.Wrapper(op, err) }()
+func Run(ctx context.Context, stCfg *config.TConfig) (err error) {
+	sOperation := "internal -> server -> Run"
+	defer func() { e.Wrapper(sOperation, err) }()
 
 	// TODO: Load the core of the system
-	go core.Start(cfg)
+	go core.Start(stCfg)
 	closer.AddHandler(core.Shutdown) // Register a shutdown handler.
 
 	// Basic system - begin
@@ -33,38 +33,38 @@ func Run(ctx context.Context, cfg *config.TConfig) (err error) {
 	// Basic system - end
 
 	// Start WebSocket connector
-	if cfg.WebSocketConnector.Enable {
-		go websocketconn.Start(cfg)
+	if stCfg.WebSocketConnector.Enable {
+		go websocketconn.Start(stCfg)
 		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
 	}
 
 	// Start REST API connector
-	if cfg.RestConnector.Enable {
-		go rest.Start(cfg)
+	if stCfg.RestConnector.Enable {
+		go rest.Start(stCfg)
 		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
 	}
 
 	// Start gRPC connector
-	if cfg.GrpcConnector.Enable {
-		go grpc.Start(cfg)
+	if stCfg.GrpcConnector.Enable {
+		go grpc.Start(stCfg)
 		closer.AddHandler(grpc.Shutdown) // Register a shutdown handler.
 	}
 
 	// TODO: Start web-server for manage system
-	if cfg.WebServer.Enable {
-		go webmanage.Start(cfg)
+	if stCfg.WebServer.Enable {
+		go webmanage.Start(stCfg)
 		closer.AddHandler(webmanage.Shutdown) // Register a shutdown handler.
 	}
 
 	select {
 	case <-ctx.Done(): // Waiting for a stop signal from the OS
 		break
-	case <-stopSignal: // Program signal from the control interface
+	case <-chStopSignal: // Program signal from the control interface
 		break
 	}
 	slog.Warn("The shutdown process has started.")
 
-	ctxShutdown, fnCancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeOut)
+	ctxShutdown, fnCancel := context.WithTimeout(context.Background(), stCfg.ShutdownTimeOut)
 	defer fnCancel()
 
 	if err := closer.Close(ctxShutdown); err != nil {
@@ -79,5 +79,5 @@ func Run(ctx context.Context, cfg *config.TConfig) (err error) {
 func Stop(sLogin string) {
 	sMsg := fmt.Sprintf("A stop signal was received from the control interface from the %s user", sLogin)
 	slog.Warn(sMsg, slog.String("user", sLogin))
-	stopSignal <- struct{}{}
+	chStopSignal <- struct{}{}
 }

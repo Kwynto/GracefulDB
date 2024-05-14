@@ -17,22 +17,22 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 )
 
-func Test_homeDefault(t *testing.T) {
+func Test_fnHomeDefault(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("homeDefault() function testing - negative", func(t *testing.T) {
+	t.Run("fnHomeDefault() function testing - negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		homeDefault(w, r) // calling the tested function
+		fnHomeDefault(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusFound {
-			t.Errorf("homeDefault() error: %v", status)
+			t.Errorf("fnHomeDefault() error: %v", status)
 		}
 	})
 
-	t.Run("homeDefault() function testing - positive", func(t *testing.T) {
+	t.Run("fnHomeDefault() function testing - positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -40,7 +40,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -53,14 +53,14 @@ func Test_homeDefault(t *testing.T) {
 			})
 		}
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("homeDefault() error: %v", status)
+			t.Errorf("fnHomeDefault() error: %v", status)
 		}
 	})
 
-	t.Run("homeDefault() function testing - logout", func(t *testing.T) {
+	t.Run("fnHomeDefault() function testing - logout", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -76,7 +76,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		delete(gauth.MAccess, randStr)
@@ -91,14 +91,14 @@ func Test_homeDefault(t *testing.T) {
 			})
 		}
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusFound {
-			t.Errorf("homeDefault() error: %v", status)
+			t.Errorf("fnHomeDefault() error: %v", status)
 		}
 	})
 
-	t.Run("homeDefault() function testing - Template error", func(t *testing.T) {
+	t.Run("fnHomeDefault() function testing - Template error", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -106,7 +106,7 @@ func Test_homeDefault(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -126,72 +126,72 @@ func Test_homeDefault(t *testing.T) {
 		`
 		LoadTemplateFromString(HOME_TEMP_NAME, wrongStr)
 
-		homeDefault(w1, r1) // calling the tested function
+		fnHomeDefault(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("homeDefault() error: %v", status)
+			t.Errorf("fnHomeDefault() error: %v", status)
 		}
 	})
 }
 
-func Test_homeAuth(t *testing.T) {
+func Test_fnHomeAuth(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("homeAuth() function testing - GET negative", func(t *testing.T) {
+	t.Run("fnHomeAuth() function testing - GET negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		homeAuth(w, r) // calling the tested function
+		fnHomeAuth(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("homeAuth() error: %v", status)
+			t.Errorf("fnHomeAuth() error: %v", status)
 		}
 	})
 
-	t.Run("homeAuth() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnHomeAuth() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("POST", "/", nil)
 		r.PostForm = nil
 		r.Body = nil
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 
 		status := w.Code
 		if status != http.StatusBadRequest {
-			t.Errorf("homeAuth() error: %v", status)
+			t.Errorf("fnHomeAuth() error: %v", status)
 		}
 	})
 
 }
 
-func Test_home(t *testing.T) {
+func Test_fnHome(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("home() function testing - negative", func(t *testing.T) {
+	t.Run("fnHome() function testing - negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/a", nil)
 
-		home(w, r) // calling the tested function
+		fnHome(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusFound {
-			t.Errorf("home() error: %v", status)
+			t.Errorf("fnHome() error: %v", status)
 		}
 	})
 
-	t.Run("home() function testing", func(t *testing.T) {
+	t.Run("fnHome() function testing", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		home(w, r) // calling the tested function
+		fnHome(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("home() error: %v", status)
+			t.Errorf("fnHome() error: %v", status)
 		}
 	})
 
-	t.Run("home() function testing", func(t *testing.T) {
+	t.Run("fnHome() function testing", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -207,7 +207,7 @@ func Test_home(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -220,62 +220,62 @@ func Test_home(t *testing.T) {
 			})
 		}
 
-		home(w1, r1) // calling the tested function
+		fnHome(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("home() error: %v", status)
+			t.Errorf("fnHome() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_default(t *testing.T) {
+func Test_fnNavDefault(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_default() function testing", func(t *testing.T) {
+	t.Run("fnNavDefault() function testing", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_default(w, r) // calling the tested function
+		fnNavDefault(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_default() error: %v", status)
+			t.Errorf("fnNavDefault() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_logout(t *testing.T) {
+func Test_fnNavLogout(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_logout() function testing", func(t *testing.T) {
+	t.Run("fnNavLogout() function testing", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_logout(w, r) // calling the tested function
+		fnNavLogout(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_logout() error: %v", status)
+			t.Errorf("fnNavLogout() error: %v", status)
 		}
 	})
 }
 
-func Test_selfedit_load_form(t *testing.T) {
+func Test_fnSelfeditLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("selfedit_load_form() function testing - negative", func(t *testing.T) {
+	t.Run("fnSelfeditLoadForm() function testing - negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		selfedit_load_form(w, r) // calling the tested function
+		fnSelfeditLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_load_form() error: %v", status)
+			t.Errorf("fnSelfeditLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_load_form() function testing - positive", func(t *testing.T) {
+	t.Run("fnSelfeditLoadForm() function testing - positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -283,7 +283,7 @@ func Test_selfedit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -296,14 +296,14 @@ func Test_selfedit_load_form(t *testing.T) {
 			})
 		}
 
-		selfedit_load_form(w1, r1) // calling the tested function
+		fnSelfeditLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_load_form() error: %v", status)
+			t.Errorf("fnSelfeditLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_load_form() function testing", func(t *testing.T) {
+	t.Run("fnSelfeditLoadForm() function testing", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -319,7 +319,7 @@ func Test_selfedit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		delete(gauth.MAccess, randStr)
@@ -334,30 +334,30 @@ func Test_selfedit_load_form(t *testing.T) {
 			})
 		}
 
-		selfedit_load_form(w1, r1) // calling the tested function
+		fnSelfeditLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_load_form() error: %v", status)
+			t.Errorf("fnSelfeditLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_selfedit_ok(t *testing.T) {
+func Test_fnSelfeditOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("selfedit_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSelfeditOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		selfedit_ok(w, r) // calling the tested function
+		fnSelfeditOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_ok() error: %v", status)
+			t.Errorf("fnSelfeditOk() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnSelfeditOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -365,7 +365,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -378,14 +378,14 @@ func Test_selfedit_ok(t *testing.T) {
 			})
 		}
 
-		selfedit_ok(w1, r1) // calling the tested function
+		fnSelfeditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_ok() error: %v", status)
+			t.Errorf("fnSelfeditOk() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnSelfeditOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -401,7 +401,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -416,14 +416,14 @@ func Test_selfedit_ok(t *testing.T) {
 			})
 		}
 
-		selfedit_ok(w1, r1) // calling the tested function
+		fnSelfeditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_ok() error: %v", status)
+			t.Errorf("fnSelfeditOk() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_ok() function testing POST positive and not value of password", func(t *testing.T) {
+	t.Run("fnSelfeditOk() function testing POST positive and not value of password", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -439,7 +439,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -452,14 +452,14 @@ func Test_selfedit_ok(t *testing.T) {
 			})
 		}
 
-		selfedit_ok(w1, r1) // calling the tested function
+		fnSelfeditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_ok() error: %v", status)
+			t.Errorf("fnSelfeditOk() error: %v", status)
 		}
 	})
 
-	t.Run("selfedit_ok() function testing - all right", func(t *testing.T) {
+	t.Run("fnSelfeditOk() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -475,7 +475,7 @@ func Test_selfedit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -492,30 +492,30 @@ func Test_selfedit_ok(t *testing.T) {
 			})
 		}
 
-		selfedit_ok(w1, r1) // calling the tested function
+		fnSelfeditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("selfedit_ok() error: %v", status)
+			t.Errorf("fnSelfeditOk() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_dashboard(t *testing.T) {
+func Test_fnNavDashboard(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_dashboard() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnNavDashboard() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_dashboard(w, r) // calling the tested function
+		fnNavDashboard(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_dashboard() error: %v", status)
+			t.Errorf("fnNavDashboard() error: %v", status)
 		}
 	})
 
-	t.Run("nav_dashboard() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnNavDashboard() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -523,7 +523,7 @@ func Test_nav_dashboard(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -536,30 +536,30 @@ func Test_nav_dashboard(t *testing.T) {
 			})
 		}
 
-		nav_dashboard(w1, r1) // calling the tested function
+		fnNavDashboard(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_dashboard() error: %v", status)
+			t.Errorf("fnNavDashboard() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_databases(t *testing.T) {
+func Test_fnNavDatabases(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_databases() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnNavDatabases() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_databases(w, r) // calling the tested function
+		fnNavDatabases(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_databases() error: %v", status)
+			t.Errorf("fnNavDatabases() error: %v", status)
 		}
 	})
 
-	t.Run("nav_databases() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnNavDatabases() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -567,7 +567,7 @@ func Test_nav_databases(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -580,30 +580,30 @@ func Test_nav_databases(t *testing.T) {
 			})
 		}
 
-		nav_databases(w1, r1) // calling the tested function
+		fnNavDatabases(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_databases() error: %v", status)
+			t.Errorf("fnNavDatabases() error: %v", status)
 		}
 	})
 }
 
-func Test_console_request(t *testing.T) {
+func Test_fnConsoleRequest(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("console_request() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnConsoleRequest() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		console_request(w, r) // calling the tested function
+		fnConsoleRequest(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("console_request() error: %v", status)
+			t.Errorf("fnConsoleRequest() error: %v", status)
 		}
 	})
 
-	t.Run("console_request() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnConsoleRequest() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -611,7 +611,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -624,14 +624,14 @@ func Test_console_request(t *testing.T) {
 			})
 		}
 
-		console_request(w1, r1) // calling the tested function
+		fnConsoleRequest(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("console_request() error: %v", status)
+			t.Errorf("fnConsoleRequest() error: %v", status)
 		}
 	})
 
-	t.Run("console_request() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnConsoleRequest() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -647,7 +647,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -662,14 +662,14 @@ func Test_console_request(t *testing.T) {
 			})
 		}
 
-		console_request(w1, r1) // calling the tested function
+		fnConsoleRequest(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("console_request() error: %v", status)
+			t.Errorf("fnConsoleRequest() error: %v", status)
 		}
 	})
 
-	t.Run("console_request() function testing - all right", func(t *testing.T) {
+	t.Run("fnConsoleRequest() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -685,7 +685,7 @@ func Test_console_request(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -701,30 +701,30 @@ func Test_console_request(t *testing.T) {
 			})
 		}
 
-		console_request(w1, r1) // calling the tested function
+		fnConsoleRequest(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("console_request() error: %v", status)
+			t.Errorf("fnConsoleRequest() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_accounts(t *testing.T) {
+func Test_fnNavAccounts(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_accounts() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnNavAccounts() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_accounts(w, r) // calling the tested function
+		fnNavAccounts(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_accounts() error: %v", status)
+			t.Errorf("fnNavAccounts() error: %v", status)
 		}
 	})
 
-	t.Run("nav_accounts() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnNavAccounts() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -732,7 +732,7 @@ func Test_nav_accounts(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -745,14 +745,14 @@ func Test_nav_accounts(t *testing.T) {
 			})
 		}
 
-		nav_accounts(w1, r1) // calling the tested function
+		fnNavAccounts(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_accounts() error: %v", status)
+			t.Errorf("fnNavAccounts() error: %v", status)
 		}
 	})
 
-	t.Run("nav_accounts() function testing - all coverage", func(t *testing.T) {
+	t.Run("fnNavAccounts() function testing - all coverage", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -776,7 +776,7 @@ func Test_nav_accounts(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -789,30 +789,30 @@ func Test_nav_accounts(t *testing.T) {
 			})
 		}
 
-		nav_accounts(w1, r1) // calling the tested function
+		fnNavAccounts(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_accounts() error: %v", status)
+			t.Errorf("fnNavAccounts() error: %v", status)
 		}
 	})
 }
 
-func Test_account_create_load_form(t *testing.T) {
+func Test_fnAccountCreateLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_create_load_form() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountCreateLoadForm() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_create_load_form(w, r) // calling the tested function
+		fnAccountCreateLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_load_form() error: %v", status)
+			t.Errorf("fnAccountCreateLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_load_form() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnAccountCreateLoadForm() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -820,7 +820,7 @@ func Test_account_create_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -833,30 +833,30 @@ func Test_account_create_load_form(t *testing.T) {
 			})
 		}
 
-		account_create_load_form(w1, r1) // calling the tested function
+		fnAccountCreateLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_load_form() error: %v", status)
+			t.Errorf("fnAccountCreateLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_account_create_ok(t *testing.T) {
+func Test_fnAccountCreateOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_create_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_create_ok(w, r) // calling the tested function
+		fnAccountCreateOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -864,7 +864,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -877,14 +877,14 @@ func Test_account_create_ok(t *testing.T) {
 			})
 		}
 
-		account_create_ok(w1, r1) // calling the tested function
+		fnAccountCreateOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -900,7 +900,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -915,14 +915,14 @@ func Test_account_create_ok(t *testing.T) {
 			})
 		}
 
-		account_create_ok(w1, r1) // calling the tested function
+		fnAccountCreateOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_ok() function testing POST positive and not value of password", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing POST positive and not value of password", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -938,7 +938,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -957,14 +957,14 @@ func Test_account_create_ok(t *testing.T) {
 			})
 		}
 
-		account_create_ok(w1, r1) // calling the tested function
+		fnAccountCreateOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_ok() function testing - create error", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing - create error", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -980,7 +980,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -998,14 +998,14 @@ func Test_account_create_ok(t *testing.T) {
 			})
 		}
 
-		account_create_ok(w1, r1) // calling the tested function
+		fnAccountCreateOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_create_ok() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountCreateOk() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1021,7 +1021,7 @@ func Test_account_create_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1040,30 +1040,30 @@ func Test_account_create_ok(t *testing.T) {
 			})
 		}
 
-		account_create_ok(w1, r1) // calling the tested function
+		fnAccountCreateOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_create_ok() error: %v", status)
+			t.Errorf("fnAccountCreateOk() error: %v", status)
 		}
 	})
 }
 
-func Test_account_edit_load_form(t *testing.T) {
+func Test_fnAccountEditLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_edit_load_form() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountEditLoadForm() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_edit_load_form(w, r) // calling the tested function
+		fnAccountEditLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_load_form() error: %v", status)
+			t.Errorf("fnAccountEditLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_load_form() function testing - Isolate positive and don't GetProfile", func(t *testing.T) {
+	t.Run("fnAccountEditLoadForm() function testing - Isolate positive and don't GetProfile", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1071,7 +1071,7 @@ func Test_account_edit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1084,14 +1084,14 @@ func Test_account_edit_load_form(t *testing.T) {
 			})
 		}
 
-		account_edit_load_form(w1, r1) // calling the tested function
+		fnAccountEditLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_load_form() error: %v", status)
+			t.Errorf("fnAccountEditLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_load_form() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountEditLoadForm() function testing - all right", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1099,7 +1099,7 @@ func Test_account_edit_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1121,30 +1121,30 @@ func Test_account_edit_load_form(t *testing.T) {
 			})
 		}
 
-		account_edit_load_form(w1, r1) // calling the tested function
+		fnAccountEditLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_load_form() error: %v", status)
+			t.Errorf("fnAccountEditLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_account_edit_ok(t *testing.T) {
+func Test_fnAccountEditOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_edit_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_edit_ok(w, r) // calling the tested function
+		fnAccountEditOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1152,7 +1152,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1165,14 +1165,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1188,7 +1188,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1203,14 +1203,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing POST positive and not value of login", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing POST positive and not value of login", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1226,7 +1226,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1245,14 +1245,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing POST positive and not value of password", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing POST positive and not value of password", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1268,7 +1268,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1287,14 +1287,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing - status error", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing - status error", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1310,7 +1310,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1329,14 +1329,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing - Roles", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing - Roles", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1352,7 +1352,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1382,14 +1382,14 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_edit_ok() function testing - root user", func(t *testing.T) {
+	t.Run("fnAccountEditOk() function testing - root user", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1405,7 +1405,7 @@ func Test_account_edit_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1427,30 +1427,30 @@ func Test_account_edit_ok(t *testing.T) {
 			})
 		}
 
-		account_edit_ok(w1, r1) // calling the tested function
+		fnAccountEditOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_edit_ok() error: %v", status)
+			t.Errorf("fnAccountEditOk() error: %v", status)
 		}
 	})
 }
 
-func Test_account_ban_load_form(t *testing.T) {
+func Test_fnAccountBanLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_ban_load_form() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountBanLoadForm() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_ban_load_form(w, r) // calling the tested function
+		fnAccountBanLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_load_form() error: %v", status)
+			t.Errorf("fnAccountBanLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_load_form() function testing - root user", func(t *testing.T) {
+	t.Run("fnAccountBanLoadForm() function testing - root user", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1458,7 +1458,7 @@ func Test_account_ban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1480,14 +1480,14 @@ func Test_account_ban_load_form(t *testing.T) {
 			})
 		}
 
-		account_ban_load_form(w1, r1) // calling the tested function
+		fnAccountBanLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_load_form() error: %v", status)
+			t.Errorf("fnAccountBanLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_load_form() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountBanLoadForm() function testing - all right", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1495,7 +1495,7 @@ func Test_account_ban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1517,30 +1517,30 @@ func Test_account_ban_load_form(t *testing.T) {
 			})
 		}
 
-		account_ban_load_form(w1, r1) // calling the tested function
+		fnAccountBanLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_load_form() error: %v", status)
+			t.Errorf("fnAccountBanLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_account_ban_ok(t *testing.T) {
+func Test_fnAccountBanOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_ban_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_ban_ok(w, r) // calling the tested function
+		fnAccountBanOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1548,7 +1548,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1561,14 +1561,14 @@ func Test_account_ban_ok(t *testing.T) {
 			})
 		}
 
-		account_ban_ok(w1, r1) // calling the tested function
+		fnAccountBanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1584,7 +1584,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1599,14 +1599,14 @@ func Test_account_ban_ok(t *testing.T) {
 			})
 		}
 
-		account_ban_ok(w1, r1) // calling the tested function
+		fnAccountBanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_ok() function testing POST positive and not value of login", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing POST positive and not value of login", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1622,7 +1622,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1638,14 +1638,14 @@ func Test_account_ban_ok(t *testing.T) {
 			})
 		}
 
-		account_ban_ok(w1, r1) // calling the tested function
+		fnAccountBanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_ok() function testing POST positive and don't work BlockUser", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing POST positive and don't work BlockUser", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1661,7 +1661,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1677,14 +1677,14 @@ func Test_account_ban_ok(t *testing.T) {
 			})
 		}
 
-		account_ban_ok(w1, r1) // calling the tested function
+		fnAccountBanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_ban_ok() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountBanOk() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1700,7 +1700,7 @@ func Test_account_ban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -1724,30 +1724,30 @@ func Test_account_ban_ok(t *testing.T) {
 			})
 		}
 
-		account_ban_ok(w1, r1) // calling the tested function
+		fnAccountBanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_ban_ok() error: %v", status)
+			t.Errorf("fnAccountBanOk() error: %v", status)
 		}
 	})
 }
 
-func Test_account_unban_load_form(t *testing.T) {
+func Test_fnAccountUnbanLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_unban_load_form() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountUnbanLoadForm() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_unban_load_form(w, r) // calling the tested function
+		fnAccountUnbanLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_load_form() error: %v", status)
+			t.Errorf("fnAccountUnbanLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_load_form() function testing - root user", func(t *testing.T) {
+	t.Run("fnAccountUnbanLoadForm() function testing - root user", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1755,7 +1755,7 @@ func Test_account_unban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1777,14 +1777,14 @@ func Test_account_unban_load_form(t *testing.T) {
 			})
 		}
 
-		account_unban_load_form(w1, r1) // calling the tested function
+		fnAccountUnbanLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_load_form() error: %v", status)
+			t.Errorf("fnAccountUnbanLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_load_form() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountUnbanLoadForm() function testing - all right", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1792,7 +1792,7 @@ func Test_account_unban_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -1814,30 +1814,30 @@ func Test_account_unban_load_form(t *testing.T) {
 			})
 		}
 
-		account_unban_load_form(w1, r1) // calling the tested function
+		fnAccountUnbanLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_load_form() error: %v", status)
+			t.Errorf("fnAccountUnbanLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_account_unban_ok(t *testing.T) {
+func Test_fnAccountUnbanOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_unban_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_unban_ok(w, r) // calling the tested function
+		fnAccountUnbanOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -1845,7 +1845,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1858,14 +1858,14 @@ func Test_account_unban_ok(t *testing.T) {
 			})
 		}
 
-		account_unban_ok(w1, r1) // calling the tested function
+		fnAccountUnbanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1881,7 +1881,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1896,14 +1896,14 @@ func Test_account_unban_ok(t *testing.T) {
 			})
 		}
 
-		account_unban_ok(w1, r1) // calling the tested function
+		fnAccountUnbanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_ok() function testing POST positive and not value of login", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing POST positive and not value of login", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1919,7 +1919,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1935,14 +1935,14 @@ func Test_account_unban_ok(t *testing.T) {
 			})
 		}
 
-		account_unban_ok(w1, r1) // calling the tested function
+		fnAccountUnbanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_ok() function testing POST positive and don't work UnblockUser", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing POST positive and don't work UnblockUser", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1958,7 +1958,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -1974,14 +1974,14 @@ func Test_account_unban_ok(t *testing.T) {
 			})
 		}
 
-		account_unban_ok(w1, r1) // calling the tested function
+		fnAccountUnbanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_unban_ok() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountUnbanOk() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -1997,7 +1997,7 @@ func Test_account_unban_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -2021,30 +2021,30 @@ func Test_account_unban_ok(t *testing.T) {
 			})
 		}
 
-		account_unban_ok(w1, r1) // calling the tested function
+		fnAccountUnbanOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_unban_ok() error: %v", status)
+			t.Errorf("fnAccountUnbanOk() error: %v", status)
 		}
 	})
 }
 
-func Test_account_del_load_form(t *testing.T) {
+func Test_fnAccountDelLoadForm(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_del_load_form() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountDelLoadForm() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_del_load_form(w, r) // calling the tested function
+		fnAccountDelLoadForm(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_load_form() error: %v", status)
+			t.Errorf("fnAccountDelLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_load_form() function testing - root user", func(t *testing.T) {
+	t.Run("fnAccountDelLoadForm() function testing - root user", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -2052,7 +2052,7 @@ func Test_account_del_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2066,14 +2066,14 @@ func Test_account_del_load_form(t *testing.T) {
 			})
 		}
 
-		account_del_load_form(w1, r1) // calling the tested function
+		fnAccountDelLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_load_form() error: %v", status)
+			t.Errorf("fnAccountDelLoadForm() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_load_form() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountDelLoadForm() function testing - all right", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -2081,7 +2081,7 @@ func Test_account_del_load_form(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr := gauth.GenerateTicket()
@@ -2103,30 +2103,30 @@ func Test_account_del_load_form(t *testing.T) {
 			})
 		}
 
-		account_del_load_form(w1, r1) // calling the tested function
+		fnAccountDelLoadForm(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_load_form() error: %v", status)
+			t.Errorf("fnAccountDelLoadForm() error: %v", status)
 		}
 	})
 }
 
-func Test_account_del_ok(t *testing.T) {
+func Test_fnAccountDelOk(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("account_del_ok() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		account_del_ok(w, r) // calling the tested function
+		fnAccountDelOk(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_ok() function testing - POST negative", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing - POST negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -2134,7 +2134,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2147,14 +2147,14 @@ func Test_account_del_ok(t *testing.T) {
 			})
 		}
 
-		account_del_ok(w1, r1) // calling the tested function
+		fnAccountDelOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_ok() function testing POST positive and don't work ParseForm", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing POST positive and don't work ParseForm", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -2170,7 +2170,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2185,14 +2185,14 @@ func Test_account_del_ok(t *testing.T) {
 			})
 		}
 
-		account_del_ok(w1, r1) // calling the tested function
+		fnAccountDelOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_ok() function testing POST positive and not value of login", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing POST positive and not value of login", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -2208,7 +2208,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2224,14 +2224,14 @@ func Test_account_del_ok(t *testing.T) {
 			})
 		}
 
-		account_del_ok(w1, r1) // calling the tested function
+		fnAccountDelOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_ok() function testing POST positive and don't work DeleteUser", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing POST positive and don't work DeleteUser", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -2247,7 +2247,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2263,14 +2263,14 @@ func Test_account_del_ok(t *testing.T) {
 			})
 		}
 
-		account_del_ok(w1, r1) // calling the tested function
+		fnAccountDelOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 
-	t.Run("account_del_ok() function testing - all right", func(t *testing.T) {
+	t.Run("fnAccountDelOk() function testing - all right", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -2286,7 +2286,7 @@ func Test_account_del_ok(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		randStr1 := gauth.GenerateTicket()
@@ -2310,30 +2310,30 @@ func Test_account_del_ok(t *testing.T) {
 			})
 		}
 
-		account_del_ok(w1, r1) // calling the tested function
+		fnAccountDelOk(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("account_del_ok() error: %v", status)
+			t.Errorf("fnAccountDelOk() error: %v", status)
 		}
 	})
 }
 
-func Test_nav_settings(t *testing.T) {
+func Test_fnNavSettings(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("nav_settings() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnNavSettings() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		nav_settings(w, r) // calling the tested function
+		fnNavSettings(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_settings() error: %v", status)
+			t.Errorf("fnNavSettings() error: %v", status)
 		}
 	})
 
-	t.Run("nav_settings() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnNavSettings() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -2341,7 +2341,7 @@ func Test_nav_settings(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2354,30 +2354,30 @@ func Test_nav_settings(t *testing.T) {
 			})
 		}
 
-		nav_settings(w1, r1) // calling the tested function
+		fnNavSettings(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("nav_settings() error: %v", status)
+			t.Errorf("fnNavSettings() error: %v", status)
 		}
 	})
 }
 
-func Test_settings_core_friendly_change_sw(t *testing.T) {
+func Test_fnSettingsCoreFriendlyChangeSw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_core_friendly_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSettingsCoreFriendlyChangeSw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_core_friendly_change_sw(w, r) // calling the tested function
+		fnSettingsCoreFriendlyChangeSw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
+			t.Errorf("fnSettingsCoreFriendlyChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_core_friendly_change_sw() function testing - off", func(t *testing.T) {
+	t.Run("fnSettingsCoreFriendlyChangeSw() function testing - off", func(t *testing.T) {
 		config.StDefaultConfig.CoreSettings.FriendlyMode = true
 
 		w := httptest.NewRecorder()
@@ -2387,7 +2387,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2400,14 +2400,14 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_core_friendly_change_sw(w1, r1) // calling the tested function
+		fnSettingsCoreFriendlyChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK || !core.StLocalCoreSettings.FriendlyMode {
-			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
+			t.Errorf("fnSettingsCoreFriendlyChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_core_friendly_change_sw() function testing - on", func(t *testing.T) {
+	t.Run("fnSettingsCoreFriendlyChangeSw() function testing - on", func(t *testing.T) {
 		config.StDefaultConfig.CoreSettings.FriendlyMode = false
 
 		w := httptest.NewRecorder()
@@ -2417,7 +2417,7 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2430,30 +2430,30 @@ func Test_settings_core_friendly_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_core_friendly_change_sw(w1, r1) // calling the tested function
+		fnSettingsCoreFriendlyChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK || core.StLocalCoreSettings.FriendlyMode {
-			t.Errorf("settings_core_friendly_change_sw() error: %v", status)
+			t.Errorf("fnSettingsCoreFriendlyChangeSw() error: %v", status)
 		}
 	})
 }
 
-func Test_settings_wsc_change_sw(t *testing.T) {
+func Test_fnSettingsWScChangeSw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_wsc_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSettingsWScChangeSw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_wsc_change_sw(w, r) // calling the tested function
+		fnSettingsWScChangeSw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_wsc_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWScChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_wsc_change_sw() function testing - shutdown", func(t *testing.T) {
+	t.Run("fnSettingsWScChangeSw() function testing - shutdown", func(t *testing.T) {
 		config.StDefaultConfig.WebSocketConnector.Enable = true
 		go websocketconn.Start(&config.StDefaultConfig)
 		closer.AddHandler(websocketconn.Shutdown) // Register a shutdown handler.
@@ -2465,7 +2465,7 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2478,14 +2478,14 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_wsc_change_sw(w1, r1) // calling the tested function
+		fnSettingsWScChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_wsc_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWScChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_wsc_change_sw() function testing - start", func(t *testing.T) {
+	t.Run("fnSettingsWScChangeSw() function testing - start", func(t *testing.T) {
 		config.StDefaultConfig.WebSocketConnector.Enable = false
 		closer.RunAndDelHandler(websocketconn.Shutdown)
 
@@ -2496,7 +2496,7 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2509,30 +2509,30 @@ func Test_settings_wsc_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_wsc_change_sw(w1, r1) // calling the tested function
+		fnSettingsWScChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_wsc_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWScChangeSw() error: %v", status)
 		}
 	})
 }
 
-func Test_settings_rest_change_sw(t *testing.T) {
+func Test_fnSettingsRestChangeSw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_rest_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSettingsRestChangeSw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_rest_change_sw(w, r) // calling the tested function
+		fnSettingsRestChangeSw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_rest_change_sw() error: %v", status)
+			t.Errorf("fnSettingsRestChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_rest_change_sw() function testing - shutdown", func(t *testing.T) {
+	t.Run("fnSettingsRestChangeSw() function testing - shutdown", func(t *testing.T) {
 		config.StDefaultConfig.RestConnector.Enable = true
 		go rest.Start(&config.StDefaultConfig)
 		closer.AddHandler(rest.Shutdown) // Register a shutdown handler.
@@ -2544,7 +2544,7 @@ func Test_settings_rest_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2557,14 +2557,14 @@ func Test_settings_rest_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_rest_change_sw(w1, r1) // calling the tested function
+		fnSettingsRestChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_rest_change_sw() error: %v", status)
+			t.Errorf("fnSettingsRestChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_rest_change_sw() function testing - start", func(t *testing.T) {
+	t.Run("fnSettingsRestChangeSw() function testing - start", func(t *testing.T) {
 		config.StDefaultConfig.RestConnector.Enable = false
 		closer.RunAndDelHandler(rest.Shutdown)
 
@@ -2575,7 +2575,7 @@ func Test_settings_rest_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2588,46 +2588,46 @@ func Test_settings_rest_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_rest_change_sw(w1, r1) // calling the tested function
+		fnSettingsRestChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_rest_change_sw() error: %v", status)
+			t.Errorf("fnSettingsRestChangeSw() error: %v", status)
 		}
 	})
 }
 
-func Test_settings_grpc_change_sw(t *testing.T) {
+func Test_fnSettingsGrpcChangeSw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_grpc_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSettingsGrpcChangeSw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_grpc_change_sw(w, r) // calling the tested function
+		fnSettingsGrpcChangeSw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_grpc_change_sw() error: %v", status)
+			t.Errorf("fnSettingsGrpcChangeSw() error: %v", status)
 		}
 	})
 }
 
-func Test_settings_web_change_sw(t *testing.T) {
+func Test_fnSettingsWebChangeSw(t *testing.T) {
 	gauth.Start()
 	parseTemplates()
 
-	t.Run("settings_web_change_sw() function testing - Isolate negative", func(t *testing.T) {
+	t.Run("fnSettingsWebChangeSw() function testing - Isolate negative", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("GET", "/", nil)
 
-		settings_web_change_sw(w, r) // calling the tested function
+		fnSettingsWebChangeSw(w, r) // calling the tested function
 		status := w.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_web_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWebChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_web_change_sw() function testing - Isolate positive", func(t *testing.T) {
+	t.Run("fnSettingsWebChangeSw() function testing - Isolate positive", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		form := url.Values{}
 		form.Add("username", "root")
@@ -2635,7 +2635,7 @@ func Test_settings_web_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2648,14 +2648,14 @@ func Test_settings_web_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_web_change_sw(w1, r1) // calling the tested function
+		fnSettingsWebChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_web_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWebChangeSw() error: %v", status)
 		}
 	})
 
-	t.Run("settings_web_change_sw() function testing - Isolate undefined user", func(t *testing.T) {
+	t.Run("fnSettingsWebChangeSw() function testing - Isolate undefined user", func(t *testing.T) {
 		randStr := gauth.GenerateTicket()
 		prof := gauth.TProfile{
 			Description: "Testing description",
@@ -2671,7 +2671,7 @@ func Test_settings_web_change_sw(t *testing.T) {
 		r := httptest.NewRequest("POST", "/", strings.NewReader(form.Encode()))
 		r.PostForm = form
 
-		homeAuth(w, r)
+		fnHomeAuth(w, r)
 		wCooks := w.Result().Cookies()
 
 		w1 := httptest.NewRecorder()
@@ -2684,10 +2684,10 @@ func Test_settings_web_change_sw(t *testing.T) {
 			})
 		}
 
-		settings_web_change_sw(w1, r1) // calling the tested function
+		fnSettingsWebChangeSw(w1, r1) // calling the tested function
 		status := w1.Code
 		if status != http.StatusOK {
-			t.Errorf("settings_web_change_sw() error: %v", status)
+			t.Errorf("fnSettingsWebChangeSw() error: %v", status)
 		}
 	})
 }

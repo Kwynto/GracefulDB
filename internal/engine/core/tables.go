@@ -11,60 +11,60 @@ import (
 )
 
 // Marks the table as deleted, but does not delete files.
-func RemoveTable(nameDB, nameTable string) bool {
+func RemoveTable(sNameDB, sNameTable string) bool {
 	// This function is complete
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StStorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return false
 	}
 
-	tNow := time.Now()
+	dtNow := time.Now()
 
-	tableInfo.LastUpdate = tNow
-	tableInfo.Deleted = true
+	stTableInfo.LastUpdate = dtNow
+	stTableInfo.Deleted = true
 
-	dbInfo.Removed = append(dbInfo.Removed, tableInfo)
-	delete(dbInfo.Tables, nameTable)
-	dbInfo.LastUpdate = tNow
+	stDBInfo.Removed = append(stDBInfo.Removed, stTableInfo)
+	delete(stDBInfo.Tables, sNameTable)
+	stDBInfo.LastUpdate = dtNow
 
-	StStorageInfo.DBs[nameDB] = dbInfo
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }
 
 // Deletes the folder and table files, if table was mark as 'removed'
-func StrongRemoveTable(nameDB, nameTable string) bool {
+func StrongRemoveTable(sNameDB, sNameTable string) bool {
 	// This function is complete
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StStorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
-	for indRange, tableInfo := range dbInfo.Removed {
-		if tableInfo.Name == nameTable {
+	for iRangeInd, stTableInfo := range stDBInfo.Removed {
+		if stTableInfo.Name == sNameTable {
 			// tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			tablePath := filepath.Join(StLocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
-			err := os.RemoveAll(tablePath)
+			sTablePath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
+			err := os.RemoveAll(sTablePath)
 			if err != nil {
 				return false
 			}
 
-			dbInfo.Removed = slices.Delete(dbInfo.Removed, indRange, indRange+1)
-			dbInfo.LastUpdate = time.Now()
-			StStorageInfo.DBs[nameDB] = dbInfo
+			stDBInfo.Removed = slices.Delete(stDBInfo.Removed, iRangeInd, iRangeInd+1)
+			stDBInfo.LastUpdate = time.Now()
+			StStorageInfo.DBs[sNameDB] = stDBInfo
 
-			return dbInfo.Save()
+			return stDBInfo.Save()
 		}
 	}
 
@@ -72,150 +72,150 @@ func StrongRemoveTable(nameDB, nameTable string) bool {
 }
 
 // Rename a table.
-func RenameTable(nameDB, oldNameTable, newNameTable string, secure bool) bool {
+func RenameTable(sNameDB, sOldNameTable, sNewNameTable string, isSecure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(newNameTable) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNewNameTable) {
 		return false
 	}
 
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
-	dbInfo, okDB := StStorageInfo.DBs[nameDB]
-	if okDB {
-		tableInfo, okTable := dbInfo.Tables[oldNameTable]
-		if !okTable {
+	stDBInfo, isOkDB := StStorageInfo.DBs[sNameDB]
+	if isOkDB {
+		stTableInfo, isOkTable := stDBInfo.Tables[sOldNameTable]
+		if !isOkTable {
 			return false
 		}
 
-		tNow := time.Now()
+		dtNow := time.Now()
 
-		tableInfo.Name = newNameTable
-		tableInfo.LastUpdate = tNow
+		stTableInfo.Name = sNewNameTable
+		stTableInfo.LastUpdate = dtNow
 
-		delete(dbInfo.Tables, oldNameTable)
-		dbInfo.Tables[newNameTable] = tableInfo
-		dbInfo.LastUpdate = tNow
+		delete(stDBInfo.Tables, sOldNameTable)
+		stDBInfo.Tables[sNewNameTable] = stTableInfo
+		stDBInfo.LastUpdate = dtNow
 
-		StStorageInfo.DBs[nameDB] = dbInfo
+		StStorageInfo.DBs[sNameDB] = stDBInfo
 
-		return dbInfo.Save()
+		return stDBInfo.Save()
 	}
 
 	return false
 }
 
-func TruncateTable(nameDB, nameTable string) bool {
+func TruncateTable(sNameDB, sNameTable string) bool {
 	// This function is complete
-	var whereIds []uint64 = []uint64{}
-	var rowsForStore []gtypes.TRowForStore
-	var cols []string = []string{}
-	var deleteIn gtypes.TDeleteStruct = gtypes.TDeleteStruct{
+	var slUWhereIds []uint64 = []uint64{}
+	var slStRowsForStore []gtypes.TRowForStore
+	var slSCols []string = []string{}
+	var stDeleteIn gtypes.TDeleteStruct = gtypes.TDeleteStruct{
 		Where:   make([]gtypes.TConditions, 2),
 		IsWhere: false,
 	}
 
-	deleteIn.Where[0] = gtypes.TConditions{
+	stDeleteIn.Where[0] = gtypes.TConditions{
 		Type:      "operation",
 		Key:       "_id",
 		Operation: ">",
 		Value:     "0",
 	}
-	deleteIn.IsWhere = true
+	stDeleteIn.IsWhere = true
 
-	dbInfo, okDB := GetDBInfo(nameDB)
-	if !okDB {
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
 		return false
 	}
-	tableInfo, ok := dbInfo.Tables[nameTable]
-	if !ok {
+	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	if !isOk {
 		return false
 	}
-	for _, col := range tableInfo.Columns {
-		cols = append(cols, col.Name)
+	for _, stCol := range stTableInfo.Columns {
+		slSCols = append(slSCols, stCol.Name)
 	}
 
-	additionalData := gtypes.TAdditionalData{
-		Db:    nameDB,
-		Table: nameTable,
+	stAdditionalData := gtypes.TAdditionalData{
+		Db:    sNameDB,
+		Table: sNameTable,
 	}
 
-	whereIds = whereSelection(deleteIn.Where, additionalData)
+	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
 
-	tNow := time.Now().Unix()
+	dtNow := time.Now().Unix()
 
 	// Deleting by changing the status of records and setting zero values
-	for _, id := range whereIds {
-		var rowStore = gtypes.TRowForStore{}
-		rowStore.Id = id
-		rowStore.Time = tNow
-		rowStore.Status = 0
-		rowStore.Shape = 30 // this is code of delete
-		rowStore.DB = nameDB
-		rowStore.Table = nameTable
-		for _, col := range cols {
-			rowStore.Row = append(rowStore.Row, gtypes.TColumnForStore{
-				Field: col,
+	for _, uId := range slUWhereIds {
+		var stRowStore = gtypes.TRowForStore{}
+		stRowStore.Id = uId
+		stRowStore.Time = dtNow
+		stRowStore.Status = 0
+		stRowStore.Shape = 30 // this is code of delete
+		stRowStore.DB = sNameDB
+		stRowStore.Table = sNameTable
+		for _, sCol := range slSCols {
+			stRowStore.Row = append(stRowStore.Row, gtypes.TColumnForStore{
+				Field: sCol,
 				Value: "",
 			})
 		}
 
-		rowsForStore = append(rowsForStore, rowStore)
+		slStRowsForStore = append(slStRowsForStore, stRowStore)
 	}
 
-	if len(whereIds) > 0 {
-		go InsertIntoBuffer(rowsForStore)
+	if len(slUWhereIds) > 0 {
+		go InsertIntoBuffer(slStRowsForStore)
 	}
 
 	return true
 }
 
 // Creating a new table.
-func CreateTable(nameDB, nameTable string, secure bool) bool {
+func CreateTable(sNameDB, sNameTable string, isSecure bool) bool {
 	// This function is complete
-	if secure && !vqlexp.MRegExpCollection["EntityName"].MatchString(nameTable) {
+	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNameTable) {
 		return false
 	}
 
-	var folderName string
+	var sFolderName string
 
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
-	dbInfo, ok := StStorageInfo.DBs[nameDB]
-	if !ok {
+	stDBInfo, isOk := StStorageInfo.DBs[sNameDB]
+	if !isOk {
 		return false
 	}
 
 	// pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
-	pathDB := filepath.Join(StLocalCoreSettings.Storage, dbInfo.Folder)
+	sPathDB := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder)
 
 	for {
-		folderName = GenerateName()
-		if !CheckFolder(pathDB, folderName) {
+		sFolderName = GenerateName()
+		if !CheckFolder(sPathDB, sFolderName) {
 			break
 		}
 	}
 
 	// fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
-	fullTableName := filepath.Join(pathDB, folderName)
-	err1 := os.Mkdir(fullTableName, 0666)
+	sFullTableName := filepath.Join(sPathDB, sFolderName)
+	err1 := os.Mkdir(sFullTableName, 0666)
 	if err1 != nil {
 		return false
 	}
 
 	// serviceName := fmt.Sprintf("%s/service", fullTableName)
-	serviceName := filepath.Join(fullTableName, "service")
-	err2 := os.Mkdir(serviceName, 0666)
+	sServiceName := filepath.Join(sFullTableName, "service")
+	err2 := os.Mkdir(sServiceName, 0666)
 	if err2 != nil {
 		return false
 	}
 
-	tableInfo := TTableInfo{
-		Name:       nameTable,
-		Patronymic: nameDB,
-		Folder:     folderName,
-		Parent:     dbInfo.Folder,
+	stTableInfo := TTableInfo{
+		Name:       sNameTable,
+		Patronymic: sNameDB,
+		Folder:     sFolderName,
+		Parent:     stDBInfo.Folder,
 		Columns:    make(map[string]TColumnInfo),
 		Removed:    make([]TColumnInfo, 0),
 		Order:      make([]string, 0),
@@ -228,19 +228,19 @@ func CreateTable(nameDB, nameTable string, secure bool) bool {
 		Deleted:    false,
 	}
 
-	dbInfo.Tables[nameTable] = tableInfo
-	dbInfo.LastUpdate = time.Now()
-	StStorageInfo.DBs[nameDB] = dbInfo
+	stDBInfo.Tables[sNameTable] = stTableInfo
+	stDBInfo.LastUpdate = time.Now()
+	StStorageInfo.DBs[sNameDB] = stDBInfo
 
-	return dbInfo.Save()
+	return stDBInfo.Save()
 }
 
-func IfExistTable(db, table string) bool {
-	dbInfo, okDb := GetDBInfo(db)
-	if !okDb {
+func IfExistTable(sDB, sTable string) bool {
+	stDBInfo, isOk := GetDBInfo(sDB)
+	if !isOk {
 		return false
 	}
-	_, okTab := dbInfo.Tables[table]
+	_, isOkTab := stDBInfo.Tables[sTable]
 
-	return okTab
+	return isOkTab
 }

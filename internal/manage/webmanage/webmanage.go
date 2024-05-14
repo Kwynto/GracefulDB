@@ -16,49 +16,49 @@ const (
 	CONSOLE_TIME_FORMAT = "2006-01-02 15:04:05"
 )
 
-var address string
-var muxWeb *http.ServeMux
+var sAddress string
+var stMuxWeb *http.ServeMux
 
-var srvWeb *http.Server
+var stSrvWeb *http.Server
 
 func routes() *http.ServeMux {
 	// Main routes
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/log.out", logout)
+	stMux := http.NewServeMux()
+	stMux.HandleFunc("/", fnHome)
+	stMux.HandleFunc("/log.out", fnLogout)
 
 	// HTMX routes
-	mux.HandleFunc("/hx/", nav_default)
-	mux.HandleFunc("/hx/nav/logout", nav_logout)
+	stMux.HandleFunc("/hx/", fnNavDefault)
+	stMux.HandleFunc("/hx/nav/logout", fnNavLogout)
 
-	mux.HandleFunc("/hx/nav/dashboard", nav_dashboard)
+	stMux.HandleFunc("/hx/nav/dashboard", fnNavDashboard)
 
-	mux.HandleFunc("/hx/nav/databases", nav_databases)
+	stMux.HandleFunc("/hx/nav/databases", fnNavDatabases)
 	// mux.HandleFunc("/hx/databases/request", database_request)
 
-	mux.HandleFunc("/hx/nav/console", nav_console)
-	mux.HandleFunc("/hx/console/request", console_request)
+	stMux.HandleFunc("/hx/nav/console", fnNavConsole)
+	stMux.HandleFunc("/hx/console/request", fnConsoleRequest)
 
-	mux.HandleFunc("/hx/nav/accounts", nav_accounts)
-	mux.HandleFunc("/hx/accounts/create_load_form", account_create_load_form)
-	mux.HandleFunc("/hx/accounts/create_ok", account_create_ok)
-	mux.HandleFunc("/hx/accounts/edit_load_form", account_edit_load_form)
-	mux.HandleFunc("/hx/accounts/edit_ok", account_edit_ok)
-	mux.HandleFunc("/hx/accounts/ban_load_form", account_ban_load_form)
-	mux.HandleFunc("/hx/accounts/ban_ok", account_ban_ok)
-	mux.HandleFunc("/hx/accounts/unban_load_form", account_unban_load_form)
-	mux.HandleFunc("/hx/accounts/unban_ok", account_unban_ok)
-	mux.HandleFunc("/hx/accounts/del_load_form", account_del_load_form)
-	mux.HandleFunc("/hx/accounts/del_ok", account_del_ok)
-	mux.HandleFunc("/hx/accounts/selfedit_load_form", selfedit_load_form)
-	mux.HandleFunc("/hx/accounts/selfedit_ok", selfedit_ok)
+	stMux.HandleFunc("/hx/nav/accounts", fnNavAccounts)
+	stMux.HandleFunc("/hx/accounts/create_load_form", fnAccountCreateLoadForm)
+	stMux.HandleFunc("/hx/accounts/create_ok", fnAccountCreateOk)
+	stMux.HandleFunc("/hx/accounts/edit_load_form", fnAccountEditLoadForm)
+	stMux.HandleFunc("/hx/accounts/edit_ok", fnAccountEditOk)
+	stMux.HandleFunc("/hx/accounts/ban_load_form", fnAccountBanLoadForm)
+	stMux.HandleFunc("/hx/accounts/ban_ok", fnAccountBanOk)
+	stMux.HandleFunc("/hx/accounts/unban_load_form", fnAccountUnbanLoadForm)
+	stMux.HandleFunc("/hx/accounts/unban_ok", fnAccountUnbanOk)
+	stMux.HandleFunc("/hx/accounts/del_load_form", fnAccountDelLoadForm)
+	stMux.HandleFunc("/hx/accounts/del_ok", fnAccountDelOk)
+	stMux.HandleFunc("/hx/accounts/selfedit_load_form", fnSelfeditLoadForm)
+	stMux.HandleFunc("/hx/accounts/selfedit_ok", fnSelfeditOk)
 
-	mux.HandleFunc("/hx/nav/settings", nav_settings)
-	mux.HandleFunc("/hx/settings/core_friendly_change_sw", settings_core_friendly_change_sw)
-	mux.HandleFunc("/hx/settings/wsc_change_sw", settings_wsc_change_sw)
-	mux.HandleFunc("/hx/settings/rest_change_sw", settings_rest_change_sw)
-	mux.HandleFunc("/hx/settings/grpc_change_sw", settings_grpc_change_sw)
-	mux.HandleFunc("/hx/settings/web_change_sw", settings_web_change_sw)
+	stMux.HandleFunc("/hx/nav/settings", fnNavSettings)
+	stMux.HandleFunc("/hx/settings/core_friendly_change_sw", fnSettingsCoreFriendlyChangeSw)
+	stMux.HandleFunc("/hx/settings/wsc_change_sw", fnSettingsWScChangeSw)
+	stMux.HandleFunc("/hx/settings/rest_change_sw", fnSettingsRestChangeSw)
+	stMux.HandleFunc("/hx/settings/grpc_change_sw", fnSettingsGrpcChangeSw)
+	stMux.HandleFunc("/hx/settings/web_change_sw", fnSettingsWebChangeSw)
 
 	// Isolation of static files
 	// fileServer := http.FileServer(IsolatedFS{http.Dir("./ui/static/")})
@@ -66,28 +66,28 @@ func routes() *http.ServeMux {
 	// mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	// Embed of static file
-	fileServer := http.FileServer(http.FS(uiStaticDir))
-	mux.Handle("/ui/static", http.NotFoundHandler())
-	mux.Handle("/ui/static/", fileServer)
+	inFileServer := http.FileServer(http.FS(emStaticDir))
+	stMux.Handle("/ui/static", http.NotFoundHandler())
+	stMux.Handle("/ui/static/", inFileServer)
 
-	return mux
+	return stMux
 }
 
-func Start(cfg *config.TConfig) {
+func Start(stCfg *config.TConfig) {
 	// This function is completes
 	parseTemplates()
 
-	address = fmt.Sprintf("%s:%s", cfg.WebServer.Address, cfg.WebServer.Port)
-	muxWeb = routes()
+	sAddress = fmt.Sprintf("%s:%s", stCfg.WebServer.Address, stCfg.WebServer.Port)
+	stMuxWeb = routes()
 
-	srvWeb = &http.Server{
-		Addr:     address,
+	stSrvWeb = &http.Server{
+		Addr:     sAddress,
 		ErrorLog: ordinarylogger.LogServerError,
-		Handler:  muxWeb,
+		Handler:  stMuxWeb,
 	}
 
-	slog.Info("Web manager is running", slog.String("address", address))
-	if err := srvWeb.ListenAndServe(); err != nil {
+	slog.Info("Web manager is running", slog.String("address", sAddress))
+	if err := stSrvWeb.ListenAndServe(); err != nil {
 		slog.Debug(err.Error())
 		return
 	}
@@ -95,9 +95,9 @@ func Start(cfg *config.TConfig) {
 
 func Shutdown(ctx context.Context, c *closer.TCloser) {
 	// This function is complete
-	if err := srvWeb.Shutdown(ctx); err != nil {
-		msg := fmt.Sprintf("There was a problem with stopping the Web manager: %s", err.Error())
-		c.AddMsg(msg)
+	if err := stSrvWeb.Shutdown(ctx); err != nil {
+		sMsg := fmt.Sprintf("There was a problem with stopping the Web manager: %s", err.Error())
+		c.AddMsg(sMsg)
 	}
 	slog.Info("Web manager stopped")
 	c.Done()
