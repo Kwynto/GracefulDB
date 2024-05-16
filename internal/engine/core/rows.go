@@ -535,8 +535,17 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 	return slUWhereIds, true
 }
 
-func SelectRows(sNameDB, sNameTable string, stUpdateIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
+func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
 	// - It's almost done
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
+		return []gtypes.TResponseRow{}, false
+	}
+
+	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	if !isOkTable {
+		return []gtypes.TResponseRow{}, false
+	}
 
 	// TODO: do it
 

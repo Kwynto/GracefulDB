@@ -157,7 +157,7 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	// TODO: Make an implementation in the kernel
 	stResultRow, isOkSelect = core.SelectRows(sDB, sTable, stSelectIn)
 	if !isOkSelect {
-		return `{"state":"error", "result":"the record(s) cannot be updated"}`, errors.New("the record cannot be updated")
+		return `{"state":"error", "result":"the record(s) cannot be selected"}`, errors.New("the record cannot be selected")
 	}
 
 	stResSelect.State = "ok"
