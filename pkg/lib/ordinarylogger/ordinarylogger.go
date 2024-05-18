@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Kwynto/GracefulDB/pkg/lib/colorterm"
+	"github.com/Kwynto/GracefulDB/pkg/lib/incolor"
 )
 
 const (
@@ -36,13 +36,13 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	switch r.Level {
 	case slog.LevelDebug:
-		sLevel = colorterm.StringMagenta(sLevel)
+		sLevel = incolor.StringMagenta(sLevel)
 	case slog.LevelInfo:
-		sLevel = colorterm.StringGreen(sLevel)
+		sLevel = incolor.StringGreen(sLevel)
 	case slog.LevelWarn:
-		sLevel = colorterm.StringYellow(sLevel)
+		sLevel = incolor.StringYellow(sLevel)
 	case slog.LevelError:
-		sLevel = colorterm.StringRed(sLevel)
+		sLevel = incolor.StringRed(sLevel)
 	}
 
 	mFields := make(map[string]interface{}, r.NumAttrs())
@@ -85,9 +85,9 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 		sFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
 	}
 
-	sMsg := colorterm.StringCyan(r.Message)
+	sMsg := incolor.StringCyan(r.Message)
 
-	h.lScreen.Println(sTimeStrScreen, sLevel, sMsg, colorterm.StringWhite(sAttrsScreenOut))
+	h.lScreen.Println(sTimeStrScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut))
 	h.lFile.Println(sFileOut)
 
 	return nil

@@ -1,4 +1,4 @@
-package colorterm
+package incolor
 
 import (
 	"fmt"
