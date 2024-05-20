@@ -535,12 +535,74 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 	return slUWhereIds, true
 }
 
-func SelectRows(sNameDB, sNameTable string, stUpdateIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
+func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
 	// - It's almost done
+	var slReturnedCells = make([]string, 0, 4)
+	var slStRowsForResponse = make([]gtypes.TResponseRow, 0, 4)
 
-	// TODO: do it
+	if !stSelectIn.IsWhere {
+		stSelectIn.Where[0] = gtypes.TConditions{
+			Type:      "operation",
+			Key:       "_id",
+			Operation: ">",
+			Value:     "0",
+		}
+		stSelectIn.IsWhere = true
+	}
 
-	return []gtypes.TResponseRow{}, true
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
+		return []gtypes.TResponseRow{}, false
+	}
+	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	if !isOkTable {
+		return []gtypes.TResponseRow{}, false
+	}
+
+	// chacking keys
+	for _, stWhereElem := range stSelectIn.Where {
+		if stWhereElem.Type == "operation" {
+			if stWhereElem.Key != "_id" && stWhereElem.Key != "_time" && stWhereElem.Key != "_status" && stWhereElem.Key != "_shape" {
+				_, isOk := stTableInfo.Columns[stWhereElem.Key]
+				if !isOk {
+					return []gtypes.TResponseRow{}, false
+				}
+			}
+		}
+	}
+	stAdditionalData := gtypes.TAdditionalData{
+		Db:    sNameDB,
+		Table: sNameTable,
+	}
+	slUWhereIds := whereSelection(stSelectIn.Where, stAdditionalData)
+
+	for _, sColVal := range stSelectIn.Columns {
+		if sColVal == "*" {
+			for _, stColVal := range stTableInfo.Columns {
+				slReturnedCells = append(slReturnedCells, stColVal.Name)
+			}
+		} else {
+			slReturnedCells = append(slReturnedCells, sColVal)
+		}
+	}
+
+	// Selection by IDs
+	for _, uId := range slUWhereIds {
+		var stRowForResponse = make(gtypes.TResponseRow, 0)
+
+		// TODO: Make an identifier generator for the cache.
+		for _, sCol := range slReturnedCells {
+			sValue, isOkVal := GetColumnById(sNameDB, sNameTable, sCol, uId)
+			if !isOkVal {
+				return slStRowsForResponse, false
+			}
+			stRowForResponse[sCol] = sValue
+		}
+
+		slStRowsForResponse = append(slStRowsForResponse, stRowForResponse)
+	}
+
+	return slStRowsForResponse, true
 }
 
 func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
