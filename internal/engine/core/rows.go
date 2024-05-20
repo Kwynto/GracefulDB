@@ -586,14 +586,20 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 		}
 	}
 
-	// dtNow := time.Now().Unix()
-
 	// Selection by IDs
 	for _, uId := range slUWhereIds {
-		var stRowsForResponse = make(gtypes.TResponseRow, 0)
+		var stRowForResponse = make(gtypes.TResponseRow, 0)
 
-		// TODO: do it
-		slStRowsForResponse = append(slStRowsForResponse, stRowsForResponse)
+		// TODO: Make an identifier generator for the cache.
+		for _, sCol := range slReturnedCells {
+			sValue, isOkVal := GetColumnById(sNameDB, sNameTable, sCol, uId)
+			if !isOkVal {
+				return slStRowsForResponse, false
+			}
+			stRowForResponse[sCol] = sValue
+		}
+
+		slStRowsForResponse = append(slStRowsForResponse, stRowForResponse)
 	}
 
 	return slStRowsForResponse, true

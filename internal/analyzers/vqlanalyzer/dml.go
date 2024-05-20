@@ -19,11 +19,11 @@ func (q tQuery) DMLSelect() (result string, err error) {
 	defer func() { e.Wrapper(sOperation, err) }()
 
 	var (
-		stResultRow []gtypes.TResponseRow
-		isOkSelect  bool
-		stRes       gtypes.TResponse
-		stResSelect gtypes.TResponseSelect
-		stSelectIn  = gtypes.TSelectStruct{
+		slStResultRows []gtypes.TResponseRow
+		isOkSelect     bool
+		stRes          gtypes.TResponse
+		stResSelect    gtypes.TResponseSelect
+		stSelectIn     = gtypes.TSelectStruct{
 			Orderby: gtypes.TOrderBy{
 				Cols: make([]string, 0, 4),
 				Sort: make([]uint8, 0, 4),
@@ -154,14 +154,13 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 	// Request execution
 
-	// TODO: Make an implementation in the kernel
-	stResultRow, isOkSelect = core.SelectRows(sDB, sTable, stSelectIn)
+	slStResultRows, isOkSelect = core.SelectRows(sDB, sTable, stSelectIn)
 	if !isOkSelect {
 		return `{"state":"error", "result":"the record(s) cannot be selected"}`, errors.New("the record cannot be selected")
 	}
 
 	stResSelect.State = "ok"
-	stResSelect.Result = stResultRow
+	stResSelect.Result = slStResultRows
 	return ecowriter.EncodeJSON(stResSelect), nil
 }
 
