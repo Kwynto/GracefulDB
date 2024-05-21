@@ -222,6 +222,9 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 
 	for _, sLine := range slSFileData {
 		slSLineData := strings.Split(sLine, "|")
+		if len(slSLineData) < 2 {
+			break
+		}
 		sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
 		uId, err := strconv.ParseUint(sValueId, 10, 64)
 		if err != nil {

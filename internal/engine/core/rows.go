@@ -59,6 +59,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						slSFileData := strings.Split(sFileText, "\n")
 						for _, sLine := range slSFileData {
 							slLineData := strings.Split(sLine, "|")
+							if len(slLineData) < 4 {
+								break
+							}
 							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
@@ -122,6 +125,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						slFileData := strings.Split(sFileText, "\n")
 						for _, sLine := range slFileData {
 							slLineData := strings.Split(sLine, "|")
+							if len(slLineData) < 4 {
+								break
+							}
 							sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
@@ -189,6 +195,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						slFileData := strings.Split(sFileText, "\n")
 						for _, sVal := range slFileData {
 							slLineData := strings.Split(sVal, "|")
+							if len(slLineData) < 4 {
+								break
+							}
 							sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
@@ -256,6 +265,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						slFileData := strings.Split(sFileText, "\n")
 						for _, sLine := range slFileData {
 							slLineData := strings.Split(sLine, "|")
+							if len(slLineData) < 4 {
+								break
+							}
 							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 							uID, err := strconv.ParseUint(sValueId, 10, 64)
 							if err != nil {
@@ -315,6 +327,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					slFileData := strings.Split(sFileText, "\n")
 					for _, sLine := range slFileData {
 						slLineData := strings.Split(sLine, "|")
+						if len(slLineData) < 4 {
+							break
+						}
 						sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
 						uID, err := strconv.ParseUint(sValueId, 10, 64)
 						if err != nil {
@@ -370,6 +385,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 
 			for _, sLine := range slFileData {
 				slLineData := strings.Split(sLine, "|")
+				if len(slLineData) < 4 {
+					break
+				}
 				sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 
 				uValue, err := strconv.ParseUint(sValueId, 10, 64)
@@ -588,6 +606,10 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 
 	// Selection by IDs
 	for _, uId := range slUWhereIds {
+		if uId == 0 {
+			continue
+		}
+
 		var stRowForResponse = make(gtypes.TResponseRow, 0)
 
 		// TODO: Make an identifier generator for the cache.
@@ -648,6 +670,10 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 
 	// Updating by changing the status of records and setting new values
 	for _, uId := range slUWhereIds {
+		if uId == 0 {
+			continue
+		}
+
 		var stRowStore = gtypes.TRowForStore{}
 		stRowStore.Id = uId
 		stRowStore.Time = dtNow
@@ -661,11 +687,6 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 				sValue = sNewValue
 			} else {
 				sValue, _ = GetColumnById(sNameDB, sNameTable, sCol, uId)
-				// okCol := false
-				// value, okCol = GetColumnById(nameDB, nameTable, col, id)
-				// if !okCol {
-				// 	value = ""
-				// }
 			}
 			stRowStore.Row = append(stRowStore.Row, gtypes.TColumnForStore{
 				Field: sCol,
