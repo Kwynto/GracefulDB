@@ -130,7 +130,7 @@ func CompileRegExpCollection() tRegExpCollection {
 	mRECol = mRECol.CompileExp("InsertValuesWord", `(?m)[vV][aA][lL][uU][eE][sS]`)
 	mRECol = mRECol.CompileExp("InsertSplitParenthesis", `(?m)\),\s*\(`)
 
-	mRECol = mRECol.CompileExp("SearchUpdate", `(?m)^[uU][pP][dD][aA][tT][eE].*[sS][sE][tT].*`)
+	mRECol = mRECol.CompileExp("SearchUpdate", `(?m)^[uU][pP][dD][aA][tT][eE].*[sS][eE][tT].*`)
 	mRECol = mRECol.CompileExp("UpdateWord", `(?m)^[uU][pP][dD][aA][tT][eE]`)
 	mRECol = mRECol.CompileExp("UpdateSetToEnd", `(?m)\s*[sS][eE][tT]\s.*`)
 	mRECol = mRECol.CompileExp("UpdateSetWord", `(?m)\s*[sS][eE][tT]\s`)

@@ -16,9 +16,10 @@ import (
 func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
-		slUResIds           = make([]uint64, 4)
-		slUProgressIds      = make([]uint64, 4)
-		isDelete       bool = false
+		slUResIds            = make([]uint64, 0, 4)
+		slUProgressIds       = make([]uint64, 0, 4)
+		slUBlacklistIds      = make([]uint64, 0, 4)
+		isDelete        bool = false
 	)
 
 	if stCond.Type != "operation" {
@@ -60,7 +61,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						for _, sLine := range slSFileData {
 							slLineData := strings.Split(sLine, "|")
 							if len(slLineData) < 4 {
-								break
+								continue
 							}
 							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 
@@ -69,31 +70,43 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								continue
 							}
 
-							if uValueShape < 30 {
-								uID, err := strconv.ParseUint(sValueId, 10, 64)
-								if err != nil {
-									continue
-								}
-
-								switch {
-								case stCond.Operation == "<=" && uID <= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">=" && uID >= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "<" && uID < uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">" && uID > uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "=" && uID == uValueCond:
-									slUResIds = append(slUResIds, uID)
-									// case "like":
-									// 	return []uint64{}
-									// case "regexp":
-									// 	return []uint64{}
-								}
+							uID, err := strconv.ParseUint(sValueId, 10, 64)
+							if err != nil {
+								continue
 							}
+
+							if uValueShape == 30 {
+								slUBlacklistIds = append(slUBlacklistIds, uID)
+							}
+
+							// if uValueShape < 30 {
+							switch {
+							case stCond.Operation == "<=" && uID <= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">=" && uID >= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "<" && uID < uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">" && uID > uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "=" && uID == uValueCond:
+								slUResIds = append(slUResIds, uID)
+								// case "like":
+								// 	return []uint64{}
+								// case "regexp":
+								// 	return []uint64{}
+							}
+							// }
 						}
 					}
+				}
+			}
+
+			slUResIds = slices.Compact(slUResIds)
+			for _, uBlackVal := range slUBlacklistIds {
+				iInd := slices.Index(slUResIds, uBlackVal)
+				if iInd >= 0 {
+					slUResIds = slices.Delete(slUResIds, iInd, iInd+1)
 				}
 			}
 		}
@@ -126,7 +139,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						for _, sLine := range slFileData {
 							slLineData := strings.Split(sLine, "|")
 							if len(slLineData) < 4 {
-								break
+								continue
 							}
 							sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
 
@@ -135,35 +148,47 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								continue
 							}
 
-							if uValueShape < 30 {
-								uID, err := strconv.ParseUint(sValueId, 10, 64)
-								if err != nil {
-									continue
-								}
-								uValueTime, err := strconv.ParseUint(sValueTime, 10, 64)
-								if err != nil {
-									continue
-								}
-
-								switch {
-								case stCond.Operation == "<=" && uValueTime <= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">=" && uValueTime >= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "<" && uValueTime < uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">" && uValueTime > uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "=" && uValueTime == uValueCond:
-									slUResIds = append(slUResIds, uID)
-									// case "like":
-									// 	return []uint64{}
-									// case "regexp":
-									// 	return []uint64{}
-								}
+							uID, err := strconv.ParseUint(sValueId, 10, 64)
+							if err != nil {
+								continue
 							}
+							uValueTime, err := strconv.ParseUint(sValueTime, 10, 64)
+							if err != nil {
+								continue
+							}
+
+							if uValueShape == 30 {
+								slUBlacklistIds = append(slUBlacklistIds, uID)
+							}
+
+							// if uValueShape < 30 {
+							switch {
+							case stCond.Operation == "<=" && uValueTime <= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">=" && uValueTime >= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "<" && uValueTime < uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">" && uValueTime > uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "=" && uValueTime == uValueCond:
+								slUResIds = append(slUResIds, uID)
+								// case "like":
+								// 	return []uint64{}
+								// case "regexp":
+								// 	return []uint64{}
+							}
+							// }
 						}
 					}
+				}
+			}
+
+			slUResIds = slices.Compact(slUResIds)
+			for _, uBlackVal := range slUBlacklistIds {
+				iInd := slices.Index(slUResIds, uBlackVal)
+				if iInd >= 0 {
+					slUResIds = slices.Delete(slUResIds, iInd, iInd+1)
 				}
 			}
 		}
@@ -196,7 +221,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						for _, sVal := range slFileData {
 							slLineData := strings.Split(sVal, "|")
 							if len(slLineData) < 4 {
-								break
+								continue
 							}
 							sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
 
@@ -205,35 +230,47 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								continue
 							}
 
-							if uValueShape < 30 {
-								uID, err := strconv.ParseUint(sValueId, 10, 64)
-								if err != nil {
-									continue
-								}
-								uValueStatus, err := strconv.ParseUint(sValueStatus, 10, 64)
-								if err != nil {
-									continue
-								}
-
-								switch {
-								case stCond.Operation == "<=" && uValueStatus <= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">=" && uValueStatus >= uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "<" && uValueStatus < uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == ">" && uValueStatus > uValueCond:
-									slUResIds = append(slUResIds, uID)
-								case stCond.Operation == "=" && uValueStatus == uValueCond:
-									slUResIds = append(slUResIds, uID)
-									// case "like":
-									// 	return []uint64{}
-									// case "regexp":
-									// 	return []uint64{}
-								}
+							uID, err := strconv.ParseUint(sValueId, 10, 64)
+							if err != nil {
+								continue
 							}
+							uValueStatus, err := strconv.ParseUint(sValueStatus, 10, 64)
+							if err != nil {
+								continue
+							}
+
+							if uValueShape == 30 {
+								slUBlacklistIds = append(slUBlacklistIds, uID)
+							}
+
+							// if uValueShape < 30 {
+							switch {
+							case stCond.Operation == "<=" && uValueStatus <= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">=" && uValueStatus >= uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "<" && uValueStatus < uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == ">" && uValueStatus > uValueCond:
+								slUResIds = append(slUResIds, uID)
+							case stCond.Operation == "=" && uValueStatus == uValueCond:
+								slUResIds = append(slUResIds, uID)
+								// case "like":
+								// 	return []uint64{}
+								// case "regexp":
+								// 	return []uint64{}
+							}
+							// }
 						}
 					}
+				}
+			}
+
+			slUResIds = slices.Compact(slUResIds)
+			for _, uBlackVal := range slUBlacklistIds {
+				iInd := slices.Index(slUResIds, uBlackVal)
+				if iInd >= 0 {
+					slUResIds = slices.Delete(slUResIds, iInd, iInd+1)
 				}
 			}
 		}
@@ -266,7 +303,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						for _, sLine := range slFileData {
 							slLineData := strings.Split(sLine, "|")
 							if len(slLineData) < 4 {
-								break
+								continue
 							}
 							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
 							uID, err := strconv.ParseUint(sValueId, 10, 64)
@@ -300,12 +337,12 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 			}
 		}
 	} else {
-		sValueCond := Encode64(stCond.Value)
-
 		stColumnInfo, isOk := stTableInfo.Columns[stCond.Key]
 		if !isOk {
 			return []uint64{}
 		}
+
+		sValueCond := Encode64(stCond.Value)
 
 		// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
@@ -327,8 +364,8 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					slFileData := strings.Split(sFileText, "\n")
 					for _, sLine := range slFileData {
 						slLineData := strings.Split(sLine, "|")
-						if len(slLineData) < 4 {
-							break
+						if len(slLineData) < 2 {
+							continue
 						}
 						sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
 						uID, err := strconv.ParseUint(sValueId, 10, 64)
@@ -474,6 +511,12 @@ func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdd
 		}
 	}
 
+	if len(slUAcc) >= 1 {
+		if slUAcc[0] == 0 {
+			slUAcc = slices.Delete(slUAcc, 0, 1)
+		}
+	}
+
 	return slUAcc
 }
 
@@ -529,6 +572,10 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 
 	// Deleting by changing the status of records and setting zero values
 	for _, uId := range slUWhereIds {
+		if uId == 0 {
+			continue
+		}
+
 		var stRowStore = gtypes.TRowForStore{}
 		stRowStore.Id = uId
 		stRowStore.Time = dtNow
@@ -618,7 +665,7 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 			if !isOkVal {
 				return slStRowsForResponse, false
 			}
-			stRowForResponse[sCol] = sValue
+			stRowForResponse[sCol] = Decode64(sValue)
 		}
 
 		slStRowsForResponse = append(slStRowsForResponse, stRowForResponse)
@@ -684,7 +731,7 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 		for _, sCol := range slSCols {
 			sNewValue, isOk := stUpdateIn.Couples[sCol]
 			if isOk {
-				sValue = sNewValue
+				sValue = Encode64(sNewValue)
 			} else {
 				sValue, _ = GetColumnById(sNameDB, sNameTable, sCol, uId)
 			}
@@ -773,7 +820,6 @@ func InsertRows(sNameDB, sNameTable string, slSColumns []string, slSlSRowsIn [][
 				sVStore = Encode64(slSRow[iInd])
 			} else {
 				if stColumn.Specification.NotNull {
-					fmt.Println("Point 4")
 					return nil, false
 				}
 				sVStore = stColumn.Specification.Default
