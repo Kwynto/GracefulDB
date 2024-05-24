@@ -606,12 +606,13 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 	var slStRowsForResponse = make([]gtypes.TResponseRow, 0, 4)
 
 	if !stSelectIn.IsWhere {
-		stSelectIn.Where[0] = gtypes.TConditions{
+		stBaseCond := gtypes.TConditions{
 			Type:      "operation",
 			Key:       "_id",
 			Operation: ">",
 			Value:     "0",
 		}
+		stSelectIn.Where = append(stSelectIn.Where, stBaseCond)
 		stSelectIn.IsWhere = true
 	}
 
@@ -642,14 +643,27 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 	slUWhereIds := whereSelection(stSelectIn.Where, stAdditionalData)
 
 	for _, sColVal := range stSelectIn.Columns {
-		if sColVal == "*" {
+		switch sColVal {
+		case "*":
 			for _, stColVal := range stTableInfo.Columns {
 				slReturnedCells = append(slReturnedCells, stColVal.Name)
 			}
-		} else {
+		case "_id", "_time", "_status", "_shape":
+			continue
+		default:
 			slReturnedCells = append(slReturnedCells, sColVal)
 		}
+
+		// if sColVal == "*" {
+		// 	for _, stColVal := range stTableInfo.Columns {
+		// 		slReturnedCells = append(slReturnedCells, stColVal.Name)
+		// 	}
+		// } else {
+		// 	slReturnedCells = append(slReturnedCells, sColVal)
+		// }
 	}
+	slReturnedCells = slices.Compact(slReturnedCells)
+	slReturnedCells = slices.Clip(slReturnedCells)
 
 	// Selection by IDs
 	for _, uId := range slUWhereIds {
@@ -658,6 +672,16 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 		}
 
 		var stRowForResponse = make(gtypes.TResponseRow, 0)
+
+		time, status, shape, isOk := GetInfoById(sNameDB, sNameTable, uId)
+		if !isOk {
+			continue
+		}
+
+		stRowForResponse["_id"] = fmt.Sprint(uId)
+		stRowForResponse["_time"] = time
+		stRowForResponse["_status"] = status
+		stRowForResponse["_shape"] = shape
 
 		// TODO: Make an identifier generator for the cache.
 		for _, sCol := range slReturnedCells {

@@ -223,7 +223,7 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 	for _, sLine := range slSFileData {
 		slSLineData := strings.Split(sLine, "|")
 		if len(slSLineData) < 2 {
-			break
+			continue
 		}
 		sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
 		uId, err := strconv.ParseUint(sValueId, 10, 64)
@@ -236,6 +236,45 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 	}
 
 	return sResValue, true
+}
+
+func GetInfoById(sNameDB, sNameTable string, uIdRow uint64) (time string, status string, shape string, isOk bool) {
+	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	if !isOkDB {
+		return time, status, shape, false
+	}
+	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	if !isOkTable {
+		return time, status, shape, false
+	}
+
+	// sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
+
+	uMaxBucket := Pow(2, stTableInfo.BucketLog)
+	uHashId := uIdRow % uMaxBucket
+	if uHashId == 0 {
+		uHashId = uMaxBucket
+	}
+
+	sFullNameFile := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service", fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
+	sFileText, err := ecowriter.FileRead(sFullNameFile)
+	if err != nil {
+		return time, status, shape, false
+	}
+
+	slSFileData := strings.Split(sFileText, "\n")
+
+	iLenFileData := len(slSFileData)
+	for _, sLine := range slSFileData[iLenFileData-2:] {
+		slSLineData := strings.Split(sLine, "|")
+		if len(slSLineData) < 4 {
+			continue
+		}
+
+		time, status, shape = slSLineData[1], slSLineData[2], slSLineData[3] // time, status, shape
+	}
+
+	return time, status, shape, true
 }
 
 // Creating a new column
