@@ -10,6 +10,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/connectors/rest"
 	"github.com/Kwynto/GracefulDB/internal/connectors/websocketconn"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/internal/manage/webmanage"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
@@ -30,6 +31,11 @@ func Run(ctx context.Context, stCfg *config.TConfig) (err error) {
 	// Loading the authorization module
 	go gauth.Start()
 	closer.AddHandler(gauth.Shutdown) // Register a shutdown handler.
+
+	// Loading the caching system
+	go instead.Start()
+	closer.AddHandler(instead.Shutdown) // Register a shutdown handler.
+
 	// Basic system - end
 
 	// Start WebSocket connector

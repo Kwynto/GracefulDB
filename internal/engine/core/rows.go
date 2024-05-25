@@ -564,6 +564,7 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 	stAdditionalData := gtypes.TAdditionalData{
 		Db:    sNameDB,
 		Table: sNameTable,
+		Stamp: time.Now().Unix(),
 	}
 
 	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
@@ -636,9 +637,11 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 			}
 		}
 	}
+
 	stAdditionalData := gtypes.TAdditionalData{
 		Db:    sNameDB,
 		Table: sNameTable,
+		Stamp: time.Now().Unix(),
 	}
 	slUWhereIds := whereSelection(stSelectIn.Where, stAdditionalData)
 
@@ -673,6 +676,7 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 
 		var stRowForResponse = make(gtypes.TResponseRow, 0)
 
+		// TODO: Make an identifier generator for the cache.
 		time, status, shape, isOk := GetInfoById(sNameDB, sNameTable, uId)
 		if !isOk {
 			continue
@@ -733,6 +737,7 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 	stAdditionalData := gtypes.TAdditionalData{
 		Db:    sNameDB,
 		Table: sNameTable,
+		Stamp: time.Now().Unix(),
 	}
 
 	slUWhereIds = whereSelection(stUpdateIn.Where, stAdditionalData)
