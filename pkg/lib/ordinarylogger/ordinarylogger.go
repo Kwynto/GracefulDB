@@ -25,9 +25,17 @@ type TStOrdinaryHandler struct {
 	env     string
 }
 
+type TRecQueue struct {
+	handler    *TStOrdinaryHandler
+	sMsgScreen string
+	sMsgFile   string
+}
+
 var IoFile *os.File // io.Writer
 var LogHandler slog.Handler
 var LogServerError *log.Logger
+
+var chRecQueue = make(chan TRecQueue, 1024)
 
 func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	var sFileOut string
@@ -74,7 +82,7 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 		}
 	}
 
-	sTimeStrScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
+	sTimeScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
 
 	switch h.env {
 	case SEnvDev:
@@ -87,8 +95,16 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 
 	sMsg := incolor.StringCyan(r.Message)
 
-	h.lScreen.Println(sTimeStrScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut))
-	h.lFile.Println(sFileOut)
+	// h.lScreen.Println(sTimeScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut))
+	// h.lFile.Println(sFileOut)
+
+	stRec := TRecQueue{
+		handler:    h,
+		sMsgScreen: fmt.Sprint(sTimeScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut)),
+		sMsgFile:   fmt.Sprint(sFileOut),
+	}
+
+	chRecQueue <- stRec
 
 	return nil
 }
@@ -116,7 +132,6 @@ func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *TSt
 
 func openLogFile(name string) *os.File {
 	f, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-
 	return f
 }
 
@@ -131,15 +146,24 @@ func setupLogger(logPath, logEnv string) *slog.Logger {
 	return newLog
 }
 
-func Err(err error) slog.Attr {
-	return slog.Attr{
-		Key:   "error",
-		Value: slog.StringValue(err.Error()),
+func recordingQueue() {
+	for {
+		stRec := <-chRecQueue
+		stRec.handler.lScreen.Println(stRec.sMsgScreen)
+		stRec.handler.lFile.Println(stRec.sMsgFile)
 	}
 }
+
+// func Err(err error) slog.Attr {
+// 	return slog.Attr{
+// 		Key:   "error",
+// 		Value: slog.StringValue(err.Error()),
+// 	}
+// }
 
 func Init(logPath, logEnv string) {
 	newLog := setupLogger(logPath, logEnv)
 	slog.SetDefault(newLog)
 	LogServerError = slog.NewLogLogger(LogHandler, slog.LevelError)
+	go recordingQueue()
 }

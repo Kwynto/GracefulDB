@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
 )
 
 func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
@@ -21,6 +21,11 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 		slUBlacklistIds      = make([]uint64, 0, 4)
 		isDelete        bool = false
 	)
+
+	if stAdditionalData.Stamp <= 0 {
+		fmt.Println("Не пришел стамп.") // FIXME: удалить
+		stAdditionalData.Stamp = time.Now().Unix()
+	}
 
 	if stCond.Type != "operation" {
 		return []uint64{}
@@ -53,17 +58,30 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
-						sFileText, err := ecowriter.FileRead(sFullNameFile)
-						if err != nil {
+
+						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+						if !isOkFile {
 							continue
 						}
-						slSFileData := strings.Split(sFileText, "\n")
-						for _, sLine := range slSFileData {
-							slLineData := strings.Split(sLine, "|")
-							if len(slLineData) < 4 {
+
+						// sFileText, err := ecowriter.FileRead(sFullNameFile)
+						// if err != nil {
+						// 	continue
+						// }
+						// slSFileData := strings.Split(sFileText, "\n")
+
+						// for _, sLine := range slSFileData {
+						for _, slLine := range slCache {
+							// slLineData := strings.Split(sLine, "|")
+							// if len(slLineData) < 4 {
+							// 	continue
+							// }
+							// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+
+							if len(slLine) < 4 {
 								continue
 							}
-							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+							sValueId, sValueShape := slLine[0], slLine[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
@@ -131,17 +149,30 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
-						sFileText, err := ecowriter.FileRead(sFullNameFile)
-						if err != nil {
+
+						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+						if !isOkFile {
 							continue
 						}
-						slFileData := strings.Split(sFileText, "\n")
-						for _, sLine := range slFileData {
-							slLineData := strings.Split(sLine, "|")
-							if len(slLineData) < 4 {
+
+						// sFileText, err := ecowriter.FileRead(sFullNameFile)
+						// if err != nil {
+						// 	continue
+						// }
+						// slFileData := strings.Split(sFileText, "\n")
+
+						// for _, sLine := range slFileData {
+						for _, slLine := range slCache {
+							// slLineData := strings.Split(sLine, "|")
+							// if len(slLineData) < 4 {
+							// 	continue
+							// }
+							// sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
+
+							if len(slLine) < 4 {
 								continue
 							}
-							sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
+							sValueId, sValueTime, sValueShape := slLine[0], slLine[1], slLine[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
@@ -213,17 +244,30 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
-						sFileText, err := ecowriter.FileRead(sFullNameFile)
-						if err != nil {
+
+						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+						if !isOkFile {
 							continue
 						}
-						slFileData := strings.Split(sFileText, "\n")
-						for _, sVal := range slFileData {
-							slLineData := strings.Split(sVal, "|")
-							if len(slLineData) < 4 {
+
+						// sFileText, err := ecowriter.FileRead(sFullNameFile)
+						// if err != nil {
+						// 	continue
+						// }
+						// slFileData := strings.Split(sFileText, "\n")
+
+						// for _, sVal := range slFileData {
+						for _, slLine := range slCache {
+							// slLineData := strings.Split(sVal, "|")
+							// if len(slLineData) < 4 {
+							// 	continue
+							// }
+							// sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
+
+							if len(slLine) < 4 {
 								continue
 							}
-							sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
+							sValueId, sValueStatus, sValueShape := slLine[0], slLine[2], slLine[3] // id, time, status, shape
 
 							uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
 							if err != nil {
@@ -295,17 +339,31 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
-						sFileText, err := ecowriter.FileRead(sFullNameFile)
-						if err != nil {
+
+						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+						if !isOkFile {
 							continue
 						}
-						slFileData := strings.Split(sFileText, "\n")
-						for _, sLine := range slFileData {
-							slLineData := strings.Split(sLine, "|")
-							if len(slLineData) < 4 {
+
+						// sFileText, err := ecowriter.FileRead(sFullNameFile)
+						// if err != nil {
+						// 	continue
+						// }
+						// slFileData := strings.Split(sFileText, "\n")
+
+						// for _, sLine := range slFileData {
+						for _, slLine := range slCache {
+							// slLineData := strings.Split(sLine, "|")
+							// if len(slLineData) < 4 {
+							// 	continue
+							// }
+							// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+
+							if len(slLine) < 4 {
 								continue
 							}
-							sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+							sValueId, sValueShape := slLine[0], slLine[3] // id, time, status, shape
+
 							uID, err := strconv.ParseUint(sValueId, 10, 64)
 							if err != nil {
 								continue
@@ -357,17 +415,31 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
 					// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 					sFullNameFile := filepath.Join(sFolderPath, sFileName)
-					sFileText, err := ecowriter.FileRead(sFullNameFile)
-					if err != nil {
+
+					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+					if !isOkFile {
 						continue
 					}
-					slFileData := strings.Split(sFileText, "\n")
-					for _, sLine := range slFileData {
-						slLineData := strings.Split(sLine, "|")
-						if len(slLineData) < 2 {
+
+					// sFileText, err := ecowriter.FileRead(sFullNameFile)
+					// if err != nil {
+					// 	continue
+					// }
+					// slFileData := strings.Split(sFileText, "\n")
+
+					// for _, sLine := range slFileData {
+					for _, slLine := range slCache {
+						// slLineData := strings.Split(sLine, "|")
+						// if len(slLineData) < 2 {
+						// 	continue
+						// }
+						// sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
+
+						if len(slLine) < 2 {
 							continue
 						}
-						sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
+						sValueId, sValueData := slLine[0], slLine[1] // id, [data]
+
 						uID, err := strconv.ParseUint(sValueId, 10, 64)
 						if err != nil {
 							continue
@@ -411,21 +483,32 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 
 			// fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
 			sFullNameFile := filepath.Join(sFolderSysPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashID))
-			sFileText, err := ecowriter.FileRead(sFullNameFile)
-			if err != nil {
+
+			slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+			if !isOkFile {
 				continue
 			}
 
-			slFileData := strings.Split(sFileText, "\n")
+			// sFileText, err := ecowriter.FileRead(sFullNameFile)
+			// if err != nil {
+			// 	continue
+			// }
+			// slFileData := strings.Split(sFileText, "\n")
 
 			isDelete = false
 
-			for _, sLine := range slFileData {
-				slLineData := strings.Split(sLine, "|")
-				if len(slLineData) < 4 {
-					break
+			// for _, sLine := range slFileData {
+			for _, slLine := range slCache {
+				// slLineData := strings.Split(sLine, "|")
+				// if len(slLineData) < 4 {
+				// 	break
+				// }
+				// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+
+				if len(slLine) < 4 {
+					continue
 				}
-				sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
+				sValueId, sValueShape := slLine[0], slLine[3] // id, time, status, shape
 
 				uValue, err := strconv.ParseUint(sValueId, 10, 64)
 				if err != nil {
@@ -459,7 +542,6 @@ func mergeOr(slUFirst, slUSecond []uint64) []uint64 {
 	slUResIds := append(slUFirst, slUSecond...)
 	slices.Sort(slUResIds)
 	slUResIds = slices.Compact(slUResIds)
-
 	slUResIds = slices.Clip(slUResIds)
 	return slUResIds
 }
@@ -481,9 +563,9 @@ func mergeAnd(slUFirst, slUSecond []uint64) []uint64 {
 func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
-		slUAcc         []uint64 // = make([]uint64, 4)
-		slUProgressIds []uint64 // = make([]uint64, 4)
-		sSelector      string   = ""
+		slUAcc                = make([]uint64, 0, 4)
+		slUProgressIds        = make([]uint64, 0, 4)
+		sSelector      string = ""
 	)
 
 	if len(slStWhere) < 1 {
@@ -561,15 +643,15 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 		slSCols = append(slSCols, stCol.Name)
 	}
 
+	dtNow := time.Now().Unix()
+
 	stAdditionalData := gtypes.TAdditionalData{
 		Db:    sNameDB,
 		Table: sNameTable,
-		Stamp: time.Now().Unix(),
+		Stamp: dtNow,
 	}
 
 	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
-
-	dtNow := time.Now().Unix()
 
 	// Deleting by changing the status of records and setting zero values
 	for _, uId := range slUWhereIds {

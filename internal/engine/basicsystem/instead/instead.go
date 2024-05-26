@@ -57,6 +57,7 @@ func (mi tInstead) loadFile(sPath string, iStamp int64) (TFile, bool) {
 	sKey := fmt.Sprintf("%s:%d", sPath, iStamp)
 	slValue, isOkStart := mi[sKey]
 	if isOkStart {
+		fmt.Println("Отдали структуру") // FIXME: удалить
 		return slValue, true
 	}
 
@@ -84,8 +85,10 @@ func (mi tInstead) loadFile(sPath string, iStamp int64) (TFile, bool) {
 	_, isOkFinish := mi[sKey]
 	if !isOkFinish {
 		mi[sKey] = slFile
+		fmt.Println("Записали структуру") // FIXME: удалить
 	}
 
+	fmt.Println("... и отдали.") // FIXME: удалить
 	return slFile, true
 }
 
@@ -154,6 +157,7 @@ func (mi tInstead) cleaning() {
 		}
 		for _, sKey := range slSBuffer {
 			delete(mi, sKey)
+			fmt.Println("Почистили", sKey) // FIXME: удалить
 		}
 		if rand.Intn(100) == 0 {
 			slSBuffer = nil
