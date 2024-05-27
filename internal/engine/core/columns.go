@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
-	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 // Marks the column as deleted, but does not delete files.
@@ -186,15 +185,15 @@ func ChangeColumn(sNameDB, sNameTable string, stNewDataColumn gtypes.TColumnForW
 // }
 
 // Get up-to-date cell data
-func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (string, bool) {
+func GetColumnById(sNameColumn string, uIdRow uint64, stAddData gtypes.TAdditionalData) (string, bool) {
 	// This function is complete
 	var sResValue string
 
-	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+	stDBInfo, isOkDB := GetDBInfo(stAddData.Db)
 	if !isOkDB {
 		return "", false
 	}
-	stTableInfo, isOk := stDBInfo.Tables[sNameTable]
+	stTableInfo, isOk := stDBInfo.Tables[stAddData.Table]
 	if !isOk {
 		return "", false
 	}
@@ -213,19 +212,31 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 	}
 
 	sFullNameFile := filepath.Join(sFolderPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
-	sFileText, err := ecowriter.FileRead(sFullNameFile)
-	if err != nil {
+
+	slCache, isOkFile := instead.LoadFile(sFullNameFile, stAddData.Stamp)
+	if !isOkFile {
 		return "", false
 	}
 
-	slSFileData := strings.Split(sFileText, "\n")
+	// sFileText, err := ecowriter.FileRead(sFullNameFile)
+	// if err != nil {
+	// 	return "", false
+	// }
+	// slSFileData := strings.Split(sFileText, "\n")
 
-	for _, sLine := range slSFileData {
-		slSLineData := strings.Split(sLine, "|")
-		if len(slSLineData) < 2 {
+	// for _, sLine := range slSFileData {
+	for _, slLine := range slCache {
+		// slSLineData := strings.Split(sLine, "|")
+		// if len(slSLineData) < 2 {
+		// 	continue
+		// }
+		// sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
+
+		if len(slLine) < 2 {
 			continue
 		}
-		sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
+		sValueId, sValueData := slLine[0], slLine[1] // id, [data]
+
 		uId, err := strconv.ParseUint(sValueId, 10, 64)
 		if err != nil {
 			continue
@@ -238,12 +249,12 @@ func GetColumnById(sNameDB, sNameTable, sNameColumn string, uIdRow uint64) (stri
 	return sResValue, true
 }
 
-func GetInfoById(sNameDB, sNameTable string, uIdRow uint64) (time string, status string, shape string, isOk bool) {
-	stDBInfo, isOkDB := GetDBInfo(sNameDB)
+func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (time string, status string, shape string, isOk bool) {
+	stDBInfo, isOkDB := GetDBInfo(stAddData.Db)
 	if !isOkDB {
 		return time, status, shape, false
 	}
-	stTableInfo, isOkTable := stDBInfo.Tables[sNameTable]
+	stTableInfo, isOkTable := stDBInfo.Tables[stAddData.Table]
 	if !isOkTable {
 		return time, status, shape, false
 	}
@@ -257,22 +268,36 @@ func GetInfoById(sNameDB, sNameTable string, uIdRow uint64) (time string, status
 	}
 
 	sFullNameFile := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service", fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
-	sFileText, err := ecowriter.FileRead(sFullNameFile)
-	if err != nil {
+
+	slCache, isOkFile := instead.LoadFile(sFullNameFile, stAddData.Stamp)
+	if !isOkFile {
 		return time, status, shape, false
 	}
 
-	slSFileData := strings.Split(sFileText, "\n")
+	// sFileText, err := ecowriter.FileRead(sFullNameFile)
+	// if err != nil {
+	// 	return time, status, shape, false
+	// }
+	// slSFileData := strings.Split(sFileText, "\n")
 
-	iLenFileData := len(slSFileData)
-	for _, sLine := range slSFileData[iLenFileData-2:] {
-		slSLineData := strings.Split(sLine, "|")
-		if len(slSLineData) < 4 {
-			continue
-		}
+	// iLenFileData := len(slSFileData)
+	iLenCache := len(slCache)
 
-		time, status, shape = slSLineData[1], slSLineData[2], slSLineData[3] // time, status, shape
+	// for _, sLine := range slSFileData[iLenFileData-2:] {
+	// 	slSLineData := strings.Split(sLine, "|")
+	// 	if len(slSLineData) < 4 {
+	// 		continue
+	// 	}
+
+	// 	time, status, shape = slSLineData[1], slSLineData[2], slSLineData[3] // time, status, shape
+	// }
+
+	// FIXME: переделать этот бред. Возвращает данные последнего id а не запрашиваемого
+	sLine := slCache[iLenCache-1]
+	if len(sLine) < 4 {
+		return time, status, shape, false
 	}
+	time, status, shape = sLine[1], sLine[2], sLine[3] // time, status, shape
 
 	return time, status, shape, true
 }

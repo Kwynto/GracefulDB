@@ -758,8 +758,7 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 
 		var stRowForResponse = make(gtypes.TResponseRow, 0)
 
-		// TODO: Make an identifier generator for the cache.
-		time, status, shape, isOk := GetInfoById(sNameDB, sNameTable, uId)
+		time, status, shape, isOk := GetInfoById(uId, stAdditionalData)
 		if !isOk {
 			continue
 		}
@@ -769,9 +768,8 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 		stRowForResponse["_status"] = status
 		stRowForResponse["_shape"] = shape
 
-		// TODO: Make an identifier generator for the cache.
 		for _, sCol := range slReturnedCells {
-			sValue, isOkVal := GetColumnById(sNameDB, sNameTable, sCol, uId)
+			sValue, isOkVal := GetColumnById(sCol, uId, stAdditionalData)
 			if !isOkVal {
 				return slStRowsForResponse, false
 			}
@@ -786,10 +784,12 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 
 func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([]uint64, bool) {
 	// This function is complete
-	var slUWhereIds []uint64 = []uint64{}
-	var slURowsForStore []gtypes.TRowForStore
-	var slSCols []string = []string{}
-	var sValue string = ""
+	var (
+		slUWhereIds     []uint64 = []uint64{}
+		slURowsForStore []gtypes.TRowForStore
+		slSCols         []string = []string{}
+		sValue          string   = ""
+	)
 
 	stDBInfo, isOkDB := GetDBInfo(sNameDB)
 	if !isOkDB {
@@ -816,15 +816,15 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 		slSCols = append(slSCols, stCol.Name)
 	}
 
+	dtNow := time.Now().Unix()
+
 	stAdditionalData := gtypes.TAdditionalData{
 		Db:    sNameDB,
 		Table: sNameTable,
-		Stamp: time.Now().Unix(),
+		Stamp: dtNow,
 	}
 
 	slUWhereIds = whereSelection(stUpdateIn.Where, stAdditionalData)
-
-	dtNow := time.Now().Unix()
 
 	// Updating by changing the status of records and setting new values
 	for _, uId := range slUWhereIds {
@@ -844,7 +844,7 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 			if isOk {
 				sValue = Encode64(sNewValue)
 			} else {
-				sValue, _ = GetColumnById(sNameDB, sNameTable, sCol, uId)
+				sValue, _ = GetColumnById(sCol, uId, stAdditionalData)
 			}
 			stRowStore.Row = append(stRowStore.Row, gtypes.TColumnForStore{
 				Field: sCol,
