@@ -61,9 +61,6 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	})
 
 	bSlAttrs, _ := json.MarshalIndent(mFields, "", "  ")
-	// if err != nil {
-	// 	return err
-	// }
 
 	sAttrsScreenOut := string(bSlAttrs)
 	if sAttrsScreenOut == "{}" {
@@ -94,9 +91,6 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	}
 
 	sMsg := incolor.StringCyan(r.Message)
-
-	// h.lScreen.Println(sTimeScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut))
-	// h.lFile.Println(sFileOut)
 
 	stRec := TRecQueue{
 		handler:    h,
@@ -153,13 +147,6 @@ func recordingQueue() {
 		stRec.handler.lFile.Println(stRec.sMsgFile)
 	}
 }
-
-// func Err(err error) slog.Attr {
-// 	return slog.Attr{
-// 		Key:   "error",
-// 		Value: slog.StringValue(err.Error()),
-// 	}
-// }
 
 func Init(logPath, logEnv string) {
 	newLog := setupLogger(logPath, logEnv)

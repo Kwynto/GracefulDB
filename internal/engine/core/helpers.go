@@ -30,7 +30,6 @@ func GenerateRev() string {
 // Checking the folder name
 func CheckFolder(sPath, sName string) bool {
 	// This function is complete
-	// fullPath := fmt.Sprintf("%s%s", patch, name)
 	sFullPath := filepath.Join(sPath, sName)
 	fDir, err := os.Stat(sFullPath)
 	if err != nil {

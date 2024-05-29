@@ -1,5 +1,7 @@
 package instead
 
+// NOTE: This package does not require data synchronization, it is written with a lack of significant competitiveness.
+
 import (
 	"context"
 	"errors"
@@ -14,8 +16,6 @@ import (
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
-
-// NOTE: This package does not require data synchronization, it is written with a lack of significant competitiveness.
 
 type TRow []string
 type TFile []TRow
@@ -62,7 +62,6 @@ func (mi tInstead) loadFile(sPath string, iStamp int64) (TFile, bool) {
 
 	sFileText, err := ecowriter.FileRead(sPath)
 	if err != nil {
-		// return TFile{}, errors.New("file reading error")
 		return TFile{}, false
 	}
 

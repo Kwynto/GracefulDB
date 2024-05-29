@@ -38,7 +38,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 
 	if stCond.Key == "_id" || stCond.Key == "_time" || stCond.Key == "_status" || stCond.Key == "_shape" {
 		if stCond.Key == "_id" {
-			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
 			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
@@ -55,7 +54,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				if !fVal.IsDir() {
 					sFileName := fVal.Name()
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
-						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
 
 						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -63,20 +61,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 							continue
 						}
 
-						// sFileText, err := ecowriter.FileRead(sFullNameFile)
-						// if err != nil {
-						// 	continue
-						// }
-						// slSFileData := strings.Split(sFileText, "\n")
-
-						// for _, sLine := range slSFileData {
 						for _, slLine := range slCache {
-							// slLineData := strings.Split(sLine, "|")
-							// if len(slLineData) < 4 {
-							// 	continue
-							// }
-							// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
-
 							if len(slLine) < 4 {
 								continue
 							}
@@ -96,7 +81,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								slUBlacklistIds = append(slUBlacklistIds, uID)
 							}
 
-							// if uValueShape < 30 {
 							switch {
 							case stCond.Operation == "<=" && uID <= uValueCond:
 								slUResIds = append(slUResIds, uID)
@@ -113,7 +97,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								// case "regexp":
 								// 	return []uint64{}
 							}
-							// }
 						}
 					}
 				}
@@ -129,7 +112,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 		}
 
 		if stCond.Key == "_time" {
-			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
 			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
@@ -146,7 +128,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				if !fVal.IsDir() {
 					sFileName := fVal.Name()
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
-						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
 
 						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -154,20 +135,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 							continue
 						}
 
-						// sFileText, err := ecowriter.FileRead(sFullNameFile)
-						// if err != nil {
-						// 	continue
-						// }
-						// slFileData := strings.Split(sFileText, "\n")
-
-						// for _, sLine := range slFileData {
 						for _, slLine := range slCache {
-							// slLineData := strings.Split(sLine, "|")
-							// if len(slLineData) < 4 {
-							// 	continue
-							// }
-							// sValueId, sValueTime, sValueShape := slLineData[0], slLineData[1], slLineData[3] // id, time, status, shape
-
 							if len(slLine) < 4 {
 								continue
 							}
@@ -191,7 +159,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								slUBlacklistIds = append(slUBlacklistIds, uID)
 							}
 
-							// if uValueShape < 30 {
 							switch {
 							case stCond.Operation == "<=" && uValueTime <= uValueCond:
 								slUResIds = append(slUResIds, uID)
@@ -208,7 +175,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								// case "regexp":
 								// 	return []uint64{}
 							}
-							// }
 						}
 					}
 				}
@@ -224,7 +190,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 		}
 
 		if stCond.Key == "_status" {
-			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
 			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
@@ -241,7 +206,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				if !fVal.IsDir() {
 					sFileName := fVal.Name()
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
-						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
 
 						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -249,20 +213,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 							continue
 						}
 
-						// sFileText, err := ecowriter.FileRead(sFullNameFile)
-						// if err != nil {
-						// 	continue
-						// }
-						// slFileData := strings.Split(sFileText, "\n")
-
-						// for _, sVal := range slFileData {
 						for _, slLine := range slCache {
-							// slLineData := strings.Split(sVal, "|")
-							// if len(slLineData) < 4 {
-							// 	continue
-							// }
-							// sValueId, sValueStatus, sValueShape := slLineData[0], slLineData[2], slLineData[3] // id, time, status, shape
-
 							if len(slLine) < 4 {
 								continue
 							}
@@ -286,7 +237,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								slUBlacklistIds = append(slUBlacklistIds, uID)
 							}
 
-							// if uValueShape < 30 {
 							switch {
 							case stCond.Operation == "<=" && uValueStatus <= uValueCond:
 								slUResIds = append(slUResIds, uID)
@@ -303,7 +253,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 								// case "regexp":
 								// 	return []uint64{}
 							}
-							// }
 						}
 					}
 				}
@@ -319,7 +268,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 		}
 
 		if stCond.Key == "_shape" {
-			// folderPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
 			uValueCond, err := strconv.ParseUint(stCond.Value, 10, 64)
@@ -336,7 +284,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				if !fVal.IsDir() {
 					sFileName := fVal.Name()
 					if strings.Contains(sFileName, stTableInfo.CurrentRev) {
-						// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 						sFullNameFile := filepath.Join(sFolderPath, sFileName)
 
 						slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -344,20 +291,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 							continue
 						}
 
-						// sFileText, err := ecowriter.FileRead(sFullNameFile)
-						// if err != nil {
-						// 	continue
-						// }
-						// slFileData := strings.Split(sFileText, "\n")
-
-						// for _, sLine := range slFileData {
 						for _, slLine := range slCache {
-							// slLineData := strings.Split(sLine, "|")
-							// if len(slLineData) < 4 {
-							// 	continue
-							// }
-							// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
-
 							if len(slLine) < 4 {
 								continue
 							}
@@ -401,7 +335,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 
 		sValueCond := Encode64(stCond.Value)
 
-		// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
 		slFiles, err := os.ReadDir(sFolderPath)
 		if err != nil {
@@ -412,7 +345,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 			if !fVal.IsDir() {
 				sFileName := fVal.Name()
 				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
-					// fullNameFile := fmt.Sprintf("%s/%s", folderPath, fileName)
 					sFullNameFile := filepath.Join(sFolderPath, sFileName)
 
 					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -420,20 +352,7 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 						continue
 					}
 
-					// sFileText, err := ecowriter.FileRead(sFullNameFile)
-					// if err != nil {
-					// 	continue
-					// }
-					// slFileData := strings.Split(sFileText, "\n")
-
-					// for _, sLine := range slFileData {
 					for _, slLine := range slCache {
-						// slLineData := strings.Split(sLine, "|")
-						// if len(slLineData) < 2 {
-						// 	continue
-						// }
-						// sValueId, sValueData := slLineData[0], slLineData[1] // id, [data]
-
 						if len(slLine) < 2 {
 							continue
 						}
@@ -470,7 +389,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 		slUProgressIds = slices.Compact(slUProgressIds)
 		slUProgressIds = slices.Clip(slUProgressIds)
 
-		// folderSysPath := fmt.Sprintf("%s%s/%s/service", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 		sFolderSysPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
 		for _, uIDVal := range slUProgressIds {
@@ -480,7 +398,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				uHashID = uMaxBucket
 			}
 
-			// fullNameFile := fmt.Sprintf("%s/%s_%d", folderSysPath, tableInfo.CurrentRev, hashid)
 			sFullNameFile := filepath.Join(sFolderSysPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashID))
 
 			slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
@@ -488,22 +405,9 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 				continue
 			}
 
-			// sFileText, err := ecowriter.FileRead(sFullNameFile)
-			// if err != nil {
-			// 	continue
-			// }
-			// slFileData := strings.Split(sFileText, "\n")
-
 			isDelete = false
 
-			// for _, sLine := range slFileData {
 			for _, slLine := range slCache {
-				// slLineData := strings.Split(sLine, "|")
-				// if len(slLineData) < 4 {
-				// 	break
-				// }
-				// sValueId, sValueShape := slLineData[0], slLineData[3] // id, time, status, shape
-
 				if len(slLine) < 4 {
 					continue
 				}
@@ -574,7 +478,6 @@ func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdd
 	for _, stElem := range slStWhere {
 		switch stElem.Type {
 		case "operation":
-			// progressIds = nil
 			slUProgressIds = findWhereIds(stElem, stAdditionalData)
 			switch sSelector {
 			case "or":
@@ -738,13 +641,6 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 			slReturnedCells = append(slReturnedCells, sColVal)
 		}
 
-		// if sColVal == "*" {
-		// 	for _, stColVal := range stTableInfo.Columns {
-		// 		slReturnedCells = append(slReturnedCells, stColVal.Name)
-		// 	}
-		// } else {
-		// 	slReturnedCells = append(slReturnedCells, sColVal)
-		// }
 	}
 	slReturnedCells = slices.Compact(slReturnedCells)
 	slReturnedCells = slices.Clip(slReturnedCells)
@@ -934,8 +830,6 @@ func InsertRows(sNameDB, sNameTable string, slSColumns []string, slSlSRowsIn [][
 				}
 				sVStore = stColumn.Specification.Default
 			}
-			// colStore.Id = tableInfo.Count
-			// colStore.Time = tNow
 			stColStore.Value = sVStore
 			stRowStore.Row = append(stRowStore.Row, stColStore)
 		}

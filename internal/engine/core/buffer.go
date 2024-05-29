@@ -16,7 +16,7 @@ var (
 )
 
 func InsertIntoBuffer(stRowsForStore []gtypes.TRowForStore) {
-	// -
+	// This function is complete
 	StWriteBuffer.Block.Lock()
 	defer StWriteBuffer.Block.Unlock()
 
@@ -30,6 +30,7 @@ func InsertIntoBuffer(stRowsForStore []gtypes.TRowForStore) {
 }
 
 func WriteBufferService() {
+	// This function is complete
 labelLoop:
 	select {
 	case <-chSignalWrite:

@@ -73,7 +73,6 @@ func StrongRemoveColumn(sNameDB, sNameTable, sNameColumn string) bool {
 
 	for iColumnInd, stColumnVal := range stTableInfo.Removed {
 		if stColumnVal.Name == sNameColumn {
-			// columnPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 			sColumnPath := filepath.Join(StLocalCoreSettings.Storage, stColumnVal.Parents, stColumnVal.Folder)
 			err := os.RemoveAll(sColumnPath)
 			if err != nil {
@@ -202,7 +201,6 @@ func GetColumnById(sNameColumn string, uIdRow uint64, stAddData gtypes.TAddition
 		return "", false
 	}
 
-	// folderPath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, columnInfo.Parents, columnInfo.Folder)
 	sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
 
 	uMaxBucket := Pow(2, stTableInfo.BucketLog)
@@ -218,20 +216,7 @@ func GetColumnById(sNameColumn string, uIdRow uint64, stAddData gtypes.TAddition
 		return "", false
 	}
 
-	// sFileText, err := ecowriter.FileRead(sFullNameFile)
-	// if err != nil {
-	// 	return "", false
-	// }
-	// slSFileData := strings.Split(sFileText, "\n")
-
-	// for _, sLine := range slSFileData {
 	for _, slLine := range slCache {
-		// slSLineData := strings.Split(sLine, "|")
-		// if len(slSLineData) < 2 {
-		// 	continue
-		// }
-		// sValueId, sValueData := slSLineData[0], slSLineData[1] // id, [data]
-
 		if len(slLine) < 2 {
 			continue
 		}
@@ -261,8 +246,6 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (sTime string,
 		return sTime, sStatus, sShape, false
 	}
 
-	// sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
-
 	uMaxBucket := Pow(2, stTableInfo.BucketLog)
 	uHashId := uIdRow % uMaxBucket
 	if uHashId == 0 {
@@ -276,26 +259,7 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (sTime string,
 		return sTime, sStatus, sShape, false
 	}
 
-	// sFileText, err := ecowriter.FileRead(sFullNameFile)
-	// if err != nil {
-	// 	return time, status, shape, false
-	// }
-	// slSFileData := strings.Split(sFileText, "\n")
-
-	// iLenFileData := len(slSFileData)
-	// iLenCache := len(slCache)
-
-	// for _, sLine := range slSFileData[iLenFileData-2:] {
-	// 	slSLineData := strings.Split(sLine, "|")
-	// 	if len(slSLineData) < 4 {
-	// 		continue
-	// 	}
-
-	// 	time, status, shape = slSLineData[1], slSLineData[2], slSLineData[3] // time, status, shape
-	// }
-
 	for _, sLine := range slCache {
-		// sLine := slCache[iLenCache-1]
 		if len(sLine) < 4 {
 			return sTime, sStatus, sShape, false
 		}
@@ -338,7 +302,6 @@ func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpec
 		return false
 	}
 
-	// pathTable := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 	sPathTable := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
 
 	for {
@@ -348,7 +311,6 @@ func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpec
 		}
 	}
 
-	// fullColumnName := fmt.Sprintf("%s%s", pathTable, folderName)
 	sFullColumnName := filepath.Join(sPathTable, sFolderName)
 	err := os.Mkdir(sFullColumnName, 0666)
 	if err != nil {
@@ -358,15 +320,10 @@ func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpec
 	dtNow := time.Now()
 
 	stColumnInfo := TColumnInfo{
-		Name:    sNameColumn,
-		OldName: "",
-		Folder:  sFolderName,
-		// Parents: fmt.Sprintf("%s/%s", tableInfo.Parent, tableInfo.Folder),
-		Parents: filepath.Join(stTableInfo.Parent, stTableInfo.Folder),
-		// BucketLog:     2,
-		// BucketSize:    LocalCoreSettings.BucketSize,
-		// OldRev:        "",
-		// CurrentRev:    GenerateRev(),
+		Name:          sNameColumn,
+		OldName:       "",
+		Folder:        sFolderName,
+		Parents:       filepath.Join(stTableInfo.Parent, stTableInfo.Folder),
 		Specification: stSpecification,
 		LastUpdate:    dtNow,
 		Deleted:       false,
