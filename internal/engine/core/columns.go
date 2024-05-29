@@ -249,14 +249,16 @@ func GetColumnById(sNameColumn string, uIdRow uint64, stAddData gtypes.TAddition
 	return sResValue, true
 }
 
-func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (time string, status string, shape string, isOk bool) {
+func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (sTime string, sStatus string, sShape string, isOk bool) {
+	sIdRow := strconv.FormatUint(uIdRow, 10)
+
 	stDBInfo, isOkDB := GetDBInfo(stAddData.Db)
 	if !isOkDB {
-		return time, status, shape, false
+		return sTime, sStatus, sShape, false
 	}
 	stTableInfo, isOkTable := stDBInfo.Tables[stAddData.Table]
 	if !isOkTable {
-		return time, status, shape, false
+		return sTime, sStatus, sShape, false
 	}
 
 	// sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
@@ -271,7 +273,7 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (time string, 
 
 	slCache, isOkFile := instead.LoadFile(sFullNameFile, stAddData.Stamp)
 	if !isOkFile {
-		return time, status, shape, false
+		return sTime, sStatus, sShape, false
 	}
 
 	// sFileText, err := ecowriter.FileRead(sFullNameFile)
@@ -281,7 +283,7 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (time string, 
 	// slSFileData := strings.Split(sFileText, "\n")
 
 	// iLenFileData := len(slSFileData)
-	iLenCache := len(slCache)
+	// iLenCache := len(slCache)
 
 	// for _, sLine := range slSFileData[iLenFileData-2:] {
 	// 	slSLineData := strings.Split(sLine, "|")
@@ -292,14 +294,18 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (time string, 
 	// 	time, status, shape = slSLineData[1], slSLineData[2], slSLineData[3] // time, status, shape
 	// }
 
-	// FIXME: переделать этот бред. Возвращает данные последнего id а не запрашиваемого
-	sLine := slCache[iLenCache-1]
-	if len(sLine) < 4 {
-		return time, status, shape, false
+	for _, sLine := range slCache {
+		// sLine := slCache[iLenCache-1]
+		if len(sLine) < 4 {
+			return sTime, sStatus, sShape, false
+		}
+		if sIdRow != sLine[0] {
+			continue
+		}
+		sTime, sStatus, sShape = sLine[1], sLine[2], sLine[3] // time, status, shape
 	}
-	time, status, shape = sLine[1], sLine[2], sLine[3] // time, status, shape
 
-	return time, status, shape, true
+	return sTime, sStatus, sShape, true
 }
 
 // Creating a new column

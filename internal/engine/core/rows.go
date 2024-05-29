@@ -23,7 +23,6 @@ func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditional
 	)
 
 	if stAdditionalData.Stamp <= 0 {
-		fmt.Println("Не пришел стамп.") // FIXME: удалить
 		stAdditionalData.Stamp = time.Now().Unix()
 	}
 
