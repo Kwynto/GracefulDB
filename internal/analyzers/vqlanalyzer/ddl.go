@@ -598,20 +598,15 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				Unique:  false,
 			},
 			IsChName: false,
-			// IsChDefault: false,
-			// IsChNotNull: false,
-			// IsChUniqut:  false,
 		}
 
 		if vqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
 			sColumn = vqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.Unique = true
-			// col.IsChUniqut = true
 		}
 		if vqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
 			sColumn = vqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.NotNull = true
-			// col.IsChNotNull = true
 		}
 		if vqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
 			sColDef := vqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
@@ -626,7 +621,6 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			} else {
 				stCol.Spec.Default = sColDef
 			}
-			// col.IsChDefault = true
 		}
 
 		if vqlexp.MRegExpCollection["RenameTo"].MatchString(sColumn) {

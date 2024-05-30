@@ -1,6 +1,6 @@
 module github.com/Kwynto/GracefulDB
 
-go 1.21.1
+go 1.22
 
 require (
 	github.com/Kwynto/colorable v0.0.0-20240317120435-a6f59ba89a16

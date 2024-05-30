@@ -300,7 +300,6 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	sInstruction := vqlexp.MRegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
 	sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
 	sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
-	// columnsValuesIn.Where = sWhere
 
 	slExpression, err := parseWhere(sWhere)
 	if err != nil {

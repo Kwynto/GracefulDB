@@ -141,9 +141,6 @@ func GenerateTicket() string {
 	// This function is complete
 	slB := make([]byte, 32)
 	rand.Read(slB)
-	// if err != nil {
-	// 	return ""
-	// }
 	return fmt.Sprintf("%x", slB)
 }
 

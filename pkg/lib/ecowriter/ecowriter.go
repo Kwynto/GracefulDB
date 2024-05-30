@@ -90,22 +90,6 @@ func DecodeJSON(str string) any {
 }
 
 func FileRead(name string) (string, error) {
-	// This function is complete
-
-	// f, err := os.Open(name)
-	// if err != nil {
-	// 	return "", err
-	// }
-	// defer f.Close()
-
-	// buf := bytes.Buffer{}
-	// sc := bufio.NewScanner(f)
-	// for sc.Scan() {
-	// 	buf.WriteString(sc.Text())
-	// }
-
-	// return buf.String(), nil
-
 	bRead, err := os.ReadFile(name)
 	if err != nil {
 		return "", err

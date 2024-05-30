@@ -54,7 +54,6 @@ func writeBufferToDisk() bool {
 			uHashId = uMaxBucket
 		}
 
-		// sFileName := fmt.Sprintf("%s%s/%s/service/%s_%d", LocalCoreSettings.Storage, dbInfo.Folder, tableInfo.Folder, tableInfo.CurrentRev, hashid)
 		sFileName := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder, stTableInfo.Folder, fmt.Sprintf("service/%s_%d", stTableInfo.CurrentRev, uHashId))
 		fFileName, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 		if err != nil {
@@ -71,10 +70,8 @@ func writeBufferToDisk() bool {
 			sFullValue := fmt.Sprintf("%s%s\n", sHead, stCol.Value)
 
 			stColInfo := stTableInfo.Columns[stCol.Field]
-			// path := fmt.Sprintf("%s%s/%s/", LocalCoreSettings.Storage, colInfo.Parents, colInfo.Folder)
 			sPath := filepath.Join(StLocalCoreSettings.Storage, stColInfo.Parents, stColInfo.Folder)
 
-			// fileName := fmt.Sprintf("%s%s_%d", path, tableInfo.CurrentRev, hashid)
 			sFileName := filepath.Join(sPath, fmt.Sprintf("%s_%d", stTableInfo.CurrentRev, uHashId))
 
 			fRWFile, err := os.OpenFile(sFileName, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)

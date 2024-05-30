@@ -126,7 +126,6 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, error) {
 
 		sWhere = vqlexp.MRegExpCollection["WhereExpression"].FindString(sWhere)
 		sLogicOper := vqlexp.MRegExpCollection["WhereExpression_And_Or_Word"].FindString(sWhere)
-		// logicOper = strings.TrimSpace(logicOper)
 
 		if vqlexp.MRegExpCollection["OR"].MatchString(sLogicOper) {
 			slExpression = append(slExpression, gtypes.TConditions{

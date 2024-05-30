@@ -123,6 +123,7 @@ type TDeleteStruct struct {
 type TAdditionalData struct {
 	Db    string
 	Table string
+	Stamp int64 // for caching
 }
 
 type TSecret struct {

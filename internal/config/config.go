@@ -18,10 +18,9 @@ var SDisplayConfigPath string
 var StDefaultConfig TConfig
 
 type TCoreSettings struct {
-	Storage    string `yaml:"storage" env-default:"./data/"`
-	BucketSize int64  `yaml:"bucket_size" env-default:"800"`
-	// FreezeMode bool   `yaml:"freeze"`
-	FriendlyMode bool `yaml:"friendly"`
+	Storage      string `yaml:"storage" env-default:"./data/"`
+	BucketSize   int64  `yaml:"bucket_size" env-default:"800"`
+	FriendlyMode bool   `yaml:"friendly"`
 }
 
 type TBufferSize struct {

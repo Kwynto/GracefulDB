@@ -53,7 +53,6 @@ func StrongRemoveTable(sNameDB, sNameTable string) bool {
 
 	for iRangeInd, stTableInfo := range stDBInfo.Removed {
 		if stTableInfo.Name == sNameTable {
-			// tablePath := fmt.Sprintf("%s%s/%s", LocalCoreSettings.Storage, tableInfo.Parent, tableInfo.Folder)
 			sTablePath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder)
 			err := os.RemoveAll(sTablePath)
 			if err != nil {
@@ -187,7 +186,6 @@ func CreateTable(sNameDB, sNameTable string, isSecure bool) bool {
 		return false
 	}
 
-	// pathDB := fmt.Sprintf("%s%s/", LocalCoreSettings.Storage, dbInfo.Folder)
 	sPathDB := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder)
 
 	for {
@@ -197,14 +195,12 @@ func CreateTable(sNameDB, sNameTable string, isSecure bool) bool {
 		}
 	}
 
-	// fullTableName := fmt.Sprintf("%s%s", pathDB, folderName)
 	sFullTableName := filepath.Join(sPathDB, sFolderName)
 	err1 := os.Mkdir(sFullTableName, 0666)
 	if err1 != nil {
 		return false
 	}
 
-	// serviceName := fmt.Sprintf("%s/service", fullTableName)
 	sServiceName := filepath.Join(sFullTableName, "service")
 	err2 := os.Mkdir(sServiceName, 0666)
 	if err2 != nil {

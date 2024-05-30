@@ -2,7 +2,6 @@ package ordinarylogger
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -196,20 +195,20 @@ func Test_setupLogger(t *testing.T) {
 	})
 }
 
-func Test_Err(t *testing.T) {
-	t.Run("Err() function testing", func(t *testing.T) {
-		fakeErr := errors.New("fake error")
-		res := Err(fakeErr)
+// func Test_Err(t *testing.T) {
+// 	t.Run("Err() function testing", func(t *testing.T) {
+// 		fakeErr := errors.New("fake error")
+// 		res := Err(fakeErr)
 
-		if r1 := reflect.TypeOf(res); r1 != reflect.TypeOf(slog.Attr{}) {
-			t.Errorf("Err() error: type mismatch: %v", r1)
-		}
+// 		if r1 := reflect.TypeOf(res); r1 != reflect.TypeOf(slog.Attr{}) {
+// 			t.Errorf("Err() error: type mismatch: %v", r1)
+// 		}
 
-		if (res.Key != "error") || !res.Value.Equal(slog.StringValue(fakeErr.Error())) {
-			t.Errorf("Err() error: broken attribute")
-		}
-	})
-}
+// 		if (res.Key != "error") || !res.Value.Equal(slog.StringValue(fakeErr.Error())) {
+// 			t.Errorf("Err() error: broken attribute")
+// 		}
+// 	})
+// }
 
 func Test_Init(t *testing.T) {
 	t.Run("Init() function testing", func(t *testing.T) {

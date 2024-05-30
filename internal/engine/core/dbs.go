@@ -40,7 +40,6 @@ func StrongRemoveDB(sNameDB string) bool {
 
 	for iInd, stDBInfo := range StStorageInfo.Removed {
 		if stDBInfo.Name == sNameDB {
-			// dbPath := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, dbInfo.Folder)
 			sDBPath := filepath.Join(StLocalCoreSettings.Storage, stDBInfo.Folder)
 			err := os.RemoveAll(sDBPath)
 			if err != nil {
@@ -110,7 +109,6 @@ func CreateDB(sNameDB string, sOwner string, isSecure bool) bool {
 		}
 	}
 
-	// fullNameFolderDB := fmt.Sprintf("%s%s", LocalCoreSettings.Storage, folderDB)
 	sFullNameFolderDB := filepath.Join(StLocalCoreSettings.Storage, sFolderDB)
 	err := os.Mkdir(sFullNameFolderDB, 0666)
 	if err != nil {

@@ -104,7 +104,6 @@ func (q tQuery) DCLGrant() (result string, err error) {
 				}
 			}
 			for _, sUser := range slUsers {
-				// var stAccessFlags gtypes.TAccessFlags
 				stAccessFlags, isOk := stDBAccess.Flags[sUser]
 				if !isOk {
 					stAccessFlags = gtypes.TAccessFlags{}
@@ -125,7 +124,6 @@ func (q tQuery) DCLGrant() (result string, err error) {
 					}
 				}
 
-				// core.StorageInfo.Access[db].Flags[user] = aFlags
 				core.SetAccessFlags(sDB, sUser, stAccessFlags)
 			}
 		}
@@ -246,7 +244,6 @@ func (q tQuery) DCLRevoke() (result string, err error) {
 					}
 				}
 
-				// core.StorageInfo.Access[db].Flags[user] = aFlags
 				core.SetAccessFlags(sDB, sUser, stAccessFlags)
 			}
 		}

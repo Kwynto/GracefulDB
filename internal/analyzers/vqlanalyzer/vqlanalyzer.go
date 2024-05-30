@@ -16,7 +16,6 @@ type tQuery struct {
 func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
 	// -
 	// Prep
-	// instruction = strings.TrimSpace(instruction)
 	sInstruction = vqlexp.MRegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
 	sInstruction = strings.TrimRight(sInstruction, "; ")
 	sInstruction = strings.TrimLeft(sInstruction, " ")
