@@ -38,6 +38,12 @@ var LogServerError *log.Logger
 var chRecQueue = make(chan TRecQueue, 1024)
 
 func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
+	go prepareLog(h, r)
+
+	return nil
+}
+
+func prepareLog(h *TStOrdinaryHandler, r slog.Record) {
 	var sFileOut string
 
 	sLevel := r.Level.String() + ":"
@@ -99,8 +105,14 @@ func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
 	}
 
 	chRecQueue <- stRec
+}
 
-	return nil
+func recordingQueue() {
+	for {
+		stRec := <-chRecQueue
+		stRec.handler.lScreen.Println(stRec.sMsgScreen)
+		stRec.handler.lFile.Println(stRec.sMsgFile)
+	}
 }
 
 func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *TStOrdinaryHandler {
@@ -138,14 +150,6 @@ func setupLogger(logPath, logEnv string) *slog.Logger {
 	newLog = slog.New(LogHandler)
 
 	return newLog
-}
-
-func recordingQueue() {
-	for {
-		stRec := <-chRecQueue
-		stRec.handler.lScreen.Println(stRec.sMsgScreen)
-		stRec.handler.lFile.Println(stRec.sMsgFile)
-	}
 }
 
 func Init(logPath, logEnv string) {
