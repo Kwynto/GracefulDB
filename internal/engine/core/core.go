@@ -70,6 +70,8 @@ func SetAccessFlags(sDB, sUser string, stFlags gtypes.TAccessFlags) {
 
 func (s *tStorageInfo) Load() bool {
 	// This method is complete
+	var isMkDir bool = false
+
 	mxStorageBlock.Lock()
 	defer mxStorageBlock.Unlock()
 
@@ -79,8 +81,18 @@ func (s *tStorageInfo) Load() bool {
 	s.Removed = make([]TDBInfo, 0)
 	s.Access = make(map[string]gtypes.TAccess)
 
+labelChDir:
 	slFiles, err := os.ReadDir(StLocalCoreSettings.Storage)
-	if err != nil {
+	if err != nil && !isMkDir {
+		errMkDir := os.MkdirAll(StLocalCoreSettings.Storage, 0660)
+		if errMkDir != nil {
+      slog.Error(err.Error())
+			return false
+		}
+		slog.Info("A storage folder has been created, according to the configuration file.")
+		isMkDir = true
+		goto labelChDir
+	} else if err != nil && isMkDir {
 		slog.Error(err.Error())
 		return false
 	}
