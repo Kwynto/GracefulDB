@@ -2,6 +2,8 @@
 Fast, Simple and Secure. 
 This is a DBMS for professionals and extreme loads. 
 
+<img src="https://github.com/mlix8hoblc/GracefulDB/assets/110055457/65073319-2933-43f8-9e56-b7d235b456a0" style="width:333px"/>
+
 **_This repository is under development._**
 
 **Usage**
