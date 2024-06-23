@@ -86,14 +86,14 @@ labelChDir:
 	if err != nil && !isMkDir {
 		errMkDir := os.MkdirAll(StLocalCoreSettings.Storage, 0660)
 		if errMkDir != nil {
-      slog.Error(err.Error())
+			slog.Error("Problems accessing the file system.", slog.String("err", err.Error()))
 			return false
 		}
 		slog.Info("A storage folder has been created, according to the configuration file.")
 		isMkDir = true
 		goto labelChDir
 	} else if err != nil && isMkDir {
-		slog.Error(err.Error())
+		slog.Error("Problems accessing the file system.", slog.String("err", err.Error()))
 		return false
 	}
 
