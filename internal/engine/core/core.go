@@ -81,6 +81,7 @@ func (s *tStorageInfo) Load() bool {
 
 	slFiles, err := os.ReadDir(StLocalCoreSettings.Storage)
 	if err != nil {
+		slog.Error(err.Error())
 		return false
 	}
 
