@@ -4,6 +4,12 @@ This is a DBMS for professionals and extreme loads.
 
 **_This repository is under development._**
 
+**Usage**
+
+> go build -o gdb  
+> mkdir ./data  
+> ./gdb
+
 **Testing**
 
 Run tests:
