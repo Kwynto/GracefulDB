@@ -6,8 +6,8 @@ This is a DBMS for professionals and extreme loads.
 
 **Usage**
 
-> go build -o gdb
-> mkdir ./data
+> go build -o gdb  
+> mkdir ./data  
 > ./gdb
 
 **Testing**
