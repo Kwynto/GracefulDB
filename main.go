@@ -10,6 +10,8 @@ import (
 
 	_ "embed"
 
+	"github.com/joho/godotenv"
+
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/server"
 
@@ -29,18 +31,27 @@ func main() {
 	fmt.Println(incolor.StringYellowH(sLicense))
 
 	// Init config
+	errDotEnv := godotenv.Load()
 	sConfigPath := os.Getenv("CONFIG_PATH")
 	config.MustLoad(sConfigPath)
 
-	if config.StDefaultConfig.Env == "test" {
-		fmt.Println("You should set up the configuration file correctly.")
-		os.Exit(0)
-	}
+	// if config.StDefaultConfig.Env == "test" {
+	// 	fmt.Println("You should set up the configuration file correctly.")
+	// 	os.Exit(0)
+	// }
 
 	// Init logger: slog
 	ordinarylogger.Init(config.StDefaultConfig.LogPath, config.StDefaultConfig.Env)
 	slog.Info("Starting GracefulDB", slog.String("env", config.StDefaultConfig.Env))
 	slog.Info("Configuration loaded", slog.String("file", config.SDisplayConfigPath))
+	if errDotEnv == nil {
+		slog.Info("The environment variables were read from the env-file. Don't forget, you can use OS environment variables, they take precedence over env-files.")
+	}
+
+	if config.StDefaultConfig.Env == config.ENV_DEV {
+		slog.Info("Developer mode is active.")
+		slog.Warn("Perhaps you should set up the configuration file correctly.")
+	}
 	slog.Debug("debug messages are enabled")
 
 	// Signal tracking
