@@ -11,7 +11,7 @@ const (
 	ENV_DEV  = "develop"
 	ENV_WORK = "working"
 
-	CONFIG_DEFAULT = "./config/default.yaml"
+	GDB_CONFIG_DEFAULT = "./config/default.yaml"
 )
 
 var SDisplayConfigPath string
@@ -104,7 +104,7 @@ func defaultConfig() TConfig {
 
 func MustLoad(sConfigPath string) *TConfig {
 	if sConfigPath == "" {
-		sConfigPath = CONFIG_DEFAULT
+		sConfigPath = GDB_CONFIG_DEFAULT
 	}
 
 	var stCfg TConfig

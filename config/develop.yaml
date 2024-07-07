@@ -1,4 +1,4 @@
-env: "develop" #dev, prod
+env: "develop" #develop, working
 log_path: "./logs"
 shutdown_timeout: 5s
 

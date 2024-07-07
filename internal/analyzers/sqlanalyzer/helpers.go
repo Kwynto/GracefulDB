@@ -1,4 +1,4 @@
-package vqlanalyzer
+package sqlanalyzer
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 )
 
@@ -19,24 +19,24 @@ func parseOrderBy(sOrderBy string, slColumns []string) (gtypes.TOrderBy, error) 
 		Sort: make([]uint8, 0, 2),
 	}
 
-	slOrderBy := vqlexp.MRegExpCollection["Comma"].Split(sOrderBy, -1)
+	slOrderBy := sqlexp.MRegExpCollection["Comma"].Split(sOrderBy, -1)
 	for _, sOBCol := range slOrderBy {
 		// разобрать ...
 		sCol := ""
 		uAD := uint8(0)
 
-		if vqlexp.MRegExpCollection["ASC"].MatchString(sOBCol) {
-			sCol = vqlexp.MRegExpCollection["ASC"].ReplaceAllLiteralString(sOBCol, "")
+		if sqlexp.MRegExpCollection["ASC"].MatchString(sOBCol) {
+			sCol = sqlexp.MRegExpCollection["ASC"].ReplaceAllLiteralString(sOBCol, "")
 			uAD = 1
-		} else if vqlexp.MRegExpCollection["DESC"].MatchString(sOBCol) {
-			sCol = vqlexp.MRegExpCollection["DESC"].ReplaceAllLiteralString(sOBCol, "")
+		} else if sqlexp.MRegExpCollection["DESC"].MatchString(sOBCol) {
+			sCol = sqlexp.MRegExpCollection["DESC"].ReplaceAllLiteralString(sOBCol, "")
 			uAD = 2
 		} else {
 			sCol = sOBCol
 			uAD = 0
 		}
 
-		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
 		sCol = trimQuotationMarks(sCol)
 		if sCol != "" {
 			stOBCols.Cols = append(stOBCols.Cols, sCol)
@@ -59,9 +59,9 @@ func parseOrderBy(sOrderBy string, slColumns []string) (gtypes.TOrderBy, error) 
 
 func parseGroupBy(sGroupBy string, slColumns []string) ([]string, error) {
 	var slGBCols = make([]string, 0, 4)
-	slGroupBy := vqlexp.MRegExpCollection["Comma"].Split(sGroupBy, -1)
+	slGroupBy := sqlexp.MRegExpCollection["Comma"].Split(sGroupBy, -1)
 	for _, sGBCol := range slGroupBy {
-		sGBCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sGBCol, "")
+		sGBCol = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sGBCol, "")
 		sGBCol = trimQuotationMarks(sGBCol)
 		if sGBCol != "" {
 			slGBCols = append(slGBCols, sGBCol)
@@ -81,12 +81,12 @@ func parseGroupBy(sGroupBy string, slColumns []string) ([]string, error) {
 func parseWhere(sWhere string) ([]gtypes.TConditions, error) {
 	var slExpression = make([]gtypes.TConditions, 0, 4)
 	for {
-		sHeadCond := vqlexp.MRegExpCollection["WhereExpression"].ReplaceAllLiteralString(sWhere, "")
-		slCondition := vqlexp.MRegExpCollection["WhereOperationConditions"].Split(sHeadCond, -1)
+		sHeadCond := sqlexp.MRegExpCollection["WhereExpression"].ReplaceAllLiteralString(sWhere, "")
+		slCondition := sqlexp.MRegExpCollection["WhereOperationConditions"].Split(sHeadCond, -1)
 		sKeyIn := slCondition[0]
 		sValueIn := slCondition[1]
 
-		sKeyIn = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sKeyIn, "")
+		sKeyIn = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sKeyIn, "")
 		sKeyIn = trimQuotationMarks(sKeyIn)
 
 		sValueIn = strings.TrimSpace(sValueIn)
@@ -105,33 +105,33 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, error) {
 			Value: sValueIn,
 		}
 
-		if vqlexp.MRegExpCollection["WhereOperation_<="].MatchString(sHeadCond) {
+		if sqlexp.MRegExpCollection["WhereOperation_<="].MatchString(sHeadCond) {
 			stExp.Operation = "<="
-		} else if vqlexp.MRegExpCollection["WhereOperation_>="].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_>="].MatchString(sHeadCond) {
 			stExp.Operation = ">="
-		} else if vqlexp.MRegExpCollection["WhereOperation_<"].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_<"].MatchString(sHeadCond) {
 			stExp.Operation = "<"
-		} else if vqlexp.MRegExpCollection["WhereOperation_>"].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_>"].MatchString(sHeadCond) {
 			stExp.Operation = ">"
-		} else if vqlexp.MRegExpCollection["WhereOperation_="].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_="].MatchString(sHeadCond) {
 			stExp.Operation = "="
-		} else if vqlexp.MRegExpCollection["WhereOperation_LIKE"].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_LIKE"].MatchString(sHeadCond) {
 			stExp.Operation = "like"
-		} else if vqlexp.MRegExpCollection["WhereOperation_REGEXP"].MatchString(sHeadCond) {
+		} else if sqlexp.MRegExpCollection["WhereOperation_REGEXP"].MatchString(sHeadCond) {
 			stExp.Operation = "regexp"
 		} else {
 			return []gtypes.TConditions{}, errors.New("condition error")
 		}
 		slExpression = append(slExpression, stExp)
 
-		sWhere = vqlexp.MRegExpCollection["WhereExpression"].FindString(sWhere)
-		sLogicOper := vqlexp.MRegExpCollection["WhereExpression_And_Or_Word"].FindString(sWhere)
+		sWhere = sqlexp.MRegExpCollection["WhereExpression"].FindString(sWhere)
+		sLogicOper := sqlexp.MRegExpCollection["WhereExpression_And_Or_Word"].FindString(sWhere)
 
-		if vqlexp.MRegExpCollection["OR"].MatchString(sLogicOper) {
+		if sqlexp.MRegExpCollection["OR"].MatchString(sLogicOper) {
 			slExpression = append(slExpression, gtypes.TConditions{
 				Type: "or",
 			})
-		} else if vqlexp.MRegExpCollection["AND"].MatchString(sLogicOper) {
+		} else if sqlexp.MRegExpCollection["AND"].MatchString(sLogicOper) {
 			slExpression = append(slExpression, gtypes.TConditions{
 				Type: "and",
 			})
@@ -139,19 +139,19 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, error) {
 			break
 		}
 
-		sWhere = vqlexp.MRegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(sWhere, "")
+		sWhere = sqlexp.MRegExpCollection["WhereExpression_And_Or_Word"].ReplaceAllLiteralString(sWhere, "")
 	}
 	return slExpression, nil
 }
 
 func trimQuotationMarks(input string) string {
-	if vqlexp.MRegExpCollection["QuotationMarks"].MatchString(input) {
-		input = vqlexp.MRegExpCollection["QuotationMarks"].ReplaceAllLiteralString(input, "")
+	if sqlexp.MRegExpCollection["QuotationMarks"].MatchString(input) {
+		input = sqlexp.MRegExpCollection["QuotationMarks"].ReplaceAllLiteralString(input, "")
 		return input
 	}
 
-	if vqlexp.MRegExpCollection["SpecQuotationMark"].MatchString(input) {
-		input = vqlexp.MRegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(input, "")
+	if sqlexp.MRegExpCollection["SpecQuotationMark"].MatchString(input) {
+		input = sqlexp.MRegExpCollection["SpecQuotationMark"].ReplaceAllLiteralString(input, "")
 		return input
 	}
 

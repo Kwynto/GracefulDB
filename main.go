@@ -32,7 +32,7 @@ func main() {
 
 	// Init config
 	errDotEnv := godotenv.Load()
-	sConfigPath := os.Getenv("CONFIG_PATH")
+	sConfigPath := os.Getenv("GDB_CONFIG_PATH")
 	config.MustLoad(sConfigPath)
 
 	// if config.StDefaultConfig.Env == "test" {
@@ -52,7 +52,7 @@ func main() {
 		slog.Info("Developer mode is active.")
 		slog.Warn("Perhaps you should set up the configuration file correctly.")
 	}
-	slog.Debug("debug messages are enabled")
+	slog.Debug("Debug messages are enabled.")
 
 	// Signal tracking
 	ctxSignal, fnStopSignal := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

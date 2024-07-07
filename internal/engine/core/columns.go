@@ -10,7 +10,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 )
 
 // Marks the column as deleted, but does not delete files.
@@ -99,7 +99,7 @@ func StrongRemoveColumn(sNameDB, sNameTable, sNameColumn string) bool {
 // Changing a column
 func ChangeColumn(sNameDB, sNameTable string, stNewDataColumn gtypes.TColumnForWrite, isSecure bool) bool {
 	// This function is complete
-	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(stNewDataColumn.Name) {
+	if isSecure && !sqlexp.MRegExpCollection["EntityName"].MatchString(stNewDataColumn.Name) {
 		return false
 	}
 
@@ -275,7 +275,7 @@ func GetInfoById(uIdRow uint64, stAddData gtypes.TAdditionalData) (sTime string,
 // Creating a new column
 func CreateColumn(sNameDB, sNameTable, sNameColumn string, isSecure bool, stSpecification gtypes.TColumnSpecification) bool {
 	// This function is complete
-	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNameColumn) {
+	if isSecure && !sqlexp.MRegExpCollection["EntityName"].MatchString(sNameColumn) {
 		return false
 	}
 

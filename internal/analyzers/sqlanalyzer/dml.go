@@ -1,11 +1,11 @@
-package vqlanalyzer
+package sqlanalyzer
 
 import (
 	"errors"
 	"strings"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
@@ -54,31 +54,31 @@ func (q tQuery) DMLSelect() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sInstruction := vqlexp.MRegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sInstruction := sqlexp.MRegExpCollection["SelectWord"].ReplaceAllLiteralString(q.Instruction, "")
 
 	sOrderBy := ""
 	sGroupBy := ""
 	isOrder := false
 	isGroup := false
 
-	if vqlexp.MRegExpCollection["OrderbyToEnd"].MatchString(sInstruction) {
-		sOrderBy = vqlexp.MRegExpCollection["OrderbyToEnd"].FindString(sInstruction)
-		sInstruction = vqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
-		sOrderBy = vqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
+	if sqlexp.MRegExpCollection["OrderbyToEnd"].MatchString(sInstruction) {
+		sOrderBy = sqlexp.MRegExpCollection["OrderbyToEnd"].FindString(sInstruction)
+		sInstruction = sqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sOrderBy = sqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
 		isOrder = true
 	}
 
-	if vqlexp.MRegExpCollection["GroupbyToEnd"].MatchString(sInstruction) {
-		sGroupBy = vqlexp.MRegExpCollection["GroupbyToEnd"].FindString(sInstruction)
-		sInstruction = vqlexp.MRegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
-		sGroupBy = vqlexp.MRegExpCollection["Groupby"].ReplaceAllLiteralString(sGroupBy, "")
+	if sqlexp.MRegExpCollection["GroupbyToEnd"].MatchString(sInstruction) {
+		sGroupBy = sqlexp.MRegExpCollection["GroupbyToEnd"].FindString(sInstruction)
+		sInstruction = sqlexp.MRegExpCollection["GroupbyToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sGroupBy = sqlexp.MRegExpCollection["Groupby"].ReplaceAllLiteralString(sGroupBy, "")
 		isGroup = true
 	}
 
-	if vqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
-		sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
-		sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
-		sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+	if sqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
+		sWhere := sqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+		sInstruction = sqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sWhere = sqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
 		expression, err := parseWhere(sWhere)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
@@ -87,10 +87,10 @@ func (q tQuery) DMLSelect() (result string, err error) {
 		stSelectIn.IsWhere = true
 	}
 
-	sTable := vqlexp.MRegExpCollection["SelectFromToEnd"].FindString(sInstruction)
-	sInstruction = vqlexp.MRegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(sInstruction, "")
-	sTable = vqlexp.MRegExpCollection["SelectFromWord"].ReplaceAllLiteralString(sTable, "")
-	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable := sqlexp.MRegExpCollection["SelectFromToEnd"].FindString(sInstruction)
+	sInstruction = sqlexp.MRegExpCollection["SelectFromToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = sqlexp.MRegExpCollection["SelectFromWord"].ReplaceAllLiteralString(sTable, "")
+	sTable = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
 	sTable = trimQuotationMarks(sTable)
 	if sTable == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
@@ -100,16 +100,16 @@ func (q tQuery) DMLSelect() (result string, err error) {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
 	}
 
-	isDistinct := vqlexp.MRegExpCollection["SelectDistinctWord"].MatchString(sInstruction)
+	isDistinct := sqlexp.MRegExpCollection["SelectDistinctWord"].MatchString(sInstruction)
 	if isDistinct {
-		sInstruction = vqlexp.MRegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(sInstruction, "")
+		sInstruction = sqlexp.MRegExpCollection["SelectDistinctWord"].ReplaceAllLiteralString(sInstruction, "")
 	}
 	stSelectIn.Distinct = isDistinct
 
 	sColumns := strings.TrimSpace(sInstruction)
-	slColumns := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	slColumns := sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 	for _, sCol := range slColumns {
-		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
 		sCol = trimQuotationMarks(sCol)
 		if sCol != "" {
 			stSelectIn.Columns = append(stSelectIn.Columns, sCol)
@@ -193,18 +193,18 @@ func (q tQuery) DMLInsert() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sInstruction := vqlexp.MRegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
-	sValues := vqlexp.MRegExpCollection["InsertValuesToEnd"].FindString(sInstruction)
-	sInstruction = vqlexp.MRegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sInstruction := sqlexp.MRegExpCollection["InsertWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sValues := sqlexp.MRegExpCollection["InsertValuesToEnd"].FindString(sInstruction)
+	sInstruction = sqlexp.MRegExpCollection["InsertValuesToEnd"].ReplaceAllLiteralString(sInstruction, "")
 
-	sColumns := vqlexp.MRegExpCollection["InsertColParenthesis"].FindString(sInstruction)
-	sColumns = vqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sColumns, "")
-	sColumns = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumns, "")
+	sColumns := sqlexp.MRegExpCollection["InsertColParenthesis"].FindString(sInstruction)
+	sColumns = sqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	sColumns = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumns, "")
 	sColumns = trimQuotationMarks(sColumns)
-	slColumnsIn = vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	slColumnsIn = sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
-	sTable := vqlexp.MRegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(sInstruction, "")
-	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable := sqlexp.MRegExpCollection["InsertColParenthesis"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
 	sTable = trimQuotationMarks(sTable)
 
 	if !core.IfExistTable(sDB, sTable) {
@@ -212,11 +212,11 @@ func (q tQuery) DMLInsert() (result string, err error) {
 	}
 
 	var slRowsIn [][]string
-	sValues = vqlexp.MRegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(sValues, "")
-	slValues := vqlexp.MRegExpCollection["InsertSplitParenthesis"].Split(sValues, -1)
+	sValues = sqlexp.MRegExpCollection["InsertValuesWord"].ReplaceAllLiteralString(sValues, "")
+	slValues := sqlexp.MRegExpCollection["InsertSplitParenthesis"].Split(sValues, -1)
 	for _, sValue := range slValues {
-		sValue = vqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sValue, "")
-		slValueIn := vqlexp.MRegExpCollection["Comma"].Split(sValue, -1)
+		sValue = sqlexp.MRegExpCollection["InsertParenthesis"].ReplaceAllLiteralString(sValue, "")
+		slValueIn := sqlexp.MRegExpCollection["Comma"].Split(sValue, -1)
 		var slRowIn []string
 		for _, sVal := range slValueIn {
 			sVal = strings.TrimSpace(sVal)
@@ -297,9 +297,9 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sInstruction := vqlexp.MRegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
-	sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
-	sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+	sInstruction := sqlexp.MRegExpCollection["UpdateWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sWhere := sqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+	sWhere = sqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
 
 	slExpression, err := parseWhere(sWhere)
 	if err != nil {
@@ -310,22 +310,22 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 	}
 	stUpdateIn.Where = append(stUpdateIn.Where, slExpression...)
 
-	sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sInstruction = sqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
 
-	sColumnsValues := vqlexp.MRegExpCollection["UpdateSetToEnd"].FindString(sInstruction)
-	sColumnsValues = vqlexp.MRegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(sColumnsValues, "")
-	slColumnsValues := vqlexp.MRegExpCollection["Comma"].Split(sColumnsValues, -1)
+	sColumnsValues := sqlexp.MRegExpCollection["UpdateSetToEnd"].FindString(sInstruction)
+	sColumnsValues = sqlexp.MRegExpCollection["UpdateSetWord"].ReplaceAllLiteralString(sColumnsValues, "")
+	slColumnsValues := sqlexp.MRegExpCollection["Comma"].Split(sColumnsValues, -1)
 
 	if len(slColumnsValues) == 0 || slColumnsValues[0] == "" {
 		return `{"state":"error", "result":"incorrect command syntax"}`, errors.New("incorrect command syntax")
 	}
 
 	for _, sColVal := range slColumnsValues {
-		slColVal := vqlexp.MRegExpCollection["SignEqual"].Split(sColVal, -1)
+		slColVal := sqlexp.MRegExpCollection["SignEqual"].Split(sColVal, -1)
 		sCol := slColVal[0]
 		sVal := slColVal[1]
 
-		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
 		sCol = trimQuotationMarks(sCol)
 
 		if len(sCol) == 0 {
@@ -338,8 +338,8 @@ func (q tQuery) DMLUpdate() (result string, err error) {
 		stUpdateIn.Couples[sCol] = sVal
 	}
 
-	sTable := vqlexp.MRegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(sInstruction, "")
-	sTable = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
+	sTable := sqlexp.MRegExpCollection["UpdateSetToEnd"].ReplaceAllLiteralString(sInstruction, "")
+	sTable = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sTable, "")
 	sTable = trimQuotationMarks(sTable)
 
 	if !core.IfExistTable(sDB, sTable) {
@@ -405,12 +405,12 @@ func (q tQuery) DMLDelete() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sInstruction := vqlexp.MRegExpCollection["DeleteWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sInstruction := sqlexp.MRegExpCollection["DeleteWord"].ReplaceAllLiteralString(q.Instruction, "")
 
-	if vqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
-		sWhere := vqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
-		sInstruction = vqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
-		sWhere = vqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
+	if sqlexp.MRegExpCollection["WhereToEnd"].MatchString(sInstruction) {
+		sWhere := sqlexp.MRegExpCollection["WhereToEnd"].FindString(sInstruction)
+		sInstruction = sqlexp.MRegExpCollection["WhereToEnd"].ReplaceAllLiteralString(sInstruction, "")
+		sWhere = sqlexp.MRegExpCollection["Where"].ReplaceAllLiteralString(sWhere, "")
 		slExpression, err := parseWhere(sWhere)
 		if err != nil {
 			return `{"state":"error", "result":"condition error"}`, errors.New("condition error")
@@ -419,7 +419,7 @@ func (q tQuery) DMLDelete() (result string, err error) {
 		stDeleteIn.IsWhere = true
 	}
 
-	sTable := vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sInstruction, "")
+	sTable := sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sInstruction, "")
 	sTable = trimQuotationMarks(sTable)
 	if sTable == "" {
 		return `{"state":"error", "result":"invalid table name"}`, errors.New("invalid table name")
@@ -494,7 +494,7 @@ func (q tQuery) DMLTruncateTable() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sTable := vqlexp.MRegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sTable := sqlexp.MRegExpCollection["TruncateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	sTable = strings.TrimSpace(sTable)
 	sTable = trimQuotationMarks(sTable)
 
