@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	ENV_DEV  = "dev"
-	ENV_PROD = "prod"
+	ENV_DEV  = "develop"
+	ENV_WORK = "working"
 
-	CONFIG_DEFAULT = "./config/default.yaml"
+	GDB_CONFIG_DEFAULT = "./config/default.yaml"
 )
 
 var SDisplayConfigPath string
@@ -54,7 +54,7 @@ type TWebServer struct {
 }
 
 type TConfig struct {
-	Env             string        `yaml:"env" env-default:"prod"`
+	Env             string        `yaml:"env" env-default:"working"`
 	LogPath         string        `yaml:"log_path" env-default:"./logs/"`
 	ShutdownTimeOut time.Duration `yaml:"shutdown_timeout" env-default:"5s"`
 
@@ -67,7 +67,7 @@ type TConfig struct {
 
 func defaultConfig() TConfig {
 	return TConfig{
-		Env:             "test",
+		Env:             ENV_DEV,
 		LogPath:         "./logs",
 		ShutdownTimeOut: 5 * time.Second,
 		CoreSettings: TCoreSettings{
@@ -104,7 +104,7 @@ func defaultConfig() TConfig {
 
 func MustLoad(sConfigPath string) *TConfig {
 	if sConfigPath == "" {
-		sConfigPath = CONFIG_DEFAULT
+		sConfigPath = GDB_CONFIG_DEFAULT
 	}
 
 	var stCfg TConfig

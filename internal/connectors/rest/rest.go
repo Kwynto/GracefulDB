@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/pkg/lib/closer"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ordinarylogger"
@@ -41,7 +41,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sResponse := vqlanalyzer.Request(sTicket, sInstruction, slPlaceholder)
+	sResponse := sqlanalyzer.Request(sTicket, sInstruction, slPlaceholder)
 
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)

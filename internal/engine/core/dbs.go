@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 )
 
 // Marks the database as deleted, but does not delete files.
@@ -58,7 +58,7 @@ func StrongRemoveDB(sNameDB string) bool {
 // Rename a database.
 func RenameDB(sOldName, sNewName string, isSecure bool) bool {
 	// This function is complete
-	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNewName) {
+	if isSecure && !sqlexp.MRegExpCollection["EntityName"].MatchString(sNewName) {
 		return false
 	}
 
@@ -88,7 +88,7 @@ func RenameDB(sOldName, sNewName string, isSecure bool) bool {
 // Creating a new database.
 func CreateDB(sNameDB string, sOwner string, isSecure bool) bool {
 	// This function is complete
-	if isSecure && !vqlexp.MRegExpCollection["EntityName"].MatchString(sNameDB) {
+	if isSecure && !sqlexp.MRegExpCollection["EntityName"].MatchString(sNameDB) {
 		return false
 	}
 

@@ -1,4 +1,4 @@
-package vqlanalyzer
+package sqlanalyzer
 
 import "testing"
 

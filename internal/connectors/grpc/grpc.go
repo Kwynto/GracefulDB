@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/Kwynto/GracefulDB/internal/analyzers/vqlanalyzer"
+	"github.com/Kwynto/GracefulDB/internal/analyzers/sqlanalyzer"
 	gs "github.com/Kwynto/GracefulDB/internal/connectors/grpc/proto/graceful_service"
 	"google.golang.org/grpc"
 
@@ -31,7 +31,7 @@ func (tMessageServer) Query(ctx context.Context, r *gs.Request) (stResponse *gs.
 	slog.Debug("Request received", slog.String("instruction", r.Instruction), slog.String("placeholder", fmt.Sprint(r.Placeholder)))
 
 	stResponse = &gs.Response{
-		Message: vqlanalyzer.Request(r.Ticket, r.Instruction, r.Placeholder),
+		Message: sqlanalyzer.Request(r.Ticket, r.Instruction, r.Placeholder),
 	}
 	slog.Debug("Response sent", slog.String("response", stResponse.Message))
 

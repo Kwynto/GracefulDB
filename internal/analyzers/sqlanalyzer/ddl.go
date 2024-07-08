@@ -1,4 +1,4 @@
-package vqlanalyzer
+package sqlanalyzer
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/core"
 	"github.com/Kwynto/GracefulDB/pkg/lib/e"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
@@ -39,11 +39,11 @@ func (q tQuery) DDLCreateDB() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isINE := vqlexp.MRegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
+	isINE := sqlexp.MRegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
-	sDB := vqlexp.MRegExpCollection["CreateDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sDB := sqlexp.MRegExpCollection["CreateDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isINE {
-		sDB = vqlexp.MRegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sDB, "")
+		sDB = sqlexp.MRegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sDB, "")
 	}
 	sDB = strings.TrimSpace(sDB)
 	sDB = trimQuotationMarks(sDB)
@@ -120,18 +120,18 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isINE := vqlexp.MRegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
+	isINE := sqlexp.MRegExpCollection["IfNotExistsWord"].MatchString(q.Instruction)
 
-	sTable := vqlexp.MRegExpCollection["CreateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sTable := sqlexp.MRegExpCollection["CreateTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isINE {
-		sTable = vqlexp.MRegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sTable, "")
+		sTable = sqlexp.MRegExpCollection["IfNotExistsWord"].ReplaceAllLiteralString(sTable, "")
 	}
 
-	sColumns := vqlexp.MRegExpCollection["TableColumns"].FindString(sTable)
-	sColumns = vqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
-	slColumnsIn := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	sColumns := sqlexp.MRegExpCollection["TableColumns"].FindString(sTable)
+	sColumns = sqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	slColumnsIn := sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
-	sTable = vqlexp.MRegExpCollection["TableColumns"].ReplaceAllLiteralString(sTable, "")
+	sTable = sqlexp.MRegExpCollection["TableColumns"].ReplaceAllLiteralString(sTable, "")
 	sTable = strings.TrimSpace(sTable)
 	sTable = trimQuotationMarks(sTable)
 
@@ -216,19 +216,19 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 					Unique:  false,
 				},
 			}
-			if vqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
-				sColumn = vqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
+			if sqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
+				sColumn = sqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
 				stCol.Spec.Unique = true
 			}
-			if vqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
-				sColumn = vqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
+			if sqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
+				sColumn = sqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
 				stCol.Spec.NotNull = true
 			}
-			if vqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
-				sColDef := vqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
-				sColumn = vqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
+			if sqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
+				sColDef := sqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
+				sColumn = sqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
 
-				sColDef = vqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
+				sColDef = sqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
 				sColDef = strings.TrimSpace(sColDef)
 				sColDef = trimQuotationMarks(sColDef)
 
@@ -239,7 +239,7 @@ func (q tQuery) DDLCreateTable() (result string, err error) {
 				}
 			}
 
-			sColumn = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
+			sColumn = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
 			sColumn = trimQuotationMarks(sColumn)
 			stCol.Name = sColumn
 
@@ -273,8 +273,8 @@ func (q tQuery) DDLCreate() (result string, err error) {
 	sOperation := "internal -> analyzers -> sql -> DDL -> DDLCreate"
 	defer func() { e.Wrapper(sOperation, err) }()
 
-	isDB := vqlexp.MRegExpCollection["CreateDatabaseWord"].MatchString(q.Instruction)
-	isTable := vqlexp.MRegExpCollection["CreateTableWord"].MatchString(q.Instruction)
+	isDB := sqlexp.MRegExpCollection["CreateDatabaseWord"].MatchString(q.Instruction)
+	isTable := sqlexp.MRegExpCollection["CreateTableWord"].MatchString(q.Instruction)
 
 	if isDB {
 		return q.DDLCreateDB()
@@ -310,18 +310,18 @@ func (q tQuery) DDLAlterDB() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isRT := vqlexp.MRegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
+	isRT := sqlexp.MRegExpCollection["AlterDatabaseRenameTo"].MatchString(q.Instruction)
 	if !isRT {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	sOldDBName := vqlexp.MRegExpCollection["AlterDatabaseRenameTo"].FindString(q.Instruction)
-	sOldDBName = vqlexp.MRegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(sOldDBName, "")
-	sOldDBName = vqlexp.MRegExpCollection["RenameTo"].ReplaceAllLiteralString(sOldDBName, "")
+	sOldDBName := sqlexp.MRegExpCollection["AlterDatabaseRenameTo"].FindString(q.Instruction)
+	sOldDBName = sqlexp.MRegExpCollection["AlterDatabaseWord"].ReplaceAllLiteralString(sOldDBName, "")
+	sOldDBName = sqlexp.MRegExpCollection["RenameTo"].ReplaceAllLiteralString(sOldDBName, "")
 	sOldDBName = trimQuotationMarks(sOldDBName)
 	sOldDBName = strings.TrimSpace(sOldDBName)
 
-	sNewDBName := vqlexp.MRegExpCollection["AlterDatabaseRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
+	sNewDBName := sqlexp.MRegExpCollection["AlterDatabaseRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
 	sNewDBName = trimQuotationMarks(sNewDBName)
 	sNewDBName = strings.TrimSpace(sNewDBName)
 
@@ -395,15 +395,15 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sTableName := vqlexp.MRegExpCollection["AlterTableAdd"].FindString(q.Instruction)
-	sTableName = vqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
-	sTableName = vqlexp.MRegExpCollection["ADD"].ReplaceAllLiteralString(sTableName, "")
+	sTableName := sqlexp.MRegExpCollection["AlterTableAdd"].FindString(q.Instruction)
+	sTableName = sqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
+	sTableName = sqlexp.MRegExpCollection["ADD"].ReplaceAllLiteralString(sTableName, "")
 	sTableName = trimQuotationMarks(sTableName)
 	sTableName = strings.TrimSpace(sTableName)
 
-	sColumns := vqlexp.MRegExpCollection["AlterTableAdd"].ReplaceAllLiteralString(q.Instruction, "")
-	sColumns = vqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
-	slColumnsIn := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	sColumns := sqlexp.MRegExpCollection["AlterTableAdd"].ReplaceAllLiteralString(q.Instruction, "")
+	sColumns = sqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	slColumnsIn := sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
 	var slStColumns = []gtypes.TColumnForWrite{}
 
@@ -416,19 +416,19 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 				Unique:  false,
 			},
 		}
-		if vqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
-			sColumn = vqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
+			sColumn = sqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.Unique = true
 		}
-		if vqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
-			sColumn = vqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
+			sColumn = sqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.NotNull = true
 		}
-		if vqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
-			sColDef := vqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
-			sColumn = vqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
+			sColDef := sqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
+			sColumn = sqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
 
-			sColDef = vqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
+			sColDef = sqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
 			sColDef = strings.TrimSpace(sColDef)
 			sColDef = trimQuotationMarks(sColDef)
 
@@ -439,7 +439,7 @@ func (q tQuery) DDLAlterTableAdd() (result string, err error) {
 			}
 		}
 
-		sColumn = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
+		sColumn = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
 		sColumn = trimQuotationMarks(sColumn)
 		stCol.Name = sColumn
 
@@ -500,9 +500,9 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sTableName := vqlexp.MRegExpCollection["AlterTableDrop"].FindString(q.Instruction)
-	sTableName = vqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
-	sTableName = vqlexp.MRegExpCollection["DROP"].ReplaceAllLiteralString(sTableName, "")
+	sTableName := sqlexp.MRegExpCollection["AlterTableDrop"].FindString(q.Instruction)
+	sTableName = sqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
+	sTableName = sqlexp.MRegExpCollection["DROP"].ReplaceAllLiteralString(sTableName, "")
 	sTableName = trimQuotationMarks(sTableName)
 	sTableName = strings.TrimSpace(sTableName)
 
@@ -510,14 +510,14 @@ func (q tQuery) DDLAlterTableDrop() (result string, err error) {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	sColumns := vqlexp.MRegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
-	sColumns = vqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
-	slColumnsIn := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	sColumns := sqlexp.MRegExpCollection["AlterTableDrop"].ReplaceAllLiteralString(q.Instruction, "")
+	sColumns = sqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	slColumnsIn := sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
 	var slSColumns = []string{}
 
 	for _, sColumn := range slColumnsIn {
-		sColumn = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
+		sColumn = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
 		sColumn = trimQuotationMarks(sColumn)
 
 		slSColumns = append(slSColumns, sColumn)
@@ -576,15 +576,15 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	sTableName := vqlexp.MRegExpCollection["AlterTableModify"].FindString(q.Instruction)
-	sTableName = vqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
-	sTableName = vqlexp.MRegExpCollection["MODIFY"].ReplaceAllLiteralString(sTableName, "")
+	sTableName := sqlexp.MRegExpCollection["AlterTableModify"].FindString(q.Instruction)
+	sTableName = sqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sTableName, "")
+	sTableName = sqlexp.MRegExpCollection["MODIFY"].ReplaceAllLiteralString(sTableName, "")
 	sTableName = trimQuotationMarks(sTableName)
 	sTableName = strings.TrimSpace(sTableName)
 
-	sColumns := vqlexp.MRegExpCollection["AlterTableModify"].ReplaceAllLiteralString(q.Instruction, "")
-	sColumns = vqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
-	slColumnsIn := vqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
+	sColumns := sqlexp.MRegExpCollection["AlterTableModify"].ReplaceAllLiteralString(q.Instruction, "")
+	sColumns = sqlexp.MRegExpCollection["TableParenthesis"].ReplaceAllLiteralString(sColumns, "")
+	slColumnsIn := sqlexp.MRegExpCollection["Comma"].Split(sColumns, -1)
 
 	var slStColumns = []gtypes.TColumnForWrite{}
 
@@ -600,19 +600,19 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			IsChName: false,
 		}
 
-		if vqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
-			sColumn = vqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnUnique"].MatchString(sColumn) {
+			sColumn = sqlexp.MRegExpCollection["ColumnUnique"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.Unique = true
 		}
-		if vqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
-			sColumn = vqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnNotNull"].MatchString(sColumn) {
+			sColumn = sqlexp.MRegExpCollection["ColumnNotNull"].ReplaceAllLiteralString(sColumn, "")
 			stCol.Spec.NotNull = true
 		}
-		if vqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
-			sColDef := vqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
-			sColumn = vqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
+		if sqlexp.MRegExpCollection["ColumnDefault"].MatchString(sColumn) {
+			sColDef := sqlexp.MRegExpCollection["ColumnDefault"].FindString(sColumn)
+			sColumn = sqlexp.MRegExpCollection["ColumnDefault"].ReplaceAllLiteralString(sColumn, "")
 
-			sColDef = vqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
+			sColDef = sqlexp.MRegExpCollection["ColumnDefaultWord"].ReplaceAllLiteralString(sColDef, "")
 			sColDef = strings.TrimSpace(sColDef)
 			sColDef = trimQuotationMarks(sColDef)
 
@@ -623,15 +623,15 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 			}
 		}
 
-		if vqlexp.MRegExpCollection["RenameTo"].MatchString(sColumn) {
-			slNames := vqlexp.MRegExpCollection["RenameTo"].Split(sColumn, -1)
+		if sqlexp.MRegExpCollection["RenameTo"].MatchString(sColumn) {
+			slNames := sqlexp.MRegExpCollection["RenameTo"].Split(sColumn, -1)
 			sOldName := slNames[0]
 			sNewName := slNames[1]
 
-			sOldName = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sOldName, "")
+			sOldName = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sOldName, "")
 			sOldName = trimQuotationMarks(sOldName)
 
-			sNewName = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sNewName, "")
+			sNewName = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sNewName, "")
 			sNewName = trimQuotationMarks(sNewName)
 
 			if sNewName != sOldName {
@@ -642,7 +642,7 @@ func (q tQuery) DDLAlterTableModify() (result string, err error) {
 				stCol.Name = sOldName
 			}
 		} else {
-			sColumn = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
+			sColumn = sqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sColumn, "")
 			sColumn = trimQuotationMarks(sColumn)
 
 			stCol.Name = sColumn
@@ -707,18 +707,18 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isRT := vqlexp.MRegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
+	isRT := sqlexp.MRegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
 	if !isRT {
 		return `{"state":"error", "result":"invalid command format"}`, errors.New("invalid command format")
 	}
 
-	sOldTableName := vqlexp.MRegExpCollection["AlterTableRenameTo"].FindString(q.Instruction)
-	sOldTableName = vqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sOldTableName, "")
-	sOldTableName = vqlexp.MRegExpCollection["RenameTo"].ReplaceAllLiteralString(sOldTableName, "")
+	sOldTableName := sqlexp.MRegExpCollection["AlterTableRenameTo"].FindString(q.Instruction)
+	sOldTableName = sqlexp.MRegExpCollection["AlterTableWord"].ReplaceAllLiteralString(sOldTableName, "")
+	sOldTableName = sqlexp.MRegExpCollection["RenameTo"].ReplaceAllLiteralString(sOldTableName, "")
 	sOldTableName = trimQuotationMarks(sOldTableName)
 	sOldTableName = strings.TrimSpace(sOldTableName)
 
-	sNewTableName := vqlexp.MRegExpCollection["AlterTableRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
+	sNewTableName := sqlexp.MRegExpCollection["AlterTableRenameTo"].ReplaceAllLiteralString(q.Instruction, "")
 	sNewTableName = trimQuotationMarks(sNewTableName)
 	sNewTableName = strings.TrimSpace(sNewTableName)
 
@@ -757,10 +757,10 @@ func (q tQuery) DDLAlterTableRenameTo() (result string, err error) {
 
 func (q tQuery) DDLAlterTable() (result string, err error) {
 	// This method is complete
-	isAdd := vqlexp.MRegExpCollection["AlterTableAdd"].MatchString(q.Instruction)
-	isDrop := vqlexp.MRegExpCollection["AlterTableDrop"].MatchString(q.Instruction)
-	isModify := vqlexp.MRegExpCollection["AlterTableModify"].MatchString(q.Instruction)
-	isRT := vqlexp.MRegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
+	isAdd := sqlexp.MRegExpCollection["AlterTableAdd"].MatchString(q.Instruction)
+	isDrop := sqlexp.MRegExpCollection["AlterTableDrop"].MatchString(q.Instruction)
+	isModify := sqlexp.MRegExpCollection["AlterTableModify"].MatchString(q.Instruction)
+	isRT := sqlexp.MRegExpCollection["AlterTableRenameTo"].MatchString(q.Instruction)
 
 	if isAdd {
 		return q.DDLAlterTableAdd()
@@ -780,8 +780,8 @@ func (q tQuery) DDLAlter() (result string, err error) {
 	sOperation := "internal -> analyzers -> sql -> DDL -> DDLAlter"
 	defer func() { e.Wrapper(sOperation, err) }()
 
-	isDB := vqlexp.MRegExpCollection["AlterDatabaseWord"].MatchString(q.Instruction)
-	isTable := vqlexp.MRegExpCollection["AlterTableWord"].MatchString(q.Instruction)
+	isDB := sqlexp.MRegExpCollection["AlterDatabaseWord"].MatchString(q.Instruction)
+	isTable := sqlexp.MRegExpCollection["AlterTableWord"].MatchString(q.Instruction)
 
 	if isDB {
 		return q.DDLAlterDB()
@@ -817,11 +817,11 @@ func (q tQuery) DDLDropDB() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isIE := vqlexp.MRegExpCollection["IfExistsWord"].MatchString(q.Instruction)
+	isIE := sqlexp.MRegExpCollection["IfExistsWord"].MatchString(q.Instruction)
 
-	sDB := vqlexp.MRegExpCollection["DropDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sDB := sqlexp.MRegExpCollection["DropDatabaseWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isIE {
-		sDB = vqlexp.MRegExpCollection["IfExistsWord"].ReplaceAllLiteralString(sDB, "")
+		sDB = sqlexp.MRegExpCollection["IfExistsWord"].ReplaceAllLiteralString(sDB, "")
 	}
 	sDB = strings.TrimSpace(sDB)
 	sDB = trimQuotationMarks(sDB)
@@ -889,11 +889,11 @@ func (q tQuery) DDLDropTable() (result string, err error) {
 
 	// Parsing an expression - Begin
 
-	isIE := vqlexp.MRegExpCollection["IfExistsWord"].MatchString(q.Instruction)
+	isIE := sqlexp.MRegExpCollection["IfExistsWord"].MatchString(q.Instruction)
 
-	sTable := vqlexp.MRegExpCollection["DropTableWord"].ReplaceAllLiteralString(q.Instruction, "")
+	sTable := sqlexp.MRegExpCollection["DropTableWord"].ReplaceAllLiteralString(q.Instruction, "")
 	if isIE {
-		sTable = vqlexp.MRegExpCollection["IfExistsWord"].ReplaceAllLiteralString(sTable, "")
+		sTable = sqlexp.MRegExpCollection["IfExistsWord"].ReplaceAllLiteralString(sTable, "")
 	}
 	sTable = strings.TrimSpace(sTable)
 	sTable = trimQuotationMarks(sTable)
@@ -928,8 +928,8 @@ func (q tQuery) DDLDrop() (result string, err error) {
 	sOperation := "internal -> analyzers -> sql -> DDL -> DDLDrop"
 	defer func() { e.Wrapper(sOperation, err) }()
 
-	isDB := vqlexp.MRegExpCollection["DropDatabaseWord"].MatchString(q.Instruction)
-	isTable := vqlexp.MRegExpCollection["DropTableWord"].MatchString(q.Instruction)
+	isDB := sqlexp.MRegExpCollection["DropDatabaseWord"].MatchString(q.Instruction)
+	isTable := sqlexp.MRegExpCollection["DropTableWord"].MatchString(q.Instruction)
 
 	if isDB {
 		return q.DDLDropDB()

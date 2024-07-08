@@ -1,9 +1,9 @@
-package vqlanalyzer
+package sqlanalyzer
 
 import (
 	"strings"
 
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 )
 
 type tQuery struct {
@@ -16,7 +16,7 @@ type tQuery struct {
 func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
 	// -
 	// Prep
-	sInstruction = vqlexp.MRegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
+	sInstruction = sqlexp.MRegExpCollection["LineBreak"].ReplaceAllLiteralString(sInstruction, " ")
 	sInstruction = strings.TrimRight(sInstruction, "; ")
 	sInstruction = strings.TrimLeft(sInstruction, " ")
 
@@ -26,8 +26,8 @@ func Request(sTicket string, sInstruction string, slPlaceholder []string) string
 		Placeholder: slPlaceholder,
 	}
 
-	for _, sExpName := range vqlexp.ArParsingOrder {
-		if vqlexp.MRegExpCollection[sExpName].MatchString(query.Instruction) {
+	for _, sExpName := range sqlexp.ArParsingOrder {
+		if sqlexp.MRegExpCollection[sExpName].MatchString(query.Instruction) {
 			switch sExpName {
 			case "SearchCreate":
 				sResult, _ := query.DDLCreate()

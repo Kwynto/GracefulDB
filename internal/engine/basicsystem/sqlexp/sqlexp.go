@@ -1,4 +1,4 @@
-package vqlexp
+package sqlexp
 
 import "regexp"
 

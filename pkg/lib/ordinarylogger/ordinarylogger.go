@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	SEnvDev  = "dev"
-	SEnvProd = "prod"
+	S_ENV_DEV  = "develop"
+	S_ENV_WORK = "working"
 )
 
 type TStOrdinaryHandler struct {
@@ -75,11 +75,11 @@ func prepareLog(h *TStOrdinaryHandler, r slog.Record) {
 
 	sAttrsFileOut := ""
 	switch h.env {
-	case SEnvDev:
+	case S_ENV_DEV:
 		for k, v := range mFields {
 			sAttrsFileOut = fmt.Sprintf("%s %s=\"%s\"", sAttrsFileOut, k, v.(string))
 		}
-	case SEnvProd:
+	case S_ENV_WORK:
 		for k, v := range mFields {
 			sAttrsFileOut = fmt.Sprintf("%s, \"%s\":\"%s\"", sAttrsFileOut, k, v.(string))
 		}
@@ -88,19 +88,19 @@ func prepareLog(h *TStOrdinaryHandler, r slog.Record) {
 	sTimeScreen := r.Time.Format("[2006-01-02 15:04:05.000 -0700]")
 
 	switch h.env {
-	case SEnvDev:
+	case S_ENV_DEV:
 		sTimeStrFile := r.Time.Format("2006-01-02 15:04:05.000 -0700")
 		sFileOut = fmt.Sprintf("time=%s level=%v msg=\"%s\"%s", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
-	case SEnvProd:
+	case S_ENV_WORK:
 		sTimeStrFile := r.Time.Format("2006-01-02T15:04:05.000000000-0700")
-		sFileOut = fmt.Sprintf("{\"time\":\"%s\",\"level\":\"%v\",\"msg\":\"%s\"%s}", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
+		sFileOut = fmt.Sprintf("{\"time\":\"%s\", \"level\":\"%v\", \"msg\":\"%s\"%s}", sTimeStrFile, r.Level, r.Message, sAttrsFileOut)
 	}
 
 	sMsg := incolor.StringCyan(r.Message)
 
 	stRec := TRecQueue{
 		handler:    h,
-		sMsgScreen: fmt.Sprint(sTimeScreen, sLevel, sMsg, incolor.StringWhite(sAttrsScreenOut)),
+		sMsgScreen: fmt.Sprint(sTimeScreen, " ", sLevel, " ", sMsg, " ", incolor.StringWhite(sAttrsScreenOut)),
 		sMsgFile:   fmt.Sprint(sFileOut),
 	}
 
@@ -118,9 +118,9 @@ func recordingQueue() {
 func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *TStOrdinaryHandler {
 	var level slog.Level
 	switch env {
-	case SEnvDev:
+	case S_ENV_DEV:
 		level = slog.LevelDebug
-	case SEnvProd:
+	case S_ENV_WORK:
 		level = slog.LevelInfo
 	}
 
