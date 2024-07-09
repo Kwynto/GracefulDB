@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -17,7 +18,11 @@ const (
 )
 
 func Test_Handle(t *testing.T) {
-	inlog := setupLogger(TEST_LOG_PATH, "dev")
+	sNameFile := filepath.Join(TEST_LOG_PATH, fmt.Sprintf("%s%s", "develop", ".log"))
+	ioFile, _ := os.OpenFile(sNameFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+
+	LogHandler = newOrdinaryHandler(os.Stdout, ioFile, "develop")
+	inlog := slog.New(LogHandler)
 
 	t.Run("Handle() function testing #1", func(t *testing.T) {
 		rec := slog.Record{
@@ -83,7 +88,11 @@ func Test_Handle(t *testing.T) {
 		}
 	})
 
-	inlog = setupLogger(TEST_LOG_PATH, "prod")
+	sNameFile2 := filepath.Join(TEST_LOG_PATH, fmt.Sprintf("%s%s", "working", ".log"))
+	ioFile2, _ := os.OpenFile(sNameFile2, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+
+	LogHandler = newOrdinaryHandler(os.Stdout, ioFile2, "working")
+	inlog = slog.New(LogHandler)
 
 	t.Run("Handle() function testing #6", func(t *testing.T) {
 		rec := slog.Record{
@@ -152,9 +161,10 @@ func Test_Handle(t *testing.T) {
 }
 
 func Test_newOrdinaryHandler(t *testing.T) {
-	iof := openLogFile(fmt.Sprintf("%s%s%s", TEST_LOG_PATH, "dev", ".log"))
+	sNameFile := fmt.Sprintf("%s%s%s", TEST_LOG_PATH, "develop", ".log")
+	iof, _ := os.OpenFile(sNameFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 
-	logHandler1 := newOrdinaryHandler(os.Stdout, iof, "dev")
+	logHandler1 := newOrdinaryHandler(os.Stdout, iof, "develop")
 
 	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
 		if r1 := reflect.TypeOf(logHandler1); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
@@ -162,7 +172,7 @@ func Test_newOrdinaryHandler(t *testing.T) {
 		}
 	})
 
-	logHandler2 := newOrdinaryHandler(os.Stdout, iof, "prod")
+	logHandler2 := newOrdinaryHandler(os.Stdout, iof, "working")
 
 	t.Run("newOrdinaryHandler() function testing", func(t *testing.T) {
 		if r1 := reflect.TypeOf(logHandler2); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
@@ -171,48 +181,9 @@ func Test_newOrdinaryHandler(t *testing.T) {
 	})
 }
 
-func Test_openLogFile(t *testing.T) {
-	t.Run("openLogFile() function testing", func(t *testing.T) {
-		iof := openLogFile(fmt.Sprintf("%s%s%s", TEST_LOG_PATH, "dev", ".log"))
-
-		if r1 := reflect.TypeOf(iof); r1 != reflect.TypeOf(&os.File{}) {
-			t.Errorf("openLogFile() error: type mismatch: %v", r1)
-		}
-	})
-}
-
-func Test_setupLogger(t *testing.T) {
-	t.Run("setupLogger() function testing", func(t *testing.T) {
-		inlog := setupLogger(TEST_LOG_PATH, "dev")
-
-		if r1 := reflect.TypeOf(inlog); r1 != reflect.TypeOf(&slog.Logger{}) {
-			t.Errorf("setupLogger() error: type mismatch: %v", r1)
-		}
-
-		if r1 := reflect.TypeOf(inlog.Handler()); r1 != reflect.TypeOf(&TStOrdinaryHandler{}) {
-			t.Errorf("setupLogger() error: type of handler mismatch: %v", r1)
-		}
-	})
-}
-
-// func Test_Err(t *testing.T) {
-// 	t.Run("Err() function testing", func(t *testing.T) {
-// 		fakeErr := errors.New("fake error")
-// 		res := Err(fakeErr)
-
-// 		if r1 := reflect.TypeOf(res); r1 != reflect.TypeOf(slog.Attr{}) {
-// 			t.Errorf("Err() error: type mismatch: %v", r1)
-// 		}
-
-// 		if (res.Key != "error") || !res.Value.Equal(slog.StringValue(fakeErr.Error())) {
-// 			t.Errorf("Err() error: broken attribute")
-// 		}
-// 	})
-// }
-
 func Test_Init(t *testing.T) {
 	t.Run("Init() function testing", func(t *testing.T) {
-		Init(TEST_LOG_PATH, "dev")
+		Init(TEST_LOG_PATH, "develop")
 
 		if r1 := reflect.TypeOf(LogServerError); r1 != reflect.TypeOf(&log.Logger{}) {
 			t.Errorf("Init() error: type mismatch: %v", r1)

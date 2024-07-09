@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	_ "embed"
 
@@ -44,14 +45,17 @@ func main() {
 	ordinarylogger.Init(config.StDefaultConfig.LogPath, config.StDefaultConfig.Env)
 	slog.Info("Starting GracefulDB", slog.String("env", config.StDefaultConfig.Env))
 	slog.Info("Configuration loaded", slog.String("file", config.SDisplayConfigPath))
+
+	// Warnings
 	if errDotEnv == nil {
 		slog.Info("The environment variables were read from the env-file. Don't forget, you can use OS environment variables, they take precedence over env-files.")
 	}
 
 	if config.StDefaultConfig.Env == config.ENV_DEV {
 		slog.Info("Developer mode is active.")
-		slog.Warn("Perhaps you should set up the configuration file correctly.")
+		slog.Warn("You are using developer mode. Perhaps you should set up the configuration file correctly.")
 	}
+
 	slog.Debug("Debug messages are enabled.")
 
 	// Signal tracking
@@ -63,4 +67,5 @@ func main() {
 	}
 
 	slog.Info("GracefulDB has finished its work and will miss you.")
+	time.Sleep(1 * time.Second)
 }
