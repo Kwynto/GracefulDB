@@ -720,7 +720,16 @@ h6 {
 .btn-close .times-icon {
   width: 14px;
   height: 17px;
+}
 
+.btn-bg-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-sm-icon {
+  width: 12px;
+  height: 12px;
 }
 
 .modal-body {
