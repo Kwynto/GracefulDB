@@ -85,22 +85,33 @@ a {
 
 .navbar .navbar-nav .nav-item {
   width: 210px;
-  color: rgba(138, 43, 226, 1);
   font-family: "Roboto", sans-serif;
 }
-.navbar .navbar-nav .nav-item:hover {
+
+.nav-item {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.nav-item:hover {
   background: black;
   color: green;
   border-left: 4px solid green;
   letter-spacing: 1px;
 }
 
-.navbar .navbar-nav i {
+.nav-item .menu-icon {
   width: 40px;
   height: 40px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  padding: 7px;
+  fill: rgba(138, 43, 226, 1);
+}
+
+.nav-item:hover .menu-icon {
+  fill: green;
 }
 
 .navbar .sticky-foot {
@@ -130,7 +141,10 @@ a {
 }
 .user-menu .user-name {
   min-width: 150px;
-  text-align: center;
+  /* text-align: center; */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px;
   background-color: rgba(1, 1, 1, 0.51);
   font-family: "Roboto", sans-serif;
@@ -139,6 +153,17 @@ a {
   color: rgba(138, 43, 226, 1);
   cursor: default;
 }
+
+.user-name .user-menu-icon {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  fill: rgba(138, 43, 226, 1);
+}
+.user-name:hover .user-menu-icon {
+  fill: green;
+}
+
 .user-menu a{
   display: block;
   color: white;
@@ -154,8 +179,26 @@ a {
   font-size: 1.1rem;
 }
 .user-menu:hover .content-user-menu{
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
+
+.content-user-menu a{
+  display: inline-flex;
+  align-items: center;
+  justify-content: left;
+}
+
+.content-user-menu a .user-menu-icon {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  fill: rgba(138, 43, 226, 1);
+}
+.content-user-menu a:hover .user-menu-icon {
+  fill: green;
+}
+
 .user-menu:hover .user-name{
   background-color: rgba(1, 1, 1, 1);
   color: green;
@@ -674,6 +717,12 @@ h6 {
 .btn-close:hover {
   background-color: rgba(239, 30, 30, 0.9);
 }
+.btn-close .times-icon {
+  width: 14px;
+  height: 17px;
+
+}
+
 .modal-body {
   margin-top: 20px;
   margin-bottom: 10px;
