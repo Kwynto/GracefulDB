@@ -1,5 +1,39 @@
 @charset "utf-8";
 
+/* =========================================
+Fonts
+========================================= */
+@font-face {
+  font-family: 'Open Sans';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../fonts/open-sans-regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-weight: 600;
+  font-style: normal;
+  src: url('../fonts/open-sans-semibold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 500;
+  font-style: normal;
+  src: url('../fonts/roboto-medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 700;
+  font-style: normal;
+  src: url('../fonts/roboto-bold.ttf') format('truetype');
+}
+
+/* =========================================
+Basic styles
+========================================= */
 ::-webkit-scrollbar{
     width: 10px;
 }
@@ -655,6 +689,9 @@ h6 {
   color: white;
 }
 
+/* =========================================
+Modals
+========================================= */
 .modal {
   position: fixed;
   top: 0;
@@ -782,6 +819,9 @@ h6 {
   font-size: 1rem;
 }
 
+/* =========================================
+Welcome page
+========================================= */
 .welcome-loading-page {
   position: absolute;
   top: 0;
