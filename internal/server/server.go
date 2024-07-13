@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/config"
 	"github.com/Kwynto/GracefulDB/internal/connectors/grpc"
@@ -37,6 +38,8 @@ func Run(ctx context.Context, stCfg *config.TConfig) (err error) {
 	closer.AddHandler(instead.Shutdown) // Register a shutdown handler.
 
 	// Basic system - end
+
+	time.Sleep(200 * time.Millisecond)
 
 	// Start WebSocket connector
 	if stCfg.WebSocketConnector.Enable {

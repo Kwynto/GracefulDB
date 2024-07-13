@@ -1,5 +1,30 @@
-@import "https://fonts.googleapis.com/css?family=Ubuntu:400,700italic";
-@import "https://fonts.googleapis.com/css?family=Cabin:400";
+/* =========================================
+Fonts
+========================================= */
+@font-face {
+  font-family: 'Ubuntu';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../fonts/ubuntu-regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Ubuntu';
+  font-weight: 700;
+  font-style: italic;
+  src: url('../fonts/ubuntu-bold-italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Cabin';
+  font-weight: 400;
+  font-style: normal;
+  src: url('../fonts/cabin-regular.ttf') format('truetype');
+}
+
+/* =========================================
+Basic styles
+========================================= */
 * {
   box-sizing: border-box;
 }

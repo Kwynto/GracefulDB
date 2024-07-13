@@ -9,6 +9,9 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
+	"sync/atomic"
+	"time"
 
 	"github.com/Kwynto/GracefulDB/pkg/lib/incolor"
 )
@@ -23,12 +26,14 @@ type TStOrdinaryHandler struct {
 	lScreen *log.Logger
 	lFile   *log.Logger
 	env     string
+	uCount  atomic.Uint64
 }
 
 type TRecQueue struct {
 	handler    *TStOrdinaryHandler
 	sMsgScreen string
 	sMsgFile   string
+	uLine      uint64
 }
 
 var IoFile *os.File // io.Writer
@@ -38,12 +43,13 @@ var LogServerError *log.Logger
 var chRecQueue = make(chan TRecQueue, 1024)
 
 func (h *TStOrdinaryHandler) Handle(ctx context.Context, r slog.Record) error {
-	go prepareLog(h, r)
+	uLine := h.uCount.Add(1)
+	go prepareLog(h, r, uLine)
 
 	return nil
 }
 
-func prepareLog(h *TStOrdinaryHandler, r slog.Record) {
+func prepareLog(h *TStOrdinaryHandler, r slog.Record, uLine uint64) {
 	var sFileOut string
 
 	sLevel := r.Level.String() + ":"
@@ -102,16 +108,39 @@ func prepareLog(h *TStOrdinaryHandler, r slog.Record) {
 		handler:    h,
 		sMsgScreen: fmt.Sprint(sTimeScreen, " ", sLevel, " ", sMsg, " ", incolor.StringWhite(sAttrsScreenOut)),
 		sMsgFile:   fmt.Sprint(sFileOut),
+		uLine:      uLine,
 	}
 
 	chRecQueue <- stRec
 }
 
 func recordingQueue() {
+	var arRecInd = make([]uint64, 1024)
+	var mRecs = make(map[uint64]TRecQueue, 1024)
+	var uInd uint64
+
 	for {
-		stRec := <-chRecQueue
-		stRec.handler.lScreen.Println(stRec.sMsgScreen)
-		stRec.handler.lFile.Println(stRec.sMsgFile)
+		arRecInd = arRecInd[:0]
+		clear(mRecs)
+		uInd = 0
+
+		iCount := len(chRecQueue)
+		for i := 0; i < iCount; i++ {
+			stRec := <-chRecQueue
+			uInd = stRec.uLine
+			arRecInd = append(arRecInd, uInd)
+			mRecs[uInd] = stRec
+		}
+
+		slices.Sort(arRecInd)
+
+		for _, uLine := range arRecInd {
+			stRec := mRecs[uLine]
+			stRec.handler.lScreen.Println(stRec.sMsgScreen)
+			stRec.handler.lFile.Println(stRec.sMsgFile)
+		}
+
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -132,28 +161,18 @@ func newOrdinaryHandler(outScreen io.Writer, outFile io.Writer, env string) *TSt
 		lFile:   log.New(outFile, "", 0),
 		env:     env,
 	}
+	h.uCount.Store(0)
 
 	return h
 }
 
-func openLogFile(name string) *os.File {
-	f, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
-	return f
-}
-
-func setupLogger(logPath, logEnv string) *slog.Logger {
-	var newLog *slog.Logger
-
-	ioFile := openLogFile(filepath.Join(logPath, fmt.Sprintf("%s%s", logEnv, ".log")))
+func Init(logPath, logEnv string) {
+	sNameFile := filepath.Join(logPath, fmt.Sprintf("%s%s", logEnv, ".log"))
+	ioFile, _ := os.OpenFile(sNameFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 
 	LogHandler = newOrdinaryHandler(os.Stdout, ioFile, logEnv)
-	newLog = slog.New(LogHandler)
+	newLog := slog.New(LogHandler)
 
-	return newLog
-}
-
-func Init(logPath, logEnv string) {
-	newLog := setupLogger(logPath, logEnv)
 	slog.SetDefault(newLog)
 	LogServerError = slog.NewLogLogger(LogHandler, slog.LevelError)
 	go recordingQueue()
