@@ -1,2 +1,5 @@
-<p class="text-white"><b class="text-primary">Request [{{.TimeR}}] from {{.From}} &gt;</b> {{.Request}}</p>
-<p class="text-info"><b class="text-success">Answer [{{.TimeA}}] &gt;</b> {{.Answer}}</p>
+<p class="text-info">Request [{{.TimeR}}] from {{.From}} &gt;<b class="text-request"> {{.Request}}</b></p>
+{{if ne .Variables ""}}
+<p class="text-info">&emsp;&emsp;&emsp; ... variables &gt;<b class="text-vars"> {{.Variables}}</b></p>
+{{end}}
+<p class="text-info">Answer [{{.TimeA}}] &gt;<b class="text-success"> {{.Answer}}</b></p>

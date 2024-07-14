@@ -272,6 +272,7 @@ func fnConsoleRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sRequest := strings.TrimSpace(r.PostForm.Get("request"))
+	sVariables := strings.TrimSpace(r.PostForm.Get("variables"))
 
 	sSesID := gosession.Start(&w, r)
 	inAuth := sSesID.Get("auth")
@@ -288,17 +289,19 @@ func fnConsoleRequest(w http.ResponseWriter, r *http.Request) {
 	sTimeA := time.Now().Format(CONSOLE_TIME_FORMAT)
 
 	stData := struct {
-		From    string
-		Request string
-		Answer  string
-		TimeR   string
-		TimeA   string
+		From      string
+		Request   string
+		Variables string
+		Answer    string
+		TimeR     string
+		TimeA     string
 	}{
-		From:    sLogin,
-		Request: sRequest,
-		Answer:  sAnswer,
-		TimeR:   sTimeR,
-		TimeA:   sTimeA,
+		From:      sLogin,
+		Request:   sRequest,
+		Variables: sVariables,
+		Answer:    sAnswer,
+		TimeR:     sTimeR,
+		TimeA:     sTimeA,
 	}
 	MTemplates[BLOCK_TEMP_CONSOLE_REQUEST_ANSWER].Execute(w, stData)
 }

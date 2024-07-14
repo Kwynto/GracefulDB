@@ -242,45 +242,6 @@ a {
   color: green;
 }
 
-.footer {
-  position: fixed;
-  right: 0;
-  left: 210px;
-  bottom: 0;
-  padding: 5px;
-  overflow: hidden;
-  z-index: 30;
-  background-color: rgba(1, 1, 1, 0.51);
-  font-family: "Roboto", sans-serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: greenyellow;
-  border: 1px solid black;
-}
-.footer:hover {
-  background-color: black;
-}
-.footerterm input {
-  position: fixed;
-  right: 0;
-  left: 210px;
-  bottom: 0;
-  padding: 5px;
-  overflow: hidden;
-  z-index: 21;
-  background-color: rgba(1, 1, 1, 0);
-  font-family: "Roboto", sans-serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: orange;
-  border: 1px solid blue;
-}
-.footerterm input:focus {
-  outline: 1px solid rgb(30, 128, 0);
-  border: 1px solid rgb(30, 128, 0);
-  background-color: rgba(1, 1, 1, 0.81);
-}
-
 .hat {
   position: fixed;
   left: 215px;
@@ -512,16 +473,99 @@ a {
   background-color: rgba(1, 1, 1, 0.81);
 }
 
-.content-console {
+.content-console-view {
   position: relative;
-  right: 0;
-  margin-bottom: 40px;
-  margin-left: -5px;
+  margin-bottom: 0px;
+  margin-left: 0px;
   padding: 6px;
-  min-height: calc(100vh - 110px);
+  min-height: calc(100vh - 70px);
+  width: 70%;
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: rgb(22, 255, 114);
+  background-color: rgba(1, 1, 1, 0.81);
+  border-radius: 0px;
+}
+
+.content-console-view .text-info {
+  color: white;
+}
+.content-console-view .text-request {
+  color: green;
+}
+.content-console-view .text-vars {
+  color: rgb(22, 255, 114);
+}
+.content-console-view .text-success {
+  color: rgba(13, 202, 240, 1);
+}
+
+.floating-console {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  z-index: 25;
+  top: 70px;
+  left: calc(70% + 60px);
+  right: 3px;
+  min-height: calc(100vh - 70px);
   color: rgb(22, 190, 114);
   background-color: rgba(1, 1, 1, 0.81);
   border-radius: 0px;
+}
+.floating-console .console-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.floating-console .console-header .console-query-div {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.floating-console .console-header .console-vars-div {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.floating-console .console-header .console-query-div label {
+  color: rgba(138, 43, 226, 1);
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+}
+.floating-console .console-header .console-query-div textarea {
+  padding: 2px;
+  color: green;
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 0.8rem;
+  background-color: rgba(1, 1, 1, 0.31);
+  resize: none;
+  height: calc(75vh - 73px);
+}
+.floating-console .console-header .console-vars-div label {
+  color: rgba(138, 43, 226, 1);
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+}
+.floating-console .console-header .console-vars-div textarea {
+  padding: 2px;
+  color: rgb(22, 255, 114);
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 0.8rem;
+  background-color: rgba(1, 1, 1, 0.31);
+  resize: none;
+  height: calc(25vh - 73px);
+}
+
+.floating-console .console-footer {
+  position: relative;
+  display: flex;
+  justify-content: right;
 }
 
 .content-cel-table {
@@ -616,6 +660,18 @@ table {
 }
 .btn-cancel {
   background-color: rgba(13, 202, 240, 0.31);
+}
+
+.btn-ok-console {
+  margin-top: 3px;
+  border-radius: 2px;
+  padding: 3px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid rgba(1, 1, 1, 1);
+  background-color: rgba(0, 255, 0, 0.9);
+  height:30px;
+  width: 100vw;
 }
 
 .form-select {
