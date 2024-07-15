@@ -488,17 +488,21 @@ a {
   border-radius: 0px;
 }
 
-.content-console-view .text-info {
-  color: white;
+.content-console-view .text-primary {
+  color: rgb(22, 255, 114);
 }
 .content-console-view .text-request {
   color: green;
 }
 .content-console-view .text-vars {
-  color: rgb(22, 255, 114);
+  color: yellow;
+}
+.content-console-view .text-info {
+  /* color: white; */
+  color: rgba(13, 202, 240, 1);
 }
 .content-console-view .text-success {
-  color: rgba(13, 202, 240, 1);
+  color: blue;
 }
 
 .floating-console {
@@ -553,7 +557,7 @@ a {
 }
 .floating-console .console-header .console-vars-div textarea {
   padding: 2px;
-  color: rgb(22, 255, 114);
+  color: yellow;
   font-family: "Roboto", sans-serif;
   font-weight: 400;
   font-size: 0.8rem;
