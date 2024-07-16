@@ -3,13 +3,53 @@
   <div class="deschead"></div>
 </div>
 <div class="main-content">
-  <div class="content-console" id="termAnswerOut">
+  <div class="content-console-view" id="termAnswerOut">
+  </div>
+</div>
+<div class="floating-console">
+  <div class="console-header">
+    <form id="form-console-comm" hx-post="/hx/console/request" hx-target="#termAnswerOut" hx-swap="beforeend" hx-trigger="submit">
+      <div class="console-query-div">
+        <label for="console-query-area">Query (VQL):</label>
+        <textarea id="console-query-area" name="request"></textarea>
+      </div>
+      <div class="console-vars-div">
+        <label for="console-vars-area">Variables (JSON):</label>
+        <textarea id="console-vars-area" name="variables"></textarea>
+      </div>
+    </form>
+  </div>
+  <div class="console-footer">
+    <button type="submit" form="form-console-comm" class="btn btn-ok-console">Send query</button>
   </div>
 </div>
 
-<section class="footerterm">
-  <form hx-post="/hx/console/request" hx-target="#termAnswerOut" hx-swap="beforeend" hx-trigger="submit">
-    <input type="text" value="" name="request" id="request-input" placeholder="Enter query">
-    <input type="submit" class="hidden" value="Send">
-  </form>
-</section>
+<script>
+  // Console - tabulation control
+  var inputFieldQuery = document.getElementById('console-query-area');
+  var inputFieldVars = document.getElementById('console-vars-area');
+
+  inputFieldQuery.onkeydown = function(e) {
+      if (e.keyCode === 9) {
+          this.setRangeText(
+              '\t',
+              this.selectionStart,
+              this.selectionStart,
+              'end'
+          )
+          return false;
+      }
+  };
+
+  inputFieldVars.onkeydown = function(e) {
+      if (e.keyCode === 9) {
+          this.setRangeText(
+              '\t',
+              this.selectionStart,
+              this.selectionStart,
+              'end'
+          )
+          return false; 
+      }
+  };
+</script>
