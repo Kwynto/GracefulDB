@@ -13,18 +13,18 @@ type tQuery struct {
 	Placeholder []string
 }
 
-func prepSpacesInLine(sSlIn []string) []string {
+func prepareSpacesInLine(sSlIn []string) []string {
 	// This functions is complete
 	var slPrepLines []string
-	for _, v := range sSlIn {
-		v = strings.TrimRight(v, "; \t")
-		v = strings.TrimLeft(v, " \t")
-		slPrepLines = append(slPrepLines, v)
+	for _, sLine := range sSlIn {
+		sLine = strings.TrimRight(sLine, "; \t")
+		sLine = strings.TrimLeft(sLine, " \t")
+		slPrepLines = append(slPrepLines, sLine)
 	}
 	return slPrepLines
 }
 
-func prepPipelineInLine(sSlIn []string) []string {
+func preparePipelineInLine(sSlIn []string) []string {
 	// This functions is complete
 	var slPrepLines []string
 	var isEndlySimbolPL bool = false
@@ -99,14 +99,32 @@ func prepPipelineInLine(sSlIn []string) []string {
 	return slPrepLines
 }
 
+func prepareRemoveComments(sSlIn []string) []string {
+	// This functions is complete
+	var slPrepLines []string
+	for _, sLine := range sSlIn {
+		if !vqlexp.MRegExpCollection["Comment"].MatchString(sLine) {
+			slPrepLines = append(slPrepLines, sLine)
+		}
+	}
+	return slPrepLines
+}
+
+func preparation(sIn string) []string {
+	// This functions is complete
+	slPrepLines := vqlexp.MRegExpCollection["LineBreak"].Split(sIn, -1)
+	slPrepLines = prepareSpacesInLine(slPrepLines)
+	slPrepLines = prepareRemoveComments(slPrepLines)
+	slPrepLines = preparePipelineInLine(slPrepLines)
+	return slPrepLines
+}
+
 // TODO: Request
 func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
 	// -
 
-	// Prep
-	slQryLines := vqlexp.MRegExpCollection["LineBreak"].Split(sInstruction, -1)
-	slQryLines = prepSpacesInLine(slQryLines)
-	slQryLines = prepPipelineInLine(slQryLines)
+	// Preparation
+	slQryLines := preparation(sInstruction)
 
 	var query tQuery = tQuery{
 		Ticket:      sTicket,
