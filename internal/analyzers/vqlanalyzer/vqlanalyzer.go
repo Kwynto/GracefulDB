@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 type tQuery struct {
-	Ticket      string
-	Instruction string
-	Placeholder []string
+	Login     string
+	Access    gauth.TProfile
+	Ticket    string
+	QueryCode []string
+	Variables map[string]any
 }
 
 func prepareSpacesInLine(sSlIn []string) []string {
@@ -119,22 +124,58 @@ func preparation(sIn string) []string {
 	return slPrepLines
 }
 
-// TODO: Request
-func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
+func execution(query tQuery) (gtypes.TResponse, error) {
 	// -
 
-	// Preparation
-	slQryLines := preparation(sInstruction)
+	_ = query
 
-	var query tQuery = tQuery{
-		Ticket:      sTicket,
-		Instruction: sInstruction,
-		Placeholder: slPlaceholder,
+	return gtypes.TResponse{}, nil
+}
+
+// TODO: Request
+func Request(sTicket string, sOriginalCode string, sVariables string) string {
+	// -
+	var stRes gtypes.TResponse
+	// mVariables := make(map[string]any)
+
+	// Pre checking
+	sLogin, stAccess, sNewTicket, errC := preCheckerVQL(sTicket)
+	if errC != nil {
+		stRes.State = "error"
+		stRes.Result = errC.Error()
+		return ecowriter.EncodeJSON(stRes)
 	}
 
-	_ = query
-	_ = slQryLines
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
+		sTicket = sNewTicket
+	}
 
-	sResult := "{\"state\":\"error\",\"result\":\"unknown command\"}"
-	return sResult
+	// Preparation query
+	slQryLines := preparation(sOriginalCode)
+
+	mVariables, errU := ecowriter.DecodeJSONMap(sVariables)
+	if errU != nil {
+		stRes.State = "error"
+		stRes.Result = errU.Error()
+		return ecowriter.EncodeJSON(stRes)
+	}
+
+	var query tQuery = tQuery{
+		Login:     sLogin,
+		Access:    stAccess,
+		Ticket:    sTicket,
+		QueryCode: slQryLines,
+		Variables: mVariables,
+	}
+
+	// Execution query
+	stRes, errEx := execution(query)
+	if errEx != nil {
+		stRes.State = "error"
+		stRes.Result = errEx.Error()
+		return ecowriter.EncodeJSON(stRes)
+	}
+
+	return ecowriter.EncodeJSON(stRes)
 }
