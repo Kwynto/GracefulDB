@@ -26,6 +26,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	var mRECol tRegExpCollection = make(tRegExpCollection)
 
 	mRECol = mRECol.CompileExp("LineBreak", `(?m)\n`)
+	mRECol = mRECol.CompileExp("Comment", `(?m)^\/\/`)
+
 	// recol = recol.CompileExp("HeadCleaner", `(?m)^\s*\n*\s*`)
 	// recol = recol.CompileExp("AnyCommand", `(?m)^[a-zA-Z].*;\s*`)
 	mRECol = mRECol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`) // protection of technical names

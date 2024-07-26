@@ -4,27 +4,32 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
 type tQuery struct {
-	Ticket      string
-	Instruction string
-	Placeholder []string
+	Login     string
+	Access    gauth.TProfile
+	Ticket    string
+	QueryCode []string
+	Variables map[string]any
 }
 
-func prepSpacesInLine(sSlIn []string) []string {
+func prepareSpacesInLine(sSlIn []string) []string {
 	// This functions is complete
 	var slPrepLines []string
-	for _, v := range sSlIn {
-		v = strings.TrimRight(v, "; \t")
-		v = strings.TrimLeft(v, " \t")
-		slPrepLines = append(slPrepLines, v)
+	for _, sLine := range sSlIn {
+		sLine = strings.TrimRight(sLine, "; \t")
+		sLine = strings.TrimLeft(sLine, " \t")
+		slPrepLines = append(slPrepLines, sLine)
 	}
 	return slPrepLines
 }
 
-func prepPipelineInLine(sSlIn []string) []string {
+func preparePipelineInLine(sSlIn []string) []string {
 	// This functions is complete
 	var slPrepLines []string
 	var isEndlySimbolPL bool = false
@@ -99,24 +104,78 @@ func prepPipelineInLine(sSlIn []string) []string {
 	return slPrepLines
 }
 
-// TODO: Request
-func Request(sTicket string, sInstruction string, slPlaceholder []string) string {
+func prepareRemoveComments(sSlIn []string) []string {
+	// This functions is complete
+	var slPrepLines []string
+	for _, sLine := range sSlIn {
+		if !vqlexp.MRegExpCollection["Comment"].MatchString(sLine) {
+			slPrepLines = append(slPrepLines, sLine)
+		}
+	}
+	return slPrepLines
+}
+
+func preparation(sIn string) []string {
+	// This functions is complete
+	slPrepLines := vqlexp.MRegExpCollection["LineBreak"].Split(sIn, -1)
+	slPrepLines = prepareSpacesInLine(slPrepLines)
+	slPrepLines = prepareRemoveComments(slPrepLines)
+	slPrepLines = preparePipelineInLine(slPrepLines)
+	return slPrepLines
+}
+
+func execution(query tQuery) (gtypes.TResponse, error) {
 	// -
 
-	// Prep
-	slQryLines := vqlexp.MRegExpCollection["LineBreak"].Split(sInstruction, -1)
-	slQryLines = prepSpacesInLine(slQryLines)
-	slQryLines = prepPipelineInLine(slQryLines)
+	_ = query
 
-	var query tQuery = tQuery{
-		Ticket:      sTicket,
-		Instruction: sInstruction,
-		Placeholder: slPlaceholder,
+	return gtypes.TResponse{}, nil
+}
+
+// TODO: Request
+func Request(sTicket string, sOriginalCode string, sVariables string) string {
+	// -
+	var stRes gtypes.TResponse
+	// mVariables := make(map[string]any)
+
+	// Pre checking
+	sLogin, stAccess, sNewTicket, errC := preCheckerVQL(sTicket)
+	if errC != nil {
+		stRes.State = "error"
+		stRes.Result = errC.Error()
+		return ecowriter.EncodeJSON(stRes)
 	}
 
-	_ = query
-	_ = slQryLines
+	if sNewTicket != "" {
+		stRes.Ticket = sNewTicket
+		sTicket = sNewTicket
+	}
 
-	sResult := "{\"state\":\"error\",\"result\":\"unknown command\"}"
-	return sResult
+	// Preparation query
+	slQryLines := preparation(sOriginalCode)
+
+	mVariables, errU := ecowriter.DecodeJSONMap(sVariables)
+	if errU != nil {
+		stRes.State = "error"
+		stRes.Result = errU.Error()
+		return ecowriter.EncodeJSON(stRes)
+	}
+
+	var query tQuery = tQuery{
+		Login:     sLogin,
+		Access:    stAccess,
+		Ticket:    sTicket,
+		QueryCode: slQryLines,
+		Variables: mVariables,
+	}
+
+	// Execution query
+	stRes, errEx := execution(query)
+	if errEx != nil {
+		stRes.State = "error"
+		stRes.Result = errEx.Error()
+		return ecowriter.EncodeJSON(stRes)
+	}
+
+	return ecowriter.EncodeJSON(stRes)
 }
