@@ -20,7 +20,7 @@ type tStFuncCode struct {
 	Name         string
 	InVariables  []tInVariables
 	OutVariables []string
-	Lines        []string
+	List         []string
 }
 
 type tQuery struct {
@@ -202,7 +202,7 @@ func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, er
 		if sNameFunc != "" {
 			stFuncCode, ok := mFuncsCode[sNameFunc]
 			if ok {
-				stFuncCode.Lines = append(stFuncCode.Lines, sLine)
+				stFuncCode.List = append(stFuncCode.List, sLine)
 
 				if vqlexp.MRegExpCollection["BeginBlock"].MatchString(sLine) {
 					countCodeBlocks += 1
@@ -210,6 +210,8 @@ func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, er
 					countCodeBlocks -= 1
 					if countCodeBlocks == 0 {
 						sNameFunc = ""
+						iLenFuncList := len(stFuncCode.List)
+						stFuncCode.List = stFuncCode.List[:iLenFuncList-1]
 					}
 				}
 			}
