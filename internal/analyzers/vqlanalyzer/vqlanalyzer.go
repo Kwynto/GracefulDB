@@ -6,16 +6,30 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
+type tInVariables struct {
+	Name string
+	Type string
+}
+
+type tStFuncCode struct {
+	Name         string
+	InVariables  []tInVariables
+	OutVariables []string
+	List         []string
+}
+
 type tQuery struct {
-	Login     string
-	Access    gauth.TProfile
-	Ticket    string
-	QueryCode []string
-	Variables map[string]any
+	Login          string
+	Access         gauth.TProfile
+	Ticket         string
+	QueryCode      []string
+	LocalFunctions map[string]tStFuncCode
+	Variables      map[string]any
 }
 
 func prepareSpacesInLine(sSlIn []string) []string {
@@ -115,19 +129,125 @@ func prepareRemoveComments(sSlIn []string) []string {
 	return slPrepLines
 }
 
-func preparation(sIn string) []string {
+func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, error) {
+	// This functions is complete
+	var slPrepLines []string
+	var sNameFunc string = ""
+	mFuncsCode := make(map[string]tStFuncCode)
+	countCodeBlocks := 0
+
+	iLenIn := len(sSlIn)
+	for i := 0; i < iLenIn; i++ {
+		sLine := sSlIn[i]
+
+		if vqlexp.MRegExpCollection["FuncSignature"].MatchString(sLine) {
+			if countCodeBlocks > 0 {
+				return slPrepLines, mFuncsCode, fmt.Errorf("sintax error in \"%s\"", sLine)
+			}
+
+			var stFuncCode tStFuncCode
+
+			sNameFunc = sqlexp.MRegExpCollection["FuncWord"].ReplaceAllLiteralString(sLine, "")
+			sNameFunc = sqlexp.MRegExpCollection["FuncDesc"].ReplaceAllLiteralString(sNameFunc, "")
+
+			sLine = sqlexp.MRegExpCollection["BeginBlock"].ReplaceAllLiteralString(sLine, "")
+			sLine = sqlexp.MRegExpCollection["FuncWordAndName"].ReplaceAllLiteralString(sLine, "")
+
+			sInVars := sqlexp.MRegExpCollection["FuncInVarString"].FindAllString(sLine, -1)[0]
+			sInVars = strings.TrimLeft(sInVars, " (")
+			sInVars = strings.TrimRight(sInVars, ") ")
+			slSInVars := strings.Split(sInVars, ",")
+
+			var slInVariables []tInVariables
+			for _, v := range slSInVars {
+				v = strings.TrimSpace(v)
+				slV := sqlexp.MRegExpCollection["Spaces"].Split(v, -1)
+
+				slRNameVar := []rune(slV[0])
+				if slRNameVar[0] != rune('$') {
+					return slPrepLines, mFuncsCode, fmt.Errorf("sintax error in functione's declaration")
+				}
+				stVar := tInVariables{
+					Name: slV[0],
+					Type: slV[1],
+				}
+				slInVariables = append(slInVariables, stVar)
+			}
+
+			sOutVars := sqlexp.MRegExpCollection["FuncInVarString"].ReplaceAllLiteralString(sLine, "")
+			sOutVars = strings.TrimLeft(sOutVars, " (")
+			sOutVars = strings.TrimRight(sOutVars, ") ")
+			slSOutVars := strings.Split(sOutVars, ",")
+
+			var slOutVariables []string
+			for _, v := range slSOutVars {
+				v = strings.TrimSpace(v)
+				slOutVariables = append(slOutVariables, v)
+			}
+
+			stFuncCode.Name = sNameFunc
+			stFuncCode.InVariables = slInVariables
+			stFuncCode.OutVariables = slOutVariables
+
+			mFuncsCode[sNameFunc] = stFuncCode
+			countCodeBlocks = 1
+			continue
+		}
+
+		if countCodeBlocks == 0 {
+			slPrepLines = append(slPrepLines, sLine)
+			continue
+		}
+
+		if sNameFunc != "" {
+			stFuncCode, ok := mFuncsCode[sNameFunc]
+			if ok {
+				stFuncCode.List = append(stFuncCode.List, sLine)
+
+				if vqlexp.MRegExpCollection["BeginBlock"].MatchString(sLine) {
+					countCodeBlocks += 1
+				} else if vqlexp.MRegExpCollection["EndBlock"].MatchString(sLine) {
+					countCodeBlocks -= 1
+					if countCodeBlocks == 0 {
+						sNameFunc = ""
+						iLenFuncList := len(stFuncCode.List)
+						stFuncCode.List = stFuncCode.List[:iLenFuncList-1]
+					}
+				}
+			}
+		}
+
+		if countCodeBlocks > 0 && i == (iLenIn-1) {
+			return slPrepLines, mFuncsCode, fmt.Errorf("sintax error")
+		}
+	}
+
+	return slPrepLines, mFuncsCode, nil
+}
+
+func preparation(sIn string) ([]string, map[string]tStFuncCode, error) {
 	// This functions is complete
 	slPrepLines := vqlexp.MRegExpCollection["LineBreak"].Split(sIn, -1)
 	slPrepLines = prepareSpacesInLine(slPrepLines)
 	slPrepLines = prepareRemoveComments(slPrepLines)
 	slPrepLines = preparePipelineInLine(slPrepLines)
-	return slPrepLines
+	slPrepLines, mLocalFunctions, err := prepareLocalFunctions(slPrepLines)
+	return slPrepLines, mLocalFunctions, err
 }
 
 func execution(query tQuery) (gtypes.TResponse, error) {
 	// -
 
-	_ = query
+	for lineInd, sLine := range query.QueryCode {
+		for _, sExpName := range vqlexp.ArParsingOrder {
+			if vqlexp.MRegExpCollection[sExpName].MatchString(sLine) {
+				switch sExpName {
+				case "Where":
+					query.DirectWhere(lineInd)
+				}
+			}
+		}
+	}
 
 	return gtypes.TResponse{}, nil
 }
@@ -152,7 +272,12 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	}
 
 	// Preparation query
-	slQryLines := preparation(sOriginalCode)
+	slQryLines, mLocalFunctions, errP := preparation(sOriginalCode)
+	if errP != nil {
+		stRes.State = "error"
+		stRes.Result = errP.Error()
+		return ecowriter.EncodeJSON(stRes)
+	}
 
 	mVariables, errU := ecowriter.DecodeJSONMap(sVariables)
 	if errU != nil {
@@ -162,11 +287,12 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	}
 
 	var query tQuery = tQuery{
-		Login:     sLogin,
-		Access:    stAccess,
-		Ticket:    sTicket,
-		QueryCode: slQryLines,
-		Variables: mVariables,
+		Login:          sLogin,
+		Access:         stAccess,
+		Ticket:         sTicket,
+		QueryCode:      slQryLines,
+		LocalFunctions: mLocalFunctions,
+		Variables:      mVariables,
 	}
 
 	// Execution query

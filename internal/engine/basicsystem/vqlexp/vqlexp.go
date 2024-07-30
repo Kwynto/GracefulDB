@@ -6,9 +6,9 @@ type tRegExpCollection map[string]*regexp.Regexp
 
 var MRegExpCollection tRegExpCollection
 
-// var ArParsingOrder = [...]string{
-
-// }
+var ArParsingOrder = [...]string{
+	"Where",
+}
 
 func (r tRegExpCollection) CompileExp(sName string, sExpr string) tRegExpCollection {
 	// This method is complete
@@ -33,15 +33,29 @@ func CompileRegExpCollection() tRegExpCollection {
 	mRECol = mRECol.CompileExp("EntityName", `(?m)^[a-zA-Z][a-zA-Z0-9_-]*$`) // protection of technical names
 	mRECol = mRECol.CompileExp("QuotationMarks", `(?m)^[\'\"]|[\'\"]$`)
 	mRECol = mRECol.CompileExp("SpecQuotationMark", "(?m)^[`]|[`]$")
-	mRECol = mRECol.CompileExp("Spaces", `(?m)\s*`)
 	mRECol = mRECol.CompileExp("Comma", `(?m),`)
 	mRECol = mRECol.CompileExp("SignEqual", `=`) // FIXME: there may be problems with the equality symbol inside the values
 
-	// DDF TODO: Разработать шаблоны
+	mRECol = mRECol.CompileExp("Spaces", `(?m)\s+`)
+	mRECol = mRECol.CompileExp("BeginBlock", `(?m)\s*\{$`)
+	mRECol = mRECol.CompileExp("EndBlock", `(?m)^\}$`)
 
-	// DMF TODO: Разработать шаблоны
+	// Directives and reserved words TODO: Разработать шаблоны
+	mRECol = mRECol.CompileExp("FuncSignature", `(?m)^func\s+[a-zA-Z][a-zA-Z0-9_\-]*\([a-zA-Z0-9_\-\$\s\,\[\]\"\'\{\}]*\)\s+\(*[a-zA-Z_\-\[\]\,\s\{\}]*\)*\s*\{$`)
+	mRECol = mRECol.CompileExp("FuncWord", `(?m)^func\s+`)
+	mRECol = mRECol.CompileExp("FuncWordAndName", `(?m)^func\s+[a-zA-Z][a-zA-Z0-9_\-]*`)
+	mRECol = mRECol.CompileExp("FuncInVarString", `(?m)^\([a-zA-Z0-9_\-\$\s\,\[\]\"\'\{\}]*\)\s*`)
+	mRECol = mRECol.CompileExp("FuncDesc", `(?m)\([a-zA-Z0-9_\-\$\s\,\[\]\"\'\{\}]*\)\s+[a-zA-Z_\-\[\]\(\)\,\s\{\}]*\s*\{$`)
 
-	// DCF TODO: Разработать шаблоны
+	mRECol = mRECol.CompileExp("Where", `(?m)^\/\/`) // FIXME:
+
+	// GPF - General Purpose Functions TODO: Разработать шаблоны
+
+	// DDF - Data Definition Functions TODO: Разработать шаблоны
+
+	// DMF - Data Manipulation Functions TODO: Разработать шаблоны
+
+	// DCF - Data Control Functions TODO: Разработать шаблоны
 
 	return mRECol
 }
