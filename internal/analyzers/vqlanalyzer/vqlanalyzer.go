@@ -6,7 +6,6 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/sqlexp"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
@@ -147,13 +146,13 @@ func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, er
 
 			var stFuncCode tStFuncCode
 
-			sNameFunc = sqlexp.MRegExpCollection["FuncWord"].ReplaceAllLiteralString(sLine, "")
-			sNameFunc = sqlexp.MRegExpCollection["FuncDesc"].ReplaceAllLiteralString(sNameFunc, "")
+			sNameFunc = vqlexp.MRegExpCollection["FuncWord"].ReplaceAllLiteralString(sLine, "")
+			sNameFunc = vqlexp.MRegExpCollection["FuncDesc"].ReplaceAllLiteralString(sNameFunc, "")
 
-			sLine = sqlexp.MRegExpCollection["BeginBlock"].ReplaceAllLiteralString(sLine, "")
-			sLine = sqlexp.MRegExpCollection["FuncWordAndName"].ReplaceAllLiteralString(sLine, "")
+			sLine = vqlexp.MRegExpCollection["BeginBlock"].ReplaceAllLiteralString(sLine, "")
+			sLine = vqlexp.MRegExpCollection["FuncWordAndName"].ReplaceAllLiteralString(sLine, "")
 
-			sInVars := sqlexp.MRegExpCollection["FuncInVarString"].FindAllString(sLine, -1)[0]
+			sInVars := vqlexp.MRegExpCollection["FuncInVarString"].FindAllString(sLine, -1)[0]
 			sInVars = strings.TrimLeft(sInVars, " (")
 			sInVars = strings.TrimRight(sInVars, ") ")
 			slSInVars := strings.Split(sInVars, ",")
@@ -161,7 +160,7 @@ func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, er
 			var slInVariables []tInVariables
 			for _, v := range slSInVars {
 				v = strings.TrimSpace(v)
-				slV := sqlexp.MRegExpCollection["Spaces"].Split(v, -1)
+				slV := vqlexp.MRegExpCollection["Spaces"].Split(v, -1)
 
 				slRNameVar := []rune(slV[0])
 				if slRNameVar[0] != rune('$') {
@@ -174,7 +173,7 @@ func prepareLocalFunctions(sSlIn []string) ([]string, map[string]tStFuncCode, er
 				slInVariables = append(slInVariables, stVar)
 			}
 
-			sOutVars := sqlexp.MRegExpCollection["FuncInVarString"].ReplaceAllLiteralString(sLine, "")
+			sOutVars := vqlexp.MRegExpCollection["FuncInVarString"].ReplaceAllLiteralString(sLine, "")
 			sOutVars = strings.TrimLeft(sOutVars, " (")
 			sOutVars = strings.TrimRight(sOutVars, ") ")
 			slSOutVars := strings.Split(sOutVars, ",")
@@ -237,14 +236,21 @@ func preparation(sIn string) ([]string, map[string]tStFuncCode, error) {
 
 func execution(query tQuery) (gtypes.TResponse, error) {
 	// -
+	var result string
+	var ok bool
 
 	for lineInd, sLine := range query.QueryCode {
 		for _, sExpName := range vqlexp.ArParsingOrder {
 			if vqlexp.MRegExpCollection[sExpName].MatchString(sLine) {
 				switch sExpName {
 				case "Where":
-					query.DirectWhere(lineInd)
+					result, ok = query.DirectWhere(lineInd)
 				}
+
+				if !ok {
+					return gtypes.TResponse{}, fmt.Errorf("sintax error in %s", sLine)
+				}
+				_ = result // FIXME:
 			}
 		}
 	}
