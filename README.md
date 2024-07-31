@@ -20,6 +20,14 @@ To do this, you need to sequentially execute two commands in the console:
 > go test ./... -coverprofile="coverage.out" -v  
 > go tool cover -html="coverage.out"  
 
+
+## Thanks for the help
+
+*this section is still empty*  
+
+You can support this project and your name or the name of your company can take its place in our hall of fame. The details are [here](https://github.com/Kwynto/GracefulDB/blob/main/SUPPORT.md).
+
+
 ## About the author 
 
 The author of the project is Constantine Zavezeon (Kwynto).  
