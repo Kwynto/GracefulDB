@@ -66,6 +66,8 @@ func CompileRegExpCollection() tRegExpCollection {
 	mRECol = mRECol.CompileExp("Orderby", `(?m)^\s*orderby`)
 	mRECol = mRECol.CompileExp("asc", `(?m)\s+asc\s*`)
 	mRECol = mRECol.CompileExp("desc", `(?m)\s+desc\s*`)
+	mRECol = mRECol.CompileExp("LimitToEnd", `(?m)\s+limit.*`)
+	mRECol = mRECol.CompileExp("Limit", `(?m)^\s*limit`)
 
 	// GPF - General Purpose Functions TODO: Разработать шаблоны
 

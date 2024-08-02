@@ -99,6 +99,12 @@ type TOrderBy struct {
 	Sort []uint8 // 0 - undef, 1 - asc, 2 - desc
 }
 
+type TLimit struct {
+	Start  int
+	Offset int
+	Is     bool
+}
+
 type TUpdaateStruct struct {
 	Where   []TConditions
 	Couples map[string]string
