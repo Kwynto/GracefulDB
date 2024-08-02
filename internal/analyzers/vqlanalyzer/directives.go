@@ -196,6 +196,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		stOrderByExp = parseOrderBy(sOrderBy)
 	}
 
+	sWhere = strings.TrimSpace(sWhere)
 	stExpression, okW := parseWhere(sWhere)
 	if !okW {
 		return "", false
