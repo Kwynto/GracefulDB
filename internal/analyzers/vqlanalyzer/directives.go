@@ -9,6 +9,38 @@ import (
 )
 
 // Directives and reserved words
+func parseOrderBy(sOrderBy string) gtypes.TOrderBy {
+	var stOBCols = gtypes.TOrderBy{
+		Cols: make([]string, 0, 2),
+		Sort: make([]uint8, 0, 2),
+	}
+
+	slOrderBy := vqlexp.MRegExpCollection["Comma"].Split(sOrderBy, -1)
+	for _, sOBCol := range slOrderBy {
+		sCol := ""
+		uAD := uint8(0)
+
+		if vqlexp.MRegExpCollection["asc"].MatchString(sOBCol) {
+			sCol = vqlexp.MRegExpCollection["asc"].ReplaceAllLiteralString(sOBCol, "")
+			uAD = 1
+		} else if vqlexp.MRegExpCollection["desc"].MatchString(sOBCol) {
+			sCol = vqlexp.MRegExpCollection["desc"].ReplaceAllLiteralString(sOBCol, "")
+			uAD = 2
+		} else {
+			sCol = sOBCol
+			uAD = 0
+		}
+
+		sCol = vqlexp.MRegExpCollection["Spaces"].ReplaceAllLiteralString(sCol, "")
+		sCol = trimQuotationMarks(sCol)
+		if sCol != "" {
+			stOBCols.Cols = append(stOBCols.Cols, sCol)
+			stOBCols.Sort = append(stOBCols.Sort, uAD)
+		}
+	}
+
+	return stOBCols
+}
 
 func parseWhere(sWhere string) ([]gtypes.TConditions, bool) {
 	// This functions is complete
@@ -82,6 +114,8 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, bool) {
 
 func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 	// -
+	var stOrderByExp gtypes.TOrderBy
+
 	sLine := q.QueryCode[lineInd]
 
 	sLeft := vqlexp.MRegExpCollection["WhereRight"].ReplaceAllLiteralString(sLine, "")
@@ -94,13 +128,25 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 	}
 
 	sRight := vqlexp.MRegExpCollection["WhereRight"].FindAllString(sLine, -1)[0]
+	sWhere := strings.TrimLeft(sRight, "= ")
+
 	// TODO: orderby and limit
-	stExpression, ok := parseWhere(sRight)
-	if !ok {
+
+	if vqlexp.MRegExpCollection["OrderbyToEnd"].MatchString(sWhere) {
+		sOrderBy := vqlexp.MRegExpCollection["OrderbyToEnd"].FindString(sWhere)
+		sWhere = vqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sWhere, "")
+		sOrderBy = vqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
+		stOrderByExp = parseOrderBy(sOrderBy)
+	}
+
+	stExpression, okW := parseWhere(sWhere)
+	if !okW {
 		return "", false
 	}
 
-	_ = stExpression // FIXME: --
+	// FIXME: --
+	_ = stExpression
+	_ = stOrderByExp
 
 	sOut := fmt.Sprintf("{\"%s\": %s}", sLeft, result)
 	return sOut, true
