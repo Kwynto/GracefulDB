@@ -2,6 +2,7 @@ package vqlanalyzer
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
@@ -250,7 +251,10 @@ func execution(query tQuery) (gtypes.TResponse, error) {
 				if !ok {
 					return gtypes.TResponse{}, fmt.Errorf("sintax error in %s", sLine)
 				}
+
 				_ = result // FIXME:
+
+				break
 			}
 		}
 	}
@@ -269,12 +273,15 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	if errC != nil {
 		stRes.State = "error"
 		stRes.Result = errC.Error()
+		slog.Debug("Wrong request:", slog.String("err", stRes.Result))
 		return ecowriter.EncodeJSON(stRes)
 	}
 
 	if sNewTicket != "" {
 		stRes.Ticket = sNewTicket
 		sTicket = sNewTicket
+	} else {
+		stRes.Ticket = sTicket
 	}
 
 	// Preparation query
@@ -282,6 +289,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	if errP != nil {
 		stRes.State = "error"
 		stRes.Result = errP.Error()
+		slog.Debug("Wrong request:", slog.String("err", stRes.Result))
 		return ecowriter.EncodeJSON(stRes)
 	}
 
@@ -289,6 +297,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	if errU != nil {
 		stRes.State = "error"
 		stRes.Result = errU.Error()
+		slog.Debug("Wrong request:", slog.String("err", stRes.Result))
 		return ecowriter.EncodeJSON(stRes)
 	}
 
@@ -306,6 +315,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	if errEx != nil {
 		stRes.State = "error"
 		stRes.Result = errEx.Error()
+		slog.Debug("Wrong request:", slog.String("err", stRes.Result))
 		return ecowriter.EncodeJSON(stRes)
 	}
 
