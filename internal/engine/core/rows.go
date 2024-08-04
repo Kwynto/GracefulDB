@@ -463,7 +463,7 @@ func mergeAnd(slUFirst, slUSecond []uint64) []uint64 {
 	return slUResIds
 }
 
-func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
+func WhereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
 		slUAcc                = make([]uint64, 0, 4)
@@ -553,7 +553,7 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 		Stamp: dtNow,
 	}
 
-	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
+	slUWhereIds = WhereSelection(stDeleteIn.Where, stAdditionalData)
 
 	// Deleting by changing the status of records and setting zero values
 	for _, uId := range slUWhereIds {
@@ -587,6 +587,7 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 
 func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
 	// - It's almost done
+	// NOTE: for SQL
 	var slReturnedCells = make([]string, 0, 4)
 	var slStRowsForResponse = make([]gtypes.TResponseRow, 0, 4)
 
@@ -627,7 +628,7 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 		Table: sNameTable,
 		Stamp: time.Now().Unix(),
 	}
-	slUWhereIds := whereSelection(stSelectIn.Where, stAdditionalData)
+	slUWhereIds := WhereSelection(stSelectIn.Where, stAdditionalData)
 
 	for _, sColVal := range stSelectIn.Columns {
 		switch sColVal {
@@ -719,7 +720,7 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 		Stamp: dtNow,
 	}
 
-	slUWhereIds = whereSelection(stUpdateIn.Where, stAdditionalData)
+	slUWhereIds = WhereSelection(stUpdateIn.Where, stAdditionalData)
 
 	// Updating by changing the status of records and setting new values
 	for _, uId := range slUWhereIds {
