@@ -198,6 +198,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		sWhere = vqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sWhere, "")
 		sOrderBy = vqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
 		stOrderByExp = parseOrderBy(sOrderBy)
+		stOrderByExp.Is = true
 	}
 
 	sWhere = strings.TrimSpace(sWhere)
@@ -248,8 +249,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 	}
 	slUWhereIds := core.WhereSelection(stExpression, stAdditionalData)
 
-	// FIXME: --
-	_ = stOrderByExp
+	slUWhereIds = core.OrderByVQL(slUWhereIds, stOrderByExp, stAdditionalData)
 
 	if stLimitExp.Is {
 		iLenIds := len(slUWhereIds)

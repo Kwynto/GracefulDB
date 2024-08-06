@@ -504,6 +504,46 @@ func WhereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdd
 	return slUAcc
 }
 
+func OrderByVQL(uIds []uint64, stOrderByExp gtypes.TOrderBy, stAdditionalData gtypes.TAdditionalData) []uint64 {
+	// -
+	if !stOrderByExp.Is {
+		return uIds
+	}
+
+	sCol := stOrderByExp.Cols[0]
+	uSort := stOrderByExp.Sort[0]
+
+	if uSort == 0 {
+		return uIds
+	}
+
+	if sCol == "_id" {
+		switch uSort {
+		case 1:
+			slices.Sort(uIds)
+		case 2:
+			slices.Sort(uIds)
+			slices.Reverse(uIds)
+		}
+		return uIds
+	}
+
+	if stAdditionalData.Stamp <= 0 {
+		stAdditionalData.Stamp = time.Now().Unix()
+	}
+
+	stDBInfo, isOk := GetDBInfo(stAdditionalData.Db)
+	if !isOk {
+		return uIds
+	}
+	stTableInfo := stDBInfo.Tables[stAdditionalData.Table]
+
+	// TODO: do it
+	_ = stTableInfo
+
+	return uIds
+}
+
 func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
 	// This function is complete
 	var slUWhereIds []uint64 = []uint64{}

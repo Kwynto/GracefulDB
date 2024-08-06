@@ -97,6 +97,7 @@ type TConditions struct {
 type TOrderBy struct {
 	Cols []string
 	Sort []uint8 // 0 - undef, 1 - asc, 2 - desc
+	Is   bool
 }
 
 type TLimit struct {
