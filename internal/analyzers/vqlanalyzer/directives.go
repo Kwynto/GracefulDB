@@ -168,7 +168,7 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, bool) {
 }
 
 func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
-	// -
+	// This function is complete
 	var stOrderByExp gtypes.TOrderBy
 	var stLimitExp gtypes.TLimit
 
@@ -247,6 +247,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		Table: q.Table,
 		Stamp: time.Now().Unix(),
 	}
+
 	slUWhereIds := core.WhereSelection(stExpression, stAdditionalData)
 
 	slUWhereIds = core.OrderByVQL(slUWhereIds, stOrderByExp, stAdditionalData)

@@ -13,6 +13,9 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
 )
 
+// type tMValues map[uint64]string
+// type tMReverseValues map[string]uint64
+
 func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
@@ -505,19 +508,26 @@ func WhereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdd
 }
 
 func OrderByVQL(uIds []uint64, stOrderByExp gtypes.TOrderBy, stAdditionalData gtypes.TAdditionalData) []uint64 {
-	// -
+	// This function is complete
+	var (
+		mValues         = make(map[uint64]string)
+		mReversValues   = make(map[string]uint64)
+		slSortingString = make([]string, 0, 4)
+		slUResIds       = make([]uint64, 0, 4)
+	)
+
 	if !stOrderByExp.Is {
 		return uIds
 	}
 
-	sCol := stOrderByExp.Cols[0]
+	sKey := stOrderByExp.Cols[0]
 	uSort := stOrderByExp.Sort[0]
 
 	if uSort == 0 {
 		return uIds
 	}
 
-	if sCol == "_id" {
+	if sKey == "_id" {
 		switch uSort {
 		case 1:
 			slices.Sort(uIds)
@@ -538,10 +548,127 @@ func OrderByVQL(uIds []uint64, stOrderByExp gtypes.TOrderBy, stAdditionalData gt
 	}
 	stTableInfo := stDBInfo.Tables[stAdditionalData.Table]
 
-	// TODO: do it
-	_ = stTableInfo
+	if sKey == "_time" || sKey == "_status" || sKey == "_shape" {
+		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
 
-	return uIds
+		slFiles, err := os.ReadDir(sFolderPath)
+		if err != nil {
+			return uIds
+		}
+
+		for _, fVal := range slFiles {
+			if !fVal.IsDir() {
+				sFileName := fVal.Name()
+				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
+					sFullNameFile := filepath.Join(sFolderPath, sFileName)
+
+					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+					if !isOkFile {
+						continue
+					}
+
+					for _, slLine := range slCache {
+						if len(slLine) < 4 {
+							continue
+						}
+						sValueId, sValueTime, sValueStatus, sValueShape := slLine[0], slLine[1], slLine[2], slLine[3] // id, time, status, shape
+
+						uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						uID, err := strconv.ParseUint(sValueId, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						for _, idVal := range uIds {
+							if idVal == uID {
+								if uValueShape != 30 {
+									switch sKey {
+									case "_time":
+										mValues[idVal] = sValueTime
+									case "_status":
+										mValues[idVal] = sValueStatus
+									case "_shape":
+										mValues[idVal] = sValueShape
+									}
+								}
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		stColumnInfo, isOk := stTableInfo.Columns[sKey]
+		if !isOk {
+			return uIds
+		}
+
+		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
+
+		slFiles, err := os.ReadDir(sFolderPath)
+		if err != nil {
+			return uIds
+		}
+
+		for _, fVal := range slFiles {
+			if !fVal.IsDir() {
+				sFileName := fVal.Name()
+				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
+					sFullNameFile := filepath.Join(sFolderPath, sFileName)
+
+					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+					if !isOkFile {
+						continue
+					}
+
+					for _, slLine := range slCache {
+						if len(slLine) < 2 {
+							continue
+						}
+						sValueId, sValueData := slLine[0], slLine[1] // id, [data]
+
+						uID, err := strconv.ParseUint(sValueId, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						for _, idVal := range uIds {
+							if idVal == uID {
+								mValues[idVal] = sValueData
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Ordering
+	for uId, sVal := range mValues {
+		mReversValues[sVal] = uId
+		slSortingString = append(slSortingString, sVal)
+	}
+
+	switch uSort {
+	case 1:
+		slices.Sort(slSortingString)
+	case 2:
+		slices.Sort(slSortingString)
+		slices.Reverse(slSortingString)
+	}
+
+	for _, v := range slSortingString {
+		id := mReversValues[v]
+		slUResIds = append(slUResIds, id)
+	}
+
+	return slUResIds
 }
 
 func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
