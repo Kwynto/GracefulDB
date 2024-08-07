@@ -27,6 +27,8 @@ type tQuery struct {
 	Login          string
 	Access         gauth.TProfile
 	Ticket         string
+	DB             string // DB name
+	Table          string // Table name
 	QueryCode      []string
 	LocalFunctions map[string]tStFuncCode
 	Variables      map[string]any

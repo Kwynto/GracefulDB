@@ -139,7 +139,7 @@ func TruncateTable(sNameDB, sNameTable string) bool {
 		Table: sNameTable,
 	}
 
-	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
+	slUWhereIds = WhereSelection(stDeleteIn.Where, stAdditionalData)
 
 	dtNow := time.Now().Unix()
 

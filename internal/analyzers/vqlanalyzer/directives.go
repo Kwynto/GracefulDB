@@ -1,12 +1,15 @@
 package vqlanalyzer
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/core"
 )
 
 // Directives and reserved words
@@ -27,7 +30,8 @@ func parseLimit(sLimit string) gtypes.TLimit {
 
 	switch iLenLimit {
 	case 1:
-		iStart, err = strconv.Atoi(slLimitAfter[0])
+		iStart = 0
+		iOffset, err = strconv.Atoi(slLimitAfter[0])
 		if err != nil {
 			return gtypes.TLimit{
 				Is: false,
@@ -164,7 +168,7 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, bool) {
 }
 
 func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
-	// -
+	// This function is complete
 	var stOrderByExp gtypes.TOrderBy
 	var stLimitExp gtypes.TLimit
 
@@ -194,6 +198,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		sWhere = vqlexp.MRegExpCollection["OrderbyToEnd"].ReplaceAllLiteralString(sWhere, "")
 		sOrderBy = vqlexp.MRegExpCollection["Orderby"].ReplaceAllLiteralString(sOrderBy, "")
 		stOrderByExp = parseOrderBy(sOrderBy)
+		stOrderByExp.Is = true
 	}
 
 	sWhere = strings.TrimSpace(sWhere)
@@ -202,11 +207,66 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		return "", false
 	}
 
-	// FIXME: --
-	_ = stExpression
-	_ = stOrderByExp
-	_ = stLimitExp
+	if len(stExpression) == 0 {
+		stBaseCond := gtypes.TConditions{
+			Type:      "operation",
+			Key:       "_id",
+			Operation: ">",
+			Value:     "0",
+		}
+		stExpression = append(stExpression, stBaseCond)
+	}
 
+	if q.DB == "" || q.Table == "" {
+		return "", false
+	}
+
+	stDBInfo, isOkDB := core.GetDBInfo(q.DB)
+	if !isOkDB {
+		return "", false
+	}
+	stTableInfo, isOkTable := stDBInfo.Tables[q.Table]
+	if !isOkTable {
+		return "", false
+	}
+
+	// chacking keys
+	for _, stWhereElem := range stExpression {
+		if stWhereElem.Type == "operation" {
+			if stWhereElem.Key != "_id" && stWhereElem.Key != "_time" && stWhereElem.Key != "_status" && stWhereElem.Key != "_shape" {
+				_, isOk := stTableInfo.Columns[stWhereElem.Key]
+				if !isOk {
+					return "", false
+				}
+			}
+		}
+	}
+
+	stAdditionalData := gtypes.TAdditionalData{
+		Db:    q.DB,
+		Table: q.Table,
+		Stamp: time.Now().Unix(),
+	}
+
+	slUWhereIds := core.WhereSelection(stExpression, stAdditionalData)
+
+	slUWhereIds = core.OrderByVQL(slUWhereIds, stOrderByExp, stAdditionalData)
+
+	if stLimitExp.Is {
+		iLenIds := len(slUWhereIds)
+		iEnd := stLimitExp.Start + stLimitExp.Offset
+		if iEnd < iLenIds {
+			slUWhereIds = slUWhereIds[stLimitExp.Start:iEnd]
+		} else {
+			slUWhereIds = slUWhereIds[stLimitExp.Start:]
+		}
+	}
+
+	bResult, err := json.Marshal(slUWhereIds)
+	if err != nil {
+		return "", false
+	}
+	result = string(bResult)
 	sOut := fmt.Sprintf("{\"%s\": %s}", sLeft, result)
 	return sOut, true
 }

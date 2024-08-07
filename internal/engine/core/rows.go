@@ -13,6 +13,9 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/instead"
 )
 
+// type tMValues map[uint64]string
+// type tMReverseValues map[string]uint64
+
 func findWhereIds(stCond gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
@@ -463,7 +466,7 @@ func mergeAnd(slUFirst, slUSecond []uint64) []uint64 {
 	return slUResIds
 }
 
-func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
+func WhereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdditionalData) []uint64 {
 	// This function is complete
 	var (
 		slUAcc                = make([]uint64, 0, 4)
@@ -502,6 +505,170 @@ func whereSelection(slStWhere []gtypes.TConditions, stAdditionalData gtypes.TAdd
 	}
 
 	return slUAcc
+}
+
+func OrderByVQL(uIds []uint64, stOrderByExp gtypes.TOrderBy, stAdditionalData gtypes.TAdditionalData) []uint64 {
+	// This function is complete
+	var (
+		mValues         = make(map[uint64]string)
+		mReversValues   = make(map[string]uint64)
+		slSortingString = make([]string, 0, 4)
+		slUResIds       = make([]uint64, 0, 4)
+	)
+
+	if !stOrderByExp.Is {
+		return uIds
+	}
+
+	sKey := stOrderByExp.Cols[0]
+	uSort := stOrderByExp.Sort[0]
+
+	if uSort == 0 {
+		return uIds
+	}
+
+	if sKey == "_id" {
+		switch uSort {
+		case 1:
+			slices.Sort(uIds)
+		case 2:
+			slices.Sort(uIds)
+			slices.Reverse(uIds)
+		}
+		return uIds
+	}
+
+	if stAdditionalData.Stamp <= 0 {
+		stAdditionalData.Stamp = time.Now().Unix()
+	}
+
+	stDBInfo, isOk := GetDBInfo(stAdditionalData.Db)
+	if !isOk {
+		return uIds
+	}
+	stTableInfo := stDBInfo.Tables[stAdditionalData.Table]
+
+	if sKey == "_time" || sKey == "_status" || sKey == "_shape" {
+		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stTableInfo.Parent, stTableInfo.Folder, "service")
+
+		slFiles, err := os.ReadDir(sFolderPath)
+		if err != nil {
+			return uIds
+		}
+
+		for _, fVal := range slFiles {
+			if !fVal.IsDir() {
+				sFileName := fVal.Name()
+				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
+					sFullNameFile := filepath.Join(sFolderPath, sFileName)
+
+					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+					if !isOkFile {
+						continue
+					}
+
+					for _, slLine := range slCache {
+						if len(slLine) < 4 {
+							continue
+						}
+						sValueId, sValueTime, sValueStatus, sValueShape := slLine[0], slLine[1], slLine[2], slLine[3] // id, time, status, shape
+
+						uValueShape, err := strconv.ParseUint(sValueShape, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						uID, err := strconv.ParseUint(sValueId, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						for _, idVal := range uIds {
+							if idVal == uID {
+								if uValueShape != 30 {
+									switch sKey {
+									case "_time":
+										mValues[idVal] = sValueTime
+									case "_status":
+										mValues[idVal] = sValueStatus
+									case "_shape":
+										mValues[idVal] = sValueShape
+									}
+								}
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		stColumnInfo, isOk := stTableInfo.Columns[sKey]
+		if !isOk {
+			return uIds
+		}
+
+		sFolderPath := filepath.Join(StLocalCoreSettings.Storage, stColumnInfo.Parents, stColumnInfo.Folder)
+
+		slFiles, err := os.ReadDir(sFolderPath)
+		if err != nil {
+			return uIds
+		}
+
+		for _, fVal := range slFiles {
+			if !fVal.IsDir() {
+				sFileName := fVal.Name()
+				if strings.Contains(sFileName, stTableInfo.CurrentRev) {
+					sFullNameFile := filepath.Join(sFolderPath, sFileName)
+
+					slCache, isOkFile := instead.LoadFile(sFullNameFile, stAdditionalData.Stamp)
+					if !isOkFile {
+						continue
+					}
+
+					for _, slLine := range slCache {
+						if len(slLine) < 2 {
+							continue
+						}
+						sValueId, sValueData := slLine[0], slLine[1] // id, [data]
+
+						uID, err := strconv.ParseUint(sValueId, 10, 64)
+						if err != nil {
+							continue
+						}
+
+						for _, idVal := range uIds {
+							if idVal == uID {
+								mValues[idVal] = sValueData
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Ordering
+	for uId, sVal := range mValues {
+		mReversValues[sVal] = uId
+		slSortingString = append(slSortingString, sVal)
+	}
+
+	switch uSort {
+	case 1:
+		slices.Sort(slSortingString)
+	case 2:
+		slices.Sort(slSortingString)
+		slices.Reverse(slSortingString)
+	}
+
+	for _, v := range slSortingString {
+		id := mReversValues[v]
+		slUResIds = append(slUResIds, id)
+	}
+
+	return slUResIds
 }
 
 func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]uint64, bool) {
@@ -553,7 +720,7 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 		Stamp: dtNow,
 	}
 
-	slUWhereIds = whereSelection(stDeleteIn.Where, stAdditionalData)
+	slUWhereIds = WhereSelection(stDeleteIn.Where, stAdditionalData)
 
 	// Deleting by changing the status of records and setting zero values
 	for _, uId := range slUWhereIds {
@@ -587,6 +754,7 @@ func DeleteRows(sNameDB, sNameTable string, stDeleteIn gtypes.TDeleteStruct) ([]
 
 func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]gtypes.TResponseRow, bool) {
 	// - It's almost done
+	// NOTE: for SQL
 	var slReturnedCells = make([]string, 0, 4)
 	var slStRowsForResponse = make([]gtypes.TResponseRow, 0, 4)
 
@@ -627,7 +795,7 @@ func SelectRows(sNameDB, sNameTable string, stSelectIn gtypes.TSelectStruct) ([]
 		Table: sNameTable,
 		Stamp: time.Now().Unix(),
 	}
-	slUWhereIds := whereSelection(stSelectIn.Where, stAdditionalData)
+	slUWhereIds := WhereSelection(stSelectIn.Where, stAdditionalData)
 
 	for _, sColVal := range stSelectIn.Columns {
 		switch sColVal {
@@ -719,7 +887,7 @@ func UpdateRows(sNameDB, sNameTable string, stUpdateIn gtypes.TUpdaateStruct) ([
 		Stamp: dtNow,
 	}
 
-	slUWhereIds = whereSelection(stUpdateIn.Where, stAdditionalData)
+	slUWhereIds = WhereSelection(stUpdateIn.Where, stAdditionalData)
 
 	// Updating by changing the status of records and setting new values
 	for _, uId := range slUWhereIds {
