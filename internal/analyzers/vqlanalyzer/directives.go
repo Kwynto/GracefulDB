@@ -1,8 +1,6 @@
 package vqlanalyzer
 
 import (
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -167,10 +165,13 @@ func parseWhere(sWhere string) ([]gtypes.TConditions, bool) {
 	return slExpression, true
 }
 
-func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
+// func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
+func (q tQuery) DirectWhere(lineInd int) (map[string]any, bool) {
 	// This function is complete
 	var stOrderByExp gtypes.TOrderBy
 	var stLimitExp gtypes.TLimit
+
+	result := make(map[string]any)
 
 	sLine := q.QueryCode[lineInd]
 
@@ -180,7 +181,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		sLeft = "$result"
 	}
 	if !vqlexp.MRegExpCollection["VariableWholeString"].MatchString(sLeft) {
-		return "", false
+		return result, false
 	}
 
 	sRight := vqlexp.MRegExpCollection["WhereRight"].FindAllString(sLine, -1)[0]
@@ -204,7 +205,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 	sWhere = strings.TrimSpace(sWhere)
 	stExpression, okW := parseWhere(sWhere)
 	if !okW {
-		return "", false
+		return result, false
 	}
 
 	if len(stExpression) == 0 {
@@ -218,16 +219,16 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 	}
 
 	if q.DB == "" || q.Table == "" {
-		return "", false
+		return result, false
 	}
 
 	stDBInfo, isOkDB := core.GetDBInfo(q.DB)
 	if !isOkDB {
-		return "", false
+		return result, false
 	}
 	stTableInfo, isOkTable := stDBInfo.Tables[q.Table]
 	if !isOkTable {
-		return "", false
+		return result, false
 	}
 
 	// chacking keys
@@ -236,7 +237,7 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 			if stWhereElem.Key != "_id" && stWhereElem.Key != "_time" && stWhereElem.Key != "_status" && stWhereElem.Key != "_shape" {
 				_, isOk := stTableInfo.Columns[stWhereElem.Key]
 				if !isOk {
-					return "", false
+					return result, false
 				}
 			}
 		}
@@ -262,11 +263,12 @@ func (q tQuery) DirectWhere(lineInd int) (result string, ok bool) {
 		}
 	}
 
-	bResult, err := json.Marshal(slUWhereIds)
-	if err != nil {
-		return "", false
-	}
-	result = string(bResult)
-	sOut := fmt.Sprintf("{\"%s\": %s}", sLeft, result)
-	return sOut, true
+	// bResult, err := json.Marshal(slUWhereIds)
+	// if err != nil {
+	// 	return "", false
+	// }
+	// result = string(bResult)
+	// sOut := fmt.Sprintf("{\"%s\": %s}", sLeft, result)
+	result[sLeft] = slUWhereIds
+	return result, true
 }
