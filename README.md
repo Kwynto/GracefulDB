@@ -4,10 +4,40 @@ This is a DBMS for professionals and extreme loads.
 
 **_This repository is under development._**
 
+## Using 
+
 The operating instructions are not ready yet.  
 You can compile and run a project just like any other GoLang project.  
 
-**Testing** 
+
+Download the GracefulDB project to your computer:  
+> git clone https://github.com/Kwynto/GracefulDB.git  
+
+or in another way  
+
+Go to the project folder:  
+> cd ./GracefulDB  
+
+Compile the project:  
+> go build main.go
+
+Start the server  
+For Windows:  
+> .\main.exe  
+
+For *nix:  
+> ./main
+
+**Warning:** Users of Unix systems may need to change the access rights for the executable file.  
+
+The server is running and now you can manage it. To do this, go to the web browser:  
+> http://localhost  
+
+or  
+
+> http://localhost:80  
+
+## Testing 
 
 Run tests:  
 > go test ./... -v  

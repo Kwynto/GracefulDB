@@ -497,12 +497,12 @@ a {
 .content-console-view .text-vars {
   color: yellow;
 }
-.content-console-view .text-info {
-  /* color: white; */
-  color: rgba(13, 202, 240, 1);
-}
+
 .content-console-view .text-success {
   color: blue;
+}
+.content-console-view .text-answer {
+  color: rgba(13, 202, 240, 1);
 }
 
 .floating-console {
