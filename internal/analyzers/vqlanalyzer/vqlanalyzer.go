@@ -239,7 +239,7 @@ func preparation(sIn string) ([]string, map[string]tStFuncCode, error) {
 
 func execution(query tQuery) (gtypes.TResponse, error) {
 	// -
-	var result string
+	var result map[string]any
 	var ok bool
 
 	for lineInd, sLine := range query.QueryCode {
@@ -254,12 +254,16 @@ func execution(query tQuery) (gtypes.TResponse, error) {
 					return gtypes.TResponse{}, fmt.Errorf("sintax error in %s", sLine)
 				}
 
-				_ = result // FIXME:
+				for skey, inValue := range result {
+					query.Variables[skey] = inValue
+				}
 
 				break
 			}
 		}
 	}
+
+	_ = result // FIXME:
 
 	return gtypes.TResponse{}, nil
 }
@@ -295,12 +299,21 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 		return ecowriter.EncodeJSON(stRes)
 	}
 
-	mVariables, errU := ecowriter.DecodeJSONMap(sVariables)
-	if errU != nil {
+	mVariables, okU := ecowriter.DecodeJSONMap(sVariables)
+	if !okU {
 		stRes.State = "error"
-		stRes.Result = errU.Error()
+		stRes.Result = "invalid variable format"
 		slog.Debug("Wrong request:", slog.String("err", stRes.Result))
 		return ecowriter.EncodeJSON(stRes)
+	}
+
+	for sKey, inValue := range mVariables {
+		rKey := []rune(sKey)[0]
+		if rKey != rune('$') {
+			newKey := fmt.Sprintf("$%s", sKey)
+			delete(mVariables, sKey)
+			mVariables[newKey] = inValue
+		}
 	}
 
 	var query tQuery = tQuery{

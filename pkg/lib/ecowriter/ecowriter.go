@@ -90,16 +90,16 @@ func DecodeJSON(str string) any {
 }
 
 // Getting map from JSON-string
-func DecodeJSONMap(str string) (map[string]any, error) {
+func DecodeJSONMap(str string) (map[string]any, bool) {
 	var inData map[string]any
 	reader := strings.NewReader(str)
 
 	jd := json.NewDecoder(reader)
 	if err := jd.Decode(&inData); err != nil {
-		return nil, err
+		return nil, false
 	}
 
-	return inData, nil
+	return inData, true
 }
 
 func FileRead(name string) (string, error) {
