@@ -6,10 +6,6 @@ type tRegExpCollection map[string]*regexp.Regexp
 
 var MRegExpCollection tRegExpCollection
 
-var ArParsingOrder = [...]string{
-	"Where",
-}
-
 func (r tRegExpCollection) CompileExp(sName string, sExpr string) tRegExpCollection {
 	// This method is complete
 	re, err := regexp.Compile(sExpr)
