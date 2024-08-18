@@ -3,6 +3,7 @@ package vqlex
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
@@ -27,16 +28,35 @@ type tQuery struct {
 	Ticket         string
 	DB             string // DB name
 	Table          string // Table name
-	QueryCode      []string
+	Code           gtypes.TCode
 	LocalFunctions map[string]tStFuncCode
-	Variables      map[string]any
+	TableOfSimbols gtypes.TTableOfSimbols
+}
+
+func splitCode(sOriginalCode string) gtypes.TCode {
+	// This function is complete
+	slStCode := make(gtypes.TCode, 0, 10)
+	slCode := strings.Split(sOriginalCode, "\n")
+
+	for _, sLine := range slCode {
+		stLine := gtypes.TLineOfCode{
+			Original: sLine,
+		}
+		slStCode = append(slStCode, stLine)
+	}
+
+	return slStCode
+}
+
+func analyzer(slStCode gtypes.TCode) gtypes.TCode {
+	// -
+	return slStCode
 }
 
 // TODO: Request
 func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	// -
 	var stRes gtypes.TResponse
-	// mVariables := make(map[string]any)
 
 	// Pre checking
 	sLogin, stAccess, sNewTicket, errC := preCheckerVQL(sTicket)
@@ -73,6 +93,8 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	}
 
 	// Preparation query
+	slStCode := splitCode(sOriginalCode)
+	slStCode = analyzer(slStCode)
 	// FIXME: it
 	// slQryLines, mLocalFunctions, errP := preparation(sOriginalCode)
 	// if errP != nil {
@@ -86,9 +108,12 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 		Login:  sLogin,
 		Access: stAccess,
 		Ticket: sTicket,
-		// QueryCode:      slQryLines,
+		Code:   slStCode,
 		// LocalFunctions: mLocalFunctions,
-		Variables: mVariables,
+		TableOfSimbols: gtypes.TTableOfSimbols{
+			Input:  mVariables,
+			IsRoot: true,
+		},
 	}
 
 	// FIXME: it

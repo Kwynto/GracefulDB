@@ -5,6 +5,37 @@ import (
 	"time"
 )
 
+// Chain tabltes of simbols
+
+type TMapVariables map[string]any
+type TMapPointers map[string]*TTableOfSimbols
+
+type TTableOfSimbols struct {
+	Parent   *TTableOfSimbols // only child table
+	Pointers TMapPointers     // only child table
+
+	Input TMapVariables // only root table
+	Self  TMapVariables
+
+	IsRoot bool
+}
+
+// Lex Analyzer
+
+type TableOfLine struct {
+	Type         string
+	NonTerminals []string
+}
+
+type TLineOfCode struct {
+	Original   string
+	Production TableOfLine
+}
+
+type TCode []TLineOfCode
+
+// Engine
+
 type TColumnSpecification struct {
 	Default string `json:"default"`
 	NotNull bool   `json:"notnull"`
