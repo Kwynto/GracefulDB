@@ -102,7 +102,7 @@ func defaultConfig() TConfig {
 	}
 }
 
-func MustLoad(sConfigPath string) *TConfig {
+func SoftLoad(sConfigPath string) *TConfig {
 	if sConfigPath == "" {
 		sConfigPath = GDB_CONFIG_DEFAULT
 	}

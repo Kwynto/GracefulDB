@@ -34,7 +34,7 @@ func main() {
 	// Init config
 	errDotEnv := godotenv.Load()
 	sConfigPath := os.Getenv("GDB_CONFIG_PATH")
-	config.MustLoad(sConfigPath)
+	config.SoftLoad(sConfigPath)
 
 	// if config.StDefaultConfig.Env == "test" {
 	// 	fmt.Println("You should set up the configuration file correctly.")
