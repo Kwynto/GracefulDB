@@ -23,8 +23,8 @@ type TTableOfSimbols struct {
 // Lex Analyzer
 
 type TableOfLine struct {
-	Type         string
-	NonTerminals []string
+	Type int // 0 - nil, 1 - modNil, 2 - comment, 10 - terminal, 20 - nonterminal
+	Line []string
 }
 
 type TLineOfCode struct {
