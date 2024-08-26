@@ -29,7 +29,7 @@ func CallSQuery(ctx context.Context, g gs.GracefulServiceClient, text string) (*
 func main() {
 	// Init config
 	configPath := os.Getenv("CONFIG_PATH")
-	cfg := config.MustLoad(configPath)
+	cfg := config.SoftLoad(configPath)
 	address := fmt.Sprintf("%s:%s", cfg.GrpcConnector.Address, cfg.GrpcConnector.Port)
 
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))

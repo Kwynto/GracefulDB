@@ -37,13 +37,13 @@ func Test_Query(t *testing.T) {
 func Test_Start(t *testing.T) {
 	t.Run("Start() function testing", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
-		config.MustLoad(tf)
+		config.SoftLoad(tf)
 		config.StDefaultConfig.GrpcConnector.Address = "256.256.256.256" // Creating an error
 
 		go Start(&config.StDefaultConfig)
 		time.Sleep(1 * time.Second)
 
-		config.MustLoad(tf)
+		config.SoftLoad(tf)
 		if closer.StCloseProcs.Counter != 0 {
 			t.Errorf("Start() error: %v.", closer.StCloseProcs.Counter)
 		}
@@ -53,7 +53,7 @@ func Test_Start(t *testing.T) {
 func Test_Shutdown(t *testing.T) {
 	t.Run("Shutdown() function testing", func(t *testing.T) {
 		tf := "../../../../config/develop.yaml"
-		config.MustLoad(tf)
+		config.SoftLoad(tf)
 
 		go Start(&config.StDefaultConfig)
 		closer.AddHandler(Shutdown)

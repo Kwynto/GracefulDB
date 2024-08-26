@@ -43,7 +43,7 @@ func Test_Run(t *testing.T) {
 	})
 
 	t.Run("Run() function testing - positive", func(t *testing.T) {
-		config.MustLoad("../../config/default.yaml")
+		config.SoftLoad("../../config/default.yaml")
 		ctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
 

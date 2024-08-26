@@ -14,12 +14,12 @@ func Test_defaultConfig(t *testing.T) {
 }
 
 func Test_MustLoad(t *testing.T) {
-	stRes := MustLoad("")
+	stRes := SoftLoad("")
 	if reflect.TypeOf(stRes) != reflect.TypeOf(&TConfig{}) {
 		t.Error("MustLoad() error = The function returns the wrong type")
 	}
 
-	stRes = MustLoad("./../../config/default.yaml")
+	stRes = SoftLoad("./../../config/default.yaml")
 	if reflect.TypeOf(stRes) != reflect.TypeOf(&TConfig{}) {
 		t.Error("MustLoad() error = The function returns the wrong type")
 	}
@@ -28,7 +28,7 @@ func Test_MustLoad(t *testing.T) {
 	f.Write([]byte("bla-bla-bla"))
 	f.Close()
 
-	stRes = MustLoad("./test.yaml")
+	stRes = SoftLoad("./test.yaml")
 	if reflect.TypeOf(stRes) != reflect.TypeOf(&TConfig{}) {
 		t.Error("MustLoad() error = The function returns the wrong type")
 	}

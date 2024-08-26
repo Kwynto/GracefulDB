@@ -36,9 +36,9 @@ type tQuery struct {
 func splitCode(sOriginalCode string) gtypes.TCode {
 	// This function is complete
 	slStCode := make(gtypes.TCode, 0, 10)
-	slCode := strings.Split(sOriginalCode, "\n")
+	slList := strings.Split(sOriginalCode, "\n")
 
-	for _, sLine := range slCode {
+	for _, sLine := range slList {
 		stLine := gtypes.TLineOfCode{
 			Original: sLine,
 		}
