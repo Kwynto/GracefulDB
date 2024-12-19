@@ -189,6 +189,8 @@ func updateUser(sLogin string, sPassword string, stAccess TProfile) error {
 	}
 
 	mxAuth.Lock()
+	defer mxAuth.Unlock()
+
 	arBH := sha256.Sum256([]byte(sPassword))
 	MHash[sLogin] = fmt.Sprintf("%x", arBH)
 
@@ -198,7 +200,6 @@ func updateUser(sLogin string, sPassword string, stAccess TProfile) error {
 
 	hashSave()
 	accessSave()
-	mxAuth.Unlock()
 
 	return nil
 }
@@ -304,13 +305,13 @@ func updateProfile(sLogin string, stAccess TProfile) error {
 	}
 
 	mxAuth.Lock()
+	defer mxAuth.Unlock()
 
 	if sLogin != "root" {
 		MAccess[sLogin] = stAccess
 	}
 
 	accessSave()
-	mxAuth.Unlock()
 
 	return nil
 }

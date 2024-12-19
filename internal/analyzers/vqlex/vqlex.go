@@ -29,28 +29,22 @@ type tQuery struct {
 	DB             string // DB name
 	Table          string // Table name
 	Code           gtypes.TCode
+	Actions        gtypes.TActions
 	LocalFunctions map[string]tStFuncCode
 	TableOfSimbols gtypes.TTableOfSimbols
 }
 
 func splitCode(sOriginalCode string) gtypes.TCode {
 	// This function is complete
-	slStCode := make(gtypes.TCode, 0, 10)
 	slList := strings.Split(sOriginalCode, "\n")
 
-	for _, sLine := range slList {
-		stLine := gtypes.TLineOfCode{
-			Original: sLine,
-		}
-		slStCode = append(slStCode, stLine)
-	}
-
-	return slStCode
+	return slList
 }
 
-func analyzer(slStCode gtypes.TCode) gtypes.TCode {
+func analyzer(slStCode gtypes.TCode) gtypes.TActions {
 	// -
-	return slStCode
+	_ = slStCode
+	return gtypes.TActions{}
 }
 
 // TODO: Request
@@ -94,7 +88,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 
 	// Preparation query
 	slStCode := splitCode(sOriginalCode)
-	slStCode = analyzer(slStCode)
+	stActions := analyzer(slStCode)
 	// FIXME: it
 	// slQryLines, mLocalFunctions, errP := preparation(sOriginalCode)
 	// if errP != nil {
@@ -105,10 +99,11 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	// }
 
 	var query tQuery = tQuery{
-		Login:  sLogin,
-		Access: stAccess,
-		Ticket: sTicket,
-		Code:   slStCode,
+		Login:   sLogin,
+		Access:  stAccess,
+		Ticket:  sTicket,
+		Code:    slStCode,
+		Actions: stActions,
 		// LocalFunctions: mLocalFunctions,
 		TableOfSimbols: gtypes.TTableOfSimbols{
 			Input:  mVariables,

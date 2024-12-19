@@ -77,9 +77,15 @@ func RenameDB(sOldName, sNewName string, isSecure bool) bool {
 
 		StStorageInfo.DBs[sNewName] = stDBInfo
 		StStorageInfo.Access[sNewName] = stDBAccess
-		StStorageInfo.Save()
 
-		return stDBInfo.Save()
+		isStorageSave := StStorageInfo.Save()
+		isDBSave := stDBInfo.Save()
+
+		if isStorageSave && isDBSave {
+			return true
+		}
+
+		return false
 	}
 
 	return false
@@ -131,7 +137,13 @@ func CreateDB(sNameDB string, sOwner string, isSecure bool) bool {
 
 	StStorageInfo.DBs[sNameDB] = stDBInfo
 	StStorageInfo.Access[sNameDB] = stDBAccess
-	StStorageInfo.Save()
 
-	return stDBInfo.Save()
+	isStorageSave := StStorageInfo.Save()
+	isDBSave := stDBInfo.Save()
+
+	if isStorageSave && isDBSave {
+		return true
+	}
+
+	return false
 }
