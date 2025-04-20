@@ -31,7 +31,7 @@ type tQuery struct {
 	Table          string // Table name
 	QueryCode      []string
 	LocalFunctions map[string]tStFuncCode
-	Variables      map[string]any
+	Variables      gtypes.TMapVariables
 }
 
 func prepareSpacesInLine(sSlIn []string) []string {
@@ -255,7 +255,13 @@ func execution(query tQuery) (gtypes.TResponse, error) {
 				}
 
 				for skey, inValue := range result {
-					query.Variables[skey] = inValue
+					// query.Variables[skey] = inValue
+					// query.Variables[skey] = fmt.Sprint(inValue)
+					query.Variables[skey] = gtypes.TVariableData{
+						// TODO: сделать проверку и приведение типов
+						Type:  0,
+						Value: fmt.Sprint(inValue),
+					}
 				}
 
 				break

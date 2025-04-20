@@ -7,30 +7,85 @@ import (
 
 // Chain tabltes of simbols
 
-type TMapVariables map[string]any
-type TMapPointers map[string]*TTableOfSimbols
+// type TMapVariables map[string]any
+type TVariableData struct {
+	Type  int // 0 - nondetected (any), 1 - bool, 2 - char, 3 - byte, 4 - int, 5 - float, 6 - str, 7 - array, 8 - object, 9 - corteg
+	Value string
+}
+type TPointer struct {
+	Simbol string
+	Link   *TTableOfSimbols
+}
+type TMapVariables map[string]TVariableData
+type TMapPointers map[string]TPointer
 
 type TTableOfSimbols struct {
-	Parent   *TTableOfSimbols // only child table
-	Pointers TMapPointers     // only child table
+	Parent *TTableOfSimbols // only child table
 
-	Input TMapVariables // only root table
-	Self  TMapVariables
+	Variables TMapVariables
+	Pointers  TMapPointers // only child table
 
+	Input  TMapVariables // only root table
 	IsRoot bool
+}
+
+func (tos *TTableOfSimbols) Record(dest *TArgument) bool {
+	if _, okV := tos.Variables[dest.Simbol]; okV {
+		tos.Variables[dest.Simbol] = TVariableData{
+			Type:  dest.Type,
+			Value: dest.Value,
+		}
+	} else if pointer, okP := tos.Pointers[dest.Simbol]; okP {
+		pointer.Link.Variables[pointer.Simbol] = TVariableData{
+			Type:  dest.Type,
+			Value: dest.Value,
+		}
+	} else if !tos.IsRoot {
+		return tos.Parent.Record(dest)
+	} else {
+		return false
+	}
+
+	return true
+}
+
+func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
+	switch source.Term {
+	case 0:
+		dest.Type = source.Type
+		dest.Value = source.Value
+	case 1:
+		ok, resultArgument := source.Production.Exec(tos)
+		if !ok {
+			return false
+		}
+		dest.Value = resultArgument.Value
+	case 2, 3:
+		// dest.Term = tSource.Term
+		dest.Type = source.Type
+		dest.Value = source.Value
+	}
+
+	if dest.Simbol != "" {
+		if !tos.Record(dest) {
+			// TODO: тут сделать создание новой переменной или указателя
+		}
+	} else {
+		return false
+	}
+
+	return true
 }
 
 // Lex Analyzer
 
 type TArgument struct {
 	Production TProduction
-	Pointer    *TTableOfSimbols
-	Name       string // для именованных аргументов
-	Any        string
-	Str        string
-	Int        int
-	Float      float64
-	Type       int // 0 - non, 1 - prodaction, 2 - pointer, 12 - any, 11 - str, 12 - int, 13 - float
+	// Name       string // для именованных аргументов
+	Simbol string // имя в таблице символов
+	Value  string
+	Term   int // 0 - non, 1 - prodaction, 2 - variable, 3 - pointer
+	Type   int // 0 - nondetected (any), 1 - bool, 2 - char, 3 - byte, 4 - int, 5 - float, 6 - str, 7 - array, 8 - object, 9 - corteg
 }
 
 type TProduction struct {
@@ -45,7 +100,7 @@ type TProduction struct {
 	// -- 12: блок области видимости
 	// -- 13: функция
 	// -- 14: возвратная операция
-	// -- 15: условная уперация
+	// -- 15: условная операция
 	// -- 16: классический цикл
 	// -- 17: цикл по диапазону
 	// --
@@ -93,23 +148,70 @@ type TProduction struct {
 	// -- 322: дикремент --
 	// -- 323: инкремент с присвоением :++
 	// -- 324: дикремент с присвоением :--
-	// -- 325: умножение с присвоением :**
-	// -- 326: деление с присвоением ://
-	// -- 327: остаток от деления с присвоением :%%
+	// -- 325: умножение с присвоением :*
+	// -- 326: деление с присвоением :/
+	// -- 327: остаток от деления с присвоением :%
 	// -- 328: возведение в степень с присвоением :**
 	// -- 329: извлечение корня с присвоением :/*
 	// -- 330: логарифм с присвоением :/%
 	// - 400: операции со строками
 	// -- 401: конкатенация строк
+	// - 500: (зарезервировано)
+	// - 600: (дириктивы)
+	// - 700: (зарезервировано)
+	// - 800: (встроенные функции)
 	Type int
-	// идентификатор для сложных продакций, например, номер вложенного блока для открывающих и закрывающих скобок
-	// Id int
 	// наборр аргументов по-порядку из таблицы символов для действий и функций
-	Input  []TArgument
-	Output []TArgument
+	Dest   []TArgument
+	Source []TArgument
 }
 
 type TActions []TProduction
+
+func (actions TActions) Run(input TMapVariables) bool {
+	pRootTOS := &TTableOfSimbols{
+		Input:  input,
+		IsRoot: true,
+	}
+	for _, production := range actions {
+		if ok, _ := production.Exec(pRootTOS); !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, *TArgument) {
+	// pLocalTOS := &TTableOfSimbols{
+	// 	Parent: parentTOS,
+	// 	IsRoot: false,
+	// }
+	switch parentProduction.Type {
+	case 1, 2, 3, 4:
+		// пока пропускаем
+	case 11:
+		zeroArgument := parentProduction.Dest[0]
+		if zeroArgument.Term == 1 {
+			if ok, _ := zeroArgument.Production.Exec(parentTOS); !ok {
+				return false, &TArgument{}
+			}
+		}
+	case 12, 13, 14, 15, 16, 17:
+		// пока пропустить
+	case 41:
+		if len(parentProduction.Dest) == len(parentProduction.Source) {
+			for indOA, outputArg := range parentProduction.Source {
+				if !parentTOS.Set(&parentProduction.Dest[indOA], &outputArg) {
+					return false, &TArgument{}
+				}
+			}
+		} else {
+			return false, &TArgument{}
+		}
+	}
+
+	return true, &TArgument{}
+}
 
 type TCode []string
 
