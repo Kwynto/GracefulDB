@@ -60,15 +60,30 @@ func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
 			return false
 		}
 		dest.Value = resultArgument.Value
-	case 2, 3:
-		// dest.Term = tSource.Term
+	case 2:
+		dest.Term = source.Term
 		dest.Type = source.Type
 		dest.Value = source.Value
+	case 3:
+		dest.Term = source.Term
+		dest.Value = source.Value
+		dest.Link = source.Link
 	}
 
 	if dest.Simbol != "" {
 		if !tos.Record(dest) {
-			// TODO: тут сделать создание новой переменной или указателя
+			switch dest.Term {
+			case 2:
+				tos.Variables[dest.Simbol] = TVariableData{
+					Type:  dest.Type,
+					Value: dest.Value,
+				}
+			case 3:
+				tos.Pointers[dest.Simbol] = TPointer{
+					Simbol: dest.Value,
+					Link:   dest.Link,
+				}
+			}
 		}
 	} else {
 		return false
@@ -83,7 +98,8 @@ type TArgument struct {
 	Production TProduction
 	// Name       string // для именованных аргументов
 	Simbol string // имя в таблице символов
-	Value  string
+	Value  string // для переменной это значение, а для указателя это название переменной в другой ТС
+	Link   *TTableOfSimbols
 	Term   int // 0 - non, 1 - prodaction, 2 - variable, 3 - pointer
 	Type   int // 0 - nondetected (any), 1 - bool, 2 - char, 3 - byte, 4 - int, 5 - float, 6 - str, 7 - array, 8 - object, 9 - corteg
 }
