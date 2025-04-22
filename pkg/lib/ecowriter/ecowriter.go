@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang"
 )
 
 var (
@@ -93,10 +93,9 @@ func DecodeJSON(str string) any {
 }
 
 // Getting map from JSON-string
-func DecodeJSONMap(str string) (gtypes.TMapVariables, bool) {
+func DecodeJSONMap(str string) (vqlang.TMapVariables, bool) {
 	var inData map[string]any
-	// var outData map[string]string
-	var outData gtypes.TMapVariables
+	var outData vqlang.TMapVariables
 
 	reader := strings.NewReader(str)
 
@@ -106,7 +105,7 @@ func DecodeJSONMap(str string) (gtypes.TMapVariables, bool) {
 	}
 
 	for key, value := range inData {
-		outData[key] = gtypes.TVariableData{
+		outData[key] = vqlang.TVariableData{
 			// TODO: сделать проверку и приведение типов
 			Type:  0,
 			Value: fmt.Sprint(value),
