@@ -29,10 +29,10 @@ func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
 		dest.Value = source.Value
 	case 1:
 		ok, resultArgument := source.Productions[0].Exec(tos)
-		if !ok {
+		if !ok && len(resultArgument) > 1 {
 			return false
 		}
-		dest.Value = resultArgument.Value
+		dest.Value = resultArgument[0].Value
 	case 2:
 		dest.Term = source.Term
 		dest.Type = source.Type
@@ -89,41 +89,54 @@ func (actions TActions) Run(parentTOS *TTableOfSimbols) bool {
 	return true
 }
 
-func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, *TArgument) {
+func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TArgument) {
 	switch parentProduction.Type {
 	case 1:
 		// -- 1: НЕкод или комментарий
 	case 2, 3, 4:
 		// пока пропускаем
 	case 11:
-		// -- 11: простая вложенная продукция
-		zeroArgument := parentProduction.Left[0]
-		if zeroArgument.Term == 1 {
-			if ok, _ := zeroArgument.Productions[0].Exec(parentTOS); !ok {
-				return false, &TArgument{}
-			}
-		}
+		// -- 11: простая самостоятельная продукция
+		return false, []TArgument{}
 	case 12:
 		// -- 12: блок области видимости
 		pLocalTOS := &TTableOfSimbols{
 			Parent: parentTOS,
 			IsRoot: false,
 		}
-		return parentProduction.Left[0].Productions.Run(pLocalTOS), &TArgument{}
-	case 13, 14, 15, 16, 17:
+		return parentProduction.Left[0].Productions.Run(pLocalTOS), []TArgument{}
+	case 13:
+		// -- 13: функция
+	case 14, 15, 16, 17:
 		// пока пропустить
 	case 41:
 		// -- 41: присваивание :=
+		var slUnpackedArguments []TArgument
+		for _, argVal := range parentProduction.Right {
+			switch argVal.Term {
+			case 0, 2, 3:
+				slUnpackedArguments = append(slUnpackedArguments, argVal)
+			case 1:
+				for _, prodVal := range argVal.Productions {
+					if okProd, resProd := prodVal.Exec(parentTOS); okProd {
+						slUnpackedArguments = append(slUnpackedArguments, resProd...)
+					} else {
+						return false, []TArgument{}
+					}
+				}
+			}
+		}
+		parentProduction.Right = slUnpackedArguments
 		if len(parentProduction.Left) == len(parentProduction.Right) {
 			for indRA, rightArg := range parentProduction.Right {
 				if !parentTOS.Set(&parentProduction.Left[indRA], &rightArg) {
-					return false, &TArgument{}
+					return false, []TArgument{}
 				}
 			}
 		} else {
-			return false, &TArgument{}
+			return false, []TArgument{}
 		}
 	}
 
-	return true, &TArgument{}
+	return true, []TArgument{}
 }
