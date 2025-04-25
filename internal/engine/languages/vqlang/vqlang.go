@@ -22,8 +22,8 @@ type TTableOfSimbols struct {
 	Variables TMapVariables
 	Pointers  TMapPointers // only child table
 
-	Input  TMapVariables // only root table
-	IsRoot bool
+	// Input  TMapVariables // only root table
+	Transparent bool // видимость родительской таблицы символов без указателей
 }
 
 // Production
@@ -111,8 +111,9 @@ type TProduction struct {
 	// - 800: (встроенные функции)
 	Type int
 	// наборр аргументов по-порядку из таблицы символов для действий и функций
-	Left  []TArgument
-	Right []TArgument
+	Left      []TArgument
+	Right     []TArgument
+	LocalCode TActions
 }
 
 type TActions []TProduction

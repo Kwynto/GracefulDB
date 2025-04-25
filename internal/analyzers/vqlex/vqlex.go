@@ -107,8 +107,8 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 		Actions: stActions,
 		// LocalFunctions: mLocalFunctions,
 		TableOfSimbols: vqlang.TTableOfSimbols{
-			Input:  mVariables,
-			IsRoot: true,
+			Variables:   mVariables,
+			Transparent: true,
 		},
 	}
 

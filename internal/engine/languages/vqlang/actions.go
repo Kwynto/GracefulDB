@@ -13,7 +13,7 @@ func (tos *TTableOfSimbols) Record(dest *TArgument) bool {
 			Type:  dest.Type,
 			Value: dest.Value,
 		}
-	} else if !tos.IsRoot {
+	} else if tos.Transparent {
 		return tos.Parent.Record(dest)
 	} else {
 		return false
@@ -65,24 +65,36 @@ func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
 	return true
 }
 
-// Production
-
-func (actions TActions) Main(input TMapVariables) bool {
-	pRootTOS := &TTableOfSimbols{
-		Input:  input,
-		IsRoot: true,
+// дополнение таблицы символов набором новых переменных
+func (tos *TTableOfSimbols) AddTOS(input *[]TArgument) {
+	for _, source := range *input {
+		switch source.Term {
+		case 2:
+			stVar := TVariableData{
+				Type:  source.Type,
+				Value: source.Value,
+			}
+			tos.Variables[source.Simbol] = stVar
+		case 3:
+			stPoint := TPointer{
+				Simbol: source.Value,
+				Link:   source.Link,
+			}
+			tos.Pointers[source.Simbol] = stPoint
+		}
 	}
-
-	return actions.Run(pRootTOS)
 }
 
-func (actions TActions) Run(parentTOS *TTableOfSimbols) bool {
-	pSelfTOS := &TTableOfSimbols{
-		Parent: parentTOS,
-		IsRoot: false,
+// Production
+
+func (actions TActions) RunCode(input TMapVariables) bool {
+	pRootTOS := &TTableOfSimbols{
+		Variables:   input,
+		Transparent: false,
 	}
+
 	for _, production := range actions {
-		if ok, _ := production.Exec(pSelfTOS); !ok {
+		if ok, _ := production.Exec(pRootTOS); !ok {
 			return ok
 		}
 	}
@@ -101,14 +113,38 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 	case 12:
 		// -- 12: блок области видимости
 		pLocalTOS := &TTableOfSimbols{
-			Parent: parentTOS,
-			IsRoot: false,
+			Parent:      parentTOS,
+			Transparent: true,
 		}
-		return parentProduction.Left[0].Productions.Run(pLocalTOS), []TArgument{}
+		actions := parentProduction.LocalCode
+		for _, production := range actions {
+			if ok, res := production.Exec(pLocalTOS); !ok {
+				return false, []TArgument{}
+			} else if len(res) != 0 {
+				return true, res
+			}
+		}
 	case 13:
 		// -- 13: функция
-	case 14, 15, 16, 17:
-		// пока пропустить
+		// правые аргументы - это входящие аргументы
+		// левые аргументы - это выходные аргументы
+		pLocalTOS := &TTableOfSimbols{
+			// Parent:      parentTOS,
+			Transparent: false,
+		}
+		pLocalTOS.AddTOS(&parentProduction.Right)
+		actions := parentProduction.LocalCode
+		for _, production := range actions {
+			if ok, res := production.Exec(pLocalTOS); !ok {
+				return false, []TArgument{}
+			} else if len(res) != 0 {
+				return true, res
+			}
+		}
+	case 14:
+		// -- 14: возвратная операция
+	case 15, 16, 17:
+		// пока пропустить (в разработке)
 	case 41:
 		// -- 41: присваивание :=
 		var slUnpackedArguments []TArgument
