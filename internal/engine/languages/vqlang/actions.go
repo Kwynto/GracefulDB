@@ -22,14 +22,14 @@ func (tos *TTableOfSimbols) Record(dest *TArgument) bool {
 	return true
 }
 
-func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
+func (tos *TTableOfSimbols) Set(dest TArgument, source *TArgument) bool {
 	switch source.Term {
 	case 0:
 		dest.Type = source.Type
 		dest.Value = source.Value
 	case 1:
 		ok, resultArgument := source.Productions[0].Exec(tos)
-		if !ok && len(resultArgument) > 1 {
+		if !ok.Result && len(resultArgument) > 1 {
 			return false
 		}
 		dest.Value = resultArgument[0].Value
@@ -44,7 +44,7 @@ func (tos *TTableOfSimbols) Set(dest *TArgument, source *TArgument) bool {
 	}
 
 	if dest.Simbol != "" {
-		if !tos.Record(dest) {
+		if !tos.Record(&dest) {
 			switch dest.Term {
 			case 2:
 				tos.Variables[dest.Simbol] = TVariableData{
@@ -108,6 +108,18 @@ func (tos *TTableOfSimbols) Extact(template TArgument) (bool, TArgument) {
 	return false, TArgument{}
 }
 
+func (tos *TTableOfSimbols) SearchFunc(name string) (bool, TFunction) {
+	if tos.Parent != nil {
+		if stFunc, okFunc := tos.Parent.Function[name]; okFunc {
+			return okFunc, stFunc
+		} else {
+			return tos.Parent.SearchFunc(name)
+		}
+	}
+
+	return false, TFunction{}
+}
+
 // Production
 
 func (actions TActions) RunCode(input TMapVariables) bool {
@@ -117,14 +129,14 @@ func (actions TActions) RunCode(input TMapVariables) bool {
 	}
 
 	for _, production := range actions {
-		if ok, _ := production.Exec(pRootTOS); !ok {
-			return ok
+		if ok, _ := production.Exec(pRootTOS); !ok.Result {
+			return ok.Result
 		}
 	}
 	return true
 }
 
-func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TArgument) {
+func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, []TArgument) {
 	switch parentProduction.Type {
 	case 1:
 		// -- 1: НЕкод или комментарий
@@ -132,7 +144,7 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 		// пока пропускаем
 	case 11:
 		// -- 11: простая самостоятельная продукция
-		return false, []TArgument{}
+		return TReturn{Result: false, Returned: false}, []TArgument{}
 	case 12:
 		// -- 12: блок области видимости
 		pLocalTOS := &TTableOfSimbols{
@@ -141,10 +153,10 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 		}
 		actions := parentProduction.LocalCode
 		for _, production := range actions {
-			if ok, res := production.Exec(pLocalTOS); !ok {
-				return false, []TArgument{}
-			} else if len(res) != 0 {
-				return true, res
+			if ok, res := production.Exec(pLocalTOS); !ok.Result {
+				return ok, []TArgument{}
+			} else if ok.Returned {
+				return ok, res
 			}
 		}
 	case 13:
@@ -152,32 +164,44 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 		// правые аргументы - это входящие аргументы
 		// левые аргументы - это выходные аргументы
 		pLocalTOS := &TTableOfSimbols{
-			// Parent:      parentTOS,
+			Parent:      parentTOS,
 			Transparent: false,
 		}
 		pLocalTOS.AddTOS(&parentProduction.Right)
-		actions := parentProduction.LocalCode
+
+		okFunc, stFunc := pLocalTOS.SearchFunc(parentProduction.Name)
+		if !okFunc {
+			return TReturn{Result: false, Returned: false}, []TArgument{}
+
+		}
+
+		iLenArg := len(stFunc.Input)
+		if len(parentProduction.Right) != iLenArg {
+			return TReturn{Result: false, Returned: false}, []TArgument{}
+		}
+
+		actions := stFunc.FuncCode
 		for _, production := range actions {
-			if ok, res := production.Exec(pLocalTOS); !ok {
-				return false, []TArgument{}
-			} else if len(res) != 0 {
-				return true, res
+			if ok, res := production.Exec(pLocalTOS); !ok.Result {
+				return ok, []TArgument{}
+			} else if ok.Returned {
+				return ok, res
 			}
 		}
 	case 14:
 		// -- 14: возвратная операция
 		if len(parentProduction.Right) == 0 {
-			return true, []TArgument{}
+			return TReturn{Result: true, Returned: true}, []TArgument{}
 		} else {
 			var slResArg []TArgument
 			for _, templateArg := range parentProduction.Right {
 				if ok, resArg := parentTOS.Extact(templateArg); ok {
 					slResArg = append(slResArg, resArg)
 				} else {
-					return false, slResArg
+					return TReturn{Result: false, Returned: true}, slResArg
 				}
 			}
-			return true, slResArg
+			return TReturn{Result: true, Returned: true}, slResArg
 		}
 	case 15:
 		// -- 15: условная операция
@@ -194,25 +218,25 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 				slUnpackedArguments = append(slUnpackedArguments, argVal)
 			case 1:
 				for _, prodVal := range argVal.Productions {
-					if okProd, resProd := prodVal.Exec(parentTOS); okProd {
+					if okProd, resProd := prodVal.Exec(parentTOS); okProd.Result {
 						slUnpackedArguments = append(slUnpackedArguments, resProd...)
 					} else {
-						return false, []TArgument{}
+						return TReturn{Result: false, Returned: false}, []TArgument{}
 					}
 				}
 			}
 		}
-		parentProduction.Right = slUnpackedArguments
-		if len(parentProduction.Left) == len(parentProduction.Right) {
-			for indRA, rightArg := range parentProduction.Right {
-				if !parentTOS.Set(&parentProduction.Left[indRA], &rightArg) {
-					return false, []TArgument{}
+		// parentProduction.Right = slUnpackedArguments
+		if len(parentProduction.Left) == len(slUnpackedArguments) {
+			for indRA, rightArg := range slUnpackedArguments {
+				if !parentTOS.Set(parentProduction.Left[indRA], &rightArg) {
+					return TReturn{Result: false, Returned: false}, []TArgument{}
 				}
 			}
 		} else {
-			return false, []TArgument{}
+			return TReturn{Result: false, Returned: false}, []TArgument{}
 		}
 	}
 
-	return true, []TArgument{}
+	return TReturn{Result: true, Returned: false}, []TArgument{}
 }

@@ -12,21 +12,33 @@ type TPointer struct {
 	Link   *TTableOfSimbols
 }
 
-type TMapVariables map[string]TVariableData
+type TFunction struct {
+	// Name     string
+	Input    []TArgument
+	FuncCode TActions
+}
 
+type TMapVariables map[string]TVariableData
 type TMapPointers map[string]TPointer
+type TMapFunctions map[string]TFunction
 
 type TTableOfSimbols struct {
 	Parent *TTableOfSimbols // only child table
 
 	Variables TMapVariables
-	Pointers  TMapPointers // only child table
+	Pointers  TMapPointers  // only child table
+	Function  TMapFunctions // only root table
 
 	// Input  TMapVariables // only root table
 	Transparent bool // видимость родительской таблицы символов без указателей
 }
 
 // Production
+
+type TReturn struct {
+	Result   bool
+	Returned bool
+}
 
 type TArgument struct {
 	Productions TActions
@@ -110,10 +122,13 @@ type TProduction struct {
 	// - 700: (зарезервировано)
 	// - 800: (встроенные функции)
 	Type int
-	// наборр аргументов по-порядку из таблицы символов для действий и функций
-	Left      []TArgument
-	Right     []TArgument
+	// название функций
+	Name string
+	// для кода блоков
 	LocalCode TActions
+	// наборр аргументов по-порядку из таблицы символов для действий и функций
+	Left  []TArgument
+	Right []TArgument
 }
 
 type TActions []TProduction
