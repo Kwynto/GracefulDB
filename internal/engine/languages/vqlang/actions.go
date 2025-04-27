@@ -85,6 +85,29 @@ func (tos *TTableOfSimbols) AddTOS(input *[]TArgument) {
 	}
 }
 
+func (tos *TTableOfSimbols) Extact(template TArgument) (bool, TArgument) {
+	if varData, okV := tos.Variables[template.Simbol]; okV {
+		resArg := TArgument{
+			Term:   2,
+			Simbol: template.Simbol,
+			Type:   varData.Type,
+			Value:  varData.Value,
+		}
+		return true, resArg
+	} else if pointData, okP := tos.Pointers[template.Simbol]; okP {
+		resArg := TArgument{
+			Term:  3,
+			Value: pointData.Simbol,
+			Link:  pointData.Link,
+		}
+		return true, resArg
+	} else if tos.Transparent {
+		return tos.Parent.Extact(template)
+	}
+
+	return false, TArgument{}
+}
+
 // Production
 
 func (actions TActions) RunCode(input TMapVariables) bool {
@@ -143,8 +166,25 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (bool, []TA
 		}
 	case 14:
 		// -- 14: возвратная операция
-	case 15, 16, 17:
-		// пока пропустить (в разработке)
+		if len(parentProduction.Right) == 0 {
+			return true, []TArgument{}
+		} else {
+			var slResArg []TArgument
+			for _, templateArg := range parentProduction.Right {
+				if ok, resArg := parentTOS.Extact(templateArg); ok {
+					slResArg = append(slResArg, resArg)
+				} else {
+					return false, slResArg
+				}
+			}
+			return true, slResArg
+		}
+	case 15:
+		// -- 15: условная операция
+	case 16:
+		// -- 16: классический цикл
+	case 17:
+		// -- 17: цикл по диапазону
 	case 41:
 		// -- 41: присваивание :=
 		var slUnpackedArguments []TArgument
