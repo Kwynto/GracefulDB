@@ -140,7 +140,15 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 	switch parentProduction.Type {
 	case 1:
 		// -- 1: НЕкод или комментарий
-	case 2, 3, 4:
+	case 2:
+		// -- 2: инструкция компилятору
+		switch parentProduction.Name {
+		case "version":
+			// пока пропускаем
+		case "engine":
+			// пока пропускаем
+		}
+	case 3, 4:
 		// пока пропускаем
 	case 11:
 		// -- 11: простая самостоятельная продукция
@@ -151,7 +159,7 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 			Parent:      parentTOS,
 			Transparent: true,
 		}
-		actions := parentProduction.LocalCode
+		actions := parentProduction.LocalCode[0]
 		for _, production := range actions {
 			if ok, res := production.Exec(pLocalTOS); !ok.Result {
 				return ok, []TArgument{}
@@ -205,6 +213,28 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 		}
 	case 15:
 		// -- 15: условная операция
+		// конструкция "else" должна быть реализована в продукции "elseif 0 == 0 {}"
+		if len(parentProduction.Right) > 0 {
+			for iIf, stIf := range parentProduction.Right {
+				ifRet, ifRes := stIf.Productions[0].Exec(parentTOS)
+				if ifRet.Result && ifRes[0].Value == "true" {
+					pLocalTOS := &TTableOfSimbols{
+						Parent:      parentTOS,
+						Transparent: true,
+					}
+					actions := parentProduction.LocalCode[iIf]
+					for _, production := range actions {
+						if ok, res := production.Exec(pLocalTOS); !ok.Result {
+							return ok, []TArgument{}
+						} else if ok.Returned {
+							return ok, res
+						}
+					}
+				}
+			}
+		} else {
+			return TReturn{Result: false, Returned: false}, []TArgument{}
+		}
 	case 16:
 		// -- 16: классический цикл
 	case 17:
