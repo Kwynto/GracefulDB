@@ -38,6 +38,7 @@ type TTableOfSimbols struct {
 type TReturn struct {
 	Result   bool
 	Returned bool
+	Logic    bool
 }
 
 type TArgument struct {
@@ -66,6 +67,7 @@ type TProduction struct {
 	// -- 17: цикл по диапазону
 	// --
 	// -- 41: присваивание :=
+	// -- 42: разделение голов и хвостов |
 	// --
 	// - 100: логические операции
 	// -- 101: равенство ==

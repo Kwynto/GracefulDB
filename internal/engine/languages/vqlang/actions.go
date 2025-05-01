@@ -152,7 +152,7 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 		// пока пропускаем
 	case 11:
 		// -- 11: простая самостоятельная продукция
-		return TReturn{Result: false, Returned: false}, []TArgument{}
+		return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 	case 12:
 		// -- 12: блок области видимости
 		pLocalTOS := &TTableOfSimbols{
@@ -185,7 +185,7 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 
 		iLenArg := len(stFunc.Input)
 		if len(parentProduction.Right) != iLenArg {
-			return TReturn{Result: false, Returned: false}, []TArgument{}
+			return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 		}
 
 		actions := stFunc.FuncCode
@@ -199,17 +199,17 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 	case 14:
 		// -- 14: возвратная операция
 		if len(parentProduction.Right) == 0 {
-			return TReturn{Result: true, Returned: true}, []TArgument{}
+			return TReturn{Result: true, Returned: true, Logic: false}, []TArgument{}
 		} else {
 			var slResArg []TArgument
 			for _, templateArg := range parentProduction.Right {
 				if ok, resArg := parentTOS.Extact(templateArg); ok {
 					slResArg = append(slResArg, resArg)
 				} else {
-					return TReturn{Result: false, Returned: true}, slResArg
+					return TReturn{Result: false, Returned: true, Logic: false}, slResArg
 				}
 			}
-			return TReturn{Result: true, Returned: true}, slResArg
+			return TReturn{Result: true, Returned: true, Logic: false}, slResArg
 		}
 	case 15:
 		// -- 15: условная операция
@@ -233,10 +233,34 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 				}
 			}
 		} else {
-			return TReturn{Result: false, Returned: false}, []TArgument{}
+			return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 		}
 	case 16:
 		// -- 16: классический цикл
+		if parentProduction.Right[0].Term == 1 && parentProduction.Right[1].Term == 1 && parentProduction.Right[2].Term == 1 {
+			pLocalTOS := &TTableOfSimbols{
+				Parent:      parentTOS,
+				Transparent: true,
+			}
+			parentProduction.Right[0].Productions[0].Exec(pLocalTOS)
+			actions := parentProduction.LocalCode[0]
+		labelfor:
+			if ifRet, ifRes := parentProduction.Right[1].Productions[0].Exec(pLocalTOS); ifRet.Result && ifRet.Logic && ifRes[0].Value == "true" {
+				for _, production := range actions {
+					if ok, res := production.Exec(pLocalTOS); !ok.Result {
+						return ok, []TArgument{}
+					} else if ok.Returned {
+						return ok, res
+					}
+				}
+			} else {
+				return TReturn{Result: true, Returned: false, Logic: false}, []TArgument{}
+			}
+			parentProduction.Right[2].Productions[0].Exec(pLocalTOS)
+			goto labelfor
+		} else {
+			return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
+		}
 	case 17:
 		// -- 17: цикл по диапазону
 	case 41:
@@ -251,22 +275,23 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 					if okProd, resProd := prodVal.Exec(parentTOS); okProd.Result {
 						slUnpackedArguments = append(slUnpackedArguments, resProd...)
 					} else {
-						return TReturn{Result: false, Returned: false}, []TArgument{}
+						return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 					}
 				}
 			}
 		}
-		// parentProduction.Right = slUnpackedArguments
 		if len(parentProduction.Left) == len(slUnpackedArguments) {
 			for indRA, rightArg := range slUnpackedArguments {
 				if !parentTOS.Set(parentProduction.Left[indRA], &rightArg) {
-					return TReturn{Result: false, Returned: false}, []TArgument{}
+					return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 				}
 			}
 		} else {
-			return TReturn{Result: false, Returned: false}, []TArgument{}
+			return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 		}
+	case 42:
+		// -- 42: разделение голов и хвостов |
 	}
 
-	return TReturn{Result: true, Returned: false}, []TArgument{}
+	return TReturn{Result: true, Returned: false, Logic: false}, []TArgument{}
 }
