@@ -1,4 +1,4 @@
-package vqlang
+package vql4runcode
 
 // Manage tables of simbols
 
@@ -237,13 +237,13 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 		}
 	case 16:
 		// -- 16: классический цикл
+		actions := parentProduction.LocalCode[0]
 		if parentProduction.Right[0].Term == 1 && parentProduction.Right[1].Term == 1 && parentProduction.Right[2].Term == 1 {
 			pLocalTOS := &TTableOfSimbols{
 				Parent:      parentTOS,
 				Transparent: true,
 			}
 			parentProduction.Right[0].Productions[0].Exec(pLocalTOS)
-			actions := parentProduction.LocalCode[0]
 		labelfor:
 			if ifRet, ifRes := parentProduction.Right[1].Productions[0].Exec(pLocalTOS); ifRet.Result && ifRet.Logic && ifRes[0].Value == "true" {
 				for _, production := range actions {
@@ -290,7 +290,7 @@ func (parentProduction TProduction) Exec(parentTOS *TTableOfSimbols) (TReturn, [
 			return TReturn{Result: false, Returned: false, Logic: false}, []TArgument{}
 		}
 	case 42:
-		// -- 42: разделение голов и хвостов |
+		// -- 42: разделение голов и хвостов |=
 	}
 
 	return TReturn{Result: true, Returned: false, Logic: false}, []TArgument{}
