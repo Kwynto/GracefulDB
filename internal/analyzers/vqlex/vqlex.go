@@ -7,7 +7,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
-	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang/vql4runcode"
+	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang/vql1step4runcode"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
@@ -29,23 +29,23 @@ type tQuery struct {
 	Ticket         string
 	DB             string // DB name
 	Table          string // Table name
-	Code           vql4runcode.TCode
-	Actions        vql4runcode.TActions
+	Code           vql1step4runcode.TCode
+	Actions        vql1step4runcode.TActions
 	LocalFunctions map[string]tStFuncCode
-	TableOfSimbols vql4runcode.TTableOfSimbols
+	TableOfSimbols vql1step4runcode.TTableOfSimbols
 }
 
-func splitCode(sOriginalCode string) vql4runcode.TCode {
+func splitCode(sOriginalCode string) vql1step4runcode.TCode {
 	// This function is complete
 	slList := strings.Split(sOriginalCode, "\n")
 
 	return slList
 }
 
-func analyzer(slStCode vql4runcode.TCode) vql4runcode.TActions {
+func analyzer(slStCode vql1step4runcode.TCode) vql1step4runcode.TActions {
 	// -
 	_ = slStCode
-	return vql4runcode.TActions{}
+	return vql1step4runcode.TActions{}
 }
 
 // TODO: Request
@@ -106,7 +106,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 		Code:    slStCode,
 		Actions: stActions,
 		// LocalFunctions: mLocalFunctions,
-		TableOfSimbols: vql4runcode.TTableOfSimbols{
+		TableOfSimbols: vql1step4runcode.TTableOfSimbols{
 			Variables:   mVariables,
 			Transparent: true,
 		},
