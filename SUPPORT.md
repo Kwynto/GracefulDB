@@ -20,4 +20,4 @@ You can make your donations for the development of open and free software in Bit
 
 **bc1qy78pp66h7pquttfasyvmevqyk7q2mmsw2vc9qe**  
 
-![bc1qy78pp66h7pquttfasyvmevqyk7q2mmsw2vc9qe](https://github.com/Kwynto/GracefulDB/blob/main/bc1qy78pp66h7pquttfasyvmevqyk7q2mmsw2vc9qe.jpg)  
+![bc1qy78pp66h7pquttfasyvmevqyk7q2mmsw2vc9qe](barcode.jpg)  
