@@ -222,6 +222,6 @@ func Shutdown(ctx context.Context, c *closer.TCloser) {
 	if !StStorageInfo.Save() {
 		c.AddMsg("Failure to save access rights !!!")
 	}
-	chSignalShutdown <- struct{}{}
+	// chSignalShutdown <- struct{}{}
 	c.Done()
 }

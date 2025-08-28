@@ -7,6 +7,7 @@ import (
 
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
+	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang/vql1step4runcode"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
@@ -28,29 +29,23 @@ type tQuery struct {
 	Ticket         string
 	DB             string // DB name
 	Table          string // Table name
-	Code           gtypes.TCode
+	Code           vql1step4runcode.TCode
+	Actions        vql1step4runcode.TActions
 	LocalFunctions map[string]tStFuncCode
-	TableOfSimbols gtypes.TTableOfSimbols
+	TableOfSimbols vql1step4runcode.TTableOfSimbols
 }
 
-func splitCode(sOriginalCode string) gtypes.TCode {
+func splitCode(sOriginalCode string) vql1step4runcode.TCode {
 	// This function is complete
-	slStCode := make(gtypes.TCode, 0, 10)
 	slList := strings.Split(sOriginalCode, "\n")
 
-	for _, sLine := range slList {
-		stLine := gtypes.TLineOfCode{
-			Original: sLine,
-		}
-		slStCode = append(slStCode, stLine)
-	}
-
-	return slStCode
+	return slList
 }
 
-func analyzer(slStCode gtypes.TCode) gtypes.TCode {
+func analyzer(slStCode vql1step4runcode.TCode) vql1step4runcode.TActions {
 	// -
-	return slStCode
+	_ = slStCode
+	return vql1step4runcode.TActions{}
 }
 
 // TODO: Request
@@ -94,7 +89,7 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 
 	// Preparation query
 	slStCode := splitCode(sOriginalCode)
-	slStCode = analyzer(slStCode)
+	stActions := analyzer(slStCode)
 	// FIXME: it
 	// slQryLines, mLocalFunctions, errP := preparation(sOriginalCode)
 	// if errP != nil {
@@ -105,14 +100,15 @@ func Request(sTicket string, sOriginalCode string, sVariables string) string {
 	// }
 
 	var query tQuery = tQuery{
-		Login:  sLogin,
-		Access: stAccess,
-		Ticket: sTicket,
-		Code:   slStCode,
+		Login:   sLogin,
+		Access:  stAccess,
+		Ticket:  sTicket,
+		Code:    slStCode,
+		Actions: stActions,
 		// LocalFunctions: mLocalFunctions,
-		TableOfSimbols: gtypes.TTableOfSimbols{
-			Input:  mVariables,
-			IsRoot: true,
+		TableOfSimbols: vql1step4runcode.TTableOfSimbols{
+			Variables:   mVariables,
+			Transparent: true,
 		},
 	}
 

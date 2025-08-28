@@ -8,6 +8,7 @@ import (
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gauth"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/gtypes"
 	"github.com/Kwynto/GracefulDB/internal/engine/basicsystem/vqlexp"
+	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang/vql1step4runcode"
 	"github.com/Kwynto/GracefulDB/pkg/lib/ecowriter"
 )
 
@@ -31,7 +32,7 @@ type tQuery struct {
 	Table          string // Table name
 	QueryCode      []string
 	LocalFunctions map[string]tStFuncCode
-	Variables      map[string]any
+	Variables      vql1step4runcode.TMapVariables
 }
 
 func prepareSpacesInLine(sSlIn []string) []string {
@@ -255,7 +256,13 @@ func execution(query tQuery) (gtypes.TResponse, error) {
 				}
 
 				for skey, inValue := range result {
-					query.Variables[skey] = inValue
+					// query.Variables[skey] = inValue
+					// query.Variables[skey] = fmt.Sprint(inValue)
+					query.Variables[skey] = vql1step4runcode.TVariableData{
+						// TODO: сделать проверку и приведение типов
+						Type:  0,
+						Value: fmt.Sprint(inValue),
+					}
 				}
 
 				break

@@ -5,35 +5,6 @@ import (
 	"time"
 )
 
-// Chain tabltes of simbols
-
-type TMapVariables map[string]any
-type TMapPointers map[string]*TTableOfSimbols
-
-type TTableOfSimbols struct {
-	Parent   *TTableOfSimbols // only child table
-	Pointers TMapPointers     // only child table
-
-	Input TMapVariables // only root table
-	Self  TMapVariables
-
-	IsRoot bool
-}
-
-// Lex Analyzer
-
-type TableOfLine struct {
-	Type int // 0 - nil, 1 - modNil, 2 - comment, 10 - terminal, 20 - nonterminal
-	Line []string
-}
-
-type TLineOfCode struct {
-	Original   string
-	Production TableOfLine
-}
-
-type TCode []TLineOfCode
-
 // Engine
 
 type TColumnSpecification struct {

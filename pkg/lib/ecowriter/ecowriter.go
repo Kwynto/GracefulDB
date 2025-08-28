@@ -3,9 +3,12 @@ package ecowriter
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/Kwynto/GracefulDB/internal/engine/languages/vqlang/vql1step4runcode"
 )
 
 var (
@@ -90,8 +93,10 @@ func DecodeJSON(str string) any {
 }
 
 // Getting map from JSON-string
-func DecodeJSONMap(str string) (map[string]any, bool) {
+func DecodeJSONMap(str string) (vql1step4runcode.TMapVariables, bool) {
 	var inData map[string]any
+	var outData vql1step4runcode.TMapVariables
+
 	reader := strings.NewReader(str)
 
 	jd := json.NewDecoder(reader)
@@ -99,7 +104,16 @@ func DecodeJSONMap(str string) (map[string]any, bool) {
 		return nil, false
 	}
 
-	return inData, true
+	for key, value := range inData {
+		outData[key] = vql1step4runcode.TVariableData{
+			// TODO: сделать проверку и приведение типов
+			Type:  0,
+			Value: fmt.Sprint(value),
+		}
+
+	}
+
+	return outData, true
 }
 
 func FileRead(name string) (string, error) {
