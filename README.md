@@ -11,22 +11,23 @@ You can compile and run a project just like any other GoLang project.
 
 
 Download the GracefulDB project to your computer:  
-> git clone https://github.com/Kwynto/GracefulDB.git  
+
+`git clone https://github.com/Kwynto/GracefulDB.git`
 
 or in another way  
 
 Go to the project folder:  
-> cd ./GracefulDB  
+`cd ./GracefulDB`
 
 Compile the project:  
-> go build main.go
+`go build main.go`
 
 Start the server  
 For Windows:  
-> .\main.exe  
+`.\main.exe`  
 
 For *nix:  
-> ./main
+`./main`
 
 **Warning:** Users of Unix systems may need to change the access rights for the executable file.  
 
@@ -40,20 +41,20 @@ or
 ## Testing 
 
 Run tests:  
-> go test ./... -v  
+`go test ./... -v`
 
 Run tests showing code coverage:  
-> go test ./... -cover -v  
+`go test ./... -cover -v`
 
 You can view code coverage in detail in your web browser.  
-To do this, you need to sequentially execute two commands in the console:  
-> go test ./... -coverprofile="coverage.out" -v  
-> go tool cover -html="coverage.out"  
+To do this, you need to sequentially execute two commands in the console:
+```
+go test ./... -coverprofile="coverage.out" -v  
+go tool cover -html="coverage.out"
+```
 
 
 ## Thanks for the help
-
-*this section is still empty*  
 
 You can support this project and your name or the name of your company can take its place in our hall of fame. The details are [here](https://github.com/Kwynto/GracefulDB/blob/main/SUPPORT.md).
 
